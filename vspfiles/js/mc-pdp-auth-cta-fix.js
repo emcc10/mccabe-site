@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp53";
+  var VERSION = "20260616pdp54";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -4395,6 +4395,7 @@
       var target = bbColorFromSwatchLabel(label) || normalizeBbLabel(label);
       var coverSel =
         global.document.querySelector("#options_table select[name*='___4']") ||
+        global.document.querySelector("select[name*='___4']") ||
         global.document.querySelector("#options_table select");
       var imgFile = bbImageForSwatchLabel(label);
       var optVal = "";
@@ -4455,10 +4456,6 @@
         swatch.classList.add("active");
       } catch (eAct) {}
 
-      eBb.preventDefault();
-      eBb.stopPropagation();
-      eBb.stopImmediatePropagation();
-
       applyBbImage(imgFile);
       reassertBbImageOnce(imgFile);
     }, true);
@@ -4468,9 +4465,11 @@
   // give it a "CHOOSE SIZE" label, and make sure size changes drive Volusion pricing.
   function ensureBeanBagSizeRow() {
     if (!isBeanBagPdpPage()) return;
-    var sizeSel = global.document.querySelector("#options_table select[name*='___58']");
+    var sizeSel =
+      global.document.querySelector("#options_table select[name*='___58']") ||
+      global.document.querySelector("select[name*='___58']");
     if (!sizeSel) {
-      var sels = global.document.querySelectorAll("#options_table select");
+      var sels = global.document.querySelectorAll("#options_table select, #v65-product-parent select, #content_area select");
       for (var s = 0; s < sels.length; s++) {
         var hasSize = false;
         for (var o = 0; o < sels[s].options.length; o++) {
@@ -4525,6 +4524,30 @@
         sizeSection.appendChild(sizeSel);
       } catch (eSelSec) {}
     }
+    var col = findPdpHeroColumnTd();
+    if (col && sizeSection.parentNode !== col) {
+      try {
+        var swatches = global.document.getElementById("beanbag-swatch-wrapper");
+        var features = global.document.getElementById("mc-pdp-features");
+        if (swatches && swatches.parentNode === col) {
+          col.insertBefore(sizeSection, swatches);
+        } else if (features && features.parentNode === col) {
+          col.insertBefore(sizeSection, features);
+        } else {
+          col.appendChild(sizeSection);
+        }
+      } catch (eAttach) {}
+    }
+    try {
+      sizeSection.style.setProperty("display", "block", "important");
+      sizeSection.style.setProperty("visibility", "visible", "important");
+      sizeSection.style.setProperty("width", "100%", "important");
+      sizeSection.style.setProperty("max-width", "440px", "important");
+      sizeSection.style.setProperty("margin", "12px 0 10px 0", "important");
+      sizeSel.style.setProperty("display", "inline-block", "important");
+      sizeSel.style.setProperty("visibility", "visible", "important");
+      sizeSel.style.setProperty("opacity", "1", "important");
+    } catch (eSecStyle) {}
 
     if (sizeSel.dataset.mcBbSizeBound !== "1") {
       sizeSel.dataset.mcBbSizeBound = "1";
@@ -5181,6 +5204,7 @@
     if (isBeanBagPdpPage()) {
       mountBeanBagSwatchesAboveFeatures();
       extractSwatchesIntoCol();
+      ensureBeanBagSizeRow();
       ensureBeanBagPurchaseStack();
       appendBeanBagInfoColumnOrder();
       markBeanBagCoverSwatchesReady();

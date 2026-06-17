@@ -16437,6 +16437,28 @@ html body.mc-bean-bag-pdp #beanbag-swatch-wrapper .beanbag-swatches {
   justify-content: flex-start !important;
 }
 
+html body.mc-bean-bag-pdp #mc-bb-size-section,
+html body.mc-bean-bag-pdp #mc-bb-size-section #mc-bb-size-label,
+html body.mc-bean-bag-pdp #mc-bb-size-section select {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html body.mc-bean-bag-pdp #mc-bb-size-section {
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 12px 0 10px 0 !important;
+  padding: 0 0 0 1.1em !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+}
+
+html body.mc-bean-bag-pdp #mc-bb-size-section select {
+  width: 100% !important;
+  max-width: 360px !important;
+}
+
 html body.productdetails #mc-pdp-features .mc-pdp-features__heading,
 html body.mc-product-page #mc-pdp-features .mc-pdp-features__heading {
   padding-left: 1.1em !important;
@@ -16874,7 +16896,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="
   box-shadow: none !important;
 }
 
-/* MC PDP unified e-product lock 20260616pdp53: consistent layout, black ATC, description follows existing features typography. */
+/* MC PDP unified e-product lock 20260616pdp54: consistent layout, black ATC, description follows existing features typography. */
 html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
 html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
 html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
