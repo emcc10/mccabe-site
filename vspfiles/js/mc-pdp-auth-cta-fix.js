@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp56";
+  var VERSION = "20260616pdp57";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2027,6 +2027,9 @@
       btn.style.setProperty("box-shadow", "none", "important");
       btn.style.setProperty("text-shadow", "none", "important");
       btn.style.setProperty("opacity", "1", "important");
+      btn.style.setProperty("width", "100%", "important");
+      btn.style.setProperty("max-width", "100%", "important");
+      btn.style.setProperty("box-sizing", "border-box", "important");
       btn.style.setProperty("-webkit-appearance", "none", "important");
       btn.style.setProperty("appearance", "none", "important");
     } catch (eForceBtn) {}
@@ -2040,6 +2043,9 @@
       wrap.style.setProperty("border", "1px solid #000", "important");
       wrap.style.setProperty("border-color", "#000", "important");
       wrap.style.setProperty("color", "#fff", "important");
+      wrap.style.setProperty("width", "100%", "important");
+      wrap.style.setProperty("max-width", "100%", "important");
+      wrap.style.setProperty("box-sizing", "border-box", "important");
       wrap.querySelectorAll("input, button").forEach(function (btn) {
         forceBlackAtcButton(btn);
       });
@@ -2060,7 +2066,7 @@
       wrap.style.setProperty("background", "transparent", "important");
       wrap.style.setProperty("background-color", "transparent", "important");
       wrap.style.setProperty("padding", "0", "important");
-      wrap.style.setProperty("width", "auto", "important");
+      wrap.style.setProperty("width", "100%", "important");
       wrap.style.setProperty("min-width", "0", "important");
       wrap.style.setProperty("max-width", "none", "important");
       wrap.style.setProperty("display", "inline-flex", "important");
@@ -2089,7 +2095,7 @@
         btn.style.setProperty("padding", "0 28px", "important");
         btn.style.setProperty("min-height", "48px", "important");
         btn.style.setProperty("margin", "0", "important");
-        btn.style.setProperty("width", "auto", "important");
+        btn.style.setProperty("width", "100%", "important");
         btn.style.setProperty("min-width", "0", "important");
         btn.style.setProperty("max-width", "none", "important");
         btn.style.setProperty("border-radius", "0", "important");
@@ -2281,7 +2287,7 @@
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart{" +
-      "display:flex!important;justify-content:center!important;width:auto!important;margin:0!important}" +
+      "display:flex!important;justify-content:center!important;width:100%!important;max-width:100%!important;margin:0!important}" +
       "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo," +
       "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right," +
       "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host," +
@@ -3934,9 +3940,19 @@
     if (!isBeanBagPdpPage()) return null;
     var col = findPdpHeroColumnTd();
     if (!col) return null;
-    var purchaseTarget = resolveAtcPurchaseTarget();
+    var purchaseTarget = resolveAtcPurchaseTarget(global.document);
     if (!purchaseTarget || !purchaseTarget.stackNode) return null;
     var stackNode = purchaseTarget.stackNode;
+    try {
+      stackNode.style.setProperty("display", "flex", "important");
+      stackNode.style.setProperty("visibility", "visible", "important");
+      stackNode.style.setProperty("opacity", "1", "important");
+      stackNode.style.setProperty("width", "100%", "important");
+      stackNode.style.setProperty("max-width", "100%", "important");
+      stackNode.style.setProperty("height", "auto", "important");
+      stackNode.style.setProperty("max-height", "none", "important");
+      stackNode.style.setProperty("overflow", "visible", "important");
+    } catch (eNodeShow) {}
     var stack = global.document.getElementById("mc-pdp-purchase-stack");
     if (!stack) {
       stack = global.document.createElement("div");
@@ -3962,6 +3978,11 @@
       stack.style.setProperty("padding", "0", "important");
       stack.style.setProperty("gap", "10px", "important");
       stack.style.setProperty("clear", "both", "important");
+      stack.style.setProperty("visibility", "visible", "important");
+      stack.style.setProperty("opacity", "1", "important");
+      stack.style.setProperty("height", "auto", "important");
+      stack.style.setProperty("max-height", "none", "important");
+      stack.style.setProperty("overflow", "visible", "important");
     } catch (eStyle) {}
     var qtyRow = global.document.getElementById("mc-pdp-qty-row");
     if (qtyRow && !stack.contains(qtyRow)) {
@@ -3970,6 +3991,7 @@
       } catch (eQty) {}
     }
     applySoftGoodsColumnPurchaseStackLayout(stack, qtyRow, stackNode);
+    fixAddToCartChrome();
     return stack;
   }
 

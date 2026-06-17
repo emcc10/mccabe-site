@@ -16896,7 +16896,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="
   box-shadow: none !important;
 }
 
-/* MC PDP unified e-product lock 20260616pdp56: consistent layout, black ATC, description follows existing features typography. */
+/* MC PDP unified e-product lock 20260616pdp57: consistent layout, black ATC, description follows existing features typography. */
 html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
 html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
 html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
@@ -17192,7 +17192,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description * {
   text-transform: none !important;
 }
 
-/* PDP final lock 20260616pdp56: typography-only description match and black ATC repaint guard. */
+/* PDP final lock 20260616pdp57: typography-only description match and black ATC repaint guard. */
 html body.productdetails #mc-pdp-description-below-features,
 html body.productdetails #mc-pdp-description-below-features *,
 html body.productdetails .mc-pdp-description-below-features,
@@ -17237,6 +17237,9 @@ html body.mc-product-page #content_area .mc-atc-button-wrap {
   background-color: #000 !important;
   border-color: #000 !important;
   color: #fff !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 html body.productdetails input[name="btnaddtocart"],
@@ -17259,6 +17262,29 @@ html body.mc-product-page .mc-atc-button-wrap button {
   box-shadow: none !important;
   text-shadow: none !important;
   opacity: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   -webkit-appearance: none !important;
   appearance: none !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack input[name="btnaddtocart"],
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack button[name="btnaddtocart"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack {
+  flex-direction: column !important;
+  max-width: 400px !important;
 }
