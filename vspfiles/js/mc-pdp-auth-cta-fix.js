@@ -6682,6 +6682,13 @@
       fb.style.setProperty("padding", "0", "important");
       fb.style.setProperty("clear", "both", "important");
     }
+    var price = d.getElementById("mc-pdp-price-stack-host");
+    if (price && price.parentNode) {
+      try {
+        price.parentNode.insertBefore(fb, price.nextSibling || null);
+      } catch (eAfterPrice) {}
+      return fb;
+    }
     if (bnpl && bnpl.parentNode && fb.parentNode !== bnpl.parentNode) {
       try {
         bnpl.parentNode.insertBefore(fb, bnpl.nextSibling || null);
