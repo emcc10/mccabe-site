@@ -293,11 +293,26 @@
   }
 
   function findPdpMediaTd() {
-    return (
-      global.document.querySelector("#v65-product-parent td.mc-pdp-media-td") ||
-      global.document.getElementById("product_photo_td") ||
-      global.document.querySelector("#v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child")
-    );
+    function inReturnRow(node) {
+      while (node && node !== global.document) {
+        if (node.tagName === "TR" && /\bmc-pdp-return-row\b/.test(node.className || "")) return true;
+        node = node.parentNode;
+      }
+      return false;
+    }
+    function validTd(node) {
+      return node && node.tagName === "TD" && !inReturnRow(node) ? node : null;
+    }
+    var tagged = global.document.querySelector("#v65-product-parent td.mc-pdp-media-td");
+    if (validTd(tagged)) return tagged;
+    var productPhotoTd = global.document.getElementById("product_photo_td");
+    if (validTd(productPhotoTd)) return productPhotoTd;
+    var photo = global.document.querySelector("#v65-product-parent img#product_photo");
+    var td = photo;
+    while (td && td.tagName !== "TD") td = td.parentNode;
+    if (validTd(td)) return td;
+    var fallback = global.document.querySelector("#v65-product-parent > tbody > tr:not(.mc-pdp-return-row) > td:first-child");
+    return validTd(fallback);
   }
 
   function mountPdpDescriptionUnderMedia() {
