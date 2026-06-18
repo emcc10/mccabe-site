@@ -34,7 +34,7 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260618sar3
-  var VERSION = "20260618sar3";
+  var VERSION = "20260619ss1";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -6619,7 +6619,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260618sar3";
+  var WANT = "20260619ss1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -6643,22 +6643,11 @@
   });
 })(window, document);
 
-/* MC_STEVE_SILVER_ALT_VIEWS_20260618D - product-code image repair for uploaded SS alt views. */
+/* MC_STEVE_SILVER_ALT_VIEWS_20260619 — force -1 piece hero for all SS- bedroom PDPs. */
 (function (g, d) {
-  var CODES = {
-    "SS-BC900CTT": true,
-    "SS-BC950CTBT": true,
-    "SS-CAS900C": true,
-    "SS-HP900CTDT": true,
-    "SS-HP900CTWT": true,
-    "SS-HP900MRD": true,
-    "SS-HP900MRW": true,
-    "SS-HP900NSD": true,
-    "SS-HP900NSW": true,
-    "SS-MON900CS": true,
-    "SS-RV900C": true,
-    "SS-SIG900C": true
-  };
+  function isSteveSilverCode(code) {
+    return /^SS-/.test(code);
+  }
 
   function productCode() {
     var input = d.querySelector('input[name="ProductCode"]');
@@ -6686,6 +6675,7 @@
   }
 
   function ensureAltViews(code, mediaCell, zoom) {
+    var altSlot = 2;
     var alt = d.getElementById("altviews") || d.querySelector("span#altviews");
     if (!alt) {
       alt = d.createElement("span");
@@ -6693,8 +6683,8 @@
       alt.className = "mc-steve-silver-altviews";
     }
     alt.innerHTML =
-      '<a href="' + photo(code, 3, false) + '" data-mc-ss-alt="3">' +
-      '<img id="alternate_product_photo_3" class="vCSS_img_alternate_product_photo" src="' + photo(code, 3, true) + '" alt="Alternate view" />' +
+      '<a href="' + photo(code, altSlot, false) + '" data-mc-ss-alt="' + altSlot + '">' +
+      '<img id="alternate_product_photo_' + altSlot + '" class="vCSS_img_alternate_product_photo" src="' + photo(code, altSlot, true) + '" alt="Room scene" />' +
       "</a>";
 
     var wrap = d.getElementById("mc-steve-silver-altviews-wrap");
@@ -6731,7 +6721,7 @@
       a.style.setProperty("height", "72px", "important");
       a.onclick = function (ev) {
         if (ev) ev.preventDefault();
-        setHero(code, 3);
+        setHero(code, altSlot);
         return false;
       };
     });
@@ -6770,7 +6760,7 @@
 
   function run() {
     var code = productCode();
-    if (!CODES[code]) return;
+    if (!isSteveSilverCode(code)) return;
     var img = d.querySelector("img#product_photo");
     if (!img) return;
     var zoom = d.querySelector("a#product_photo_zoom_url") || d.querySelector("a#product_photo_zoom_url2");
