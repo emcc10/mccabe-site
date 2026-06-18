@@ -6746,9 +6746,24 @@
       if (typeof g.mcEnsureSoftGoodsPdpLayout === "function") g.mcEnsureSoftGoodsPdpLayout();
     } catch (eReturnRow) {}
   }
-  [0, 150, 500, 1200, 2500, 5000].forEach(function (ms) {
+  [0, 150, 500, 1200, 2500, 5000, 10000, 15000, 25000].forEach(function (ms) {
     g.setTimeout(go, ms);
   });
+  try {
+    var root = d.getElementById("v65-product-parent");
+    if (root && g.MutationObserver) {
+      var queued = false;
+      var mo = new g.MutationObserver(function () {
+        if (queued) return;
+        queued = true;
+        g.setTimeout(function () {
+          queued = false;
+          go();
+        }, 40);
+      });
+      mo.observe(root, { childList: true, subtree: true });
+    }
+  } catch (eObserveReturnRow) {}
   if (d.readyState === "loading") {
     d.addEventListener("DOMContentLoaded", go, { once: true });
   } else {
