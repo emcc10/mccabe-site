@@ -166,6 +166,18 @@ def save_jpeg(data: bytes, dest: Path) -> None:
     print(f"  wrote {dest.name} ({len(jpeg)} bytes)")
 
 
+def generate_thumbnails(code: str) -> None:
+    try:
+        from generate_volusion_photo_thumbnails import generate_for_code  # noqa: PLC0415
+    except ImportError:
+        import sys
+
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from generate_volusion_photo_thumbnails import generate_for_code  # noqa: PLC0415
+    for line in generate_for_code(code, slots=(1, 2)):
+        print(f"  thumb {line}")
+
+
 def process_product(code: str, page_url: str, force: bool) -> bool:
     primary_path = PHOTOS / f"{code}-1.jpg"
     alt_path = PHOTOS / f"{code}-2.jpg"
@@ -207,6 +219,7 @@ def process_product(code: str, page_url: str, force: bool) -> bool:
     except Exception as exc:  # noqa: BLE001
         print(f"  ::error:: download failed: {exc}")
         return False
+    generate_thumbnails(code)
     return True
 
 
