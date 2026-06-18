@@ -7678,7 +7678,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
     min-width: 0 !important;
     height: auto !important;
     margin-left: 0 !important;
-    margin-right: auto !important;
+    margin-right: 50px !important;
     margin-top: 0 !important;
     object-fit: contain !important;
     box-sizing: border-box !important;
