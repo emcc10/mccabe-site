@@ -6643,6 +6643,139 @@
   });
 })(window, document);
 
+/* MC_STEVE_SILVER_ALT_VIEWS_20260618 - product-code image repair for uploaded SS alt views. */
+(function (g, d) {
+  var CODES = {
+    "SS-BC900CTT": true,
+    "SS-BC950CTBT": true,
+    "SS-CAS900C": true,
+    "SS-HP900CTDT": true,
+    "SS-HP900CTWT": true,
+    "SS-HP900MRD": true,
+    "SS-HP900MRW": true,
+    "SS-HP900NSD": true,
+    "SS-HP900NSW": true,
+    "SS-MON900CS": true,
+    "SS-RV900C": true,
+    "SS-SIG900C": true
+  };
+
+  function productCode() {
+    var input = d.querySelector('input[name="ProductCode"]');
+    return String(
+      (g.global_Current_ProductCode || "") ||
+      (input && input.value) ||
+      ""
+    ).toUpperCase();
+  }
+
+  function photo(code, n, thumb) {
+    return "/v/vspfiles/photos/" + code + "-" + n + (thumb ? "T" : "") + ".jpg";
+  }
+
+  function findMediaCell(img) {
+    return (
+      (img && img.closest && (
+        img.closest("td.mc-pdp-media-td") ||
+        img.closest("td.mc-unified-pdp-media") ||
+        img.closest("#product_photo_td") ||
+        img.closest("td")
+      )) ||
+      null
+    );
+  }
+
+  function ensureAltViews(code, mediaCell, zoom) {
+    var alt = d.getElementById("altviews") || d.querySelector("span#altviews");
+    if (!alt) {
+      alt = d.createElement("span");
+      alt.id = "altviews";
+      alt.className = "mc-steve-silver-altviews";
+    }
+    alt.innerHTML =
+      '<a href="' + photo(code, 3, false) + '" data-mc-ss-alt="3">' +
+      '<img id="alternate_product_photo_3" class="vCSS_img_alternate_product_photo" src="' + photo(code, 3, true) + '" alt="Alternate view" />' +
+      "</a>";
+
+    var wrap = d.getElementById("mc-steve-silver-altviews-wrap");
+    if (!wrap) {
+      wrap = d.createElement("div");
+      wrap.id = "mc-steve-silver-altviews-wrap";
+      wrap.className = "mc-steve-silver-altviews-wrap";
+    }
+    if (mediaCell && wrap.parentNode !== mediaCell) mediaCell.appendChild(wrap);
+    if (alt.parentNode !== wrap) wrap.appendChild(alt);
+    if (zoom && zoom.parentNode && wrap.previousElementSibling !== zoom) {
+      zoom.parentNode.insertBefore(wrap, zoom.nextSibling || null);
+    }
+
+    wrap.style.setProperty("display", "flex", "important");
+    wrap.style.setProperty("justify-content", "center", "important");
+    wrap.style.setProperty("width", "100%", "important");
+    wrap.style.setProperty("max-width", "600px", "important");
+    wrap.style.setProperty("margin", "10px auto 0", "important");
+    wrap.style.setProperty("padding", "0", "important");
+    wrap.style.setProperty("clear", "both", "important");
+
+    alt.style.setProperty("display", "flex", "important");
+    alt.style.setProperty("justify-content", "center", "important");
+    alt.style.setProperty("gap", "8px", "important");
+    alt.style.setProperty("margin", "0 auto", "important");
+    alt.style.setProperty("padding", "0", "important");
+    alt.style.setProperty("float", "none", "important");
+    alt.style.setProperty("position", "static", "important");
+
+    alt.querySelectorAll("a").forEach(function (a) {
+      a.style.setProperty("display", "block", "important");
+      a.style.setProperty("width", "72px", "important");
+      a.style.setProperty("height", "72px", "important");
+      a.onclick = function (ev) {
+        if (ev) ev.preventDefault();
+        setHero(code, 3);
+        return false;
+      };
+    });
+    alt.querySelectorAll("img").forEach(function (im) {
+      im.style.setProperty("display", "block", "important");
+      im.style.setProperty("width", "72px", "important");
+      im.style.setProperty("height", "72px", "important");
+      im.style.setProperty("object-fit", "contain", "important");
+    });
+  }
+
+  function setHero(code, n) {
+    var img = d.querySelector("img#product_photo");
+    var zoom = d.querySelector("a#product_photo_zoom_url") || d.querySelector("a#product_photo_zoom_url2");
+    if (img) {
+      img.setAttribute("src", photo(code, n, true));
+      img.src = photo(code, n, true);
+      img.removeAttribute("srcset");
+      if (img.onload) img.onload = null;
+    }
+    if (zoom) zoom.setAttribute("href", photo(code, n, false));
+  }
+
+  function run() {
+    var code = productCode();
+    if (!CODES[code]) return;
+    var img = d.querySelector("img#product_photo");
+    if (!img) return;
+    var zoom = d.querySelector("a#product_photo_zoom_url") || d.querySelector("a#product_photo_zoom_url2");
+    var mediaCell = findMediaCell(img);
+    setHero(code, 1);
+    ensureAltViews(code, mediaCell, zoom);
+  }
+
+  [0, 150, 500, 1200, 2500, 5000, 10000].forEach(function (ms) {
+    g.setTimeout(run, ms);
+  });
+  if (d.readyState === "loading") {
+    d.addEventListener("DOMContentLoaded", run);
+  } else {
+    run();
+  }
+})(window, document);
+
 /* MC_PDP_PRICE_STACK_20260522 — load standalone repair if this cached bundle is stale */
 (function (g) {
   try {
