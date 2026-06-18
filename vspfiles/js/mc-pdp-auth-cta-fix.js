@@ -6682,7 +6682,12 @@
   function photoRow(table) {
     var rows = table ? (table.tBodies && table.tBodies[0] ? table.tBodies[0].children : table.children) : [];
     for (var i = 0; i < rows.length; i += 1) {
-      if (rows[i] && rows[i].tagName === "TR" && rows[i].querySelector("#product_photo")) return rows[i];
+      if (
+        rows[i] &&
+        rows[i].tagName === "TR" &&
+        !/\bmc-pdp-return-row\b/.test(rows[i].className || "") &&
+        rows[i].querySelector("#product_photo")
+      ) return rows[i];
     }
     return null;
   }
@@ -6693,10 +6698,11 @@
     d.querySelectorAll("#mc-saranoni-visible-return-link, #mc-sar-hotfix-return").forEach(function (node) {
       try { if (node && node.parentNode) node.parentNode.removeChild(node); } catch (eRemove) {}
     });
-    var mainRow = table.querySelector("tr.mc-pdp-main-row") || photoRow(table);
-    if (!mainRow) return;
     var tbody = table.tBodies && table.tBodies[0] ? table.tBodies[0] : table;
     var row = table.querySelector("tr.mc-pdp-return-row");
+    var mainRow = table.querySelector("tr.mc-pdp-main-row") || photoRow(table) || (row && row.nextElementSibling);
+    if (mainRow && /\bmc-pdp-return-row\b/.test(mainRow.className || "")) mainRow = mainRow.nextElementSibling;
+    if (!mainRow) return;
     if (!row) {
       row = d.createElement("tr");
       row.className = "mc-pdp-return-row";
