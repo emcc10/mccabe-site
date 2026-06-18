@@ -17875,3 +17875,85 @@ html body.productdetails #mc-saranoni-visible-return-link a {
   text-transform: uppercase !important;
   text-decoration: none !important;
 }
+
+/* MC_GATLIN_ALT_STRIP_RESET_20260618 */
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) #altviews,
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) span#altviews,
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altviews {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* MC_SS_GATLIN_UNIFIED_COLUMN_LOCK_20260618 - stop media column from ballooning away from info column. */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready #v65-product-parent,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #v65-product-parent {
+    width: 1128px !important;
+    max-width: 1128px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    table-layout: fixed !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media {
+    display: table-cell !important;
+    width: 700px !important;
+    min-width: 700px !important;
+    max-width: 700px !important;
+    padding: 0 28px 0 0 !important;
+    vertical-align: top !important;
+    text-align: right !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    display: table-cell !important;
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+    padding: 0 !important;
+    vertical-align: top !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
+    display: block !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    height: auto !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews {
+    width: 650px !important;
+    max-width: 650px !important;
+    margin: 12px 0 24px auto !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html.is-sectional-product body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media {
+    width: 650px !important;
+    max-width: 650px !important;
+    margin: 0 0 0 auto !important;
+  }
+}

@@ -6646,7 +6646,7 @@
 /* MC_STEVE_SILVER_ALT_VIEWS_20260619 — force -1 piece hero for all SS- bedroom PDPs. */
 (function (g, d) {
   function isSteveSilverCode(code) {
-    return /^SS-/.test(code);
+    return /^SS-/.test(code) && !/GATLIN|-SECT/.test(code);
   }
 
   function productCode() {
@@ -6674,6 +6674,27 @@
     );
   }
 
+  function directChildUnder(parent, node) {
+    if (!parent || !node || !parent.contains(node)) return null;
+    while (node && node.parentNode !== parent) node = node.parentNode;
+    return node || null;
+  }
+
+  function mediaDescription(mediaCell) {
+    if (!mediaCell) return null;
+    var children = Array.prototype.slice.call(mediaCell.children || []);
+    for (var i = 0; i < children.length; i++) {
+      if (
+        children[i].classList &&
+        (children[i].classList.contains("mc-unified-pdp-description--media") ||
+          children[i].classList.contains("mc-unified-pdp-description"))
+      ) {
+        return children[i];
+      }
+    }
+    return null;
+  }
+
   function ensureAltViews(code, mediaCell, zoom) {
     var altSlot = 2;
     var alt = d.getElementById("altviews") || d.querySelector("span#altviews");
@@ -6693,10 +6714,26 @@
       wrap.id = "mc-steve-silver-altviews-wrap";
       wrap.className = "mc-steve-silver-altviews-wrap";
     }
-    if (mediaCell && wrap.parentNode !== mediaCell) mediaCell.appendChild(wrap);
+    var desc = mediaDescription(mediaCell);
+    var zoomChild = directChildUnder(mediaCell, zoom);
+    if (mediaCell && wrap.parentNode !== mediaCell) {
+      if (desc && desc.parentNode === mediaCell) {
+        mediaCell.insertBefore(wrap, desc);
+      } else if (zoomChild && zoomChild.parentNode === mediaCell) {
+        mediaCell.insertBefore(wrap, zoomChild.nextSibling || null);
+      } else {
+        mediaCell.appendChild(wrap);
+      }
+    }
     if (alt.parentNode !== wrap) wrap.appendChild(alt);
-    if (zoom && zoom.parentNode && wrap.previousElementSibling !== zoom) {
-      zoom.parentNode.insertBefore(wrap, zoom.nextSibling || null);
+    if (mediaCell && wrap.parentNode === mediaCell) {
+      desc = mediaDescription(mediaCell);
+      zoomChild = directChildUnder(mediaCell, zoom);
+      if (desc && desc.parentNode === mediaCell && wrap.nextSibling !== desc) {
+        mediaCell.insertBefore(wrap, desc);
+      } else if (zoomChild && zoomChild.parentNode === mediaCell && wrap.previousElementSibling !== zoomChild) {
+        mediaCell.insertBefore(wrap, zoomChild.nextSibling || null);
+      }
     }
 
     wrap.style.setProperty("display", "flex", "important");
@@ -6912,18 +6949,54 @@
       wrap.className = "mc-centered-altviews-wrap";
     }
 
+    function directChildUnder(parent, node) {
+      if (!parent || !node || !parent.contains(node)) return null;
+      while (node && node.parentNode !== parent) node = node.parentNode;
+      return node || null;
+    }
+
+    function mediaDescription(parent) {
+      var children = Array.prototype.slice.call((parent && parent.children) || []);
+      for (var i = 0; i < children.length; i++) {
+        if (
+          children[i].classList &&
+          (children[i].classList.contains("mc-unified-pdp-description--media") ||
+            children[i].classList.contains("mc-unified-pdp-description"))
+        ) {
+          return children[i];
+        }
+      }
+      return null;
+    }
+
+    var desc = mediaDescription(mediaCell);
+    var zoomChild = directChildUnder(mediaCell, zoom);
+
     if (wrap.parentNode !== mediaCell) {
-      mediaCell.appendChild(wrap);
+      if (desc && desc.parentNode === mediaCell) {
+        mediaCell.insertBefore(wrap, desc);
+      } else if (zoomChild && zoomChild.parentNode === mediaCell) {
+        mediaCell.insertBefore(wrap, zoomChild.nextSibling || null);
+      } else {
+        mediaCell.appendChild(wrap);
+      }
     }
 
     if (alt.parentNode !== wrap) {
       wrap.appendChild(alt);
     }
 
-    if (zoom && zoom.parentNode === mediaCell && wrap.previousElementSibling !== zoom) {
-      mediaCell.insertBefore(wrap, zoom.nextSibling || null);
-    } else if (!zoom && img.parentNode === mediaCell && wrap.previousElementSibling !== img) {
-      mediaCell.insertBefore(wrap, img.nextSibling || null);
+    desc = mediaDescription(mediaCell);
+    zoomChild = directChildUnder(mediaCell, zoom);
+    if (desc && desc.parentNode === mediaCell && wrap.nextSibling !== desc) {
+      mediaCell.insertBefore(wrap, desc);
+    } else if (zoomChild && zoomChild.parentNode === mediaCell && wrap.previousElementSibling !== zoomChild) {
+      mediaCell.insertBefore(wrap, zoomChild.nextSibling || null);
+    } else if (!zoomChild) {
+      var imgChild = directChildUnder(mediaCell, img);
+      if (imgChild && imgChild.parentNode === mediaCell && wrap.previousElementSibling !== imgChild) {
+        mediaCell.insertBefore(wrap, imgChild.nextSibling || null);
+      }
     }
 
     wrap.style.setProperty("display", "flex", "important");
