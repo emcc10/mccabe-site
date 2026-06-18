@@ -6643,7 +6643,7 @@
   });
 })(window, document);
 
-/* MC_STEVE_SILVER_ALT_VIEWS_20260618C - product-code image repair for uploaded SS alt views. */
+/* MC_STEVE_SILVER_ALT_VIEWS_20260618D - product-code image repair for uploaded SS alt views. */
 (function (g, d) {
   var CODES = {
     "SS-BC900CTT": true,
@@ -6755,6 +6755,19 @@
     if (zoom) zoom.setAttribute("href", photo(code, n, false));
   }
 
+  function normalizeMediaLayout(mediaCell) {
+    if (!mediaCell) return;
+    try {
+      d.body.classList.add("mc-steve-silver-altview-pdp");
+    } catch (eBodyClass) {}
+    Array.prototype.slice.call(mediaCell.children || []).forEach(function (child) {
+      if (child && child.tagName === "TABLE") {
+        child.style.setProperty("margin-left", "0", "important");
+        child.style.setProperty("margin-right", "0", "important");
+      }
+    });
+  }
+
   function run() {
     var code = productCode();
     if (!CODES[code]) return;
@@ -6762,6 +6775,7 @@
     if (!img) return;
     var zoom = d.querySelector("a#product_photo_zoom_url") || d.querySelector("a#product_photo_zoom_url2");
     var mediaCell = findMediaCell(img);
+    normalizeMediaLayout(mediaCell);
     setHero(code, 1);
     ensureAltViews(code, mediaCell, zoom);
   }
