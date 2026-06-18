@@ -34,7 +34,7 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260618sar3
-  var VERSION = "20260619ss1";
+  var VERSION = "20260619ss2";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -6619,7 +6619,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260619ss1";
+  var WANT = "20260619ss2";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -6736,13 +6736,30 @@
   function setHero(code, n) {
     var img = d.querySelector("img#product_photo");
     var zoom = d.querySelector("a#product_photo_zoom_url") || d.querySelector("a#product_photo_zoom_url2");
+    var full = photo(code, n, false);
+    var thumb = photo(code, n, true);
     if (img) {
-      img.setAttribute("src", photo(code, n, true));
-      img.src = photo(code, n, true);
+      img.setAttribute("src", full);
+      img.src = full;
       img.removeAttribute("srcset");
       if (img.onload) img.onload = null;
+      if (!img.__mcSsHeroLock) {
+        img.__mcSsHeroLock = true;
+        try {
+          new g.MutationObserver(function () {
+            var cur = img.getAttribute("src") || "";
+            if (/-2T\.|-2\.jpg/i.test(cur)) {
+              img.setAttribute("src", full);
+              img.src = full;
+            }
+          }).observe(img, { attributes: true, attributeFilter: ["src"] });
+        } catch (eObs) {}
+      }
     }
-    if (zoom) zoom.setAttribute("href", photo(code, n, false));
+    if (zoom) {
+      zoom.setAttribute("href", full);
+      zoom.title = n === 1 ? "Product image" : "Room scene";
+    }
   }
 
   function normalizeMediaLayout(mediaCell) {
