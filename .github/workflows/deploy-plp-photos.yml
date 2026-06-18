@@ -82,11 +82,20 @@ jobs:
           SFTP_PORT: "2222"
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
 
+      - name: Upload Steve Silver dresser photos (manual retry)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_steve_silver_dresser_photos.py
+
       - name: Verify Steve Silver bedroom photos on live CDN
-        if: github.event_name == 'push' && contains(env.DEPLOY_CHANGED_FILES, 'vspfiles/photos/SS-')
+        if: github.event_name == 'push' && contains(env.DEPLOY_CHANGED_FILES, 'vspfiles/photos/SS-') || github.event_name == 'workflow_dispatch'
         run: |
           set -e
-          for f in SS-BC900DR-1.jpg SS-BC900CTT-1.jpg SS-BC900NS-1.jpg; do
+          for f in SS-SIG900DR-1.jpg SS-BC900DR-1.jpg SS-BC900CTT-1.jpg; do
             local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
             live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s)" | wc -c | tr -d ' ')
             echo "$f local=$local live=$live"
