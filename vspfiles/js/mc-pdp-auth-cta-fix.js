@@ -293,26 +293,11 @@
   }
 
   function findPdpMediaTd() {
-    function inReturnRow(node) {
-      while (node && node !== global.document) {
-        if (node.tagName === "TR" && /\bmc-pdp-return-row\b/.test(node.className || "")) return true;
-        node = node.parentNode;
-      }
-      return false;
-    }
-    function validTd(node) {
-      return node && node.tagName === "TD" && !inReturnRow(node) ? node : null;
-    }
-    var tagged = global.document.querySelector("#v65-product-parent td.mc-pdp-media-td");
-    if (validTd(tagged)) return tagged;
-    var productPhotoTd = global.document.getElementById("product_photo_td");
-    if (validTd(productPhotoTd)) return productPhotoTd;
-    var photo = global.document.querySelector("#v65-product-parent img#product_photo");
-    var td = photo;
-    while (td && td.tagName !== "TD") td = td.parentNode;
-    if (validTd(td)) return td;
-    var fallback = global.document.querySelector("#v65-product-parent > tbody > tr:not(.mc-pdp-return-row) > td:first-child");
-    return validTd(fallback);
+    return (
+      global.document.querySelector("#v65-product-parent td.mc-pdp-media-td") ||
+      global.document.getElementById("product_photo_td") ||
+      global.document.querySelector("#v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child")
+    );
   }
 
   function mountPdpDescriptionUnderMedia() {
@@ -6108,9 +6093,8 @@
     var tagged = global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row");
     if (tagged) return tagged;
     var opt = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
-    var anchor = opt || global.document.querySelector("#v65-product-parent #product_photo");
-    if (!anchor) return null;
-    var tr = anchor.parentNode;
+    if (!opt) return null;
+    var tr = opt.parentNode;
     while (tr && tr.tagName !== "TR") tr = tr.parentNode;
     while (tr && tr.parentNode && tr.parentNode.id !== "v65-product-parent") {
       if (tr.parentNode.tagName === "TR") tr = tr.parentNode;
@@ -6659,106 +6643,6 @@
   });
 })(window, document);
 
-/* MC_BEAN_BAG_BNPL_FALLBACK_20260618 - show copy when Stripe BNPL mounts blank/collapsed. */
-(function (g, d) {
-  function isBeanBag() {
-    return !!(d.body && /\bmc-bean-bag-pdp\b/.test(d.body.className || ""));
-  }
-  function ensureFallbackNode(bnpl) {
-    var fb = d.getElementById("mc-bean-bag-bnpl-fallback");
-    if (!fb) {
-      fb = d.createElement("div");
-      fb.id = "mc-bean-bag-bnpl-fallback";
-      fb.className = "mc-bean-bag-bnpl-fallback";
-      fb.textContent = "Pay over time with Affirm or Klarna.";
-      fb.setAttribute("aria-live", "polite");
-      fb.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
-      fb.style.setProperty("font-size", "13px", "important");
-      fb.style.setProperty("font-weight", "400", "important");
-      fb.style.setProperty("line-height", "1.45", "important");
-      fb.style.setProperty("letter-spacing", "0", "important");
-      fb.style.setProperty("color", "#444", "important");
-      fb.style.setProperty("margin", "0 0 14px 0", "important");
-      fb.style.setProperty("padding", "0", "important");
-      fb.style.setProperty("clear", "both", "important");
-    }
-    var price = d.getElementById("mc-pdp-price-stack-host");
-    if (price && price.parentNode) {
-      try {
-        price.parentNode.insertBefore(fb, price.nextSibling || null);
-      } catch (eAfterPrice) {}
-      return fb;
-    }
-    if (bnpl && bnpl.parentNode && fb.parentNode !== bnpl.parentNode) {
-      try {
-        bnpl.parentNode.insertBefore(fb, bnpl.nextSibling || null);
-      } catch (eInsert) {}
-    } else if (bnpl && bnpl.nextSibling !== fb && bnpl.parentNode === fb.parentNode) {
-      try {
-        bnpl.parentNode.insertBefore(fb, bnpl.nextSibling || null);
-      } catch (eMove) {}
-    }
-    return fb;
-  }
-  function inlineFrameHeight(iframe) {
-    if (!iframe) return 0;
-    var h = "";
-    try {
-      h = iframe.style && iframe.style.height ? iframe.style.height : "";
-    } catch (eStyle) {}
-    if (!h) {
-      var style = iframe.getAttribute("style") || "";
-      var m = style.match(/height\s*:\s*([0-9.]+)px/i);
-      if (m) h = m[1];
-    }
-    return parseFloat(h) || 0;
-  }
-  function sync() {
-    if (!isBeanBag()) return;
-    var bnpl = d.getElementById("messaging-element");
-    if (!bnpl || !bnpl.parentNode) return;
-    var iframe = bnpl.querySelector("iframe");
-    var privateStripe = bnpl.querySelector(".__PrivateStripeElement");
-    var fallback = ensureFallbackNode(bnpl);
-    var stripeHeight = inlineFrameHeight(iframe);
-    var blankStripe = !iframe || stripeHeight <= 12;
-    if (blankStripe) {
-      fallback.style.setProperty("display", "block", "important");
-      fallback.style.setProperty("visibility", "visible", "important");
-      fallback.style.setProperty("opacity", "1", "important");
-      bnpl.setAttribute("data-mc-bnpl-fallback", "1");
-      bnpl.style.setProperty("min-height", "0", "important");
-      bnpl.style.setProperty("height", "0", "important");
-      bnpl.style.setProperty("margin", "0", "important");
-      bnpl.style.setProperty("overflow", "hidden", "important");
-      if (privateStripe) privateStripe.style.setProperty("display", "none", "important");
-      return;
-    }
-    fallback.style.setProperty("display", "none", "important");
-    bnpl.removeAttribute("data-mc-bnpl-fallback");
-    bnpl.style.removeProperty("height");
-    bnpl.style.removeProperty("overflow");
-    if (privateStripe) privateStripe.style.removeProperty("display");
-  }
-  [0, 250, 750, 1500, 3000, 6000, 12000, 20000].forEach(function (ms) {
-    g.setTimeout(sync, ms);
-  });
-  try {
-    if (g.MutationObserver) {
-      var mo = new g.MutationObserver(function () {
-        g.clearTimeout(g.__MC_BB_BNPL_SYNC_TIMER__);
-        g.__MC_BB_BNPL_SYNC_TIMER__ = g.setTimeout(sync, 80);
-      });
-      mo.observe(d.documentElement, { childList: true, subtree: true });
-    }
-  } catch (eMo) {}
-  if (d.readyState === "loading") {
-    d.addEventListener("DOMContentLoaded", sync, { once: true });
-  } else {
-    sync();
-  }
-})(window, document);
-
 /* MC_PDP_PRICE_STACK_20260522 — load standalone repair if this cached bundle is stale */
 (function (g) {
   try {
@@ -6780,112 +6664,155 @@
   };
   (d.head || d.documentElement).appendChild(s);
 })(window);
-
-/* MC_STATIC_RETURN_ROW_20260618 - keep soft-goods return links on the shared PDP row. */
+/* MC_RETURN_LINK_ONLY_20260618 */
 (function (g, d) {
-  function isBeanBag() {
-    return !!(d.body && /mc-bean-bag-pdp/.test(d.body.className || ""));
-  }
-  function isSaranoni() {
-    return !!(d.body && /mc-saranoni-pdp/.test(d.body.className || ""));
-  }
-  function category() {
-    if (isBeanBag()) return { name: "Bean Bags", href: "/bean-bag-seating-s/103.htm" };
-    if (isSaranoni()) return { name: "Adult Blankets", href: "/category-s/205.htm" };
-    return null;
-  }
-  function photoRow(table) {
-    var rows = table ? (table.tBodies && table.tBodies[0] ? table.tBodies[0].children : table.children) : [];
-    for (var i = 0; i < rows.length; i += 1) {
-      if (
-        rows[i] &&
-        rows[i].tagName === "TR" &&
-        !/\bmc-pdp-return-row\b/.test(rows[i].className || "") &&
-        rows[i].querySelector("#product_photo")
-      ) return rows[i];
+  function getReturnData() {
+    if (d.body && /\bmc-bean-bag-pdp\b/.test(d.body.className || "")) {
+      return { text: "\u2190 RETURN TO BEAN BAGS", href: "/bean-bag-seating-s/103.htm" };
+    }
+    if (d.body && /\bmc-saranoni-pdp\b/.test(d.body.className || "")) {
+      return { text: "\u2190 RETURN TO ADULT BLANKETS", href: "/category-s/205.htm" };
     }
     return null;
   }
-  function insertStaticRow() {
-    var cat = category();
+
+  function restoreReturnLink() {
+    var data = getReturnData();
     var table = d.getElementById("v65-product-parent");
-    if (!cat || !table) return;
-    d.querySelectorAll("#mc-saranoni-visible-return-link, #mc-sar-hotfix-return").forEach(function (node) {
-      try { if (node && node.parentNode) node.parentNode.removeChild(node); } catch (eRemove) {}
-    });
-    var tbody = table.tBodies && table.tBodies[0] ? table.tBodies[0] : table;
-    var row = table.querySelector("tr.mc-pdp-return-row");
-    var mainRow = table.querySelector("tr.mc-pdp-main-row") || photoRow(table) || (row && row.nextElementSibling);
-    if (mainRow && /\bmc-pdp-return-row\b/.test(mainRow.className || "")) mainRow = mainRow.nextElementSibling;
-    if (!mainRow) return;
-    if (!row) {
-      row = d.createElement("tr");
-      row.className = "mc-pdp-return-row";
-      var cell = d.createElement("td");
-      cell.className = "mc-pdp-return-cell";
-      cell.colSpan = Math.max(1, mainRow.children ? mainRow.children.length : 1);
+    if (!data || !table || !table.parentNode) return;
+
+    var wrap = d.getElementById("mc-pdp-return-link-static");
+    if (!wrap) {
+      wrap = d.createElement("div");
+      wrap.id = "mc-pdp-return-link-static";
+      wrap.className = "mc-pdp-return-link-static";
+
       var link = d.createElement("a");
       link.className = "mc-pdp-return-link";
-      cell.appendChild(link);
-      row.appendChild(cell);
-      tbody.insertBefore(row, mainRow);
-    } else if (row.nextElementSibling !== mainRow) {
-      tbody.insertBefore(row, mainRow);
+      wrap.appendChild(link);
+
+      table.parentNode.insertBefore(wrap, table);
     }
-    row.querySelectorAll(".mc-bean-bag-media-stack").forEach(function (stack) {
-      try {
-        var cell = row.querySelector(".mc-pdp-return-cell") || row.querySelector("td");
-        var mediaCell = mainRow.querySelector("td") || mainRow.children[0];
-        var stackedLink = stack.querySelector(".mc-pdp-return-link");
-        if (cell && stackedLink && stackedLink.parentNode !== cell) {
-          Node.prototype.insertBefore.call(cell, stackedLink, cell.firstChild || null);
-        }
-        if (mediaCell && stack.parentNode !== mediaCell) {
-          Node.prototype.insertBefore.call(mediaCell, stack, mediaCell.firstChild || null);
-        }
-      } catch (eMoveStack) {}
-    });
-    row.querySelectorAll("#altviews, span#altviews, .altviews, .mc-unified-altviews").forEach(function (alt) {
-      try {
-        var mediaCell = mainRow.querySelector("td") || mainRow.children[0];
-        if (mediaCell && alt.parentNode !== mediaCell) mediaCell.appendChild(alt);
-      } catch (eMoveAlt) {}
-    });
-    var linkEl = row.querySelector(".mc-pdp-return-link");
-    if (linkEl) {
-      linkEl.href = cat.href;
-      linkEl.textContent = "\u2190 RETURN TO " + cat.name.toUpperCase();
-      linkEl.setAttribute("aria-label", "Return to " + cat.name);
-    }
+
+    var a = wrap.querySelector("a");
+    if (!a) return;
+
+    a.href = data.href;
+    a.textContent = data.text;
+    a.setAttribute("aria-label", data.text.replace("\u2190 ", ""));
+
+    wrap.style.setProperty("display", "block", "important");
+    wrap.style.setProperty("visibility", "visible", "important");
+    wrap.style.setProperty("opacity", "1", "important");
+    wrap.style.setProperty("width", "100%", "important");
+    wrap.style.setProperty("margin", "0 0 14px 0", "important");
+    wrap.style.setProperty("padding", "0", "important");
+    wrap.style.setProperty("clear", "both", "important");
+
+    a.style.setProperty("display", "inline-block", "important");
+    a.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+    a.style.setProperty("font-size", "11px", "important");
+    a.style.setProperty("font-weight", "600", "important");
+    a.style.setProperty("letter-spacing", "0.14em", "important");
+    a.style.setProperty("text-transform", "uppercase", "important");
+    a.style.setProperty("text-decoration", "none", "important");
+    a.style.setProperty("color", "#111", "important");
   }
-  function go() {
-    try {
-      if (!d.body || !/mc-(bean-bag|saranoni)-pdp/.test(d.body.className || "")) return;
-      insertStaticRow();
-      if (typeof g.mcEnsureSoftGoodsPdpLayout === "function") g.mcEnsureSoftGoodsPdpLayout();
-    } catch (eReturnRow) {}
-  }
-  [0, 150, 500, 1200, 2500, 5000, 10000, 15000, 25000].forEach(function (ms) {
-    g.setTimeout(go, ms);
+
+  [0, 150, 500, 1200, 2500, 5000].forEach(function (ms) {
+    g.setTimeout(restoreReturnLink, ms);
   });
-  try {
-    var root = d.getElementById("v65-product-parent");
-    if (root && g.MutationObserver) {
-      var queued = false;
-      var mo = new g.MutationObserver(function () {
-        if (queued) return;
-        queued = true;
-        g.setTimeout(function () {
-          queued = false;
-          go();
-        }, 40);
-      });
-      mo.observe(root, { childList: true, subtree: true });
-    }
-  } catch (eObserveReturnRow) {}
+
   if (d.readyState === "loading") {
-    d.addEventListener("DOMContentLoaded", go, { once: true });
+    d.addEventListener("DOMContentLoaded", restoreReturnLink);
   } else {
-    go();
+    restoreReturnLink();
+  }
+})(window, document);
+/* MC_CENTER_ALT_IMAGES_UNDER_MAIN_20260618 */
+(function (g, d) {
+  function centerAltImages() {
+    if (!d.body || !/\b(productdetails|mc-product-page)\b/.test(d.body.className || "")) return;
+
+    var img = d.querySelector("img#product_photo");
+    var alt =
+      d.querySelector("#altviews") ||
+      d.querySelector("span#altviews") ||
+      d.querySelector(".mc-unified-altviews");
+
+    if (!img || !alt) return;
+
+    var zoom = d.querySelector("a#product_photo_zoom_url");
+    var mediaCell =
+      img.closest("td.mc-pdp-media-td") ||
+      img.closest("td.mc-unified-pdp-media") ||
+      img.closest("#product_photo_td") ||
+      img.closest("td");
+
+    if (!mediaCell) return;
+
+    var wrap = d.getElementById("mc-centered-altviews-wrap");
+    if (!wrap) {
+      wrap = d.createElement("div");
+      wrap.id = "mc-centered-altviews-wrap";
+      wrap.className = "mc-centered-altviews-wrap";
+    }
+
+    if (wrap.parentNode !== mediaCell) {
+      mediaCell.appendChild(wrap);
+    }
+
+    if (alt.parentNode !== wrap) {
+      wrap.appendChild(alt);
+    }
+
+    if (zoom && zoom.parentNode === mediaCell && wrap.previousElementSibling !== zoom) {
+      mediaCell.insertBefore(wrap, zoom.nextSibling || null);
+    } else if (!zoom && img.parentNode === mediaCell && wrap.previousElementSibling !== img) {
+      mediaCell.insertBefore(wrap, img.nextSibling || null);
+    }
+
+    wrap.style.setProperty("display", "flex", "important");
+    wrap.style.setProperty("justify-content", "center", "important");
+    wrap.style.setProperty("width", "100%", "important");
+    wrap.style.setProperty("max-width", img.offsetWidth ? img.offsetWidth + "px" : "600px", "important");
+    wrap.style.setProperty("margin", "10px auto 0 auto", "important");
+    wrap.style.setProperty("padding", "0", "important");
+    wrap.style.setProperty("clear", "both", "important");
+
+    alt.style.setProperty("display", "flex", "important");
+    alt.style.setProperty("flex-wrap", "wrap", "important");
+    alt.style.setProperty("justify-content", "center", "important");
+    alt.style.setProperty("gap", "8px", "important");
+    alt.style.setProperty("margin", "0 auto", "important");
+    alt.style.setProperty("padding", "0", "important");
+    alt.style.setProperty("float", "none", "important");
+    alt.style.setProperty("position", "static", "important");
+    alt.style.setProperty("text-align", "center", "important");
+  }
+
+[0, 150, 500, 1200, 2500, 5000, 10000, 15000, 25000, 40000].forEach(function (ms) {
+  g.setTimeout(centerAltImages, ms);
+});
+try {
+  if (g.MutationObserver && !g.__MC_CENTER_ALT_IMAGES_OBSERVER__) {
+    g.__MC_CENTER_ALT_IMAGES_OBSERVER__ = true;
+
+    var timer = null;
+    var observer = new g.MutationObserver(function () {
+      g.clearTimeout(timer);
+      timer = g.setTimeout(centerAltImages, 120);
+    });
+
+    observer.observe(d.getElementById("v65-product-parent") || d.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+} catch (eCenterAltObserver) {}
+  if (d.readyState === "loading") {
+    d.addEventListener("DOMContentLoaded", centerAltImages);
+  } else {
+    centerAltImages();
   }
 })(window, document);
