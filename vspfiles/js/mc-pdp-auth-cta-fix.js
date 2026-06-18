@@ -6711,6 +6711,12 @@
     } else if (row.nextElementSibling !== mainRow) {
       tbody.insertBefore(row, mainRow);
     }
+    row.querySelectorAll("#altviews, span#altviews, .altviews, .mc-unified-altviews").forEach(function (alt) {
+      try {
+        var mediaCell = mainRow.querySelector("td") || mainRow.children[0];
+        if (mediaCell && alt.parentNode !== mediaCell) mediaCell.appendChild(alt);
+      } catch (eMoveAlt) {}
+    });
     var linkEl = row.querySelector(".mc-pdp-return-link");
     if (linkEl) {
       linkEl.href = cat.href;
