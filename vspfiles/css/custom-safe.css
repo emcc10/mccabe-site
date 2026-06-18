@@ -17875,3 +17875,36 @@ html body.productdetails #mc-saranoni-visible-return-link a {
   text-transform: uppercase !important;
   text-decoration: none !important;
 }
+
+/* MC_BEAN_BAG_BNPL_OFFSET_20260618: keep BNPL visible and restore centered desktop columns. */
+html body.mc-bean-bag-pdp #messaging-element,
+html body.mc-bean-bag-pdp .StripeElement#messaging-element {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 42px !important;
+  height: auto !important;
+  margin: 0 0 14px 0 !important;
+  overflow: visible !important;
+}
+
+html body.mc-bean-bag-pdp #messaging-element .__PrivateStripeElement,
+html body.mc-bean-bag-pdp #messaging-element iframe {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 42px !important;
+  height: 42px !important;
+  overflow: visible !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-bean-bag-pdp #v65-product-parent td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp #v65-product-parent td.mc-unified-pdp-media,
+  html body.mc-bean-bag-pdp #v65-product-parent td:has(img#product_photo),
+  html body.mc-bean-bag-pdp #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp #v65-product-parent td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp #v65-product-parent td:has(#mc-pdp-features) {
+    transform: translateX(55px) !important;
+  }
+}
