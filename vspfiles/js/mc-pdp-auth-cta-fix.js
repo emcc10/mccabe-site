@@ -6665,3 +6665,21 @@
   };
   (d.head || d.documentElement).appendChild(s);
 })(window);
+
+/* MC_STATIC_RETURN_ROW_20260618 - keep soft-goods return links on the shared PDP row. */
+(function (g, d) {
+  function go() {
+    try {
+      if (!d.body || !/mc-(bean-bag|saranoni)-pdp/.test(d.body.className || "")) return;
+      if (typeof g.mcEnsureSoftGoodsPdpLayout === "function") g.mcEnsureSoftGoodsPdpLayout();
+    } catch (eReturnRow) {}
+  }
+  [0, 150, 500, 1200, 2500, 5000].forEach(function (ms) {
+    g.setTimeout(go, ms);
+  });
+  if (d.readyState === "loading") {
+    d.addEventListener("DOMContentLoaded", go, { once: true });
+  } else {
+    go();
+  }
+})(window, document);
