@@ -6711,6 +6711,15 @@
     } else if (row.nextElementSibling !== mainRow) {
       tbody.insertBefore(row, mainRow);
     }
+    row.querySelectorAll(".mc-bean-bag-media-stack").forEach(function (stack) {
+      try {
+        var cell = row.querySelector(".mc-pdp-return-cell") || row.querySelector("td");
+        var mediaCell = mainRow.querySelector("td") || mainRow.children[0];
+        var stackedLink = stack.querySelector(".mc-pdp-return-link");
+        if (cell && stackedLink && stackedLink.parentNode !== cell) cell.insertBefore(stackedLink, cell.firstChild);
+        if (mediaCell && stack.parentNode !== mediaCell) mediaCell.insertBefore(stack, mediaCell.firstChild || null);
+      } catch (eMoveStack) {}
+    });
     row.querySelectorAll("#altviews, span#altviews, .altviews, .mc-unified-altviews").forEach(function (alt) {
       try {
         var mediaCell = mainRow.querySelector("td") || mainRow.children[0];
