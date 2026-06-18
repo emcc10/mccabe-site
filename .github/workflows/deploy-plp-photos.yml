@@ -10,7 +10,11 @@ on:
       - "scripts/upload_recliner_plp_photos.py"
       - "scripts/fetch_recliner_plp_photos.py"
       - "scripts/upload_tmh_mat_photos.py"
-      - "scripts/sync_tmh_trv_mat_photos.py"
+      - "scripts/upload_steve_silver_bedroom_photos.py"
+      - "scripts/fetch_steve_silver_dresser_photos.py"
+      - "scripts/fetch_steve_silver_nightstand_photos.py"
+      - "scripts/fetch_steve_silver_chest_photos.py"
+      - "scripts/generate_volusion_photo_thumbnails.py"
       - ".github/workflows/deploy-plp-photos.yml"
       - ".github/scripts/deploy-volusion.sh"
   workflow_dispatch:
@@ -68,6 +72,29 @@ jobs:
           SKIP_TEMPLATE_DEPLOY: "1"
           DEPLOY_STRICT: "1"
         run: bash .github/scripts/deploy-volusion.sh
+
+      - name: Upload Steve Silver bedroom photos (explicit sync)
+        if: github.event_name == 'push' && contains(env.DEPLOY_CHANGED_FILES, 'vspfiles/photos/SS-')
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_steve_silver_bedroom_photos.py
+
+      - name: Verify Steve Silver bedroom photos on live CDN
+        if: github.event_name == 'push' && contains(env.DEPLOY_CHANGED_FILES, 'vspfiles/photos/SS-')
+        run: |
+          set -e
+          for f in SS-BC900DR-1.jpg SS-BC900CTT-1.jpg SS-BC900NS-1.jpg; do
+            local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
+            live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s)" | wc -c | tr -d ' ')
+            echo "$f local=$local live=$live"
+            if [ "$live" -lt "$((local / 2))" ]; then
+              echo "::error::Bedroom photo not synced to CDN: $f (local=$local live=$live)"
+              exit 1
+            fi
+          done
 
       - name: Upload all TMH mat and travel photos (full-size sync)
         if: env.UPLOAD_TMH_MATS == '1' || github.event_name == 'workflow_dispatch'
