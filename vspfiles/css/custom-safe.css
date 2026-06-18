@@ -17908,3 +17908,15 @@ html body.mc-bean-bag-pdp #messaging-element iframe {
     transform: translateX(55px) !important;
   }
 }
+
+/* MC_BEAN_BAG_TOP_LEVEL_OFFSET_20260618: prevent nested Volusion cells from stacking the offset. */
+@media (min-width: 992px) {
+  html body.mc-bean-bag-pdp #v65-product-parent td {
+    transform: none !important;
+  }
+
+  html body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:not(.mc-pdp-return-row) > td:has(img#product_photo),
+  html body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:not(.mc-pdp-return-row) > td:has(#mc-pdp-features) {
+    transform: translateX(55px) !important;
+  }
+}
