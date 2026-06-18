@@ -6093,8 +6093,9 @@
     var tagged = global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row");
     if (tagged) return tagged;
     var opt = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
-    if (!opt) return null;
-    var tr = opt.parentNode;
+    var anchor = opt || global.document.querySelector("#v65-product-parent #product_photo");
+    if (!anchor) return null;
+    var tr = anchor.parentNode;
     while (tr && tr.tagName !== "TR") tr = tr.parentNode;
     while (tr && tr.parentNode && tr.parentNode.id !== "v65-product-parent") {
       if (tr.parentNode.tagName === "TR") tr = tr.parentNode;
