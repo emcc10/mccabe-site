@@ -6668,9 +6668,60 @@
 
 /* MC_STATIC_RETURN_ROW_20260618 - keep soft-goods return links on the shared PDP row. */
 (function (g, d) {
+  function isBeanBag() {
+    return !!(d.body && /mc-bean-bag-pdp/.test(d.body.className || ""));
+  }
+  function isSaranoni() {
+    return !!(d.body && /mc-saranoni-pdp/.test(d.body.className || ""));
+  }
+  function category() {
+    if (isBeanBag()) return { name: "Bean Bags", href: "/bean-bag-seating-s/103.htm" };
+    if (isSaranoni()) return { name: "Adult Blankets", href: "/category-s/205.htm" };
+    return null;
+  }
+  function photoRow(table) {
+    var rows = table ? (table.tBodies && table.tBodies[0] ? table.tBodies[0].children : table.children) : [];
+    for (var i = 0; i < rows.length; i += 1) {
+      if (rows[i] && rows[i].tagName === "TR" && rows[i].querySelector("#product_photo")) return rows[i];
+    }
+    return null;
+  }
+  function insertStaticRow() {
+    var cat = category();
+    var table = d.getElementById("v65-product-parent");
+    if (!cat || !table) return;
+    d.querySelectorAll("#mc-saranoni-visible-return-link, #mc-sar-hotfix-return").forEach(function (node) {
+      try { if (node && node.parentNode) node.parentNode.removeChild(node); } catch (eRemove) {}
+    });
+    var mainRow = table.querySelector("tr.mc-pdp-main-row") || photoRow(table);
+    if (!mainRow) return;
+    var tbody = table.tBodies && table.tBodies[0] ? table.tBodies[0] : table;
+    var row = table.querySelector("tr.mc-pdp-return-row");
+    if (!row) {
+      row = d.createElement("tr");
+      row.className = "mc-pdp-return-row";
+      var cell = d.createElement("td");
+      cell.className = "mc-pdp-return-cell";
+      cell.colSpan = Math.max(1, mainRow.children ? mainRow.children.length : 1);
+      var link = d.createElement("a");
+      link.className = "mc-pdp-return-link";
+      cell.appendChild(link);
+      row.appendChild(cell);
+      tbody.insertBefore(row, mainRow);
+    } else if (row.nextElementSibling !== mainRow) {
+      tbody.insertBefore(row, mainRow);
+    }
+    var linkEl = row.querySelector(".mc-pdp-return-link");
+    if (linkEl) {
+      linkEl.href = cat.href;
+      linkEl.textContent = "\u2190 RETURN TO " + cat.name.toUpperCase();
+      linkEl.setAttribute("aria-label", "Return to " + cat.name);
+    }
+  }
   function go() {
     try {
       if (!d.body || !/mc-(bean-bag|saranoni)-pdp/.test(d.body.className || "")) return;
+      insertStaticRow();
       if (typeof g.mcEnsureSoftGoodsPdpLayout === "function") g.mcEnsureSoftGoodsPdpLayout();
     } catch (eReturnRow) {}
   }
