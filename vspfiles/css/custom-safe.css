@@ -17778,7 +17778,7 @@ html body [id*="soft"][id*="cart"] a[href*="ShoppingCart"] {
   html body.mc-saranoni-pdp #content_area #v65-product-parent img#product_photo,
   html body.mc-saranoni-pdp.productdetails #v65-product-parent img#product_photo,
   html body.mc-saranoni-pdp.mc-product-page #v65-product-parent img#product_photo {
-    margin-left: 165px !important;
+    margin-left: 190px !important;
     margin-top: 30px !important;
   }
 
@@ -17825,6 +17825,30 @@ html body.mc-saranoni-pdp .mc-sar-hotfix-picker { order: 60 !important; }
 html body.mc-saranoni-pdp #mc-pdp-features { order: 70 !important; clear: both !important; margin-top: 12px !important; }
 html body.mc-saranoni-pdp #mc-pdp-description-below-features { order: 80 !important; }
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack { order: 90 !important; }
+
+html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row {
+  display: table-row !important;
+}
+
+html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-cell {
+  display: block !important;
+  width: 100% !important;
+  padding: 0 0 14px 0 !important;
+  border: 0 !important;
+  text-align: left !important;
+  vertical-align: top !important;
+}
+
+html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-link {
+  display: inline-block !important;
+  color: #444 !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+}
 
 
 html body.mc-saranoni-pdp #mc-saranoni-visible-return-link,

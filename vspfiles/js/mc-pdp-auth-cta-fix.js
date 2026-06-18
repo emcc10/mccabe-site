@@ -2794,7 +2794,6 @@
   function appendSaranoniInfoColumnOrder() {
     if (!isSaranoniPdpPage()) return;
     ensureSoftGoodsReturnRow();
-    ensureSaranoniVisibleReturnLink();
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
     var brandElement = global.document.getElementById("mc-pdp-brand-logo");
@@ -6125,6 +6124,8 @@
 
   function ensureSaranoniVisibleReturnLink() {
     if (!isSaranoniPdpPage()) return;
+    var tableRowLink = global.document.querySelector("#v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-link");
+    if (tableRowLink) return;
     if (global.document.getElementById("mc-saranoni-visible-return-link")) return;
     var dest = resolveSoftGoodsReturnCategory();
     if (!dest) return;
