@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260617pdp78
-  var VERSION = "20260617pdp78";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260618sar3
+  var VERSION = "20260618sar3";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2794,6 +2794,7 @@
   function appendSaranoniInfoColumnOrder() {
     if (!isSaranoniPdpPage()) return;
     ensureSoftGoodsReturnRow();
+    removeSaranoniOutsideReturnLinks();
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
     var brandElement = global.document.getElementById("mc-pdp-brand-logo");
@@ -6148,6 +6149,17 @@
     }
   }
 
+  function removeSaranoniOutsideReturnLinks() {
+    if (!isSaranoniPdpPage()) return;
+    global.document
+      .querySelectorAll("#mc-saranoni-visible-return-link, #mc-sar-hotfix-return")
+      .forEach(function (node) {
+        try {
+          if (node && node.parentNode) node.parentNode.removeChild(node);
+        } catch (eRmSarReturn) {}
+      });
+  }
+
   function ensureSoftGoodsReturnRow() {
     if (!isSoftGoodsPdpPage()) return;
     var cat = resolveSoftGoodsReturnCategory();
@@ -6626,7 +6638,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260617pdp78";
+  var WANT = "20260618sar3";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
