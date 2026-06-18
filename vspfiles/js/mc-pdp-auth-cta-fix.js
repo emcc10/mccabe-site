@@ -6643,7 +6643,7 @@
   });
 })(window, document);
 
-/* MC_STEVE_SILVER_ALT_VIEWS_20260618 - product-code image repair for uploaded SS alt views. */
+/* MC_STEVE_SILVER_ALT_VIEWS_20260618B - product-code image repair for uploaded SS alt views. */
 (function (g, d) {
   var CODES = {
     "SS-BC900CTT": true,
