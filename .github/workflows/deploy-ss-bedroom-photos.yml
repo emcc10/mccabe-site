@@ -1,0 +1,49 @@
+name: Deploy Steve Silver bedroom photos (fast)
+
+# Bypasses the slow deploy-plp-photos queue. Use when dressers/mirrors/chests
+# are correct in git but the live CDN still shows old lifestyle thumbnails.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ss-bedroom-photos
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Paramiko
+        run: pip3 install paramiko
+
+      - name: Upload all SS bedroom photos (Paramiko SFTP)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_steve_silver_bedroom_photos.py
+
+      - name: Verify key photos on live CDN
+        run: |
+          set -e
+          for f in \
+            SS-BC900DR-1.jpg SS-SIG900DR-1.jpg \
+            SS-BC900MR-1.jpg SS-BC950MRB-1.jpg SS-CAS900M-1.jpg SS-RV900M-1.jpg \
+            SS-BC900MR-1T.jpg SS-CAS900M-1T.jpg; do
+            if [ ! -f "vspfiles/photos/$f" ]; then
+              echo "skip $f (not in repo)"
+              continue
+            fi
+            local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
+            live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s)" | wc -c | tr -d ' ')
+            echo "$f local=$local live=$live"
+            if [ "$live" -lt "$((local / 2))" ]; then
+              echo "::error::Photo not synced to CDN: $f (local=$local live=$live)"
+              exit 1
+            fi
+          done

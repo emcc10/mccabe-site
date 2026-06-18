@@ -20,6 +20,15 @@ on:
       - ".github/workflows/deploy-plp-photos.yml"
       - ".github/scripts/deploy-volusion.sh"
   workflow_dispatch:
+    inputs:
+      scope:
+        description: Upload scope (ss-bedroom-only skips TMH/recliner bulk steps)
+        required: true
+        default: ss-bedroom-only
+        type: choice
+        options:
+          - ss-bedroom-only
+          - full
 
 # Never cancel mid-photo-upload — large batches can run 40+ minutes.
 concurrency:
@@ -62,7 +71,19 @@ jobs:
           fi
 
       - name: Sync TMH-TRV travel mat photo aliases
+        if: github.event_name == 'push' || inputs.scope == 'full'
         run: python3 scripts/sync_tmh_trv_mat_photos.py
+
+      - name: Upload Steve Silver bedroom photos (explicit sync — first)
+        if: |
+          (github.event_name == 'push' && contains(env.DEPLOY_CHANGED_FILES, 'vspfiles/photos/SS-')) ||
+          (github.event_name == 'workflow_dispatch' && inputs.scope == 'ss-bedroom-only')
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_steve_silver_bedroom_photos.py
 
       - name: Upload changed vspfiles/photos (SFTP)
         if: github.event_name == 'push'
@@ -75,32 +96,14 @@ jobs:
           DEPLOY_STRICT: "1"
         run: bash .github/scripts/deploy-volusion.sh
 
-      - name: Upload Steve Silver bedroom photos (explicit sync)
-        if: github.event_name == 'push' && contains(env.DEPLOY_CHANGED_FILES, 'vspfiles/photos/SS-')
+      - name: Upload Steve Silver bedroom photos (manual full deploy retry)
+        if: github.event_name == 'workflow_dispatch' && inputs.scope == 'full'
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_PORT: "2222"
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
-
-      - name: Upload Steve Silver dresser photos (manual retry)
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          SFTP_PORT: "2222"
-        run: python3 scripts/upload_steve_silver_dresser_photos.py
-
-      - name: Upload Steve Silver mirror photos (manual retry)
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          SFTP_PORT: "2222"
-        run: python3 scripts/upload_steve_silver_mirror_photos.py
 
       - name: Verify Steve Silver bedroom photos on live CDN
         if: github.event_name == 'push' && contains(env.DEPLOY_CHANGED_FILES, 'vspfiles/photos/SS-') || github.event_name == 'workflow_dispatch'
@@ -117,7 +120,7 @@ jobs:
           done
 
       - name: Upload all TMH mat and travel photos (full-size sync)
-        if: env.UPLOAD_TMH_MATS == '1' || github.event_name == 'workflow_dispatch'
+        if: env.UPLOAD_TMH_MATS == '1' || (github.event_name == 'workflow_dispatch' && inputs.scope == 'full')
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -126,7 +129,7 @@ jobs:
         run: python3 scripts/upload_tmh_mat_photos.py
 
       - name: Upload missing stock photos (manual / full refresh)
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && inputs.scope == 'full'
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -137,7 +140,7 @@ jobs:
           python3 scripts/upload_missing_stock_photos.py
 
       - name: Verify TMH mat photos on live CDN
-        if: env.UPLOAD_TMH_MATS == '1' || github.event_name == 'workflow_dispatch'
+        if: env.UPLOAD_TMH_MATS == '1' || (github.event_name == 'workflow_dispatch' && inputs.scope == 'full')
         run: |
           set -e
           for f in TMH-MAT-PINK-MAT-1.jpg TMH-MAT-PINK-MAT-2T.jpg TMH-TRV-AMETHYST-GEM-MAT-1.jpg; do
