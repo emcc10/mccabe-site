@@ -6176,6 +6176,7 @@
 
   function ensureBeanBagReturnLink() {
     if (!isBeanBagPdpPage()) return;
+    ensureSoftGoodsReturnRow();
     var link = global.document.querySelector(".mc-return-category__link");
     if (!link) return;
     try {
