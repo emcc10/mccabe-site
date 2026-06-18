@@ -17580,6 +17580,18 @@ html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unifi
   text-align: left !important;
 }
 
+/* MC_STEVE_SILVER_DESCRIPTION_ALIGN_20260618 - align media description with the 650px hero image. */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-steve-silver-altview-pdp.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media {
+    width: 650px !important;
+    max-width: 650px !important;
+    margin: 24px 0 0 77px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
 html body.mc-pdp-unified-ready .mc-unified-pdp-description,
 html body.mc-pdp-unified-ready .mc-unified-pdp-description *,
 html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description,
