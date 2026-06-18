@@ -6125,28 +6125,8 @@
 
   function ensureSaranoniVisibleReturnLink() {
     if (!isSaranoniPdpPage()) return;
-    var tableRowLink = global.document.querySelector("#v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-link");
-    if (tableRowLink) return;
-    if (global.document.getElementById("mc-saranoni-visible-return-link")) return;
-    var dest = resolveSoftGoodsReturnCategory();
-    if (!dest) return;
-    var mount =
-      global.document.getElementById("content_area") ||
-      (global.document.getElementById("v65-product-parent") || {}).parentNode ||
-      global.document.body;
-    var table = global.document.getElementById("v65-product-parent");
-    if (!mount || !table || !table.parentNode) return;
-    var wrap = global.document.createElement("div");
-    wrap.id = "mc-saranoni-visible-return-link";
-    wrap.className = "mc-saranoni-visible-return-link";
-    var href = dest.href || "/category-s/205.htm";
-    var label = (dest.label || dest.name || "Adult Blankets").toUpperCase();
-    wrap.innerHTML = '<a href="' + href + '">&larr; RETURN TO ' + label + '</a>';
-    try {
-      table.parentNode.insertBefore(wrap, table);
-    } catch (eInsSarReturn) {
-      try { mount.insertBefore(wrap, mount.firstChild); } catch (eInsSarReturn2) {}
-    }
+    ensureSoftGoodsReturnRow();
+    removeSaranoniOutsideReturnLinks();
   }
 
   function removeSaranoniOutsideReturnLinks() {

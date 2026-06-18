@@ -17833,7 +17833,7 @@ html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row {
 html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-cell {
   display: block !important;
   width: 100% !important;
-  padding: 0 0 14px 0 !important;
+  padding: 0 0 12px 0 !important;
   border: 0 !important;
   text-align: left !important;
   vertical-align: top !important;
@@ -17841,13 +17841,18 @@ html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row .mc-pdp-retur
 
 html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-link {
   display: inline-block !important;
-  color: #444 !important;
+  color: #111 !important;
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
-  letter-spacing: .12em !important;
+  letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
+}
+
+html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-link:hover {
+  color: #444 !important;
+  text-decoration: underline !important;
 }
 
 
