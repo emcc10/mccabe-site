@@ -6659,6 +6659,99 @@
   });
 })(window, document);
 
+/* MC_BEAN_BAG_BNPL_FALLBACK_20260618 - show copy when Stripe BNPL mounts blank/collapsed. */
+(function (g, d) {
+  function isBeanBag() {
+    return !!(d.body && /\bmc-bean-bag-pdp\b/.test(d.body.className || ""));
+  }
+  function ensureFallbackNode(bnpl) {
+    var fb = d.getElementById("mc-bean-bag-bnpl-fallback");
+    if (!fb) {
+      fb = d.createElement("div");
+      fb.id = "mc-bean-bag-bnpl-fallback";
+      fb.className = "mc-bean-bag-bnpl-fallback";
+      fb.textContent = "Pay over time with Affirm or Klarna.";
+      fb.setAttribute("aria-live", "polite");
+      fb.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+      fb.style.setProperty("font-size", "13px", "important");
+      fb.style.setProperty("font-weight", "400", "important");
+      fb.style.setProperty("line-height", "1.45", "important");
+      fb.style.setProperty("letter-spacing", "0", "important");
+      fb.style.setProperty("color", "#444", "important");
+      fb.style.setProperty("margin", "0 0 14px 0", "important");
+      fb.style.setProperty("padding", "0", "important");
+      fb.style.setProperty("clear", "both", "important");
+    }
+    if (bnpl && bnpl.parentNode && fb.parentNode !== bnpl.parentNode) {
+      try {
+        bnpl.parentNode.insertBefore(fb, bnpl.nextSibling || null);
+      } catch (eInsert) {}
+    } else if (bnpl && bnpl.nextSibling !== fb && bnpl.parentNode === fb.parentNode) {
+      try {
+        bnpl.parentNode.insertBefore(fb, bnpl.nextSibling || null);
+      } catch (eMove) {}
+    }
+    return fb;
+  }
+  function inlineFrameHeight(iframe) {
+    if (!iframe) return 0;
+    var h = "";
+    try {
+      h = iframe.style && iframe.style.height ? iframe.style.height : "";
+    } catch (eStyle) {}
+    if (!h) {
+      var style = iframe.getAttribute("style") || "";
+      var m = style.match(/height\s*:\s*([0-9.]+)px/i);
+      if (m) h = m[1];
+    }
+    return parseFloat(h) || 0;
+  }
+  function sync() {
+    if (!isBeanBag()) return;
+    var bnpl = d.getElementById("messaging-element");
+    if (!bnpl || !bnpl.parentNode) return;
+    var iframe = bnpl.querySelector("iframe");
+    var privateStripe = bnpl.querySelector(".__PrivateStripeElement");
+    var fallback = ensureFallbackNode(bnpl);
+    var stripeHeight = inlineFrameHeight(iframe);
+    var blankStripe = !iframe || stripeHeight <= 12;
+    if (blankStripe) {
+      fallback.style.setProperty("display", "block", "important");
+      fallback.style.setProperty("visibility", "visible", "important");
+      fallback.style.setProperty("opacity", "1", "important");
+      bnpl.setAttribute("data-mc-bnpl-fallback", "1");
+      bnpl.style.setProperty("min-height", "0", "important");
+      bnpl.style.setProperty("height", "0", "important");
+      bnpl.style.setProperty("margin", "0", "important");
+      bnpl.style.setProperty("overflow", "hidden", "important");
+      if (privateStripe) privateStripe.style.setProperty("display", "none", "important");
+      return;
+    }
+    fallback.style.setProperty("display", "none", "important");
+    bnpl.removeAttribute("data-mc-bnpl-fallback");
+    bnpl.style.removeProperty("height");
+    bnpl.style.removeProperty("overflow");
+    if (privateStripe) privateStripe.style.removeProperty("display");
+  }
+  [0, 250, 750, 1500, 3000, 6000, 12000, 20000].forEach(function (ms) {
+    g.setTimeout(sync, ms);
+  });
+  try {
+    if (g.MutationObserver) {
+      var mo = new g.MutationObserver(function () {
+        g.clearTimeout(g.__MC_BB_BNPL_SYNC_TIMER__);
+        g.__MC_BB_BNPL_SYNC_TIMER__ = g.setTimeout(sync, 80);
+      });
+      mo.observe(d.documentElement, { childList: true, subtree: true });
+    }
+  } catch (eMo) {}
+  if (d.readyState === "loading") {
+    d.addEventListener("DOMContentLoaded", sync, { once: true });
+  } else {
+    sync();
+  }
+})(window, document);
+
 /* MC_PDP_PRICE_STACK_20260522 — load standalone repair if this cached bundle is stale */
 (function (g) {
   try {
