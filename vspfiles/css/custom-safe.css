@@ -17778,7 +17778,7 @@ html body [id*="soft"][id*="cart"] a[href*="ShoppingCart"] {
   html body.mc-saranoni-pdp #content_area #v65-product-parent img#product_photo,
   html body.mc-saranoni-pdp.productdetails #v65-product-parent img#product_photo,
   html body.mc-saranoni-pdp.mc-product-page #v65-product-parent img#product_photo {
-    margin-left: 190px !important;
+    margin-left: 140px !important;
     margin-top: 30px !important;
   }
 
@@ -17875,14 +17875,42 @@ html body.productdetails #mc-saranoni-visible-return-link a {
   text-transform: uppercase !important;
   text-decoration: none !important;
 }
-/* MC_RETURN_LINK_STATIC_POSITION_20260618 */
-html body.mc-bean-bag-pdp #mc-pdp-return-link-static,
-html body.mc-saranoni-pdp #mc-pdp-return-link-static {
+/* MC_GATLIN_ALT_STRIP_RESET_20260618 */
+html body.mc-gatlin-sectional-pdp #altviews,
+html body.mc-gatlin-sectional-pdp span#altviews,
+html body.mc-gatlin-sectional-pdp .mc-unified-altviews,
+html body.is-sectional-product #altviews,
+html body.is-sectional-product span#altviews,
+html body.is-sectional-product .mc-unified-altviews {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+/* MC_RETURN_LINK_POSITION_SAFE_FINAL_20260618 */
+
+/* Only move the standalone repaired return links */
+html body.productdetails #mc-pdp-return-link-static,
+html body.mc-product-page #mc-pdp-return-link-static {
   position: relative !important;
   top: 67px !important;
-  z-index: 5 !important;
+  left: 60px !important;
+  z-index: 50 !important;
   margin: 0 0 14px 0 !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
-  pointer-events: auto !important;
-margin-left: 70px !important;
+}
+
+/* Do NOT move native table-row return links like Gatlin */
+html body.productdetails tr.mc-pdp-return-row .mc-pdp-return-cell,
+html body.mc-product-page tr.mc-pdp-return-row .mc-pdp-return-cell {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
