@@ -6137,7 +6137,9 @@
     var wrap = global.document.createElement("div");
     wrap.id = "mc-saranoni-visible-return-link";
     wrap.className = "mc-saranoni-visible-return-link";
-    wrap.innerHTML = '<a href="' + dest.href + '">&larr; RETURN TO ' + dest.label + '</a>';
+    var href = dest.href || "/category-s/205.htm";
+    var label = (dest.label || dest.name || "Adult Blankets").toUpperCase();
+    wrap.innerHTML = '<a href="' + href + '">&larr; RETURN TO ' + label + '</a>';
     try {
       table.parentNode.insertBefore(wrap, table);
     } catch (eInsSarReturn) {
