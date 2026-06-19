@@ -17920,7 +17920,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
     width: 400px !important;
     min-width: 400px !important;
     max-width: 400px !important;
-    padding: 0 !important;
+    padding: 30px 0 0 0 !important;
     vertical-align: top !important;
     text-align: left !important;
     box-sizing: border-box !important;
@@ -17936,6 +17936,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
     height: auto !important;
     margin-left: 0 !important;
     margin-right: auto !important;
+    margin-top: 30px !important;
     align-self: flex-start !important;
   }
 
@@ -18142,5 +18143,38 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
     margin-right: 0 !important;
     width: 100% !important;
     max-width: min(650px, 100%) !important;
+  }
+}
+
+/* MC_SS_UNIFIED_NATIVE_PANEL_HIDE_20260620 — hide duplicate Care/tech specs and orphaned description tables. */
+html body.productdetails:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
+html body.mc-product-page:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
+html body.mc-pdp-unified-ready:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
+html body.productdetails:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div),
+html body.mc-product-page:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div),
+html body.mc-pdp-unified-ready:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div),
+html body.productdetails:has(.mc-unified-pdp-description--media) table.colors_descriptionbox:has(#ProductDetail_ProductDetails_div2):not(:has(.mc-unified-pdp-description--media)),
+html body.mc-product-page:has(.mc-unified-pdp-description--media) table.colors_descriptionbox:has(#ProductDetail_ProductDetails_div2):not(:has(.mc-unified-pdp-description--media)),
+html body.mc-pdp-unified-ready:has(.mc-unified-pdp-description--media) table.colors_descriptionbox:has(#ProductDetail_ProductDetails_div2):not(:has(.mc-unified-pdp-description--media)),
+html body.productdetails #ProductDetail_TechSpecs_div[data-mc-native-panel-hidden="1"],
+html body.mc-product-page #ProductDetail_TechSpecs_div[data-mc-native-panel-hidden="1"],
+html body.productdetails table.colors_descriptionbox[data-mc-native-panel-hidden="1"],
+html body.mc-product-page table.colors_descriptionbox[data-mc-native-panel-hidden="1"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* MC_SS_UNIFIED_HERO_OFFSET_20260620 — match Saranoni vertical breathing room on Steve Silver unified PDPs. */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-pdp-media-td img#product_photo,
+  html body.mc-steve-silver-altview-pdp:not(.mc-pdp-unified-ready) #v65-product-parent img#product_photo,
+  html body.mc-steve-silver-altview-pdp:not(.mc-pdp-unified-ready) #content_area img#product_photo {
+    margin-top: 30px !important;
   }
 }

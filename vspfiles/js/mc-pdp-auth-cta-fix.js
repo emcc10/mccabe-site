@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero1
-  var VERSION = "20260620sshero1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero2
+  var VERSION = "20260620sshero2";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2978,6 +2978,58 @@
     return inner;
   }
 
+  function hideNativeVolusionTabPanels() {
+    if (!isProductPdp()) return;
+    var features = global.document.querySelector("#mc-pdp-features .mc-pdp-features__body");
+    var featuresText = features
+      ? String(features.textContent || "").replace(/\s+/g, " ").trim()
+      : "";
+    if (featuresText.length > 10) {
+      var tech = global.document.getElementById("ProductDetail_TechSpecs_div");
+      if (tech) {
+        tech.style.setProperty("display", "none", "important");
+        tech.setAttribute("aria-hidden", "true");
+        tech.setAttribute("data-mc-native-panel-hidden", "1");
+      }
+      var extInfo = global.document.getElementById("ProductDetail_ExtInfo_div");
+      if (extInfo) {
+        extInfo.style.setProperty("display", "none", "important");
+        extInfo.setAttribute("aria-hidden", "true");
+      }
+    }
+
+    var mediaDesc =
+      global.document.querySelector(".mc-unified-pdp-description--media") ||
+      global.document.querySelector(
+        "td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2, td.mc-pdp-media-td #ProductDetail_ProductDetails_div2"
+      );
+    if (!mediaDesc || !String(mediaDesc.textContent || "").replace(/\s+/g, " ").trim()) return;
+
+    var mediaTd =
+      global.document.querySelector("td.mc-unified-pdp-media, td.mc-pdp-media-td") || null;
+    global.document.querySelectorAll("table.colors_descriptionbox").forEach(function (box) {
+      if (!box || box.contains(mediaDesc)) return;
+      if (box.querySelector("#ProductDetail_TechSpecs_div, #ProductDetail_ExtInfo_div")) {
+        try {
+          box.style.setProperty("display", "none", "important");
+          box.setAttribute("aria-hidden", "true");
+          box.setAttribute("data-mc-native-panel-hidden", "1");
+        } catch (eTechBox) {}
+        return;
+      }
+      var legacyDesc = box.querySelector(
+        "#ProductDetail_ProductDetails_div2, #ProductDetail_ProductDetails_div"
+      );
+      if (!legacyDesc) return;
+      if (mediaTd && mediaTd.contains(legacyDesc)) return;
+      try {
+        box.style.setProperty("display", "none", "important");
+        box.setAttribute("aria-hidden", "true");
+        box.setAttribute("data-mc-native-panel-hidden", "1");
+      } catch (eDescBox) {}
+    });
+  }
+
   function resolveSoftGoodsProductCode() {
     try {
       var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
@@ -3010,6 +3062,21 @@
 
   function isSoftGoodsPdpPage() {
     return isBeanBagPdpPage() || isSaranoniPdpPage();
+  }
+
+  function isSteveSilverPdpPage() {
+    try {
+      if (
+        global.document.body &&
+        global.document.body.classList.contains("mc-steve-silver-altview-pdp")
+      ) {
+        return true;
+      }
+      var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
+      return /^SS-/.test(pc);
+    } catch (eSs) {}
+    return false;
   }
 
   function findPdpHeroColumnTd() {
@@ -3139,6 +3206,7 @@
         hideSaranoniHeroAltviews();
         ensureConfiguredColorSwatches();
       }
+      hideNativeVolusionTabPanels();
       return;
     }
     if (block.parentNode !== insertParent || (insertAfter && block.previousElementSibling !== insertAfter)) {
@@ -3156,6 +3224,7 @@
       var sarFeatCtx = findConfiguredColorSwatchContext();
       if (sarFeatCtx) syncSaranoniColorPicker(sarFeatCtx);
     }
+    hideNativeVolusionTabPanels();
   }
 
   function normalizeConfiguredColorLabel(str) {
@@ -4719,6 +4788,7 @@
   }
 
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
+  global.mcHideNativeVolusionTabPanels = hideNativeVolusionTabPanels;
   global.mcMountBeanBagSwatchesAboveFeatures = mountBeanBagSwatchesAboveFeatures;
   global.mcAppendBeanBagInfoColumnOrder = appendBeanBagInfoColumnOrder;
   global.mcHideBeanBagNativeOptionsTable = hideBeanBagNativeOptionsTable;
@@ -5593,6 +5663,25 @@
     });
   }
 
+  function scheduleSteveSilverLayoutRepair() {
+    if (!isSteveSilverPdpPage()) return;
+    if (!shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
+    if (global.__MC_SS_LAYOUT_REPAIR_VER__ === VERSION) return;
+    global.__MC_SS_LAYOUT_REPAIR_VER__ = VERSION;
+    [80, 250, 700, 1400, 2600, 5000].forEach(function (ms) {
+      global.setTimeout(function () {
+        try {
+          prepareDeferredUnifiedPdpHero();
+          hideNativeVolusionTabPanels();
+          ensureUnifiedPdpLayout();
+          if (typeof global.mcNormalizePdpLayout === "function") {
+            global.mcNormalizePdpLayout();
+          }
+        } catch (eSsRepair) {}
+      }, ms);
+    });
+  }
+
   function installPdpStackApiGuards() {
     global.mcEnsurePdpPriceStack = mcEnsurePdpPriceStack;
     global.mcForceRebuildCleanPriceStack = forceRebuildCleanPriceStack;
@@ -6394,6 +6483,7 @@
         forceRebuildCleanPriceStack();
       }
       mountPdpFeaturesBlock();
+      hideNativeVolusionTabPanels();
       applyPdpPriceTypography();
     } catch (ePrep) {}
   }
@@ -6437,7 +6527,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260617unified19&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260619unified22&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -6550,6 +6640,7 @@
       scheduleAtcBlackLock();
       scheduleBeanBagOptionRepair();
       scheduleSaranoniColorRepair();
+      scheduleSteveSilverLayoutRepair();
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
         prepareDeferredUnifiedPdpHero();
         ensureUnifiedPdpLayout();
@@ -6683,7 +6774,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260620sshero1";
+  var WANT = "20260620sshero2";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
