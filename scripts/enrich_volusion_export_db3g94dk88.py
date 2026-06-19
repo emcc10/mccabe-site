@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
 DEFAULT_SRC = Path(r"c:\Users\erink\Downloads\SAVED_EXPORT_DB3G94DK88.csv")
 DEFAULT_DEST = ROOT / "catalog" / "steve-silver-active" / "SAVED_EXPORT_DB3G94DK88_enriched.csv"
+DEFAULT_PRICE_OVERRIDES = ROOT / "catalog" / "steve-silver-active" / "price_overrides.csv"
+MIN_SERVER_PRICE = 210
 UA = {"User-Agent": "Mozilla/5.0 (McCabe Steve Silver bed catalog)"}
 THUMB_MAX = (900, 700)
 JPEG_QUALITY = 90
@@ -756,7 +758,90 @@ def sync_collection_fields(row: dict[str, str], family_rows: list[dict[str, str]
         row["techspecs"] = replace_collection_words(row["techspecs"], wrong, collection)
 
 
-PLACEHOLDER_PRICES = {"100"}
+PLACEHOLDER_PRICES = {"100", "110", "120"}
+# Volusion often exports dining servers at 260 even though catalog servers are 650+.
+SUSPECT_SERVER_PRICES = {100, 110, 260}
+
+
+def is_server_row(row: dict[str, str]) -> bool:
+    return bool(re.search(r"\bserver\b", row.get("productname", ""), re.I))
+
+
+def parse_price(price: str) -> float | None:
+    try:
+        return float(str(price).replace(",", "").strip())
+    except ValueError:
+        return None
+
+
+def load_price_overrides(path: Path) -> dict[str, tuple[str, str]]:
+    return load_preserved_prices(path)
+
+
+def peer_price(rows: list[dict[str, str]], *, predicate) -> str | None:
+    values: list[float] = []
+    for row in rows:
+        if not predicate(row):
+            continue
+        price = parse_price(row.get("productprice", ""))
+        if price is None or price < MIN_SERVER_PRICE:
+            continue
+        values.append(price)
+    if not values:
+        return None
+    values.sort()
+    return str(int(values[len(values) // 2]))
+
+
+def apply_price_rules(rows: list[dict[str, str]], skip: set[str]) -> int:
+    """Repair obvious Volusion placeholder prices using in-catalog peers."""
+    fixed = 0
+    server_peer = peer_price(rows, predicate=is_server_row) or "740"
+    mirror_peer = peer_price(rows, predicate=lambda r: "mirror" in r.get("productname", "").lower()) or "210"
+    curio_peer = peer_price(rows, predicate=lambda r: "curio" in r.get("productname", "").lower()) or "950"
+    end_table_peer = peer_price(
+        rows,
+        predicate=lambda r: re.search(r"\bend table\b", r.get("productname", ""), re.I) is not None,
+    ) or "310"
+    counter_set_peer = peer_price(
+        rows,
+        predicate=lambda r: "counter dining set" in r.get("productname", "").lower(),
+    ) or "1660"
+    dining_set_peer = peer_price(
+        rows,
+        predicate=lambda r: "dining set" in r.get("productname", "").lower()
+        and "counter" not in r.get("productname", "").lower(),
+    ) or "799"
+
+    for row in rows:
+        code = row["productcode"]
+        if code in skip:
+            continue
+        price = parse_price(row.get("productprice", ""))
+        if price is None:
+            continue
+        name = row.get("productname", "")
+        new_price: str | None = None
+        if is_server_row(row) and (price < MIN_SERVER_PRICE or price in SUSPECT_SERVER_PRICES):
+            new_price = server_peer
+        elif price in PLACEHOLDER_PRICES:
+            lower = name.lower()
+            if "mirror" in lower:
+                new_price = mirror_peer
+            elif "curio" in lower:
+                new_price = curio_peer
+            elif re.search(r"\bend table\b", lower):
+                new_price = end_table_peer
+            elif "counter dining set" in lower:
+                new_price = counter_set_peer
+            elif "dining set" in lower:
+                new_price = dining_set_peer
+        if new_price and new_price != row.get("productprice", ""):
+            row["productprice"] = new_price
+            if not row.get("saleprice", "").strip():
+                row["saleprice"] = new_price
+            fixed += 1
+    return fixed
 
 
 def load_preserved_prices(path: Path) -> dict[str, tuple[str, str]]:
@@ -774,7 +859,7 @@ def load_preserved_prices(path: Path) -> dict[str, tuple[str, str]]:
 
 
 def is_placeholder_price(price: str) -> bool:
-    return str(price).strip() in PLACEHOLDER_PRICES
+    return str(price).strip() in {"100"}
 
 
 def sync_placeholder_prices(row: dict[str, str], family_rows: list[dict[str, str]]) -> None:
@@ -796,7 +881,10 @@ def sync_placeholder_prices(row: dict[str, str], family_rows: list[dict[str, str
         if not other_price or is_placeholder_price(other_price):
             continue
         try:
-            if float(other_price.replace(",", "")) <= 150:
+            other_val = float(other_price.replace(",", ""))
+            if other_val <= 150:
+                continue
+            if is_server_row(row) and other_val in SUSPECT_SERVER_PRICES:
                 continue
         except ValueError:
             continue
@@ -907,22 +995,22 @@ def main() -> int:
     parser.add_argument("--dest", type=Path, default=DEFAULT_DEST)
     parser.add_argument("--force-images", action="store_true")
     parser.add_argument(
-        "--preserve-prices-from",
+        "--price-overrides",
         type=Path,
-        default=None,
-        help="Keep productprice/saleprice from this CSV (defaults to --dest when it already exists)",
+        default=DEFAULT_PRICE_OVERRIDES,
+        help="CSV with productcode,productprice,saleprice — always wins over source/export prices",
     )
     parser.add_argument(
         "--no-preserve-prices",
         action="store_true",
-        help="Take prices only from --src (overwrites any manual price edits in --dest)",
+        help="Do not keep prices from the existing enriched CSV",
     )
     args = parser.parse_args()
 
+    price_overrides = load_price_overrides(args.price_overrides)
     preserved_prices: dict[str, tuple[str, str]] = {}
     if not args.no_preserve_prices:
-        preserve_path = args.preserve_prices_from or args.dest
-        preserved_prices = load_preserved_prices(preserve_path)
+        preserved_prices = load_preserved_prices(args.dest)
 
     with args.src.open(newline="", encoding="cp1252") as fh:
         reader = csv.reader(fh)
@@ -946,6 +1034,8 @@ def main() -> int:
             sync_placeholder_prices(row, family_index.get(sku_family(sku), []))
 
     price_applied = apply_preserved_prices(rows, preserved_prices)
+    rules_fixed = apply_price_rules(rows, skip=set(price_overrides))
+    overrides_applied = apply_preserved_prices(rows, price_overrides)
 
     args.dest.parent.mkdir(parents=True, exist_ok=True)
     with args.dest.open("w", newline="", encoding="utf-8-sig") as fh:
@@ -958,7 +1048,11 @@ def main() -> int:
     print(f"Wrote {len(rows)} rows -> {args.dest}")
     print(f"Rows with techspecs: {filled}; rows with weight: {weights}")
     if price_applied:
-        print(f"Preserved manual prices for {price_applied} row(s)")
+        print(f"Preserved manual prices for {price_applied} row(s) from {args.dest.name}")
+    if rules_fixed:
+        print(f"Repaired {rules_fixed} Volusion placeholder price(s)")
+    if overrides_applied:
+        print(f"Applied {overrides_applied} price override(s) from {args.price_overrides.name}")
     return 0
 
 
