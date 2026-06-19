@@ -574,10 +574,27 @@
     });
   }
 
+  function isSteveSilverPdp() {
+    try {
+      if (global.document.body && global.document.body.classList.contains("mc-steve-silver-altview-pdp")) {
+        return true;
+      }
+      var input = global.document.querySelector('input[name="ProductCode"]');
+      var code = String(
+        (global.global_Current_ProductCode || "") || (input && input.value) || ""
+      ).toUpperCase();
+      return /^SS-/.test(code);
+    } catch (e) {
+      return false;
+    }
+  }
+
   function normalizeMediaColumn(mediaTd) {
     if (!mediaTd) return;
     var isBeanBag =
       global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp");
+    var isSteveSilver = isSteveSilverPdp();
+    var isDesktop = global.matchMedia && global.matchMedia("(min-width: 992px)").matches;
     var imgMaxW = isBeanBag ? "600px" : "650px";
     var img = qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image", mediaTd) || qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image");
     if (img && img.style) {
@@ -590,7 +607,11 @@
       img.style.setProperty("max-width", imgMaxW, "important");
       img.style.setProperty("max-height", "none", "important");
       img.style.setProperty("object-fit", "contain", "important");
-      img.style.setProperty("margin", "0 0 0 auto", "important");
+      if (isSteveSilver && isDesktop) {
+        img.style.setProperty("margin", "0", "important");
+      } else {
+        img.style.setProperty("margin", "0 0 0 auto", "important");
+      }
     }
 
     var alt = qs("#altviews, .altviews, [id*='altviews'], [class*='altviews']", document);
@@ -599,15 +620,37 @@
       alt.classList.add("mc-unified-altviews");
       alt.style.setProperty("display", "flex", "important");
       alt.style.setProperty("flex-direction", "row", "important");
-      alt.style.setProperty("align-items", "center", "important");
-      alt.style.setProperty("justify-content", "center", "important");
+      alt.style.setProperty("align-items", isSteveSilver && isDesktop ? "flex-start" : "center", "important");
+      alt.style.setProperty(
+        "justify-content",
+        isSteveSilver && isDesktop ? "flex-start" : "center",
+        "important"
+      );
       alt.style.setProperty("gap", "10px", "important");
       alt.style.setProperty("flex-wrap", "wrap", "important");
       alt.style.setProperty("width", "100%", "important");
-      alt.style.setProperty("margin", "10px auto 0", "important");
+      alt.style.setProperty(
+        "margin",
+        isSteveSilver && isDesktop ? "10px 0 0 0" : "10px auto 0",
+        "important"
+      );
       alt.style.setProperty("padding", "0", "important");
       alt.style.setProperty("float", "none", "important");
       alt.style.setProperty("clear", "both", "important");
+    }
+
+    var altWrap = qs("#mc-steve-silver-altviews-wrap, .mc-steve-silver-altviews-wrap", mediaTd);
+    if (altWrap && altWrap.style) {
+      altWrap.style.setProperty(
+        "justify-content",
+        isSteveSilver && isDesktop ? "flex-start" : "center",
+        "important"
+      );
+      altWrap.style.setProperty(
+        "margin",
+        isSteveSilver && isDesktop ? "10px 0 0 0" : "10px auto 0",
+        "important"
+      );
     }
   }
 

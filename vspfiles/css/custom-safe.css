@@ -17902,13 +17902,15 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   }
 
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media {
-    display: table-cell !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
     width: 700px !important;
     min-width: 700px !important;
     max-width: 700px !important;
     padding: 0 28px 0 0 !important;
     vertical-align: top !important;
-    text-align: right !important;
+    text-align: left !important;
     box-sizing: border-box !important;
   }
 
@@ -17926,27 +17928,52 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
+    order: 1 !important;
     display: block !important;
     width: 650px !important;
     max-width: 650px !important;
     height: auto !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    align-self: flex-start !important;
   }
 
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews {
+    order: 2 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    align-self: flex-start !important;
     width: 650px !important;
     max-width: 650px !important;
-    margin: 12px 0 24px auto !important;
+    margin: 12px 0 24px 0 !important;
+    text-align: left !important;
   }
 
-  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media {
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media span[itemprop="description"] {
+    order: 3 !important;
+    display: block !important;
     width: 650px !important;
     max-width: 650px !important;
-    margin: 0 0 0 auto !important;
+    margin: 24px 0 0 0 !important;
+    align-self: flex-start !important;
+    text-align: left !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media .colors_descriptionbox {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
 
@@ -18077,5 +18104,42 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
     align-self: flex-start !important;
     margin-left: 0 !important;
     margin-right: auto !important;
+  }
+}
+
+/* MC_SS_MEDIA_LEFT_ALIGN_20260619 — Steve Silver: hero, alt thumbs, description stack left in media column (desktop). */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #altviews,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) span#altviews,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) .altviews,
+  html body.mc-steve-silver-altview-pdp #mc-steve-silver-altviews-wrap,
+  html body.mc-steve-silver-altview-pdp .mc-steve-silver-altviews-wrap {
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-align: left !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #product_photo_td,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media {
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description--media {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-align: left !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+  html body.mc-steve-silver-altview-pdp form .colors_descriptionbox {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: min(650px, 100%) !important;
   }
 }

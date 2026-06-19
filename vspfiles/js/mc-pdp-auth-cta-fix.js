@@ -6736,18 +6736,19 @@
       }
     }
 
+    var isDesktop = g.matchMedia && g.matchMedia("(min-width: 992px)").matches;
     wrap.style.setProperty("display", "flex", "important");
-    wrap.style.setProperty("justify-content", "center", "important");
+    wrap.style.setProperty("justify-content", isDesktop ? "flex-start" : "center", "important");
     wrap.style.setProperty("width", "100%", "important");
     wrap.style.setProperty("max-width", "600px", "important");
-    wrap.style.setProperty("margin", "10px auto 0", "important");
+    wrap.style.setProperty("margin", isDesktop ? "10px 0 0 0" : "10px auto 0", "important");
     wrap.style.setProperty("padding", "0", "important");
     wrap.style.setProperty("clear", "both", "important");
 
     alt.style.setProperty("display", "flex", "important");
-    alt.style.setProperty("justify-content", "center", "important");
+    alt.style.setProperty("justify-content", isDesktop ? "flex-start" : "center", "important");
     alt.style.setProperty("gap", "8px", "important");
-    alt.style.setProperty("margin", "0 auto", "important");
+    alt.style.setProperty("margin", isDesktop ? "0" : "0 auto", "important");
     alt.style.setProperty("padding", "0", "important");
     alt.style.setProperty("float", "none", "important");
     alt.style.setProperty("position", "static", "important");
