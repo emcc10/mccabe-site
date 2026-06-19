@@ -34,6 +34,7 @@ jobs:
           for f in \
             SS-BC900DR-1.jpg SS-SIG900DR-1.jpg \
             SS-BC900MR-1.jpg SS-BC950MRB-1.jpg SS-CAS900M-1.jpg SS-RV900M-1.jpg \
+            SS-BC900KFB-1.jpg SS-BC900QFB-1.jpg SS-CAS900KFB-1.jpg SS-RV900KFB-1.jpg \
             SS-BC900MR-1T.jpg SS-CAS900M-1T.jpg; do
             if [ ! -f "vspfiles/photos/$f" ]; then
               echo "skip $f (not in repo)"

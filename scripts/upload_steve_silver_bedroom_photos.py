@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Upload Steve Silver bedroom PLP/PDP photos to Volusion SFTP.
 
-Ensures SS-* chest, nightstand, dresser, mirror, and HP900 images reach
+Ensures SS-* chest, nightstand, dresser, mirror, bed, and HP900 images reach
 /v/vspfiles/photos/ even when the generic changed-files deploy misses files.
 """
 from __future__ import annotations

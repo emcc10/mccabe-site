@@ -12,6 +12,7 @@ import csv
 import io
 import json
 import re
+import shutil
 import sys
 import urllib.error
 import urllib.request
@@ -21,6 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "catalog" / "steve-silver-beds"
 IMAGE_DIR = OUT_DIR / "images"
+VOLUSION_PHOTOS = ROOT / "vspfiles" / "photos"
 CSV_PATH = OUT_DIR / "steve_silver_beds.csv"
 UA = {"User-Agent": "Mozilla/5.0 (McCabe Steve Silver bed catalog)"}
 MIN_BYTES = 15_000
@@ -506,7 +508,19 @@ def process_product(config: dict[str, str], force: bool) -> dict[str, str]:
     row["image_thumbnail"] = str(thumb_path.relative_to(ROOT)).replace("\\", "/")
     print(f"  wrote {main_path.name} ({main_path.stat().st_size} bytes)")
     print(f"  wrote {thumb_path.name} ({thumb_path.stat().st_size} bytes)")
+    sync_to_volusion(code)
     return row
+
+
+def sync_to_volusion(code: str) -> None:
+    """Copy catalog bed images into vspfiles/photos for Volusion PLP/PDP."""
+    VOLUSION_PHOTOS.mkdir(parents=True, exist_ok=True)
+    for suffix in ("-1.jpg", "-1T.jpg"):
+        src = IMAGE_DIR / f"{code}{suffix}"
+        if src.is_file():
+            dest = VOLUSION_PHOTOS / src.name
+            shutil.copy2(src, dest)
+            print(f"  sync {dest.relative_to(ROOT)}")
 
 
 def write_csv(rows: list[dict[str, str]]) -> None:
@@ -569,11 +583,26 @@ def write_xlsx(rows: list[dict[str, str]]) -> None:
     print(f"Wrote {xlsx_path.relative_to(ROOT)}")
 
 
+def sync_all_to_volusion() -> int:
+    count = 0
+    for path in sorted(IMAGE_DIR.glob("SS-*FB*-*.jpg")):
+        dest = VOLUSION_PHOTOS / path.name
+        shutil.copy2(path, dest)
+        count += 1
+    return count
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--force", action="store_true", help="Re-download images")
+    parser.add_argument("--sync-only", action="store_true", help="Copy catalog images to vspfiles/photos only")
     parser.add_argument("--code", action="append", help="Only these Volusion codes")
     args = parser.parse_args()
+
+    if args.sync_only:
+        n = sync_all_to_volusion()
+        print(f"Synced {n} bed photo(s) to {VOLUSION_PHOTOS.relative_to(ROOT)}/")
+        return 0 if n else 1
 
     products = BED_PRODUCTS
     if args.code:
@@ -590,6 +619,8 @@ def main() -> int:
 
     write_csv(rows)
     write_xlsx(rows)
+    synced = sync_all_to_volusion()
+    print(f"\nSynced {synced} bed photo(s) to {VOLUSION_PHOTOS.relative_to(ROOT)}/")
     print(f"\nWrote {CSV_PATH.relative_to(ROOT)} ({len(rows)} rows)")
     print(f"Images in {IMAGE_DIR.relative_to(ROOT)}/")
     print(f"Done: {len(rows)} ok, {fail} failed")
