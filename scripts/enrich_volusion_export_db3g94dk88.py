@@ -34,6 +34,65 @@ NAME_OVERRIDES: dict[str, str] = {
     "SS-KE800CG": "Marlow Manual Swivel Glider Recliner",
 }
 
+# Steve Silver internal SKU prefix → collection name (HY500PT → Hyland, DAR500BPT → Darcy, …).
+SKU_COLLECTION: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"^DAR"), "Darcy"),
+    (re.compile(r"^HY"), "Hyland"),
+    (re.compile(r"^JA"), "Joanna"),
+    (re.compile(r"^CAN"), "Canyon"),
+    (re.compile(r"^GRA"), "Gracie"),
+    (re.compile(r"^BUF"), "Burlington"),
+    (re.compile(r"^CV"), "Canova"),
+    (re.compile(r"^GRY"), "Grayson"),
+    (re.compile(r"^RAM"), "Ramona"),
+    (re.compile(r"^MOL"), "Molly"),
+    (re.compile(r"^KAR"), "Karina"),
+    (re.compile(r"^FIT"), "Fitzgerald"),
+    (re.compile(r"^FOR"), "Fortuna"),
+    (re.compile(r"^GAR"), "Garcia"),
+    (re.compile(r"^LAV"), "Lavon"),
+    (re.compile(r"^LUN"), "Luna"),
+    (re.compile(r"^GAT"), "Gatlin"),
+    (re.compile(r"^CON"), "Conroe"),
+    (re.compile(r"^DEN"), "Denver"),
+    (re.compile(r"^DAN"), "Daniel"),
+    (re.compile(r"^ZEN"), "Zenith"),
+    (re.compile(r"^ALX"), "Alexandria"),
+    (re.compile(r"^OLS"), "Olsen"),
+    (re.compile(r"^KEI"), "Keily"),
+    (re.compile(r"^KE8"), "Keily"),
+    (re.compile(r"^NOA"), "Noah"),
+    (re.compile(r"^SIG"), "Signature"),
+    (re.compile(r"^CAS"), "Cassie"),
+    (re.compile(r"^MON"), "Montana"),
+    (re.compile(r"^RV"), "Riverdale"),
+    (re.compile(r"^HP"), "Highland Park"),
+    (re.compile(r"^BC"), "Bear Creek"),
+    (re.compile(r"^BAR"), "Barron"),
+    (re.compile(r"^COZ"), "Cozy"),
+    (re.compile(r"^MAR"), "Marlow"),
+]
+
+# Generic Volusion labels that omit the collection name.
+GENERIC_NAME_PREFIXES = (
+    "Casual Occasional",
+    "Mixed Media Occasional",
+    "Kids Dining Set",
+)
+
+# Canonical productname when no same-family sibling already has the right collection.
+NAME_TEMPLATES: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"PTB?$"), "{collection} Counter Dining Set Counter Height w/ Chairs"),
+    (re.compile(r"SVB?$"), "{collection} Server"),
+    (re.compile(r"^CAN100(?:KC|NC)$"), "{collection} Cocktail Table w/ Casters"),
+    (re.compile(r"^CAN100(?:KE|NE)$"), "{collection} End Table"),
+    (re.compile(r"^GRA100(?:WC|NC)$"), "{collection} Round Cocktail Table"),
+    (re.compile(r"^GRA100(?:WE|NE)$"), "{collection} Round End Table"),
+    (re.compile(r"^JA150C$"), "{collection} Occasional Coffee Table w/ Casters"),
+    (re.compile(r"^JA150E$"), "{collection} Occasional End Table"),
+    (re.compile(r"^JA300T$"), "{collection} Kids Dining Set Standard w/ Chairs"),
+]
+
 PLACEHOLDER_CODES = {
     "Adeline-Patio-Set",
     "Burlington-Dining-Set",
@@ -577,6 +636,201 @@ def meta_description(name: str, vendor: str) -> str:
     return f"Shop {name} at McCabe's Theater & Living. {base[:140].rstrip()}."[:255]
 
 
+def internal_sku(code: str) -> str | None:
+    m = re.match(r"SS-(.+)$", code, re.I)
+    return m.group(1).upper() if m else None
+
+
+def collection_from_internal_sku(sku: str) -> str | None:
+    for pat, name in SKU_COLLECTION:
+        if pat.match(sku):
+            return name
+    return None
+
+
+def sku_family(sku: str) -> str:
+    m = re.match(r"^([A-Z]+\d+)", sku)
+    return m.group(1) if m else sku
+
+
+def name_has_collection(name: str, collection: str) -> bool:
+    return bool(re.search(rf"\b{re.escape(collection)}\b", name, re.I))
+
+
+def is_generic_productname(name: str) -> bool:
+    return any(name.startswith(prefix) for prefix in GENERIC_NAME_PREFIXES)
+
+
+def template_productname(sku: str, collection: str) -> str | None:
+    for pat, tmpl in NAME_TEMPLATES:
+        if pat.search(sku):
+            return tmpl.format(collection=collection)
+    return None
+
+
+def sku_name_group(sku: str) -> str:
+    """Group SKUs that should share the same productname shape (PT vs SV vs CAN cocktail, …)."""
+    if re.search(r"SVB?$", sku):
+        return "server"
+    if re.search(r"PTB?$", sku):
+        return "counter-set"
+    if re.search(r"^CAN100(?:KC|NC)$", sku):
+        return "canyon-cocktail"
+    if re.search(r"^CAN100(?:KE|NE)$", sku):
+        return "canyon-end"
+    if re.search(r"^GRA100(?:WC|NC)$", sku):
+        return "gracie-cocktail"
+    if re.search(r"^GRA100(?:WE|NE)$", sku):
+        return "gracie-end"
+    if sku in {"JA150C"}:
+        return "joanna-coffee"
+    if sku in {"JA150E"}:
+        return "joanna-end"
+    if sku == "JA300T":
+        return "joanna-kids-set"
+    return sku
+
+
+def sibling_productname(sku: str, collection: str, family_rows: list[dict[str, str]]) -> str | None:
+    group = sku_name_group(sku)
+    for row in family_rows:
+        other = internal_sku(row["productcode"])
+        if not other or other == sku:
+            continue
+        if sku_name_group(other) != group:
+            continue
+        other_name = row.get("productname", "")
+        if name_has_collection(other_name, collection):
+            return other_name
+    return None
+
+
+def replace_collection_words(text: str, wrong: list[str], right: str) -> str:
+    if not text:
+        return text
+    out = text
+    for name in wrong:
+        out = re.sub(rf"\b{re.escape(name)}\b", right, out, flags=re.I)
+    return out
+
+
+def wrong_collections_for_sku(sku: str, expected: str) -> list[str]:
+    wrong = {name for _, name in SKU_COLLECTION if name.lower() != expected.lower()}
+    wrong.update({"Casual Occasional", "Mixed Media Occasional", "Kids Dining Set"})
+    return sorted(wrong, key=len, reverse=True)
+
+
+def refresh_name_derived_fields(row: dict[str, str], name: str) -> None:
+    row["productname"] = name
+    base = name.split(",")[0]
+    row["productkeywords"] = f"{base}; Steve Silver"
+    row["metatag_keywords"] = row["productkeywords"]
+    row["metatag_title"] = meta_title(name)
+    row["metatag_description"] = meta_description(name, row.get("productiondescription", ""))
+
+
+def sync_collection_fields(row: dict[str, str], family_rows: list[dict[str, str]]) -> None:
+    code = row["productcode"]
+    if code in NAME_OVERRIDES or code in PRODUCTS:
+        return
+    sku = internal_sku(code)
+    if not sku:
+        return
+    collection = collection_from_internal_sku(sku)
+    if not collection:
+        return
+
+    name = row.get("productname", "")
+    needs_name = not name_has_collection(name, collection) or is_generic_productname(name)
+    if needs_name:
+        fixed = sibling_productname(sku, collection, family_rows) or template_productname(sku, collection)
+        if fixed:
+            refresh_name_derived_fields(row, fixed)
+            name = fixed
+
+    wrong = [w for w in wrong_collections_for_sku(sku, collection) if w.lower() != collection.lower()]
+    for field in ("productdescription", "productiondescription"):
+        row[field] = replace_collection_words(row.get(field, ""), wrong, collection)
+
+    if row.get("techspecs", "").strip():
+        row["techspecs"] = replace_collection_words(row["techspecs"], wrong, collection)
+
+
+PLACEHOLDER_PRICES = {"100"}
+
+
+def load_preserved_prices(path: Path) -> dict[str, tuple[str, str]]:
+    if not path.is_file():
+        return {}
+    with path.open(newline="", encoding="utf-8-sig") as fh:
+        reader = csv.DictReader(fh)
+        out: dict[str, tuple[str, str]] = {}
+        for row in reader:
+            code = row.get("productcode", "").strip()
+            if not code:
+                continue
+            out[code] = (row.get("productprice", ""), row.get("saleprice", ""))
+        return out
+
+
+def is_placeholder_price(price: str) -> bool:
+    return str(price).strip() in PLACEHOLDER_PRICES
+
+
+def sync_placeholder_prices(row: dict[str, str], family_rows: list[dict[str, str]]) -> None:
+    """Copy real prices onto finish-variant rows Volusion exported as 100 placeholders."""
+    if not is_placeholder_price(row.get("productprice", "")):
+        return
+    sku = internal_sku(row["productcode"])
+    if not sku:
+        return
+    group = sku_name_group(sku)
+    for other in family_rows:
+        other_code = other["productcode"]
+        if other_code == row["productcode"]:
+            continue
+        other_sku = internal_sku(other_code)
+        if not other_sku or sku_name_group(other_sku) != group:
+            continue
+        other_price = other.get("productprice", "").strip()
+        if not other_price or is_placeholder_price(other_price):
+            continue
+        try:
+            if float(other_price.replace(",", "")) <= 150:
+                continue
+        except ValueError:
+            continue
+        row["productprice"] = other_price
+        other_sale = other.get("saleprice", "").strip()
+        row["saleprice"] = other_sale if other_sale else other_price
+        return
+
+
+def apply_preserved_prices(rows: list[dict[str, str]], preserved: dict[str, tuple[str, str]]) -> int:
+    applied = 0
+    for row in rows:
+        code = row["productcode"]
+        if code not in preserved:
+            continue
+        productprice, saleprice = preserved[code]
+        if productprice.strip():
+            row["productprice"] = productprice
+            applied += 1
+        if saleprice.strip():
+            row["saleprice"] = saleprice
+    return applied
+
+
+def build_sku_family_index(rows: list[dict[str, str]]) -> dict[str, list[dict[str, str]]]:
+    index: dict[str, list[dict[str, str]]] = {}
+    for row in rows:
+        sku = internal_sku(row["productcode"])
+        if not sku:
+            continue
+        index.setdefault(sku_family(sku), []).append(row)
+    return index
+
+
 def enrich_row(row: dict[str, str], force_images: bool) -> dict[str, str]:
     code = row["productcode"]
     name = row.get("productname", "")
@@ -652,7 +906,23 @@ def main() -> int:
     parser.add_argument("--src", type=Path, default=DEFAULT_SRC)
     parser.add_argument("--dest", type=Path, default=DEFAULT_DEST)
     parser.add_argument("--force-images", action="store_true")
+    parser.add_argument(
+        "--preserve-prices-from",
+        type=Path,
+        default=None,
+        help="Keep productprice/saleprice from this CSV (defaults to --dest when it already exists)",
+    )
+    parser.add_argument(
+        "--no-preserve-prices",
+        action="store_true",
+        help="Take prices only from --src (overwrites any manual price edits in --dest)",
+    )
     args = parser.parse_args()
+
+    preserved_prices: dict[str, tuple[str, str]] = {}
+    if not args.no_preserve_prices:
+        preserve_path = args.preserve_prices_from or args.dest
+        preserved_prices = load_preserved_prices(preserve_path)
 
     with args.src.open(newline="", encoding="cp1252") as fh:
         reader = csv.reader(fh)
@@ -668,6 +938,15 @@ def main() -> int:
             row["productiondescription"] = row.pop("", "")
         enrich_row(row, args.force_images)
 
+    family_index = build_sku_family_index(rows)
+    for row in rows:
+        sku = internal_sku(row["productcode"])
+        if sku:
+            sync_collection_fields(row, family_index.get(sku_family(sku), []))
+            sync_placeholder_prices(row, family_index.get(sku_family(sku), []))
+
+    price_applied = apply_preserved_prices(rows, preserved_prices)
+
     args.dest.parent.mkdir(parents=True, exist_ok=True)
     with args.dest.open("w", newline="", encoding="utf-8-sig") as fh:
         writer = csv.DictWriter(fh, fieldnames=header, extrasaction="ignore")
@@ -678,6 +957,8 @@ def main() -> int:
     weights = sum(1 for r in rows if r.get("productweight", "").strip())
     print(f"Wrote {len(rows)} rows -> {args.dest}")
     print(f"Rows with techspecs: {filled}; rows with weight: {weights}")
+    if price_applied:
+        print(f"Preserved manual prices for {price_applied} row(s)")
     return 0
 
 
