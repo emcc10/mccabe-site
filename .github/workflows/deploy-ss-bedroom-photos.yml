@@ -4,6 +4,12 @@ name: Deploy Steve Silver photos (fast)
 # are correct in git but the live CDN still shows old lifestyle thumbnails.
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "vspfiles/photos/SS-*.jpg"
+      - "scripts/upload_steve_silver_bedroom_photos.py"
+      - ".github/workflows/deploy-ss-bedroom-photos.yml"
 
 concurrency:
   group: deploy-ss-bedroom-photos
