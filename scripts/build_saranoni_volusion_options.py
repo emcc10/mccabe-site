@@ -72,15 +72,36 @@ HANDLE_TO_CODE: dict[str, str] = {
     "faux-fur-throw-blankets": "SAR-FX-FUR",
     "faux-fur-xl-throw-blankets": "SAR-FX-FUR-XL-LG",
     "faux-fur-toddler-blankets": "SAR-FX-FUR-TOD",
+    "plush-faux-fur-xl-throw-blankets": "SAR-PLSH-FX-FUR-XL-LG",
     "faux-fur-twin-blankets": "SAR-FX-FUR-TWIN",
     "faux-fur-full-queen-blankets": "SAR-FX-FUR-FULL-QUEEN",
     "faux-fur-king-blankets": "SAR-FX-FUR-KING",
     "bamboo-rayon-muslin-4-layer-quilt": "SAR-BMBU-RYN-MSLN-4-LAYER",
     "bamboo-rayon-muslin-queen-king-4-layer-quilt": "SAR-BMBU-RYN-MSLN-QUEEN-KING",
     "cotton-muslin-4-layer-quilt": "SAR-COTTON-MSLN-4-LAYER",
-    "bamboni-twin-blankets": "SAR-BMB-TWIN",
-    "bamboni-twin-blanket": "SAR-BAMBONI-TWIN-BLANKETS",
-    "grand-faux-fur-robe": "SAR-GRAND-FX-FUR-ROBES",
+    "bamboni-twin-blankets": "SAR-BAMBONI-TWIN-BLANKETS",
+    "bamboni-twin-blanket": "SAR-BMB-TWIN",
+    "baby-bamboni-lite-sets": "SAR-BABY-BMB-LITE-SETS",
+    "bamboo-rayon-muslin-pillowcase-set": "SAR-BMBU-RYN-MSLN-PILLOWCA",
+    "dream-toddler": "SAR-DREAM-TOD",
+    "faux-fur-full-queen-blanket": "SAR-FX-FUR-FULL-QUEEN",
+    "faux-fur-king-blanket": "SAR-FX-FUR-KING",
+    "faux-fur-pillowcase": "SAR-FX-FUR-PILLOWCA",
+    "faux-fur-twin-blankets": "SAR-FX-FUR-TWIN",
+    "grand-faux-fur-2-pack-euro-pillow-covers": "SAR-GRAND-FX-FUR-2-PACK-EURO",
+    "minky-stretch-luxe-robes": "SAR-MNKY-STR-LUXE-ROBES",
+    "pleated-dust-ruffle": "SAR-PLEATED-DUST-RUFFLE",
+    "satin-back-toddler-blanket": "SAR-SATIN-BACK-TOD",
+    "satin-border-toddler-blanket": "SAR-SATIN-BORDER-TOD",
+    "stretchy-swaddle": "SAR-STRETCHY-SWADDLES-HATS",
+    "superman-double-layer-bamboni-copy": "SAR-SUPERMAN-DBL-LAYER-BMB",
+    "superman-minky-lush": "SAR-SUPERMAN-MNKY-LUSH",
+    "the-very-hungry-caterpillar-minky-stretch-luxe-blankets": "SAR-VERY-HGRY-CAT-MNKY-STR",
+    "waffle-knit-robes": "SAR-WFL-KNT-ROBES",
+    "waffle-knit-toddler-blankets": "SAR-WFL-KNT-TOD",
+    "wizarding-world-charm-minky-lush": "SAR-WIZARDIN-WORLD-CHARM",
+    "wonder-woman-double-layer-bamboni": "SAR-WONDER-WOMAN-DBL-LAYER",
+    "wonder-woman-minky-lush": "SAR-WONDER-WOMAN-MNKY-LUSH",
     # Licensed / collaboration
     "harry-potter-muslin-nursery": "SAR-HP-HP-MSLN-NRS",
     "harry-potter-icons-minky-lush": "SAR-HP-HP-ICONS-MNKY-LUSH",
@@ -99,6 +120,16 @@ HANDLE_TO_CODE: dict[str, str] = {
 }
 
 CODE_TO_HANDLE = {v: k for k, v in HANDLE_TO_CODE.items()}
+CODE_TO_HANDLE.update(
+    {
+        "SAR-BABY-BAMBONI-LITE-FOR-ABC": "baby-bamboni-lite-sets",
+        "SAR-BAMBONI-HAT": "bamboni-hat",
+        "SAR-BAMBONI-SETS": "bamboni-sets",
+        "SAR-BAMBONI-SNUGGLER": "bamboni-snuggler",
+        "SAR-BAMBONI-SOCKS": "bamboni-socks",
+        "SAR-BAMBONI-TODDLER-BLANKET": "bamboni-toddler-blanket",
+    }
+)
 
 # Manual overrides when user spreadsheet differs from live Saranoni pricediffs.
 PRICE_DIFF_OVERRIDES: dict[str, dict[str, int]] = {
