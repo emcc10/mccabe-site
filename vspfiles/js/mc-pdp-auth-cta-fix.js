@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260619layout3
-  var VERSION = "20260619layout3";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero1
+  var VERSION = "20260620sshero1";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -73,6 +73,7 @@
   var configuredColorActiveEntry = null;
   var configuredColorActiveSrc = "";
   var configuredColorDefaultSrc = "";
+  var configuredColorLastAppliedOptionId = "";
   var configuredColorEnforceUntil = 0;
   var configuredColorEnforceTimer = null;
   var PDP_HERO_ANTIFLICKER_SEL =
@@ -3440,10 +3441,43 @@
   // Volusion's native option-change logic can asynchronously rewrite (often blank)
   // #product_photo a few hundred ms after the change event. Re-assert our chosen
   // image for a short window so the hero never blanks or reverts.
+  function lockConfiguredColorActiveEntry(entry) {
+    if (!entry) return;
+    configuredColorActiveEntry = entry;
+    try {
+      global.__MC_CONFIGURED_COLOR_ACTIVE_OPTION_ID__ = String(entry.optionId || "");
+    } catch (eLockGlobal) {}
+    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    if (wrap) wrap.setAttribute("data-mc-active-option-id", entry.optionId);
+  }
+
+  function restoreConfiguredColorActiveEntry(ctx) {
+    if (configuredColorActiveEntry || !ctx || !ctx.entries) return;
+    var lockedId = "";
+    try {
+      lockedId = String(global.__MC_CONFIGURED_COLOR_ACTIVE_OPTION_ID__ || "");
+    } catch (eLockedGlobal) {}
+    if (!lockedId) {
+      var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+      lockedId = wrap ? wrap.getAttribute("data-mc-active-option-id") || "" : "";
+    }
+    if (!lockedId) return;
+    var i;
+    for (i = 0; i < ctx.entries.length; i++) {
+      if (ctx.entries[i].optionId === String(lockedId)) {
+        configuredColorActiveEntry = ctx.entries[i];
+        return;
+      }
+    }
+  }
+
   function enforceConfiguredColorPhoto() {
     if (configuredColorEnforceTimer) return;
     configuredColorEnforceTimer = global.setInterval(function () {
-      if (Date.now() > configuredColorEnforceUntil || !configuredColorActiveSrc) {
+      var enforceActive =
+        !!configuredColorActiveEntry ||
+        Date.now() <= configuredColorEnforceUntil;
+      if (!enforceActive || !configuredColorActiveSrc) {
         global.clearInterval(configuredColorEnforceTimer);
         configuredColorEnforceTimer = null;
         return;
@@ -3464,15 +3498,26 @@
     var mainImg = global.document.getElementById("product_photo");
     if (!mainImg || !fileName) return;
     var previousSrc = mainImg.getAttribute("src") || "";
-    if (previousSrc && previousSrc.indexOf("/manufacturers/") === -1) configuredColorDefaultSrc = previousSrc;
+    if (
+      !configuredColorDefaultSrc &&
+      previousSrc &&
+      previousSrc.indexOf("/manufacturers/") === -1 &&
+      !configuredColorActiveEntry
+    ) {
+      configuredColorDefaultSrc = previousSrc;
+    }
     var token = String(Date.now()) + ":" + Math.random();
     global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ = token;
     loadConfiguredColorImage(buildConfiguredColorImageCandidates(fileName), function (resolvedSrc) {
       if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
-      var finalSrc = resolvedSrc || previousSrc || configuredColorDefaultSrc;
+      var finalSrc = resolvedSrc;
+      if (!finalSrc && configuredColorActiveEntry) {
+        finalSrc = previousSrc;
+      }
+      if (!finalSrc) finalSrc = previousSrc || configuredColorDefaultSrc;
       if (!finalSrc) return;
       configuredColorActiveSrc = finalSrc;
-      configuredColorEnforceUntil = Date.now() + 2500;
+      configuredColorEnforceUntil = Date.now() + (configuredColorActiveEntry ? 8000 : 2500);
       setConfiguredColorPhotoSrc(finalSrc, label);
       enforceConfiguredColorPhoto();
     });
@@ -4142,7 +4187,13 @@
       btn.setAttribute("aria-pressed", active ? "true" : "false");
     });
     if (applyPhoto && selected) {
-      applyConfiguredColorMainPhoto(selected.mainImage, selected.label);
+      if (
+        selected.optionId !== configuredColorLastAppliedOptionId ||
+        !configuredColorActiveSrc
+      ) {
+        applyConfiguredColorMainPhoto(selected.mainImage, selected.label);
+        configuredColorLastAppliedOptionId = selected.optionId;
+      }
     }
     syncSaranoniAltviewActiveState();
   }
@@ -4153,6 +4204,8 @@
     select.addEventListener("change", function () {
       var ctx = findConfiguredColorSwatchContext();
       if (!ctx || ctx.select !== select) return;
+      var entry = findConfiguredColorSelectedEntry(ctx);
+      if (entry) lockConfiguredColorActiveEntry(entry);
       syncConfiguredColorSwatchUi(ctx, true);
     });
   }
@@ -4168,7 +4221,7 @@
       var opt = findConfiguredColorOption(ctx.select, entry);
       if (!opt) return false;
       // Lock this selection first so subsequent re-renders / Volusion resets keep it.
-      configuredColorActiveEntry = entry;
+      lockConfiguredColorActiveEntry(entry);
       syncConfiguredColorSelect(ctx.select, opt);
       syncConfiguredColorSwatchUi(ctx, true);
       if (isSaranoniPdpPage()) syncSaranoniColorPicker(ctx);
@@ -4196,22 +4249,31 @@
     }
     renderConfiguredColorSwatches(ctx);
     bindConfiguredColorSwatchSelect(ctx.select);
-    if (isSaranoniPdpPage() && !configuredColorActiveEntry) {
+    restoreConfiguredColorActiveEntry(ctx);
+    if (
+      isSaranoniPdpPage() &&
+      !configuredColorActiveEntry &&
+      !global.__MC_CONFIGURED_COLOR_INIT__
+    ) {
       var defaultSarEntry = findConfiguredColorSelectedEntry(ctx) || ctx.entries[0] || null;
       var defaultSarOpt = defaultSarEntry ? findConfiguredColorOption(ctx.select, defaultSarEntry) : null;
       if (defaultSarEntry && defaultSarOpt) {
-        configuredColorActiveEntry = defaultSarEntry;
+        lockConfiguredColorActiveEntry(defaultSarEntry);
         syncConfiguredColorSelect(ctx.select, defaultSarOpt);
       }
     }
-    if (!configuredColorActiveEntry) {
+    if (!configuredColorDefaultSrc && !configuredColorActiveEntry) {
       var hero = global.document.getElementById("product_photo");
       var heroSrc = hero ? hero.getAttribute("src") || "" : "";
       if (heroSrc && heroSrc.indexOf("/manufacturers/") === -1) configuredColorDefaultSrc = heroSrc;
     }
-    // Saranoni color PDPs should open on the default selected option image;
-    // other configured products keep Volusion's initial hero until selection.
-    syncConfiguredColorSwatchUi(ctx, isSaranoniPdpPage() || !!configuredColorActiveEntry);
+    // Apply the default hero only once on initial load. MutationObserver-driven
+    // re-runs must refresh swatch UI without rewriting #product_photo.
+    var applyInitialPhoto =
+      !global.__MC_CONFIGURED_COLOR_INIT__ &&
+      (isSaranoniPdpPage() || !!configuredColorActiveEntry);
+    syncConfiguredColorSwatchUi(ctx, applyInitialPhoto);
+    if (!global.__MC_CONFIGURED_COLOR_INIT__) global.__MC_CONFIGURED_COLOR_INIT__ = true;
     if (isSaranoniPdpPage()) {
       hideSaranoniHeroAltviews();
       syncSaranoniColorPicker(ctx);
@@ -5288,6 +5350,8 @@
         if (!/^SAR/i.test(parseProductCodeFromSelectName(sel.name))) return;
         var ctx = findConfiguredColorSwatchContext();
         if (!ctx || ctx.select !== sel) return;
+        var entry = findConfiguredColorSelectedEntry(ctx);
+        if (entry) lockConfiguredColorActiveEntry(entry);
         syncConfiguredColorSwatchUi(ctx, true);
         syncSaranoniColorPicker(ctx);
         syncSaranoniAltviewActiveState();

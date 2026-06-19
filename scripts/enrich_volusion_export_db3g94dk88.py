@@ -29,6 +29,7 @@ DEFAULT_SRC = Path(r"c:\Users\erink\Downloads\SAVED_EXPORT_DB3G94DK88.csv")
 DEFAULT_DEST = ROOT / "catalog" / "steve-silver-active" / "SAVED_EXPORT_DB3G94DK88_enriched.csv"
 DEFAULT_PRICE_OVERRIDES = ROOT / "catalog" / "steve-silver-active" / "price_overrides.csv"
 DEFAULT_VENDOR_CACHE = ROOT / "catalog" / "steve-silver-active" / "vendor_copy_cache.json"
+DEFAULT_MCCABE_CATALOG = ROOT / "catalog" / "steve-silver-active" / "mccabe_live_catalog.csv"
 MIN_SERVER_PRICE = 210
 UA = {"User-Agent": "Mozilla/5.0 (McCabe Steve Silver bed catalog)"}
 THUMB_MAX = (900, 700)
@@ -46,15 +47,31 @@ NAME_OVERRIDES: dict[str, str] = {
     "SS-GAT70696T": "Stone Dual Power Reclining Console Loveseat",
     "SS-GAT70696T-2": "Stone Dual Power Reclining Sofa",
     "SS-KE800CG": "Marlow Manual Swivel Glider Recliner",
+    "SS-HY500SV": "Hyland Server",
+    "SS-HY500SVB": "Hyland Server, Brown",
+    "SS-JA500SV": "Joanna Two Tone Server",
+    "SS-BUR500NSV": "Magnolia Cathedral Doored Server, Black",
+    "SS-AY200B": "Adrian Sideboard",
+    "SS-GA500SV": "Garland Sideboard",
+    "SS-COL500WSV": "Colvin Server, Ivory",
 }
+
+# Volusion codes that share Steve Silver SKUs with a different collection on mccabe.com.
+# Drop from enriched export (not sold on mccabestheaterandliving.com).
+EXCLUDE_PRODUCT_CODE_PREFIXES = ("SS-ABR",)
+
+# Steve Silver search returns Aubrey PDPs for these Auburn Volusion codes.
+VENDOR_COPY_SKIP_CODES = frozenset({"SS-AUB100KE", "SS-AUB100NE"})
 
 # Steve Silver internal SKU prefix → collection name (HY500PT → Hyland, DAR500BPT → Darcy, …).
 SKU_COLLECTION: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"^HEL"), "Helen"),
     (re.compile(r"^COL"), "Colvin"),
     (re.compile(r"^CNT"), "Canton"),
-    (re.compile(r"^ABR"), "Aubrey"),
     (re.compile(r"^AUB"), "Auburn"),
+    (re.compile(r"^MM"), "Magnolia"),
+    (re.compile(r"^BUR520"), "Napa"),
+    (re.compile(r"^BUR500NSV$"), "Magnolia"),
     (re.compile(r"^BUR"), "Burlington"),
     (re.compile(r"^GAB"), "Gabby"),
     (re.compile(r"^EVA500"), "Evan"),
@@ -99,9 +116,12 @@ SKU_COLLECTION: list[tuple[re.Pattern[str], str]] = [
 PREFIX_WRONG_NAMES: list[tuple[re.Pattern[str], list[str]]] = [
     (re.compile(r"^GAB"), ["Garland"]),
     (re.compile(r"^HEL"), ["Page"]),
-    (re.compile(r"^ABR"), ["Auburn"]),
+    (re.compile(r"^HY"), ["Joanna"]),
+    (re.compile(r"^JA"), ["Hyland"]),
     (re.compile(r"^CNT"), ["Colvin"]),
     (re.compile(r"^AUB"), ["Aubrey"]),
+    (re.compile(r"^BUR500NSV$"), ["Burlington", "Cathedral Doored"]),
+    (re.compile(r"^COL"), ["Evan"]),
 ]
 
 # Generic Volusion labels that omit the collection name.
@@ -771,7 +791,7 @@ def refresh_name_derived_fields(row: dict[str, str], name: str) -> None:
 
 def sync_collection_fields(row: dict[str, str], family_rows: list[dict[str, str]]) -> None:
     code = row["productcode"]
-    if code in NAME_OVERRIDES or code in PRODUCTS:
+    if code in PRODUCTS:
         return
     sku = internal_sku(code)
     if not sku:
@@ -781,19 +801,21 @@ def sync_collection_fields(row: dict[str, str], family_rows: list[dict[str, str]
         return
 
     name = row.get("productname", "")
-    needs_name = not name_has_collection(name, collection) or is_generic_productname(name)
-    if needs_name:
-        fixed = sibling_productname(sku, collection, family_rows) or template_productname(sku, collection)
-        if fixed:
-            refresh_name_derived_fields(row, fixed)
-            name = fixed
+    if code not in NAME_OVERRIDES:
+        needs_name = not name_has_collection(name, collection) or is_generic_productname(name)
+        if needs_name:
+            fixed = sibling_productname(sku, collection, family_rows) or template_productname(sku, collection)
+            if fixed:
+                refresh_name_derived_fields(row, fixed)
+                name = fixed
 
     wrong = [w for w in wrong_collections_for_sku(sku, collection) if w.lower() != collection.lower()]
-    name_wrong = [w for w in wrong if name_has_collection(name, w)]
-    if name_wrong:
-        fixed_name = replace_collection_words(name, name_wrong, collection)
-        refresh_name_derived_fields(row, fixed_name)
-        name = fixed_name
+    if code not in NAME_OVERRIDES:
+        name_wrong = [w for w in wrong if name_has_collection(name, w)]
+        if name_wrong:
+            fixed_name = replace_collection_words(name, name_wrong, collection)
+            refresh_name_derived_fields(row, fixed_name)
+            name = fixed_name
 
     for field in ("productdescription", "productiondescription"):
         row[field] = replace_collection_words(row.get(field, ""), wrong, collection)
@@ -882,7 +904,7 @@ def sync_vendor_copy(
     pending: dict[str, list[dict[str, str]]] = {}
     for row in rows:
         code = row["productcode"]
-        if code in PRODUCTS or code in NAME_OVERRIDES:
+        if code in PRODUCTS or code in NAME_OVERRIDES or code in VENDOR_COPY_SKIP_CODES:
             continue
         sku = internal_sku(code)
         if not sku:
@@ -1018,6 +1040,38 @@ def load_preserved_prices(path: Path) -> dict[str, tuple[str, str]]:
                 continue
             out[code] = (row.get("productprice", ""), row.get("saleprice", ""))
         return out
+
+
+def load_mccabe_catalog(path: Path) -> dict[str, dict[str, str]]:
+    if not path.is_file():
+        return {}
+    with path.open(newline="", encoding="utf-8-sig") as fh:
+        return {r["productcode"].strip(): r for r in csv.DictReader(fh) if r.get("productcode", "").strip()}
+
+
+def apply_mccabe_catalog(rows: list[dict[str, str]], catalog: dict[str, dict[str, str]]) -> int:
+    applied = 0
+    for row in rows:
+        cfg = catalog.get(row["productcode"])
+        if not cfg:
+            continue
+        name = cfg.get("productname", "").strip()
+        if name:
+            refresh_name_derived_fields(row, name)
+        price = cfg.get("productprice", "").strip()
+        sale = cfg.get("saleprice", "").strip() or price
+        if price:
+            row["productprice"] = price
+            row["saleprice"] = sale
+        applied += 1
+    return applied
+
+
+def should_exclude_row(row: dict[str, str]) -> bool:
+    code = row.get("productcode", "")
+    if any(code.startswith(prefix) for prefix in EXCLUDE_PRODUCT_CODE_PREFIXES):
+        return True
+    return bool(re.search(r"\bAubrey\b", row.get("productname", ""), re.I))
 
 
 def is_placeholder_price(price: str) -> bool:
@@ -1196,6 +1250,12 @@ def main() -> int:
         action="store_true",
         help="Re-fetch vendor copy even when cached",
     )
+    parser.add_argument(
+        "--mccabe-catalog",
+        type=Path,
+        default=DEFAULT_MCCABE_CATALOG,
+        help="CSV with productcode,productname,productprice,saleprice from live mccabestheaterandliving.com",
+    )
     args = parser.parse_args()
 
     price_overrides = load_price_overrides(args.price_overrides)
@@ -1239,6 +1299,12 @@ def main() -> int:
     rules_fixed = apply_price_rules(rows, skip=set(price_overrides))
     overrides_applied = apply_preserved_prices(rows, price_overrides)
 
+    mccabe_catalog = load_mccabe_catalog(args.mccabe_catalog)
+    mccabe_applied = apply_mccabe_catalog(rows, mccabe_catalog)
+
+    excluded = sum(1 for row in rows if should_exclude_row(row))
+    rows = [row for row in rows if not should_exclude_row(row)]
+
     args.dest.parent.mkdir(parents=True, exist_ok=True)
     with args.dest.open("w", newline="", encoding="utf-8-sig") as fh:
         writer = csv.DictWriter(fh, fieldnames=header, extrasaction="ignore")
@@ -1257,6 +1323,10 @@ def main() -> int:
         print(f"Applied {overrides_applied} price override(s) from {args.price_overrides.name}")
     if vendor_applied:
         print(f"Applied stevesilver.com vendor copy to {vendor_applied} row(s)")
+    if mccabe_applied:
+        print(f"Applied {mccabe_applied} live catalog name/price(s) from {args.mccabe_catalog.name}")
+    if excluded:
+        print(f"Excluded {excluded} Aubrey row(s) from export")
     return 0
 
 

@@ -13,6 +13,11 @@ from pathlib import Path
 
 UA = {"User-Agent": "Mozilla/5.0 (McCabe Steve Silver bed catalog)"}
 
+# Volusion internal SKU -> stevesilver.com PDP when search-by-SKU returns the wrong collection.
+SKU_PAGE_OVERRIDES: dict[str, str] = {
+    "BUR500NSV": "https://stevesilver.com/product/magnolia-cathedral-doored-server-black/",
+}
+
 
 @dataclass
 class VendorCopy:
@@ -180,7 +185,8 @@ def build_production_description(
     return production, bullets_to_techspecs(techspec_bullets)
 
 def fetch_vendor_copy(sku: str) -> VendorCopy | None:
-    url = find_product_url(sku)
+    override = SKU_PAGE_OVERRIDES.get(sku.upper())
+    url = override or find_product_url(sku)
     if not url:
         return None
     html = fetch_text(url)
