@@ -7,16 +7,28 @@ import csv
 import io
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from html import unescape
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from steve_silver_vendor_copy import (
+    VendorCopy,
+    adapt_finish_variant,
+    get_vendor_copy,
+    load_cache,
+    save_cache,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
 DEFAULT_SRC = Path(r"c:\Users\erink\Downloads\SAVED_EXPORT_DB3G94DK88.csv")
 DEFAULT_DEST = ROOT / "catalog" / "steve-silver-active" / "SAVED_EXPORT_DB3G94DK88_enriched.csv"
 DEFAULT_PRICE_OVERRIDES = ROOT / "catalog" / "steve-silver-active" / "price_overrides.csv"
+DEFAULT_VENDOR_CACHE = ROOT / "catalog" / "steve-silver-active" / "vendor_copy_cache.json"
 MIN_SERVER_PRICE = 210
 UA = {"User-Agent": "Mozilla/5.0 (McCabe Steve Silver bed catalog)"}
 THUMB_MAX = (900, 700)
@@ -38,6 +50,14 @@ NAME_OVERRIDES: dict[str, str] = {
 
 # Steve Silver internal SKU prefix → collection name (HY500PT → Hyland, DAR500BPT → Darcy, …).
 SKU_COLLECTION: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"^HEL"), "Helen"),
+    (re.compile(r"^COL"), "Colvin"),
+    (re.compile(r"^CNT"), "Canton"),
+    (re.compile(r"^ABR"), "Aubrey"),
+    (re.compile(r"^AUB"), "Auburn"),
+    (re.compile(r"^BUR"), "Burlington"),
+    (re.compile(r"^GAB"), "Gabby"),
+    (re.compile(r"^EVA500"), "Evan"),
     (re.compile(r"^DAR"), "Darcy"),
     (re.compile(r"^HY"), "Hyland"),
     (re.compile(r"^JA"), "Joanna"),
@@ -75,6 +95,15 @@ SKU_COLLECTION: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"^MAR"), "Marlow"),
 ]
 
+# Volusion export sometimes uses a completely different collection label than the SKU prefix.
+PREFIX_WRONG_NAMES: list[tuple[re.Pattern[str], list[str]]] = [
+    (re.compile(r"^GAB"), ["Garland"]),
+    (re.compile(r"^HEL"), ["Page"]),
+    (re.compile(r"^ABR"), ["Auburn"]),
+    (re.compile(r"^CNT"), ["Colvin"]),
+    (re.compile(r"^AUB"), ["Aubrey"]),
+]
+
 # Generic Volusion labels that omit the collection name.
 GENERIC_NAME_PREFIXES = (
     "Casual Occasional",
@@ -93,6 +122,12 @@ NAME_TEMPLATES: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"^JA150C$"), "{collection} Occasional Coffee Table w/ Casters"),
     (re.compile(r"^JA150E$"), "{collection} Occasional End Table"),
     (re.compile(r"^JA300T$"), "{collection} Kids Dining Set Standard w/ Chairs"),
+    (re.compile(r"^HEL850"), "{collection} Accent Chair"),
+    (re.compile(r"^AUB100KC$"), "{collection} Coffee Table"),
+    (re.compile(r"^AUB100NC$"), "{collection} Coffee Table"),
+    (re.compile(r"^GAB4848T$"), "{collection} Dining Set w/ Chairs"),
+    (re.compile(r"^COL500(?:E|K|N|W)SV$"), "{collection} Server"),
+    (re.compile(r"^CNT500PT$"), "{collection} Counter Dining Set Counter Height w/ Chairs"),
 ]
 
 PLACEHOLDER_CODES = {
@@ -719,6 +754,9 @@ def replace_collection_words(text: str, wrong: list[str], right: str) -> str:
 def wrong_collections_for_sku(sku: str, expected: str) -> list[str]:
     wrong = {name for _, name in SKU_COLLECTION if name.lower() != expected.lower()}
     wrong.update({"Casual Occasional", "Mixed Media Occasional", "Kids Dining Set"})
+    for pat, names in PREFIX_WRONG_NAMES:
+        if pat.match(sku):
+            wrong.update(names)
     return sorted(wrong, key=len, reverse=True)
 
 
@@ -751,11 +789,123 @@ def sync_collection_fields(row: dict[str, str], family_rows: list[dict[str, str]
             name = fixed
 
     wrong = [w for w in wrong_collections_for_sku(sku, collection) if w.lower() != collection.lower()]
+    name_wrong = [w for w in wrong if name_has_collection(name, w)]
+    if name_wrong:
+        fixed_name = replace_collection_words(name, name_wrong, collection)
+        refresh_name_derived_fields(row, fixed_name)
+        name = fixed_name
+
     for field in ("productdescription", "productiondescription"):
         row[field] = replace_collection_words(row.get(field, ""), wrong, collection)
 
     if row.get("techspecs", "").strip():
         row["techspecs"] = replace_collection_words(row["techspecs"], wrong, collection)
+
+
+def is_thin_volusion_description(desc: str) -> bool:
+    text = (desc or "").strip()
+    if not text:
+        return True
+    if "Features:" in text:
+        return False
+    return len(text) < 500
+
+
+def needs_vendor_copy(row: dict[str, str], sku: str, collection: str | None) -> bool:
+    if not collection:
+        return False
+    name = row.get("productname", "")
+    if not name_has_collection(name, collection) or is_generic_productname(name):
+        return True
+    wrong = wrong_collections_for_sku(sku, collection)
+    for field in ("productiondescription", "productdescription"):
+        desc = row.get(field, "")
+        if not desc:
+            continue
+        if not name_has_collection(desc, collection):
+            return True
+        if any(name_has_collection(desc, w) for w in wrong):
+            return True
+        if is_thin_volusion_description(desc) and name_has_collection(name, collection):
+            return True
+    return False
+
+
+def apply_vendor_copy(row: dict[str, str], copy: VendorCopy) -> None:
+    refresh_name_derived_fields(row, copy.productname)
+    row["productiondescription"] = copy.productiondescription
+    row["productdescription"] = copy.productiondescription
+    row["techspecs"] = copy.techspecs
+    if row.get("productcategory") == "193":
+        cat = dining_category(copy.productname, row["productcode"])
+        if cat:
+            row["productcategory"] = cat
+    if not row.get("productweight", "").strip():
+        m = re.search(r"(\d{2,4})\s*lb", copy.productiondescription, re.I)
+        if m:
+            row["productweight"] = m.group(1)
+
+
+def family_vendor_copy(
+    sku: str,
+    family_rows: list[dict[str, str]],
+    cache: dict[str, dict[str, str]],
+) -> VendorCopy | None:
+    prefix_m = re.match(r"^([A-Z]+)", sku)
+    if not prefix_m:
+        return None
+    prefix = prefix_m.group(1)
+    candidates = sorted(
+        {
+            other
+            for row in family_rows
+            for other in [internal_sku(row["productcode"])]
+            if other and other != sku and other.startswith(prefix)
+        },
+        key=lambda s: (0 if s.upper() in cache else 1, s),
+    )
+    for other_sku in candidates:
+        copy = get_vendor_copy(other_sku, cache)
+        if copy:
+            return adapt_finish_variant(copy, sku)
+    return None
+
+
+def sync_vendor_copy(
+    rows: list[dict[str, str]],
+    family_index: dict[str, list[dict[str, str]]],
+    cache: dict[str, dict[str, str]],
+    *,
+    refresh: bool = False,
+) -> int:
+    applied = 0
+    pending: dict[str, list[dict[str, str]]] = {}
+    for row in rows:
+        code = row["productcode"]
+        if code in PRODUCTS or code in NAME_OVERRIDES:
+            continue
+        sku = internal_sku(code)
+        if not sku:
+            continue
+        collection = collection_from_internal_sku(sku)
+        if not needs_vendor_copy(row, sku, collection):
+            continue
+        pending.setdefault(sku, []).append(row)
+
+    for sku, affected_rows in sorted(pending.items()):
+        copy = get_vendor_copy(sku, cache, refresh=refresh)
+        if not copy:
+            copy = family_vendor_copy(sku, family_index.get(sku_family(sku), []), cache)
+        if not copy:
+            print(f"  vendor copy missing for {sku} ({len(affected_rows)} row(s))")
+            continue
+        for row in affected_rows:
+            apply_vendor_copy(row, copy)
+            applied += 1
+        print(f"  vendor copy {sku}: {copy.productname}")
+        time.sleep(0.4)
+
+    return applied
 
 
 PLACEHOLDER_PRICES = {"100", "110", "120"}
@@ -1030,6 +1180,22 @@ def main() -> int:
         action="store_true",
         help="Do not keep prices from the existing enriched CSV",
     )
+    parser.add_argument(
+        "--vendor-cache",
+        type=Path,
+        default=DEFAULT_VENDOR_CACHE,
+        help="JSON cache of stevesilver.com product copy keyed by internal SKU",
+    )
+    parser.add_argument(
+        "--no-vendor-copy",
+        action="store_true",
+        help="Skip fetching names/descriptions from stevesilver.com",
+    )
+    parser.add_argument(
+        "--refresh-vendor-copy",
+        action="store_true",
+        help="Re-fetch vendor copy even when cached",
+    )
     args = parser.parse_args()
 
     price_overrides = load_price_overrides(args.price_overrides)
@@ -1058,6 +1224,17 @@ def main() -> int:
             sync_collection_fields(row, family_index.get(sku_family(sku), []))
             sync_placeholder_prices(row, family_index.get(sku_family(sku), []))
 
+    vendor_cache = load_cache(args.vendor_cache)
+    vendor_applied = 0
+    if not args.no_vendor_copy:
+        vendor_applied = sync_vendor_copy(
+            rows,
+            family_index,
+            vendor_cache,
+            refresh=args.refresh_vendor_copy,
+        )
+        save_cache(args.vendor_cache, vendor_cache)
+
     price_applied = apply_preserved_prices(rows, preserved_prices)
     rules_fixed = apply_price_rules(rows, skip=set(price_overrides))
     overrides_applied = apply_preserved_prices(rows, price_overrides)
@@ -1078,6 +1255,8 @@ def main() -> int:
         print(f"Repaired {rules_fixed} Volusion placeholder price(s)")
     if overrides_applied:
         print(f"Applied {overrides_applied} price override(s) from {args.price_overrides.name}")
+    if vendor_applied:
+        print(f"Applied stevesilver.com vendor copy to {vendor_applied} row(s)")
     return 0
 
 
