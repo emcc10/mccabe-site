@@ -36,6 +36,7 @@ jobs:
             SS-BC900MR-1.jpg SS-BC950MRB-1.jpg SS-CAS900M-1.jpg SS-RV900M-1.jpg \
             SS-BC900KFB-1.jpg SS-BC900QFB-1.jpg SS-CAS900KFB-1.jpg SS-RV900KFB-1.jpg \
             SS-CONROE-PWR-CHAISE-SECT-1.jpg SS-GATLIN-PWR-SECT-1.jpg SS-DANIEL-PWR-SOFA-1.jpg \
+            SS-KEILY-BROWN-86SOFA-1.jpg SS-DENVER-BROWN-PWR-SECT-1.jpg SS-NOAH-GRAY-SLEEPER-SOFA-1.jpg \
             SS-BC900MR-1T.jpg SS-CAS900M-1T.jpg SS-CONROE-PWR-CHAISE-SECT-1T.jpg; do
             if [ ! -f "vspfiles/photos/$f" ]; then
               echo "skip $f (not in repo)"

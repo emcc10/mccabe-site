@@ -16,6 +16,7 @@ on:
       - "scripts/fetch_steve_silver_chest_photos.py"
       - "scripts/fetch_steve_silver_mirror_photos.py"
       - "scripts/upload_steve_silver_mirror_photos.py"
+      - "scripts/fetch_steve_silver_upholstery_photos.py"
       - "scripts/generate_volusion_photo_thumbnails.py"
       - ".github/workflows/deploy-plp-photos.yml"
       - ".github/scripts/deploy-volusion.sh"
