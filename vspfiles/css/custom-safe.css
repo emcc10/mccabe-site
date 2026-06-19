@@ -9728,6 +9728,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   .content_area-wrapper {
     margin-left: auto !important;
     margin-right: auto !important;
+    margin-top: -40px !important;
   }
 }
 
