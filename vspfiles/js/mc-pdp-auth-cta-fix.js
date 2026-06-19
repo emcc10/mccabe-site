@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero2
-  var VERSION = "20260620sshero2";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero3
+  var VERSION = "20260620sshero3";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2851,6 +2851,32 @@
         } catch (eHide) {}
       }
     });
+    syncPdpDescriptionViewMore();
+  }
+
+  function appendSteveSilverInfoColumnOrder() {
+    if (!isSteveSilverPdpPage()) return;
+    var infoColumn =
+      global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
+      findPdpHeroColumnTd();
+    if (!infoColumn) return;
+    var ordered = [
+      global.document.getElementById("mc-pdp-brand-logo"),
+      global.document.getElementById("mc-pdp-title-right"),
+      global.document.getElementById("mc-pdp-price-stack-host"),
+      global.document.getElementById("messaging-element"),
+      global.document.getElementById("mc-pdp-option-block"),
+      global.document.getElementById("mc-pdp-features"),
+      global.document.getElementById("mc-pdp-description-below-features"),
+      global.document.querySelector(".mc-unified-purchase-controls") ||
+        global.document.getElementById("mc-pdp-purchase-stack"),
+    ];
+    ordered.forEach(function (element) {
+      if (!element) return;
+      try {
+        infoColumn.appendChild(element);
+      } catch (eAppend) {}
+    });
   }
 
   function ensurePdpInfoColumnOrder() {
@@ -3000,6 +3026,7 @@
 
     var mediaDesc =
       global.document.querySelector(".mc-unified-pdp-description--media") ||
+      global.document.getElementById("mc-pdp-description-below-features") ||
       global.document.querySelector(
         "td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2, td.mc-pdp-media-td #ProductDetail_ProductDetails_div2"
       );
@@ -4550,8 +4577,10 @@
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
     if (!shouldUseDescriptionBelowFeaturesLayout()) return;
-    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
-    var col = findPdpHeroColumnTd();
+    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage() && !isSteveSilverPdpPage()) return;
+    var col =
+      global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
+      findPdpHeroColumnTd();
     if (!col) return;
     var descDiv =
       global.document.getElementById("ProductDetail_ProductDetails_div") ||
@@ -4570,7 +4599,12 @@
           global.document.getElementById("mc-configured-color-swatch-wrapper");
         var featuresBlockForDesc = global.document.getElementById("mc-pdp-features");
         var optAnchor = global.document.getElementById("mc-pdp-option-block");
-        if (swatchAnchor && swatchAnchor.parentNode === col) {
+        var purchaseAnchor =
+          global.document.querySelector(".mc-unified-purchase-controls") ||
+          global.document.getElementById("mc-pdp-purchase-stack");
+        if (isSteveSilverPdpPage() && purchaseAnchor && purchaseAnchor.parentNode === col) {
+          col.insertBefore(host, purchaseAnchor);
+        } else if (swatchAnchor && swatchAnchor.parentNode === col) {
           insertNodeAfter(col, swatchAnchor, host);
         } else if (featuresBlockForDesc && featuresBlockForDesc.parentNode === col) {
           insertNodeAfter(col, featuresBlockForDesc, host);
@@ -4580,6 +4614,18 @@
           col.appendChild(host);
         }
       } catch (eH) {}
+    }
+    if (col && host.parentNode !== col) {
+      try {
+        var purchaseMove =
+          global.document.querySelector(".mc-unified-purchase-controls") ||
+          global.document.getElementById("mc-pdp-purchase-stack");
+        if (isSteveSilverPdpPage() && purchaseMove && purchaseMove.parentNode === col) {
+          col.insertBefore(host, purchaseMove);
+        } else {
+          col.appendChild(host);
+        }
+      } catch (eMoveHost) {}
     }
     try {
       host.style.setProperty("width", "100%", "important");
@@ -4623,6 +4669,139 @@
     try {
       pruneDescriptionDuplicateFeatures();
     } catch (ePrune) {}
+    ensureDescriptionBelowFeaturesInner(host);
+    syncPdpDescriptionViewMore();
+  }
+
+  function ensureDescriptionBelowFeaturesInner(host) {
+    if (!host) return null;
+    var inner = host.querySelector(":scope > .mc-pdp-description-below-features__inner");
+    if (!inner) {
+      inner = global.document.createElement("div");
+      inner.className = "mc-pdp-description-below-features__inner";
+      var child;
+      while ((child = host.firstElementChild)) {
+        if (child.classList && child.classList.contains("mc-pdp-description-view-more")) break;
+        inner.appendChild(child);
+      }
+      if (inner.childNodes.length) {
+        host.insertBefore(inner, host.firstChild);
+      }
+    }
+    return inner;
+  }
+
+  function clearDescriptionViewMoreClamp(host) {
+    if (!host) return;
+    var inner = host.querySelector(":scope > .mc-pdp-description-below-features__inner") || host;
+    host.classList.remove("mc-pdp-description-below-features--clamped");
+    host.classList.remove("mc-pdp-description-below-features--expanded");
+    try {
+      inner.style.removeProperty("max-height");
+      inner.style.removeProperty("overflow");
+    } catch (eClear) {}
+    var toggle = host.querySelector(".mc-pdp-description-view-more");
+    if (toggle) toggle.style.setProperty("display", "none", "important");
+  }
+
+  function findPdpDescriptionClampImage() {
+    return (
+      global.document.getElementById("product_photo") ||
+      global.document.querySelector(
+        "td.mc-unified-pdp-media img#product_photo, td.mc-pdp-media-td img#product_photo, img#main-image"
+      )
+    );
+  }
+
+  function applyDescriptionViewMoreClamp(host, img) {
+    if (!host || !img) return;
+    var inner = ensureDescriptionBelowFeaturesInner(host);
+    if (!inner || !String(inner.textContent || "").replace(/\s+/g, " ").trim()) return;
+    var toggle = host.querySelector(".mc-pdp-description-view-more");
+    if (!toggle) {
+      toggle = global.document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "mc-pdp-description-view-more";
+      toggle.textContent = "View more";
+      toggle.addEventListener("click", function () {
+        var expanded = host.classList.toggle("mc-pdp-description-below-features--expanded");
+        toggle.textContent = expanded ? "View less" : "View more";
+        if (expanded) {
+          inner.style.removeProperty("max-height");
+          inner.style.removeProperty("overflow");
+          host.classList.remove("mc-pdp-description-below-features--clamped");
+        } else {
+          applyDescriptionViewMoreClamp(host, findPdpDescriptionClampImage());
+        }
+      });
+      host.appendChild(toggle);
+    }
+    if (host.classList.contains("mc-pdp-description-below-features--expanded")) return;
+
+    var imgRect = img.getBoundingClientRect();
+    var hostRect = host.getBoundingClientRect();
+    var toggleHeight = toggle.offsetHeight || 28;
+    var maxHeight = Math.floor(imgRect.bottom - hostRect.top - toggleHeight - 8);
+    if (maxHeight < 72) maxHeight = 72;
+
+    try {
+      inner.style.removeProperty("max-height");
+      inner.style.removeProperty("overflow");
+    } catch (eMeasure) {}
+    var fullHeight = inner.scrollHeight;
+
+    if (fullHeight <= maxHeight) {
+      clearDescriptionViewMoreClamp(host);
+      return;
+    }
+
+    host.classList.add("mc-pdp-description-below-features--clamped");
+    host.classList.remove("mc-pdp-description-below-features--expanded");
+    try {
+      inner.style.setProperty("max-height", maxHeight + "px", "important");
+      inner.style.setProperty("overflow", "hidden", "important");
+      toggle.style.setProperty("display", "inline-block", "important");
+    } catch (eClamp) {}
+  }
+
+  function syncPdpDescriptionViewMore() {
+    if (!shouldUseDescriptionBelowFeaturesLayout()) return;
+    var host = global.document.getElementById("mc-pdp-description-below-features");
+    if (!host || !String(host.textContent || "").replace(/\s+/g, " ").trim()) return;
+    var isDesktop = global.matchMedia && global.matchMedia("(min-width: 992px)").matches;
+    if (!isDesktop) {
+      clearDescriptionViewMoreClamp(host);
+      return;
+    }
+    var img = findPdpDescriptionClampImage();
+    if (!img) return;
+    if (img.complete === false) {
+      if (img.dataset.mcDescClampBound !== "1") {
+        img.dataset.mcDescClampBound = "1";
+        img.addEventListener("load", function () {
+          syncPdpDescriptionViewMore();
+        });
+      }
+      return;
+    }
+    applyDescriptionViewMoreClamp(host, img);
+  }
+
+  function installDescriptionViewMoreResize() {
+    if (global.__MC_DESC_VIEW_MORE_RESIZE__ === VERSION) return;
+    global.__MC_DESC_VIEW_MORE_RESIZE__ = VERSION;
+    var timer = null;
+    function schedule() {
+      if (timer) clearTimeout(timer);
+      timer = global.setTimeout(function () {
+        timer = null;
+        try {
+          syncPdpDescriptionViewMore();
+        } catch (eSync) {}
+      }, 120);
+    }
+    global.addEventListener("resize", schedule);
+    global.addEventListener("load", schedule);
   }
 
   function extractSwatchesIntoCol() {
@@ -4789,6 +4968,9 @@
 
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcHideNativeVolusionTabPanels = hideNativeVolusionTabPanels;
+  global.mcMountDescriptionBelowFeatures = mountDescriptionBelowFeatures;
+  global.mcAppendSteveSilverInfoColumnOrder = appendSteveSilverInfoColumnOrder;
+  global.mcSyncPdpDescriptionViewMore = syncPdpDescriptionViewMore;
   global.mcMountBeanBagSwatchesAboveFeatures = mountBeanBagSwatchesAboveFeatures;
   global.mcAppendBeanBagInfoColumnOrder = appendBeanBagInfoColumnOrder;
   global.mcHideBeanBagNativeOptionsTable = hideBeanBagNativeOptionsTable;
@@ -5673,6 +5855,11 @@
         try {
           prepareDeferredUnifiedPdpHero();
           hideNativeVolusionTabPanels();
+          mountDescriptionBelowFeatures();
+          if (isSteveSilverPdpPage()) {
+            appendSteveSilverInfoColumnOrder();
+          }
+          syncPdpDescriptionViewMore();
           ensureUnifiedPdpLayout();
           if (typeof global.mcNormalizePdpLayout === "function") {
             global.mcNormalizePdpLayout();
@@ -6483,7 +6670,12 @@
         forceRebuildCleanPriceStack();
       }
       mountPdpFeaturesBlock();
+      mountDescriptionBelowFeatures();
       hideNativeVolusionTabPanels();
+      if (isSteveSilverPdpPage()) {
+        appendSteveSilverInfoColumnOrder();
+      }
+      syncPdpDescriptionViewMore();
       applyPdpPriceTypography();
     } catch (ePrep) {}
   }
@@ -6527,7 +6719,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260619unified22&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260620unified23&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -6641,6 +6833,8 @@
       scheduleBeanBagOptionRepair();
       scheduleSaranoniColorRepair();
       scheduleSteveSilverLayoutRepair();
+      installDescriptionViewMoreResize();
+      syncPdpDescriptionViewMore();
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
         prepareDeferredUnifiedPdpHero();
         ensureUnifiedPdpLayout();
@@ -6774,7 +6968,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260620sshero2";
+  var WANT = "20260620sshero3";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;

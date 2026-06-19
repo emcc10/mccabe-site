@@ -18178,3 +18178,69 @@ html body.mc-product-page table.colors_descriptionbox[data-mc-native-panel-hidde
     margin-top: 30px !important;
   }
 }
+
+/* MC_SS_INFO_COLUMN_DESC_20260620 — Steve Silver description in info column above qty (Saranoni-style). */
+html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info #mc-pdp-description-below-features,
+html body.mc-steve-silver-altview-pdp td.mc-pdp-options-td #mc-pdp-description-below-features {
+  display: block !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin: 12px 0 0 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+}
+
+html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description:not(.mc-pdp-description-below-features) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+html body.mc-steve-silver-altview-pdp #mc-pdp-features { order: 70 !important; }
+html body.mc-steve-silver-altview-pdp #mc-pdp-description-below-features { order: 80 !important; }
+html body.mc-steve-silver-altview-pdp .mc-unified-purchase-controls,
+html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack { order: 90 !important; }
+
+html body.productdetails #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-below-features__inner,
+html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-below-features__inner {
+  position: relative !important;
+}
+
+html body.productdetails #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped:not(.mc-pdp-description-below-features--expanded) .mc-pdp-description-below-features__inner::after,
+html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped:not(.mc-pdp-description-below-features--expanded) .mc-pdp-description-below-features__inner::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 36px !important;
+  pointer-events: none !important;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 88%) !important;
+}
+
+html body.productdetails .mc-pdp-description-view-more,
+html body.mc-product-page .mc-pdp-description-view-more {
+  display: none !important;
+  margin: 8px 0 0 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #111 !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
+html body.productdetails #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-view-more,
+html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-view-more,
+html body.productdetails #mc-pdp-description-below-features.mc-pdp-description-below-features--expanded .mc-pdp-description-view-more,
+html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-below-features--expanded .mc-pdp-description-view-more {
+  display: inline-block !important;
+}

@@ -6,7 +6,7 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260619unified22";
+  var LAYOUT_VER = "20260620unified23";
   var AUTH_LAYOUT_VER = "20260617pdp76";
   var moTimer = null;
   var moBound = false;
@@ -123,6 +123,7 @@
         qs("#mc-pdp-price-stack-host", info) || qs("#mc-pdp-price-atc-row", info),
         collectFinanceBlock(info),
         qs("#mc-pdp-features", info),
+        qs("#mc-pdp-description-below-features", info),
         qs(".mc-unified-purchase-controls", info),
       ].filter(Boolean)
     );
@@ -526,6 +527,7 @@
     var klarna = collectFinanceBlock(infoTd);
     var options = collectOptionBlocks(infoTd);
     var features = qs("#mc-pdp-features", infoTd);
+    var description = qs("#mc-pdp-description-below-features", infoTd);
     var purchase =
       qs("#mc-pdp-purchase-stack", infoTd) ||
       qs(".mc-unified-purchase-controls", infoTd);
@@ -540,6 +542,7 @@
       if (ordered.indexOf(el) === -1) ordered.push(el);
     });
     if (features && ordered.indexOf(features) === -1) ordered.push(features);
+    if (description && ordered.indexOf(description) === -1) ordered.push(description);
     if (purchase && ordered.indexOf(purchase) === -1) ordered.push(purchase);
 
     appendInOrder(infoTd, ordered);
@@ -740,6 +743,37 @@
   }
 
   function ensureDescriptionRow(mainRow, table, descNode, mediaTd) {
+    if (isSteveSilverPdp()) {
+      qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
+        if (!stray) return;
+        try {
+          stray.style.setProperty("display", "none", "important");
+          stray.setAttribute("aria-hidden", "true");
+        } catch (eStray) {}
+      });
+      var descRowSs = qs("tr.mc-pdp-description-row", table.tBodies && table.tBodies[0] ? table.tBodies[0] : table);
+      if (descRowSs) {
+        descRowSs.style.setProperty("display", "none", "important");
+        descRowSs.setAttribute("aria-hidden", "true");
+      }
+      hideLegacyVolusionTabPanels(mediaTd);
+      try {
+        if (typeof global.mcMountDescriptionBelowFeatures === "function") {
+          global.mcMountDescriptionBelowFeatures();
+        }
+        if (typeof global.mcAppendSteveSilverInfoColumnOrder === "function") {
+          global.mcAppendSteveSilverInfoColumnOrder();
+        }
+        if (typeof global.mcSyncPdpDescriptionViewMore === "function") {
+          global.mcSyncPdpDescriptionViewMore();
+        }
+        if (typeof global.mcHideNativeVolusionTabPanels === "function") {
+          global.mcHideNativeVolusionTabPanels();
+        }
+      } catch (eSsDesc) {}
+      return;
+    }
+
     if (!mainRow || !table || !mediaTd) return;
     var tbody = table.tBodies && table.tBodies[0] ? table.tBodies[0] : table;
     var descRow = qs("tr.mc-pdp-description-row", tbody);
