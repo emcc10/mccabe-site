@@ -6619,7 +6619,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260619layout3";
+  var WANT = "20260620sshero1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -6643,10 +6643,10 @@
   });
 })(window, document);
 
-/* MC_STEVE_SILVER_ALT_VIEWS_20260619 — force -1 piece hero for all SS- bedroom PDPs. */
+/* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
 (function (g, d) {
   function isSteveSilverCode(code) {
-    return /^SS-/.test(code) && !/GATLIN|-SECT/.test(code);
+    return /^SS-/.test(code);
   }
 
   function productCode() {
@@ -7041,83 +7041,5 @@ try {
     d.addEventListener("DOMContentLoaded", centerAltImages);
   } else {
     centerAltImages();
-  }
-})(window, document);
-
-/* MC_GATLIN_HERO_REPAIR_20260619 - template related-image normalizer must not rewrite PDP hero to tiny -1.jpg. */
-(function (g, d) {
-  function productCode() {
-    var input = d.querySelector('input[name="ProductCode"], input[name="productcode"]');
-    return String((g.global_Current_ProductCode || "") || (input && input.value) || "").toUpperCase();
-  }
-
-  function isGatlin() {
-    return productCode() === "SS-GATLIN-PWR-SECT";
-  }
-
-  function run() {
-    if (!isGatlin()) return;
-    if (d.body && d.body.classList) {
-      d.body.classList.add("mc-gatlin-sectional-pdp");
-      d.body.classList.remove("mc-steve-silver-altview-pdp");
-    }
-
-    var hero = d.querySelector("img#product_photo");
-    var zoom = d.querySelector("a#product_photo_zoom_url") || d.querySelector("a#product_photo_zoom_url2");
-    var src = "/v/vspfiles/photos/SS-GATLIN-PWR-SECT-2T.jpg";
-
-    if (hero) {
-      // The baked template still has mc-ss-piece-hero-boot after this file.
-      // It checks __mcSsHeroLock before installing its old SS -1.jpg observer.
-      hero.__mcSsHeroLock = true;
-      var current = hero.getAttribute("src") || "";
-      if (current.indexOf(src) === -1) hero.setAttribute("src", src);
-      if (hero.src.indexOf("SS-GATLIN-PWR-SECT-2T.jpg") === -1) hero.src = src;
-      hero.removeAttribute("srcset");
-      hero.style.setProperty("display", "block", "important");
-      hero.style.setProperty("visibility", "visible", "important");
-      hero.style.setProperty("opacity", "1", "important");
-      if (!hero.__mcGatlinHeroRepairObserver && g.MutationObserver) {
-        hero.__mcGatlinHeroRepairObserver = true;
-        try {
-          new g.MutationObserver(function () {
-            var cur = hero.getAttribute("src") || "";
-            if (cur.indexOf(src) === -1) {
-              hero.setAttribute("src", src);
-              hero.src = src;
-            }
-            hero.removeAttribute("srcset");
-          }).observe(hero, { attributes: true, attributeFilter: ["src", "srcset"] });
-        } catch (eHeroObs) {}
-      }
-    }
-
-    if (zoom) zoom.setAttribute("href", src);
-  }
-
-  [0, 150, 500, 1200, 2500, 5000, 10000, 15000, 25000, 40000, 65000].forEach(function (ms) {
-    g.setTimeout(run, ms);
-  });
-
-  try {
-    if (g.MutationObserver && !g.__MC_GATLIN_HERO_REPAIR_OBSERVER__) {
-      g.__MC_GATLIN_HERO_REPAIR_OBSERVER__ = true;
-      var timer = null;
-      new g.MutationObserver(function () {
-        g.clearTimeout(timer);
-        timer = g.setTimeout(run, 80);
-      }).observe(d.getElementById("v65-product-parent") || d.body || d.documentElement, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["src", "class"]
-      });
-    }
-  } catch (eObs) {}
-
-  if (d.readyState === "loading") {
-    d.addEventListener("DOMContentLoaded", run);
-  } else {
-    run();
   }
 })(window, document);

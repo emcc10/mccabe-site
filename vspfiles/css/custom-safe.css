@@ -18034,11 +18034,6 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   }
 }
 
-html body.mc-gatlin-sectional-pdp img#product_photo,
-html body img#product_photo[src*="SS-GATLIN-PWR-SECT-1.jpg"] {
-  content: url("/v/vspfiles/photos/SS-GATLIN-PWR-SECT-2T.jpg") !important;
-}
-
 /* MC_SARANONI_MEDIA_GAP_RESTORE_20260619 - do not right-pack Saranoni into the feature column. */
 @media (min-width: 992px) {
   html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,

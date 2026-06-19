@@ -10,30 +10,34 @@ const clipsDir = join(repoRoot, 'vspfiles/home-hero-clips');
 const outPath = join(repoRoot, 'vspfiles/windsor.mp4');
 const ffmpeg = ffmpegInstaller.path;
 
-/** Mixkit free stock clips (Mixkit License). Real camera motion, no elderly subjects. */
+/** Mixkit free stock clips (Mixkit License). Furniture-forward, residential home interiors. */
 const CLIPS = [
   {
     name: 'living-room-sofa',
-    url: 'https://assets.mixkit.co/videos/3110/3110-1080.mp4',
-    start: 0,
+    // Couple on a cozy home sofa — living room visible, not the gray minimalist zoom.
+    url: 'https://assets.mixkit.co/videos/4858/4858-1080.mp4',
+    start: 2,
     seconds: 4,
   },
   {
     name: 'blanket-on-sofa',
-    url: 'https://assets.mixkit.co/videos/4548/4548-1080.mp4',
+    // Brown sofa with a plush throw blanket draped over it.
+    url: 'https://assets.mixkit.co/videos/4710/4710-1080.mp4',
     start: 1,
     seconds: 4,
   },
   {
-    name: 'women-dining-table',
-    url: 'https://assets.mixkit.co/videos/12129/12129-1080.mp4',
+    name: 'dining-table-gathering',
+    // Elegant dining table set with people gathered — furniture in frame.
+    url: 'https://assets.mixkit.co/videos/42151/42151-1080.mp4',
     start: 0,
     seconds: 4,
   },
   {
-    name: 'interior-pan',
-    url: 'https://assets.mixkit.co/videos/4198/4198-1080.mp4',
-    start: 0,
+    name: 'home-living-room',
+    // Modern residential living room — not a hotel pan.
+    url: 'https://assets.mixkit.co/videos/3090/3090-1080.mp4',
+    start: 1,
     seconds: 4,
   },
 ] as const;

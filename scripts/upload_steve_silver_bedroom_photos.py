@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Upload Steve Silver bedroom PLP/PDP photos to Volusion SFTP.
+"""Upload Steve Silver PLP/PDP photos to Volusion SFTP.
 
-Ensures SS-* chest, nightstand, dresser, mirror, bed, and HP900 images reach
-/v/vspfiles/photos/ even when the generic changed-files deploy misses files.
+Ensures SS-* bedroom and upholstery images reach /v/vspfiles/photos/ even when
+the generic changed-files deploy misses files.
 """
 from __future__ import annotations
 
@@ -20,6 +20,16 @@ PATTERNS = (
     "SS-MON*.jpg",
     "SS-RV*.jpg",
     "SS-SIG*.jpg",
+    "SS-CONROE*.jpg",
+    "SS-GATLIN*.jpg",
+    "SS-DENVER*.jpg",
+    "SS-LUNA*.jpg",
+    "SS-DANIEL*.jpg",
+    "SS-ZENITH*.jpg",
+    "SS-ALEX*.jpg",
+    "SS-OLSEN*.jpg",
+    "SS-KEILY*.jpg",
+    "SS-NOAH*.jpg",
 )
 
 
@@ -47,7 +57,7 @@ def main() -> int:
 
     targets = collect_targets()
     if not targets:
-        print("No Steve Silver bedroom photos found", file=sys.stderr)
+        print("No Steve Silver photos found", file=sys.stderr)
         return 1
 
     host = os.environ["FTP_SERVER"]
@@ -73,7 +83,7 @@ def main() -> int:
     finally:
         transport.close()
 
-    print(f"Uploaded {ok}/{len(targets)} Steve Silver bedroom photo(s)")
+    print(f"Uploaded {ok}/{len(targets)} Steve Silver photo(s)")
     return 1 if fail else 0
 
 
