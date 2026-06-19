@@ -18039,6 +18039,26 @@ html body img#product_photo[src*="SS-GATLIN-PWR-SECT-1.jpg"] {
 
 /* MC_SARANONI_MEDIA_GAP_RESTORE_20260619 - do not right-pack Saranoni into the feature column. */
 @media (min-width: 992px) {
+  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-unified-pdp-row {
+    gap: 44px !important;
+    column-gap: 44px !important;
+  }
+
+  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media {
+    padding-right: 20px !important;
+  }
+
+  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-info {
+    padding-left: 20px !important;
+  }
+
   html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media {
     align-items: flex-start !important;
   }
