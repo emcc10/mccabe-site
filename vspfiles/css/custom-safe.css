@@ -18036,3 +18036,29 @@ html body.mc-gatlin-sectional-pdp img#product_photo,
 html body img#product_photo[src*="SS-GATLIN-PWR-SECT-1.jpg"] {
   content: url("/v/vspfiles/photos/SS-GATLIN-PWR-SECT-2T.jpg") !important;
 }
+
+/* MC_SARANONI_MEDIA_GAP_RESTORE_20260619 - do not right-pack Saranoni into the feature column. */
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media {
+    align-items: flex-start !important;
+  }
+
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-under-media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-below-features,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span[itemprop="description"] {
+    align-self: flex-start !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+}
