@@ -291,6 +291,11 @@ def main() -> None:
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--delay", type=float, default=0.35)
     parser.add_argument("--all", action="store_true", help="Write CSV even if options exist")
+    parser.add_argument(
+        "--split",
+        action="store_true",
+        help="Also write one CSV per product (default: single master file only)",
+    )
     args = parser.parse_args()
 
     catalog = load_catalog(args.catalog)
@@ -298,6 +303,7 @@ def main() -> None:
 
     summary_path = args.out_dir / "Volusion_Saranoni_Options_Summary.csv"
     summary_rows: list[dict[str, str]] = []
+    master_rows: list[dict[str, str]] = []
 
     for row in catalog:
         code = row["productcode"].strip()
@@ -370,24 +376,52 @@ def main() -> None:
         diffs = price_diffs(product, axis, code)
         rows = build_rows(axis, diffs, missing)
         fname = f"Volusion_{slugify_name(name)}_Options.csv"
-        out_path = args.out_dir / fname
-        with out_path.open("w", newline="", encoding="utf-8") as f:
-            w = csv.writer(f)
-            w.writerow(["optionid", "optionsdesc", "pricediff"])
-            for option_id, label, diff in rows:
-                w.writerow([option_id, label, diff])
+        for option_id, label, diff in rows:
+            master_rows.append(
+                {
+                    "productcode": code,
+                    "productname": name,
+                    "optionid": option_id,
+                    "optionsdesc": label,
+                    "pricediff": str(diff),
+                }
+            )
+        if args.split:
+            out_path = args.out_dir / fname
+            with out_path.open("w", newline="", encoding="utf-8") as f:
+                w = csv.writer(f)
+                w.writerow(["optionid", "optionsdesc", "pricediff"])
+                for option_id, label, diff in rows:
+                    w.writerow([option_id, label, diff])
 
         summary_rows.append(
             {
                 "productcode": code,
                 "productname": name,
                 "status": "generated",
-                "csv_file": fname,
+                "csv_file": fname if args.split else "Volusion_Saranoni_Missing_Options.csv",
                 "missing_color": str(missing[COLOR_OPTION_ID]),
                 "missing_size": str(missing[SIZE_OPTION_ID]),
             }
         )
-        print(f"Wrote {fname} ({code})")
+        print(f"Added {len(rows)} options for {code}")
+
+    master_path = args.out_dir / "Volusion_Saranoni_Missing_Options.csv"
+    if master_rows:
+        with master_path.open("w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(
+                f,
+                fieldnames=[
+                    "productcode",
+                    "productname",
+                    "optionid",
+                    "optionsdesc",
+                    "pricediff",
+                ],
+            )
+            w.writeheader()
+            w.writerows(master_rows)
+        print(f"Master options: {master_path} ({len(master_rows)} rows)")
 
     with summary_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(
