@@ -793,6 +793,12 @@ def peer_price(rows: list[dict[str, str]], *, predicate) -> str | None:
     return str(int(values[len(values) // 2]))
 
 
+def is_volusion_placeholder(price: float) -> bool:
+    if price == int(price):
+        return int(price) in {100, 110, 120}
+    return False
+
+
 def apply_price_rules(rows: list[dict[str, str]], skip: set[str]) -> int:
     """Repair obvious Volusion placeholder prices using in-catalog peers."""
     fixed = 0
@@ -822,9 +828,9 @@ def apply_price_rules(rows: list[dict[str, str]], skip: set[str]) -> int:
             continue
         name = row.get("productname", "")
         new_price: str | None = None
-        if is_server_row(row) and (price < MIN_SERVER_PRICE or price in SUSPECT_SERVER_PRICES):
+        if is_server_row(row) and (price < MIN_SERVER_PRICE or int(price) in SUSPECT_SERVER_PRICES):
             new_price = server_peer
-        elif price in PLACEHOLDER_PRICES:
+        elif is_volusion_placeholder(price):
             lower = name.lower()
             if "mirror" in lower:
                 new_price = mirror_peer
@@ -894,6 +900,19 @@ def sync_placeholder_prices(row: dict[str, str], family_rows: list[dict[str, str
         return
 
 
+def should_preserve_manual_price(row: dict[str, str], price: str) -> bool:
+    parsed = parse_price(price)
+    if parsed is None:
+        return False
+    if is_volusion_placeholder(parsed):
+        return False
+    if is_server_row(row) and (
+        parsed < MIN_SERVER_PRICE or int(parsed) in SUSPECT_SERVER_PRICES
+    ):
+        return False
+    return True
+
+
 def apply_preserved_prices(rows: list[dict[str, str]], preserved: dict[str, tuple[str, str]]) -> int:
     applied = 0
     for row in rows:
@@ -901,7 +920,7 @@ def apply_preserved_prices(rows: list[dict[str, str]], preserved: dict[str, tupl
         if code not in preserved:
             continue
         productprice, saleprice = preserved[code]
-        if productprice.strip():
+        if productprice.strip() and should_preserve_manual_price(row, productprice):
             row["productprice"] = productprice
             applied += 1
         if saleprice.strip():
