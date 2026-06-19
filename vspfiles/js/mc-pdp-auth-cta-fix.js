@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260619layout2
-  var VERSION = "20260619layout2";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260619layout3
+  var VERSION = "20260619layout3";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -6619,7 +6619,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260619layout2";
+  var WANT = "20260619layout3";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -7067,6 +7067,9 @@ try {
     var src = "/v/vspfiles/photos/SS-GATLIN-PWR-SECT-2T.jpg";
 
     if (hero) {
+      // The baked template still has mc-ss-piece-hero-boot after this file.
+      // It checks __mcSsHeroLock before installing its old SS -1.jpg observer.
+      hero.__mcSsHeroLock = true;
       var current = hero.getAttribute("src") || "";
       if (current.indexOf(src) === -1) hero.setAttribute("src", src);
       if (hero.src.indexOf("SS-GATLIN-PWR-SECT-2T.jpg") === -1) hero.src = src;

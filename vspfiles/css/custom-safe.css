@@ -17951,7 +17951,9 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
 /* MC_DOUBLE_RUCHED_FAUX_MEDIA_LOCK_20260619 - legacy Saranoni PDP is not unified; keep hero left of features. */
 @media (min-width: 992px) {
   html body.mc-saranoni-pdp form#vCSS_mainform[action*="SAR%2DDBL%2DRCH%2DFX%2DFUR"] img#product_photo,
-  html body.mc-saranoni-pdp form#vCSS_mainform[action*="sar-dbl-rch-fx-fur" i] img#product_photo {
+  html body.mc-saranoni-pdp form#vCSS_mainform[action*="sar-dbl-rch-fx-fur" i] img#product_photo,
+  html body.mc-saranoni-pdp img#product_photo[src*="SAR-DBL-RCH-FX-FUR"],
+  html body.mc-saranoni-pdp img#product_photo[src*="sar-dbl-rch-fx-fur" i] {
     display: block !important;
     width: 650px !important;
     max-width: 650px !important;
