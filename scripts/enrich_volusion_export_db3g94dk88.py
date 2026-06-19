@@ -25,6 +25,15 @@ CAT_DINING_SET = "215"
 CAT_DINING_CHAIR = "216"
 CAT_DINING_SERVER = "217"
 
+# Volusion export productname sometimes disagrees with vendor description text.
+NAME_OVERRIDES: dict[str, str] = {
+    "SS-2968479": "Gatlin Dual Power Recliner",
+    "SS-3PC-LOVESE": "Stone Power Console Loveseat",
+    "SS-GAT70696T": "Stone Dual Power Reclining Console Loveseat",
+    "SS-GAT70696T-2": "Stone Dual Power Reclining Sofa",
+    "SS-KE800CG": "Marlow Manual Swivel Glider Recliner",
+}
+
 PLACEHOLDER_CODES = {
     "Adeline-Patio-Set",
     "Burlington-Dining-Set",
@@ -590,6 +599,11 @@ def enrich_row(row: dict[str, str], force_images: bool) -> dict[str, str]:
                 download_slot(code, int(slot), urls, force_images)  # type: ignore[arg-type]
             finalize_images(code)
         return row
+
+    if code in NAME_OVERRIDES:
+        name = NAME_OVERRIDES[code]
+        row["productname"] = name
+        row["metatag_title"] = meta_title(name)
 
     desc = row.get("productdescription", "")
     if not row.get("productiondescription", "").strip() and desc.strip():
