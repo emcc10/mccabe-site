@@ -17992,22 +17992,39 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
   html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
   html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap #altviews,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap span#altviews,
   html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
   html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
   html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
-  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap #altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap span#altviews {
     order: 2 !important;
+    display: flex !important;
+    justify-content: center !important;
     width: 650px !important;
     max-width: 650px !important;
-    margin: 12px 0 24px auto !important;
+    margin: 8px 0 16px auto !important;
     align-self: flex-end !important;
   }
 
   html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
   html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-under-media,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-below-features,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span[itemprop="description"],
   html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
-  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-under-media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-below-features,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span[itemprop="description"] {
     order: 3 !important;
+    display: block !important;
     width: 650px !important;
     max-width: 650px !important;
     margin: 0 0 0 auto !important;
