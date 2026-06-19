@@ -17963,3 +17963,59 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
     margin-top: 30px !important;
   }
 }
+
+/* MC_LIVE_PDP_MEDIA_STACK_LOCK_20260619 - works through stale baked templates because custom-safe.css is cache-busted inline. */
+@media (min-width: 992px) {
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+  }
+
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
+    order: 1 !important;
+    display: block !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    height: auto !important;
+    margin: 0 !important;
+    align-self: flex-end !important;
+  }
+
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews {
+    order: 2 !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    margin: 12px 0 24px auto !important;
+    align-self: flex-end !important;
+  }
+
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media {
+    order: 3 !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    margin: 0 0 0 auto !important;
+    align-self: flex-end !important;
+  }
+}
+
+html body.mc-gatlin-sectional-pdp img#product_photo,
+html body img#product_photo[src*="SS-GATLIN-PWR-SECT-1.jpg"] {
+  content: url("/v/vspfiles/photos/SS-GATLIN-PWR-SECT-2T.jpg") !important;
+}
