@@ -842,6 +842,12 @@ def apply_price_rules(rows: list[dict[str, str]], skip: set[str]) -> int:
                 new_price = counter_set_peer
             elif "dining set" in lower:
                 new_price = dining_set_peer
+        elif (
+            int(price) == 260
+            and "dining set" in name.lower()
+            and "counter" not in name.lower()
+        ):
+            new_price = dining_set_peer
         if new_price and new_price != row.get("productprice", ""):
             row["productprice"] = new_price
             if not row.get("saleprice", "").strip():
