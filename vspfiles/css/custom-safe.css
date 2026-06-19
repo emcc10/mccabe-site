@@ -17896,6 +17896,8 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
     max-width: 1128px !important;
     margin-left: auto !important;
     margin-right: auto !important;
+    position: relative !important;
+    left: 42px !important;
     table-layout: fixed !important;
   }
 
