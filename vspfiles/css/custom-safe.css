@@ -15920,6 +15920,14 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list {
 html body.productdetails #mc-pdp-features .mc-pdp-features__list li,
 html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
   margin: 0 0 4px 0 !important;
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+}
+
+html body.productdetails #mc-pdp-features .mc-pdp-features__list li::before,
+html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li::before {
+  content: none !important;
+  display: none !important;
 }
 
 /* =====================================================
@@ -18191,6 +18199,11 @@ html body.mc-steve-silver-altview-pdp td.mc-pdp-options-td #mc-pdp-description-b
   text-align: left !important;
 }
 
+html body.productdetails #mc-pdp-description-below-features .mc-pdp-description-below-features__inner,
+html body.mc-product-page #mc-pdp-description-below-features .mc-pdp-description-below-features__inner {
+  display: block !important;
+}
+
 html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description--media,
 html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description:not(.mc-pdp-description-below-features) {
   display: none !important;
@@ -18243,4 +18256,5 @@ html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-
 html body.productdetails #mc-pdp-description-below-features.mc-pdp-description-below-features--expanded .mc-pdp-description-view-more,
 html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-below-features--expanded .mc-pdp-description-view-more {
   display: inline-block !important;
+  order: unset !important;
 }

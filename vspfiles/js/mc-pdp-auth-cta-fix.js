@@ -34,7 +34,7 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero3
-  var VERSION = "20260620sshero3";
+  var VERSION = "20260620sshero4";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2973,6 +2973,18 @@
       .replace(/"/g, "&quot;");
   }
 
+  function normalizeFeatureText(text) {
+    return String(text || "")
+      .replace(/\s+/g, " ")
+      .replace(/^[\s\u2022\u00b7\u25aa\u25cf\u25e6\u2023\u2043\u2219•·▪‣◦\-–—*]+\s*/u, "")
+      .trim();
+  }
+
+  function buildFeaturesListHtml(items) {
+    if (!items.length) return "";
+    return '<ul class="mc-pdp-features__list">' + items.join("") + "</ul>";
+  }
+
   function extractTechSpecsBodyHtml() {
     var src = global.document.getElementById("ProductDetail_TechSpecs_div");
     if (!src) return "";
@@ -2982,11 +2994,11 @@
       var i;
       for (i = 0; i < lis.length; i++) {
         if (lis[i].querySelector("ul, ol")) continue;
-        var t = (lis[i].textContent || "").replace(/\s+/g, " ").trim();
+        var t = normalizeFeatureText(lis[i].textContent || "");
         if (t) items.push("<li>" + escapeHtmlText(t) + "</li>");
       }
       if (items.length) {
-        return '<ul class="mc-pdp-features__list">' + items.join("") + "</ul>";
+        return buildFeaturesListHtml(items);
       }
     }
     var clone = src.cloneNode(true);
@@ -3179,11 +3191,11 @@
     src.querySelectorAll("li").forEach(function (li) {
       if (li.closest("#beanbag-swatch-wrapper, .beanbag-swatches, script, style, #mc-pdp-features")) return;
       if (li.querySelector("ul, ol")) return;
-      var t = (li.textContent || "").replace(/\s+/g, " ").trim();
+      var t = normalizeFeatureText(li.textContent || "");
       if (t) items.push("<li>" + escapeHtmlText(t) + "</li>");
     });
     if (!items.length) return "";
-    return '<ul class="mc-pdp-features__list">' + items.join("") + "</ul>";
+    return buildFeaturesListHtml(items);
   }
 
   function mountPdpFeaturesBlock() {
@@ -4673,6 +4685,12 @@
     syncPdpDescriptionViewMore();
   }
 
+  function repositionDescriptionViewMoreToggle(host) {
+    if (!host) return;
+    var toggle = host.querySelector(":scope > .mc-pdp-description-view-more");
+    if (toggle) host.appendChild(toggle);
+  }
+
   function ensureDescriptionBelowFeaturesInner(host) {
     if (!host) return null;
     var inner = host.querySelector(":scope > .mc-pdp-description-below-features__inner");
@@ -4685,10 +4703,20 @@
         inner.appendChild(child);
       }
       if (inner.childNodes.length) {
-        host.insertBefore(inner, host.firstChild);
+        var toggleBefore = host.querySelector(":scope > .mc-pdp-description-view-more");
+        if (toggleBefore) host.insertBefore(inner, toggleBefore);
+        else host.appendChild(inner);
+      }
+    } else {
+      var stray;
+      while ((stray = host.firstElementChild)) {
+        if (stray === inner) break;
+        if (stray.classList && stray.classList.contains("mc-pdp-description-view-more")) break;
+        inner.appendChild(stray);
       }
     }
-    return inner;
+    repositionDescriptionViewMoreToggle(host);
+    return inner.childNodes.length ? inner : null;
   }
 
   function clearDescriptionViewMoreClamp(host) {
@@ -4736,6 +4764,7 @@
       });
       host.appendChild(toggle);
     }
+    repositionDescriptionViewMoreToggle(host);
     if (host.classList.contains("mc-pdp-description-below-features--expanded")) return;
 
     var imgRect = img.getBoundingClientRect();
