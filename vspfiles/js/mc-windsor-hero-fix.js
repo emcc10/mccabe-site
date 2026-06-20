@@ -1,4 +1,5 @@
 /* MC_WINDSOR_HERO_FIX — force windsor-home.mp4 (CDN caches bad windsor.mp4 slideshow). */
+/* MC_WINDSOR_DEPLOY_VERIFY_20260620windsor2 */
 (function (g, d) {
   if (!g || !d || g.__MC_WINDSOR_HERO_FIX__) return;
   g.__MC_WINDSOR_HERO_FIX__ = true;
