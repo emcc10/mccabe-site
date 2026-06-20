@@ -132,7 +132,7 @@
     var seen={};
     return qa('a[href]',doc).map(function(anchor){
       var href=abs(anchor.getAttribute('href'));
-      if(!href||!/product|\/p\/|ProductDetails\.asp|-p\//i.test(href))return null;
+      if(!href||!/product|product-p|\/p\/|ProductDetails\.asp|-p\//i.test(href))return null;
       var card=cardRoot(anchor);
       var name=findName(anchor,card);
       if(!name||name.toLowerCase()===current.toLowerCase())return null;
@@ -154,6 +154,7 @@
 
     var section=d.createElement('section');
     section.id=SECTION_ID;
+    section.setAttribute('data-mc-collection-source',collection);
     section.setAttribute('aria-labelledby','mc-bedroom-collection-heading');
 
     var h=d.createElement('h2');

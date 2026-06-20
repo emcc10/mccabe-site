@@ -3734,6 +3734,9 @@
 
   function applyConfiguredColorSelection(ctx, entry, forcePhoto) {
     if (!ctx || !entry) return false;
+    try {
+      global.__MC_CONFIGURED_COLOR_USER_PICKED__ = true;
+    } catch (eUserPick) {}
     lockConfiguredColorActiveEntry(entry);
     var opt = findConfiguredColorOption(ctx.select, entry);
     if (opt) {
@@ -4093,15 +4096,13 @@
     }
     if (picker.getAttribute("data-mc-sar-color-signature") === signature) {
       syncSaranoniAltviewActiveState();
-      updateConfiguredColorLabels(
-        configuredColorActiveEntry || findConfiguredColorSelectedEntry(ctx)
-      );
+      updateConfiguredColorLabels(resolveDisplayedColorEntry(ctx));
       return;
     }
     picker.setAttribute("data-mc-sar-color-signature", signature);
     picker.innerHTML =
       '<div class="mc-pdp-features__heading mc-saranoni-color-picker__heading">Selected color: ' +
-      '<span id="mc-saranoni-selected-color-name"></span></div>' +
+      '<span id="mc-saranoni-selected-color-name">Choose a color</span></div>' +
       '<div class="mc-saranoni-color-picker__thumbs"></div>';
     var thumbs = picker.querySelector(".mc-saranoni-color-picker__thumbs");
     visible.forEach(function (item) {
@@ -4496,9 +4497,15 @@
     return null;
   }
 
+  function resolveDisplayedColorEntry(ctx) {
+    if (configuredColorActiveEntry) return configuredColorActiveEntry;
+    if (isSaranoniPdpPage()) return null;
+    return findConfiguredColorSelectedEntry(ctx);
+  }
+
   function syncConfiguredColorSwatchUi(ctx, applyPhoto, forcePhoto) {
     if (!ctx) return;
-    var selected = configuredColorActiveEntry || findConfiguredColorSelectedEntry(ctx);
+    var selected = resolveDisplayedColorEntry(ctx);
     updateConfiguredColorLabels(selected);
     var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
     if (wrap) {
@@ -4567,30 +4574,30 @@
     renderConfiguredColorSwatches(ctx);
     bindConfiguredColorSwatchSelect(ctx.select);
     restoreConfiguredColorActiveEntry(ctx);
-    if (
-      isSaranoniPdpPage() &&
-      !configuredColorActiveEntry &&
-      !global.__MC_CONFIGURED_COLOR_INIT__
-    ) {
-      var defaultSarEntry = findConfiguredColorSelectedEntry(ctx) || ctx.entries[0] || null;
-      var defaultSarOpt = defaultSarEntry ? findConfiguredColorOption(ctx.select, defaultSarEntry) : null;
-      if (defaultSarEntry && defaultSarOpt) {
-        lockConfiguredColorActiveEntry(defaultSarEntry);
-        syncConfiguredColorSelect(ctx.select, defaultSarOpt);
-      }
-    }
-    if (!configuredColorDefaultSrc && !configuredColorActiveEntry) {
+    if (!configuredColorDefaultSrc) {
       var hero = global.document.getElementById("product_photo");
       var heroSrc = hero ? hero.getAttribute("src") || "" : "";
       if (heroSrc && heroSrc.indexOf("/manufacturers/") === -1) configuredColorDefaultSrc = heroSrc;
     }
-    // Apply the default hero only once on initial load. MutationObserver-driven
-    // re-runs must refresh swatch UI without rewriting #product_photo.
+    // Saranoni: keep category/default hero until shopper picks a color swatch.
     var applyInitialPhoto =
       !global.__MC_CONFIGURED_COLOR_INIT__ &&
-      (isSaranoniPdpPage() || !!configuredColorActiveEntry);
+      !!configuredColorActiveEntry &&
+      (!isSaranoniPdpPage() || !!global.__MC_CONFIGURED_COLOR_USER_PICKED__);
     syncConfiguredColorSwatchUi(ctx, applyInitialPhoto);
     if (!global.__MC_CONFIGURED_COLOR_INIT__) global.__MC_CONFIGURED_COLOR_INIT__ = true;
+    if (
+      isSaranoniPdpPage() &&
+      productCode &&
+      !global.__MC_CONFIGURED_COLOR_USER_PICKED__ &&
+      !configuredColorActiveEntry
+    ) {
+      loadProductScopedColorImage(productCode, productCode + "-2T.jpg", function (resolved) {
+        if (!resolved || global.__MC_CONFIGURED_COLOR_USER_PICKED__) return;
+        configuredColorDefaultSrc = resolved;
+        setConfiguredColorPhotoSrc(resolved, "", productCode);
+      });
+    }
     if (isSaranoniPdpPage()) {
       hideSaranoniHeroAltviews();
       syncSaranoniColorPicker(ctx);
