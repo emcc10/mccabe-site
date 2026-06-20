@@ -6,7 +6,7 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260620returncat1";
+  var LAYOUT_VER = "20260620collection2";
   var AUTH_LAYOUT_VER = "20260617pdp76";
   var moTimer = null;
   var moBound = false;
@@ -21,6 +21,27 @@
 
   function isPDP() {
     return !!qs('input[name="ProductCode"]') && !!(qs("#content_area") || qs("#v65-product-parent"));
+  }
+
+  function ensureBedroomCollectionSection() {
+    if (!isPDP()) return;
+    if (global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ || global.__MC_BEDROOM_COLLECTION_SECTION_20260620__) return;
+    if (qs("script[src*='mc-bedroom-collection-section.js']")) return;
+    try {
+      global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = true;
+      var s = global.document.createElement("script");
+      s.src = "/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2&mcrd=" + Date.now();
+      s.async = true;
+      s.onload = function () {
+        global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = false;
+      };
+      s.onerror = function () {
+        global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = false;
+      };
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eCollectionLoad) {
+      global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = false;
+    }
   }
 
   function isSectionalConfigurator() {
@@ -1125,6 +1146,7 @@
   }
 
   function boot() {
+    ensureBedroomCollectionSection();
     if (mcNormalizePdpLayout()) return;
     bindMutationObserver();
   }
