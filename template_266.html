@@ -1876,18 +1876,45 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     <!-- HERO VIDEO -->
 <section class="mc-hero-video">
  <video class="mc-hero-video-el" autoplay muted loop playsinline preload="auto">
-  <source src="https://www.mccabestheaterandliving.com/v/vspfiles/windsor.mp4?v=20260620orig" type="video/mp4">
+  <source src="https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620" type="video/mp4">
 </video>
 <script>
 (function () {
-  function startHeroVideoAtSeven() {
-    var v = document.querySelector("#slideshow-container video.mc-hero-video-el");
-    if (!v) return;
+  window.MC_WINDSOR_HERO_SRC =
+    "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620";
 
+  window.mcEnsureWindsorHeroSrc = function (v) {
+    if (!v) return false;
+    var want = window.MC_WINDSOR_HERO_SRC;
+    var srcEl = v.querySelector("source");
+    var cur = srcEl
+      ? String(srcEl.getAttribute("src") || srcEl.src || "")
+      : String(v.getAttribute("src") || v.src || "");
+    if (cur.indexOf("windsor-home.mp4") !== -1 && v.dataset.mcWindsorSrcApplied === want) {
+      return false;
+    }
+    if (srcEl) {
+      srcEl.setAttribute("src", want);
+    } else {
+      v.setAttribute("src", want);
+    }
+    try {
+      delete v.dataset.mcStartedAtSeven;
+    } catch (eDel) {}
+    v.dataset.mcWindsorSrcApplied = want;
+    try {
+      v.load();
+    } catch (eLoad) {}
+    return true;
+  };
+
+  window.mcPlayWindsorHeroAtSeven = function (v) {
+    if (!v) return;
     v.muted = true;
     v.loop = true;
     v.playsInline = true;
     v.autoplay = true;
+    window.mcEnsureWindsorHeroSrc(v);
 
     function seekAndPlay() {
       try {
@@ -1895,6 +1922,9 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
           v.dataset.mcStartedAtSeven = "1";
           v.currentTime = 7;
         }
+        v.classList.remove("is-preloading");
+        v.classList.add("is-ready");
+        v.style.setProperty("opacity", "1", "important");
         v.play && v.play().catch(function () {});
       } catch (e) {}
     }
@@ -1903,7 +1933,25 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
       seekAndPlay();
     } else {
       v.addEventListener("loadedmetadata", seekAndPlay, { once: true });
+      v.addEventListener(
+        "error",
+        function () {
+          try {
+            delete v.dataset.mcWindsorSrcApplied;
+            delete v.dataset.mcStartedAtSeven;
+          } catch (eReset) {}
+          window.mcEnsureWindsorHeroSrc(v);
+          v.addEventListener("loadedmetadata", seekAndPlay, { once: true });
+        },
+        { once: true }
+      );
     }
+  };
+
+  function startHeroVideoAtSeven() {
+    var v = document.querySelector("#slideshow-container video.mc-hero-video-el");
+    if (!v) return;
+    window.mcPlayWindsorHeroAtSeven(v);
   }
 
   if (document.readyState === "loading") {
@@ -1972,17 +2020,22 @@ document.addEventListener("DOMContentLoaded", function () {
   var video = document.querySelector(".mc-hero-video-el");
   if (!video) return;
 
-  var startTime = 4;
+  var startTime = 7;
   var hasStarted = false;
 
   function revealVideo() {
     video.classList.remove("is-preloading");
     video.classList.add("is-ready");
+    video.style.setProperty("opacity", "1", "important");
   }
 
   function seekAndPlay() {
     if (hasStarted) return;
     hasStarted = true;
+
+    if (typeof window.mcEnsureWindsorHeroSrc === "function") {
+      window.mcEnsureWindsorHeroSrc(video);
+    }
 
     video.pause();
 
@@ -1998,6 +2051,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     video.addEventListener("seeked", onSeeked);
     video.currentTime = startTime;
+  }
+
+  if (typeof window.mcPlayWindsorHeroAtSeven === "function") {
+    window.mcPlayWindsorHeroAtSeven(video);
+    return;
   }
 
   if (video.readyState >= 1) {
@@ -21613,21 +21671,25 @@ s0.parentNode.insertBefore(s1,s0);
       v.style.setProperty("opacity", "1", "important");
       v.style.setProperty("z-index", "1", "important");
 
-      v.muted = true;
-      v.loop = true;
-      v.playsInline = true;
-      v.autoplay = true;
+      if (typeof window.mcPlayWindsorHeroAtSeven === "function") {
+        window.mcPlayWindsorHeroAtSeven(v);
+      } else {
+        v.muted = true;
+        v.loop = true;
+        v.playsInline = true;
+        v.autoplay = true;
 
-      if (!v.dataset.mcStartedAtSeven) {
+        if (!v.dataset.mcStartedAtSeven) {
+          try {
+            v.dataset.mcStartedAtSeven = "1";
+            v.currentTime = 7;
+          } catch (eSeek) {}
+        }
+
         try {
-          v.dataset.mcStartedAtSeven = "1";
-          v.currentTime = 7;
-        } catch (eSeek) {}
+          v.play && v.play().catch(function () {});
+        } catch (ePlay) {}
       }
-
-      try {
-        v.play && v.play().catch(function () {});
-      } catch (ePlay) {}
     }
   }
 

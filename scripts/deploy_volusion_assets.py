@@ -35,6 +35,8 @@ CRITICAL = (
     "vspfiles/boards/save.php",
     "vspfiles/boards/delete.php",
     "vspfiles/boards/_auth.php",
+    "vspfiles/windsor-home.mp4",
+    "vspfiles/windsor.mp4",
 )
 
 OPTIONAL = (
