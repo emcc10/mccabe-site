@@ -1,0 +1,41 @@
+name: Deploy Windsor hero video
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "vspfiles/windsor-home.mp4"
+      - "vspfiles/windsor.mp4"
+      - "scripts/upload_windsor_home_video.py"
+      - ".github/workflows/deploy-windsor-video.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-windsor-video
+  cancel-in-progress: true
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python deps
+        run: pip3 install paramiko
+
+      - name: Upload Windsor hero MP4 files
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_windsor_home_video.py
+
+      - name: Verify live windsor-home.mp4 size
+        run: |
+          want=$(wc -c < vspfiles/windsor-home.mp4 | tr -d ' ')
+          live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=$(date +%s)" | wc -c | tr -d ' ')
+          echo "local=$want live=$live"
+          test "$live" = "$want"
