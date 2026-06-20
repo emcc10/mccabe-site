@@ -1800,7 +1800,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 </video>
 <script>
 (function () {
-  function startHeroVideo() {
+  function startHeroVideoAtSeven() {
     var v = document.querySelector("#slideshow-container video.mc-hero-video-el");
     if (!v) return;
 
@@ -1809,26 +1809,30 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     v.playsInline = true;
     v.autoplay = true;
 
-    function playFromStart() {
+    function seekAndPlay() {
       try {
+        if (!v.dataset.mcStartedAtSeven) {
+          v.dataset.mcStartedAtSeven = "1";
+          v.currentTime = 7;
+        }
         v.play && v.play().catch(function () {});
       } catch (e) {}
     }
 
     if (v.readyState >= 1) {
-      playFromStart();
+      seekAndPlay();
     } else {
-      v.addEventListener("loadedmetadata", playFromStart, { once: true });
+      v.addEventListener("loadedmetadata", seekAndPlay, { once: true });
     }
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", startHeroVideo);
+    document.addEventListener("DOMContentLoaded", startHeroVideoAtSeven);
   } else {
-    startHeroVideo();
+    startHeroVideoAtSeven();
   }
 
-  window.addEventListener("load", startHeroVideo);
+  window.addEventListener("load", startHeroVideoAtSeven);
 })();
 </script>
  <div class="mc-hero-overlay">
@@ -21509,6 +21513,13 @@ s0.parentNode.insertBefore(s1,s0);
       v.loop = true;
       v.playsInline = true;
       v.autoplay = true;
+
+      if (!v.dataset.mcStartedAtSeven) {
+        try {
+          v.dataset.mcStartedAtSeven = "1";
+          v.currentTime = 7;
+        } catch (eSeek) {}
+      }
 
       try {
         v.play && v.play().catch(function () {});
