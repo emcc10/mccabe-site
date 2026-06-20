@@ -523,6 +523,86 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
+<script>
+(function () {
+  var FRAG_URL = '/v/vspfiles/category-landings/cat142-bedroom.html?v=20260620';
+
+  function mcCat142Page1() {
+    try {
+      var path = (location.pathname || '').toLowerCase();
+      if (!/-s\/142\.html?$/i.test(path)) return false;
+      var q = location.search || '';
+      if (/(?:^|[?&])page=(?!1(?:&|$))[^&]+/i.test(q)) return false;
+      var scripts = document.querySelectorAll('#content_area script');
+      var i;
+      for (i = 0; i < scripts.length; i++) {
+        var t = scripts[i].textContent || '';
+        if (/SearchParams\s*=/.test(t) && /cat=142/i.test(t)) {
+          if (/page=\d+/i.test(t) && !/page=1(?:&|'|"|\s|;|$)/i.test(t)) return false;
+          break;
+        }
+      }
+      var pageInp = document.querySelector('input[title="Go to page"]');
+      if (pageInp && String(pageInp.value || '1').trim() !== '1') return false;
+      return true;
+    } catch (eCat142) {
+      return false;
+    }
+  }
+
+  function mcInsertCat142Bedroom(html) {
+    if (!html || document.getElementById('mc-cat-bedroom')) return true;
+    var form = document.getElementById('MainForm');
+    if (!form || !form.parentNode) return false;
+    var mount = document.createElement('div');
+    mount.innerHTML = html;
+    while (mount.firstChild) {
+      form.parentNode.insertBefore(mount.firstChild, form);
+    }
+    return true;
+  }
+
+  var fetchStarted = false;
+  function mcLoadCat142Bedroom() {
+    if (!mcCat142Page1() || document.getElementById('mc-cat-bedroom')) return;
+    if (fetchStarted) return;
+    fetchStarted = true;
+    fetch(FRAG_URL, { credentials: 'same-origin' })
+      .then(function (res) {
+        return res.ok ? res.text() : '';
+      })
+      .then(function (html) {
+        mcInsertCat142Bedroom(html);
+      })
+      .catch(function () {
+        fetchStarted = false;
+      });
+  }
+
+  function mcTryCat142Bedroom() {
+    if (!mcCat142Page1()) return;
+    if (document.getElementById('mc-cat-bedroom')) return;
+    mcLoadCat142Bedroom();
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries += 1;
+      if (document.getElementById('mc-cat-bedroom') || !mcCat142Page1()) {
+        clearInterval(timer);
+        return;
+      }
+      if (!fetchStarted) mcLoadCat142Bedroom();
+      if (tries > 50) clearInterval(timer);
+    }, 100);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mcTryCat142Bedroom);
+  } else {
+    mcTryCat142Bedroom();
+  }
+  window.addEventListener('load', mcTryCat142Bedroom);
+})();
+</script>
 <!-- MC_DEPLOY_VERIFY_20260607revertplpmat: reverted gray PLP thumb mats from 7516154 -->
 <!-- MC_CSS_DEPLOY_VERIFY_20260607memberpricing: same token as /v/vspfiles/css/custom-safe.css line 1 -->
 <meta name="mc-deploy-verify" content="20260619layout4">
