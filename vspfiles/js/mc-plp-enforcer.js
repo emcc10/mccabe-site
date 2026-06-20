@@ -759,4 +759,84 @@
   [0, 400, 1500].forEach(function (ms) {
     global.setTimeout(loadPdpAuthCtaFix, ms);
   });
+
+  /* MC_CAT142_BEDROOM_LANDING — inject Steve Silver bedroom PLP hero (template rebake lags). */
+  (function cat142BedroomLanding(doc, win) {
+    var FRAG_URL = "/v/vspfiles/category-landings/cat142-bedroom.html?v=20260620";
+    var guard = "__MC_CAT142_BEDROOM__";
+
+    function page1() {
+      try {
+        var path = String(win.location.pathname || "").toLowerCase();
+        if (!/-s\/142\.html?$/i.test(path)) return false;
+        var q = win.location.search || "";
+        if (/(?:^|[?&])page=(?!1(?:&|$))[^&]+/i.test(q)) return false;
+        var scripts = doc.querySelectorAll("#content_area script");
+        var i;
+        for (i = 0; i < scripts.length; i++) {
+          var t = scripts[i].textContent || "";
+          if (/SearchParams\s*=/.test(t) && /cat=142/i.test(t)) {
+            if (/page=\d+/i.test(t) && !/page=1(?:&|'|"|\s|;|$)/i.test(t)) return false;
+            break;
+          }
+        }
+        var pageInp = doc.querySelector('input[title="Go to page"]');
+        if (pageInp && String(pageInp.value || "1").trim() !== "1") return false;
+        return true;
+      } catch (eP1) {
+        return false;
+      }
+    }
+
+    function insert(html) {
+      if (!html || doc.getElementById("mc-cat-bedroom")) return true;
+      var form = doc.getElementById("MainForm");
+      if (!form || !form.parentNode) return false;
+      var mount = doc.createElement("div");
+      mount.innerHTML = html;
+      while (mount.firstChild) {
+        form.parentNode.insertBefore(mount.firstChild, form);
+      }
+      return true;
+    }
+
+    var fetchStarted = false;
+    function load() {
+      if (!page1() || doc.getElementById("mc-cat-bedroom") || fetchStarted) return;
+      fetchStarted = true;
+      win
+        .fetch(FRAG_URL, { credentials: "same-origin" })
+        .then(function (res) {
+          return res.ok ? res.text() : "";
+        })
+        .then(insert)
+        .catch(function () {
+          fetchStarted = false;
+        });
+    }
+
+    function tryLoad() {
+      if (!page1() || doc.getElementById("mc-cat-bedroom")) return;
+      load();
+      var tries = 0;
+      var timer = win.setInterval(function () {
+        tries += 1;
+        if (doc.getElementById("mc-cat-bedroom") || !page1()) {
+          win.clearInterval(timer);
+          return;
+        }
+        if (!fetchStarted) load();
+        if (tries > 50) win.clearInterval(timer);
+      }, 100);
+    }
+
+    if (win[guard]) return;
+    win[guard] = true;
+    if (doc.readyState === "loading") {
+      doc.addEventListener("DOMContentLoaded", tryLoad);
+    } else {
+      tryLoad();
+    }
+    win.addEventListener("load", tryLoad);
+  })(global.document, global);
 })(window);

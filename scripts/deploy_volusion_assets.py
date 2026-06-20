@@ -38,6 +38,7 @@ CRITICAL = (
     "vspfiles/boards/_auth.php",
     "vspfiles/windsor-home.mp4",
     "vspfiles/windsor.mp4",
+    "vspfiles/category-landings/cat142-bedroom.html",
 )
 
 OPTIONAL = (
