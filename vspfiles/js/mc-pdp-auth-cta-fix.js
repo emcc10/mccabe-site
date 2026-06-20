@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620windsor1
-  var VERSION = "20260620windsor1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620collection1
+  var VERSION = "20260620collection1";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -7090,8 +7090,29 @@
     }
   }
 
+
+  function ensureBedroomCollectionSection() {
+    if (global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ || global.__MC_BEDROOM_COLLECTION_SECTION_20260620__) return;
+    if (global.document.querySelector("script[src*='mc-bedroom-collection-section.js']")) return;
+    try {
+      global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = true;
+      var s = global.document.createElement("script");
+      s.src = "/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection1&mcrd=" + Date.now();
+      s.async = true;
+      s.onload = function () {
+        global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = false;
+      };
+      s.onerror = function () {
+        global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = false;
+      };
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eLoadCollection) {
+      global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = false;
+    }
+  }
   function runPatch() {
     if (!isProductPdp()) return;
+    ensureBedroomCollectionSection();
     var sectional = isSectionalPdpPage();
     // Pause the MutationObserver for the duration of this patch (plus a couple of
     // animation frames) so the DOM moves/styles we apply here don't get observed
@@ -7325,7 +7346,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260620windsor1";
+  var WANT = "20260620collection1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
