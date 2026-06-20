@@ -6,7 +6,7 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260620collection2";
+  var LAYOUT_VER = "20260620collection3";
   var AUTH_LAYOUT_VER = "20260617pdp76";
   var moTimer = null;
   var moBound = false;
@@ -21,6 +21,223 @@
 
   function isPDP() {
     return !!qs('input[name="ProductCode"]') && !!(qs("#content_area") || qs("#v65-product-parent"));
+  }
+
+  var BEDROOM_PIECE_RE = /\b(chest|dresser|king bed|queen bed|bed|nightstand|night stand|mirror|armoire|wardrobe|media chest|gentlemans chest|gentleman's chest|drawer chest|door chest|bachelor chest|california king bed|cal king bed|twin bed|full bed)\b/i;
+
+  function mcBedroomText(el) {
+    return (el && String(el.textContent || (el.getAttribute && el.getAttribute("content")) || "").replace(/\s+/g, " ").trim()) || "";
+  }
+
+  function mcBedroomCleanName(value) {
+    return String(value || "")
+      .replace(/\s+-\s+McCabe.*$/i, "")
+      .replace(/\s+\|\s+McCabe.*$/i, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function mcBedroomCurrentName() {
+    var candidates = [
+      qs('h1[itemprop="name"]'),
+      qs('[itemprop="name"]'),
+      qs("#productname"),
+      qs(".productnamecolorLARGE"),
+      qs(".productnamecolor"),
+      qs("h1"),
+      qs('meta[property="og:title"]'),
+      qs('meta[name="twitter:title"]')
+    ];
+    for (var i = 0; i < candidates.length; i++) {
+      var name = mcBedroomCleanName(mcBedroomText(candidates[i]) || (candidates[i] && candidates[i].content));
+      if (name && name.length > 2) return name;
+    }
+    return mcBedroomCleanName(global.document.title);
+  }
+
+  function mcBedroomCollectionFromName(name) {
+    name = mcBedroomCleanName(name);
+    if (!BEDROOM_PIECE_RE.test(name)) return "";
+    var match = name.match(new RegExp("^(.*?)\\s+" + BEDROOM_PIECE_RE.source + "(?:[\\s,\\-]|$)", "i"));
+    if (match && match[1]) return mcBedroomCleanName(match[1]);
+    var words = name.split(/\s+/);
+    if (/^the$/i.test(words[0]) && words.length > 2) return words.slice(0, 2).join(" ");
+    if (words.length > 2) return words.slice(0, 2).join(" ");
+    if (words.length > 1) return words.join(" ");
+    return "";
+  }
+
+  function mcBedroomAbs(url) {
+    if (!url) return "";
+    try {
+      return new URL(url, global.location.href).href;
+    } catch (eUrl) {
+      return url;
+    }
+  }
+
+  function mcBedroomProductCode() {
+    return String(
+      global.global_Current_ProductCode ||
+        (qs('input[name="ProductCode"]') && qs('input[name="ProductCode"]').value) ||
+        ""
+    ).toLowerCase();
+  }
+
+  function mcBedroomIsCurrentUrl(url) {
+    var href = String(url || "").toLowerCase();
+    var code = mcBedroomProductCode();
+    return (
+      href &&
+      (href.replace(/\/$/, "") === String(global.location.href).toLowerCase().replace(/\/$/, "") ||
+        href.replace(/\/$/, "") === String(global.location.pathname).toLowerCase().replace(/\/$/, "") ||
+        (code && href.indexOf(code) > -1))
+    );
+  }
+
+  function mcBedroomRelatedAnchor() {
+    var direct =
+      qs("#v65-product-related") ||
+      qs("#related_products") ||
+      qs("#ProductDetail_ProductDetails_divRelatedProducts") ||
+      qs('[id*="RelatedProducts"]') ||
+      qs(".related-products") ||
+      qs(".v65-product-related");
+    if (direct) return direct;
+    var headings = qsa("h2,h3,h4,.v65-product-related-header,.related-title,.section-title");
+    for (var i = 0; i < headings.length; i++) {
+      if (/related\s+items|you\s+may\s+also\s+like|related\s+products/i.test(mcBedroomText(headings[i]))) {
+        return (headings[i].closest && headings[i].closest("table,section,div")) || headings[i];
+      }
+    }
+    return null;
+  }
+
+  function mcBedroomAddCss() {
+    if (qs("#mc-bedroom-collection-css")) return;
+    var st = global.document.createElement("style");
+    st.id = "mc-bedroom-collection-css";
+    st.textContent =
+      "#mc-bedroom-collection{clear:both;margin:34px 0 26px;padding:22px 0;border-top:1px solid #ddd;border-bottom:1px solid #ddd;font-family:Inter,Arial,sans-serif}" +
+      "#mc-bedroom-collection .mc-collection-heading{margin:0 0 16px;color:#222;font-size:22px;font-weight:400;line-height:1.25;letter-spacing:0;text-transform:none}" +
+      "#mc-bedroom-collection .mc-collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}" +
+      "#mc-bedroom-collection .mc-collection-card{display:block;color:#333;text-decoration:none}" +
+      "#mc-bedroom-collection .mc-collection-image{display:block;width:100%;aspect-ratio:1/1;background:#f6f4f0;border:1px solid #ddd;overflow:hidden}" +
+      "#mc-bedroom-collection .mc-collection-image img{display:block;width:100%;height:100%;object-fit:contain}" +
+      "#mc-bedroom-collection .mc-collection-name{display:block;margin:9px 0 0;font-size:14px;line-height:1.35;color:#333}" +
+      "#mc-bedroom-collection .mc-collection-price{display:block;margin:4px 0 0;font-size:13px;line-height:1.3;color:#666}" +
+      "#mc-bedroom-collection .mc-collection-card:hover .mc-collection-name{text-decoration:underline}" +
+      "@media(max-width:640px){#mc-bedroom-collection{margin:26px 0 22px;padding:18px 0}#mc-bedroom-collection .mc-collection-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}#mc-bedroom-collection .mc-collection-heading{font-size:20px}}";
+    (global.document.head || global.document.documentElement).appendChild(st);
+  }
+
+  function mcBedroomCardRoot(anchor) {
+    return (
+      (anchor.closest &&
+        anchor.closest(".v-product, .product, .product-card, .product-wrapper, .product-row, td, li, article, div")) ||
+      anchor
+    );
+  }
+
+  function mcBedroomFindName(anchor, card) {
+    var img = qs("img", anchor) || qs("img", card);
+    return mcBedroomCleanName(
+      mcBedroomText(qs(".productnamecolor, .productnamecolorSMALL, .product-name, .productname, [itemprop='name']", card)) ||
+        mcBedroomText(anchor) ||
+        (anchor.getAttribute && anchor.getAttribute("title")) ||
+        (img && (img.alt || img.title))
+    );
+  }
+
+  function mcBedroomFindPrice(card) {
+    return mcBedroomText(qs(".productprice, .price, [itemprop='price'], .saleprice, .ourprice", card));
+  }
+
+  function mcBedroomFindImage(anchor, card) {
+    var img = qs("img", anchor) || qs("img", card);
+    return img ? mcBedroomAbs(img.getAttribute("data-src") || img.getAttribute("data-original") || img.getAttribute("src")) : "";
+  }
+
+  function mcBedroomProductsFromDoc(doc, collection, current) {
+    var seen = {};
+    return Array.prototype.map
+      .call(doc.querySelectorAll("a[href]"), function (anchor) {
+        var href = mcBedroomAbs(anchor.getAttribute("href"));
+        if (!href || !/product|product-p|\/p\/|ProductDetails\.asp|-p\//i.test(href)) return null;
+        var card = mcBedroomCardRoot(anchor);
+        var name = mcBedroomFindName(anchor, card);
+        if (!name || name.toLowerCase() === current.toLowerCase()) return null;
+        if (name.toLowerCase().indexOf(collection.toLowerCase()) === -1) return null;
+        if (!BEDROOM_PIECE_RE.test(name)) return null;
+        if (mcBedroomIsCurrentUrl(href)) return null;
+        var key = href.split("#")[0].split("?")[0].toLowerCase();
+        if (seen[key]) return null;
+        seen[key] = true;
+        return { name: name, href: href, image: mcBedroomFindImage(anchor, card), price: mcBedroomFindPrice(card) };
+      })
+      .filter(Boolean);
+  }
+
+  function mcBedroomRender(products, collection) {
+    if (!products.length || qs("#mc-bedroom-collection")) return;
+    mcBedroomAddCss();
+    var section = global.document.createElement("section");
+    section.id = "mc-bedroom-collection";
+    section.setAttribute("aria-labelledby", "mc-bedroom-collection-heading");
+    section.setAttribute("data-mc-collection-source", collection);
+    var h = global.document.createElement("h2");
+    h.id = "mc-bedroom-collection-heading";
+    h.className = "mc-collection-heading";
+    h.textContent = "The Collection";
+    section.appendChild(h);
+    var grid = global.document.createElement("div");
+    grid.className = "mc-collection-grid";
+    products.forEach(function (product) {
+      var a = global.document.createElement("a");
+      a.className = "mc-collection-card";
+      a.href = product.href;
+      var media = global.document.createElement("span");
+      media.className = "mc-collection-image";
+      if (product.image) {
+        var img = global.document.createElement("img");
+        img.loading = "lazy";
+        img.alt = product.name;
+        img.src = product.image;
+        media.appendChild(img);
+      }
+      a.appendChild(media);
+      var name = global.document.createElement("span");
+      name.className = "mc-collection-name";
+      name.textContent = product.name;
+      a.appendChild(name);
+      if (product.price) {
+        var price = global.document.createElement("span");
+        price.className = "mc-collection-price";
+        price.textContent = product.price;
+        a.appendChild(price);
+      }
+      grid.appendChild(a);
+    });
+    section.appendChild(grid);
+    var related = mcBedroomRelatedAnchor();
+    if (related && related.parentNode) related.parentNode.insertBefore(section, related);
+  }
+
+  function renderBedroomCollectionFallback() {
+    if (qs("#mc-bedroom-collection")) return;
+    var name = mcBedroomCurrentName();
+    var collection = mcBedroomCollectionFromName(name);
+    if (!collection) return;
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/SearchResults.asp?Search=" + encodeURIComponent(collection), true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4 || xhr.status < 200 || xhr.status >= 300) return;
+        var doc = new DOMParser().parseFromString(xhr.responseText, "text/html");
+        mcBedroomRender(mcBedroomProductsFromDoc(doc, collection, name), collection);
+      };
+      xhr.send();
+    } catch (eBedroomFallback) {}
   }
 
   function ensureBedroomCollectionSection() {
@@ -1147,6 +1364,8 @@
 
   function boot() {
     ensureBedroomCollectionSection();
+    global.setTimeout(renderBedroomCollectionFallback, 700);
+    global.setTimeout(renderBedroomCollectionFallback, 1800);
     if (mcNormalizePdpLayout()) return;
     bindMutationObserver();
   }

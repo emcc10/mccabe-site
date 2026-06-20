@@ -44,12 +44,13 @@
     name=cleanName(name);
     if(!PIECE_RE.test(name))return'';
 
-    var match=name.match(new RegExp('^(.*?)\\s+'+PIECE_RE.source+'(?:\\s|$)','i'));
+    var match=name.match(new RegExp('^(.*?)\\s+'+PIECE_RE.source+'(?:[\\s,\\-]|$)','i'));
     if(match&&match[1])return cleanName(match[1]);
 
     var words=name.split(/\s+/);
     if(/^the$/i.test(words[0])&&words.length>2)return words.slice(0,2).join(' ');
-    if(words.length>1)return words[0];
+    if(words.length>2)return words.slice(0,2).join(' ');
+    if(words.length>1)return words.join(' ');
     return'';
   }
   function productCode(){
