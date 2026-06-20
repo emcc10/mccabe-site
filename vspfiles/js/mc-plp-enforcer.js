@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260628d — site-wide strip .00 from prices (full content sweep); PLP thumbnails
+ * MC_PLP_ENFORCER_20260628e — site-wide strip .00 from prices (full content sweep); PLP thumbnails
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260628d";
+  var VERSION = "20260628e";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -27,7 +27,7 @@
       "html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box," +
       "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-image-box{" +
       "display:flex!important;align-items:center!important;justify-content:center!important;" +
-      "width:100%!important;height:260px!important;overflow:visible!important;background:#fff!important;padding:0!important}" +
+      "width:100%!important;height:280px!important;overflow:visible!important;background:#fff!important;padding:0!important}" +
       "html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box>img," +
       "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-image-box>img{" +
       "width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;" +
@@ -52,7 +52,7 @@
   })();
 
   var TARGET_VISIBLE_W = 300;
-  var BOX_HEIGHT = 260;
+  var BOX_HEIGHT = 280;
   var NORMALIZED_W = 420;
   var NORMALIZED_H = 260;
   var BOUNDS_JSON = "/v/vspfiles/js/mc-plp-sofa-bounds.json";

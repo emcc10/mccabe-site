@@ -525,8 +525,8 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 </script>
 <!-- MC_DEPLOY_VERIFY_20260607revertplpmat: reverted gray PLP thumb mats from 7516154 -->
 <!-- MC_CSS_DEPLOY_VERIFY_20260607memberpricing: same token as /v/vspfiles/css/custom-safe.css line 1 -->
-<meta name="mc-deploy-verify" content="20260619layout3">
-<meta name="mc-pdp-cache-buster" content="20260619layout3">
+<meta name="mc-deploy-verify" content="20260619layout4">
+<meta name="mc-pdp-cache-buster" content="20260619layout4">
 <meta name="mc-live-deploy-check" content="20260615-room-planner-removed">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -549,7 +549,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260619layout3" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260619layout4" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -1498,7 +1498,7 @@ document.addEventListener("DOMContentLoaded", function () {
 })(window, document);
   </script>
   <script id="mc-plp-enforcer-bridge">
-(function(g,d){var W="20260628d",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
+(function(g,d){var W="20260628e",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
 function cat(){try{var p=String(g.location.pathname||"").toLowerCase();
 var isHome =
@@ -18035,18 +18035,18 @@ window.addEventListener('mcMemberPricingReady', function () {
     max-width: 96vw !important;
   }
 
-  /* 2) Category grid — white thumb stage (match custom-safe --mc-plp-*) */
+  /* 2) Category grid — full product photo visible (contain, centered; no top crop) */
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product a.v-product__img,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
-    height: 220px !important;
-    min-height: 220px !important;
-    max-height: 220px !important;
-    overflow: hidden !important;
-    padding: 12px !important;
+    height: 260px !important;
+    min-height: 260px !important;
+    max-height: 260px !important;
+    overflow: visible !important;
+    padding: 8px !important;
     margin: 0 !important;
     display: flex !important;
-    align-items: flex-end !important;
+    align-items: center !important;
     justify-content: center !important;
     background: #ffffff !important;
     box-sizing: border-box !important;
@@ -18055,11 +18055,13 @@ window.addEventListener('mcMemberPricingReady', function () {
   :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
     width: 100% !important;
-    height: 172px !important;
+    height: 100% !important;
     max-width: 100% !important;
-    max-height: 172px !important;
+    max-height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
     object-fit: contain !important;
-    object-position: center bottom !important;
+    object-position: center center !important;
     margin: 0 auto !important;
     border: 0 !important;
   }
@@ -18818,7 +18820,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
 <link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260520plp-mat" id="mc-mccabe-overrides-body-last" />
-<link rel="stylesheet" href="/v/vspfiles/css/mc-plp-body-last.css?v=20260627b" id="mc-plp-body-last-css" />
+<link rel="stylesheet" href="/v/vspfiles/css/mc-plp-body-last.css?v=20260628e" id="mc-plp-body-last-css" />
 <link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521type" id="mc-live-patch-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
@@ -21272,7 +21274,7 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260628d"></script>
+  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260628e"></script>
  
   <script id="mc-my-boards-template-boot">
 (function () {

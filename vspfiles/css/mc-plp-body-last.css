@@ -2,7 +2,7 @@
 
 .mc-plp-image-box {
   width: 100% !important;
-  height: 260px !important;
+  height: 280px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -38,7 +38,7 @@ html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img.mc
 html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box,
 html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-image-box {
   width: 100% !important;
-  height: 260px !important;
+  height: 280px !important;
   min-height: 0 !important;
   max-height: none !important;
   display: flex !important;
