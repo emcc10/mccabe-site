@@ -34,7 +34,7 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero5
-  var VERSION = "20260620returncat1";
+  var VERSION = "20260620variants1";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -3284,6 +3284,101 @@
     return m ? String(m[1] || "").toUpperCase() : "";
   }
 
+  function resolveConfiguredColorProductCode(ctx) {
+    var fromPage = resolveSoftGoodsProductCode();
+    if (fromPage) return fromPage;
+    if (ctx && ctx.productCode) return String(ctx.productCode).trim().toUpperCase();
+    return "";
+  }
+
+  function configuredColorImageBelongsToProduct(src, productCode) {
+    if (!src || !productCode) return false;
+    var hay = String(src).toUpperCase();
+    var pc = String(productCode).trim().toUpperCase();
+    if (hay.indexOf(pc) !== -1) return true;
+    return hay.indexOf(pc.replace(/-/g, "%2D")) !== -1;
+  }
+
+  function resetConfiguredColorStateForProduct(productCode) {
+    var pc = String(productCode || "").trim().toUpperCase();
+    if (!pc) return;
+    var prev = "";
+    try {
+      prev = String(global.__MC_CONFIGURED_COLOR_PRODUCT__ || "").trim().toUpperCase();
+    } catch (ePrevPc) {}
+    if (prev && prev === pc) return;
+    configuredColorActiveEntry = null;
+    configuredColorActiveSrc = "";
+    configuredColorDefaultSrc = "";
+    configuredColorLastAppliedOptionId = "";
+    configuredColorEnforceUntil = 0;
+    try {
+      delete global.__MC_CONFIGURED_COLOR_ACTIVE_OPTION_ID__;
+      global.__MC_CONFIGURED_COLOR_INIT__ = false;
+    } catch (eResetGlobal) {}
+    global.__MC_CONFIGURED_COLOR_PRODUCT__ = pc;
+  }
+
+  function buildProductScopedColorImageCandidates(productCode, fileName) {
+    if (!productCode || !fileName) return [];
+    var pc = String(productCode).trim().toUpperCase();
+    var base = String(fileName).trim();
+    if (
+      base.toUpperCase().indexOf(pc) === -1 &&
+      base.toUpperCase().indexOf(pc.replace(/-/g, "_")) === -1
+    ) {
+      return [];
+    }
+    return buildConfiguredColorImageCandidates(base, pc).filter(function (url) {
+      return configuredColorImageBelongsToProduct(url, pc);
+    });
+  }
+
+  function loadProductScopedColorImage(productCode, fileName, done) {
+    loadConfiguredColorImage(
+      buildProductScopedColorImageCandidates(productCode, fileName),
+      function (resolved) {
+        if (resolved && configuredColorImageBelongsToProduct(resolved, productCode)) {
+          done(resolved);
+          return;
+        }
+        done("");
+      }
+    );
+  }
+
+  function bindConfiguredColorHeroGuard(productCode) {
+    var pc = String(productCode || "").trim().toUpperCase();
+    if (!pc) return;
+    var img = global.document.getElementById("product_photo");
+    if (!img || img.__mcConfiguredColorHeroGuard) return;
+    img.__mcConfiguredColorHeroGuard = true;
+    try {
+      new global.MutationObserver(function () {
+        if (!isSaranoniPdpPage()) return;
+        var cur = img.getAttribute("src") || "";
+        if (!cur || cur.indexOf("/manufacturers/") !== -1) return;
+        if (configuredColorActiveSrc && cur === configuredColorActiveSrc) return;
+        if (configuredColorImageBelongsToProduct(cur, pc)) return;
+        if (configuredColorActiveSrc) {
+          setConfiguredColorPhotoSrc(
+            configuredColorActiveSrc,
+            configuredColorActiveEntry ? configuredColorActiveEntry.label : "",
+            pc
+          );
+          return;
+        }
+        var ctx = findConfiguredColorSwatchContext();
+        var entry = ctx ? findConfiguredColorSelectedEntry(ctx) : null;
+        if (entry && entry.mainImage) {
+          loadProductScopedColorImage(pc, entry.mainImage, function (resolved) {
+            if (resolved) setConfiguredColorPhotoSrc(resolved, entry.label, pc);
+          });
+        }
+      }).observe(img, { attributes: true, attributeFilter: ["src"] });
+    } catch (eHeroGuard) {}
+  }
+
   function optionMatchesConfiguredColorEntry(opt, entry) {
     if (!opt || !entry) return false;
     var val = String(opt.value || "");
@@ -3424,13 +3519,11 @@
     return /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color)/.test(labelHay);
   }
 
-  function buildConfiguredColorThumbCandidates(entry) {
-    var out = buildConfiguredColorImageCandidates(entry.swatchImage);
-    if (entry.mainImage) {
-      buildConfiguredColorImageCandidates(entry.mainImage).forEach(function (candidate) {
-        if (candidate && out.indexOf(candidate) === -1) out.push(candidate);
-      });
-    }
+  function buildConfiguredColorThumbCandidates(entry, productCode) {
+    var out = buildProductScopedColorImageCandidates(productCode, entry.swatchImage);
+    buildProductScopedColorImageCandidates(productCode, entry.mainImage).forEach(function (candidate) {
+      if (candidate && out.indexOf(candidate) === -1) out.push(candidate);
+    });
     return out;
   }
 
@@ -3438,6 +3531,7 @@
     // Bean bag PDPs have their own native swatch system (#beanbag-swatch-wrapper);
     // never let the configured-color swatches take over those pages.
     if (isBeanBagPdpPage()) return null;
+    var pagePc = resolveConfiguredColorProductCode(null);
     var selects = global.document.querySelectorAll("#options_table select, #v65-product-parent select");
     var best = null;
     var i;
@@ -3449,6 +3543,7 @@
       if (sarSel.classList && sarSel.classList.contains("mc-native-leather")) continue;
       var sarPc = parseProductCodeFromSelectName(sarSel.name);
       if (!/^SAR/i.test(sarPc)) continue;
+      if (pagePc && sarPc !== pagePc) continue;
       if (!isSaranoniColorSelect(sarSel)) continue;
       var sarEntries = buildDataDrivenSaranoniEntries(sarSel, sarPc);
       if (!sarEntries.length) continue;
@@ -3490,6 +3585,7 @@
       if (sel.classList && sel.classList.contains("mc-native-leather")) continue;
       var pc = parseProductCodeFromSelectName(sel.name);
       if (!/^SAR/i.test(pc)) continue;
+      if (pagePc && pc !== pagePc) continue;
       if (!isSaranoniColorSelect(sel)) continue;
       var dynEntries = buildDataDrivenSaranoniEntries(sel, pc);
       if (!dynEntries.length) continue;
@@ -3504,7 +3600,7 @@
     return null;
   }
 
-  function buildConfiguredColorImageCandidates(fileName) {
+  function buildConfiguredColorImageCandidates(fileName, productCode) {
     var candidates = [];
     if (!fileName) return candidates;
     candidates.push(
@@ -3523,9 +3619,11 @@
     }
     candidates.push("/v/vspfiles/photos/" + fileName);
     candidates.push("/v/vspfiles/images/" + fileName);
-    var mainImg = global.document.getElementById("product_photo");
-    var src = mainImg && mainImg.getAttribute ? mainImg.getAttribute("src") || "" : "";
-    if (src) candidates.push(src.replace(/[^/]+$/, fileName));
+    if (!productCode) {
+      var mainImg = global.document.getElementById("product_photo");
+      var src = mainImg && mainImg.getAttribute ? mainImg.getAttribute("src") || "" : "";
+      if (src) candidates.push(src.replace(/[^/]+$/, fileName));
+    }
     return candidates.filter(function (item, idx, arr) {
       return item && arr.indexOf(item) === idx;
     });
@@ -3549,9 +3647,10 @@
     tryNext();
   }
 
-  function setConfiguredColorPhotoSrc(resolvedSrc, label) {
+  function setConfiguredColorPhotoSrc(resolvedSrc, label, productCode) {
     var mainImg = global.document.getElementById("product_photo");
     if (!mainImg || !resolvedSrc) return;
+    if (productCode && !configuredColorImageBelongsToProduct(resolvedSrc, productCode)) return;
     try {
       if ((mainImg.getAttribute("src") || "") !== resolvedSrc) mainImg.src = resolvedSrc;
       if (mainImg.hasAttribute("srcset")) mainImg.removeAttribute("srcset");
@@ -3642,12 +3741,52 @@
       ensureConfiguredColorCartField(ctx.select, opt, null);
     }
     syncConfiguredColorSwatchUi(ctx, true, forcePhoto);
-    if (isSaranoniPdpPage()) syncSaranoniColorPicker(ctx);
+    if (isSaranoniPdpPage()) {
+      syncSaranoniColorPicker(ctx);
+      [0, 120, 400].forEach(function (delay) {
+        global.setTimeout(function () {
+          applyConfiguredColorMainPhoto(entry.mainImage, entry.label, resolveConfiguredColorProductCode(ctx));
+        }, delay);
+      });
+    }
     syncSaranoniAltviewActiveState();
     return true;
   }
 
-  function enforceConfiguredColorPhoto() {
+  function applyConfiguredColorMainPhoto(fileName, label, productCode) {
+    var mainImg = global.document.getElementById("product_photo");
+    if (!mainImg || !fileName) return;
+    var pc = productCode || resolveConfiguredColorProductCode(null);
+    var previousSrc = mainImg.getAttribute("src") || "";
+    if (
+      !configuredColorDefaultSrc &&
+      previousSrc &&
+      previousSrc.indexOf("/manufacturers/") === -1 &&
+      !configuredColorActiveEntry &&
+      (!pc || configuredColorImageBelongsToProduct(previousSrc, pc))
+    ) {
+      configuredColorDefaultSrc = previousSrc;
+    }
+    var token = String(Date.now()) + ":" + Math.random();
+    global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ = token;
+    loadProductScopedColorImage(pc, fileName, function (resolvedSrc) {
+      if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
+      var finalSrc = resolvedSrc;
+      if (!finalSrc && configuredColorActiveEntry) {
+        finalSrc = previousSrc;
+      }
+      if (!finalSrc) finalSrc = previousSrc || configuredColorDefaultSrc;
+      if (!finalSrc) return;
+      if (pc && !configuredColorImageBelongsToProduct(finalSrc, pc)) return;
+      configuredColorActiveSrc = finalSrc;
+      configuredColorEnforceUntil = Date.now() + (configuredColorActiveEntry ? 8000 : 2500);
+      setConfiguredColorPhotoSrc(finalSrc, label, pc);
+      enforceConfiguredColorPhoto(pc);
+    });
+  }
+
+  function enforceConfiguredColorPhoto(productCode) {
+    var pc = productCode || resolveConfiguredColorProductCode(null);
     if (configuredColorEnforceTimer) return;
     configuredColorEnforceTimer = global.setInterval(function () {
       var enforceActive =
@@ -3658,45 +3797,22 @@
         configuredColorEnforceTimer = null;
         return;
       }
+      if (pc && !configuredColorImageBelongsToProduct(configuredColorActiveSrc, pc)) {
+        global.clearInterval(configuredColorEnforceTimer);
+        configuredColorEnforceTimer = null;
+        return;
+      }
       var mainImg = global.document.getElementById("product_photo");
       if (!mainImg) return;
       var cur = mainImg.getAttribute("src") || "";
       if (cur !== configuredColorActiveSrc) {
         setConfiguredColorPhotoSrc(
           configuredColorActiveSrc,
-          configuredColorActiveEntry ? configuredColorActiveEntry.label : ""
+          configuredColorActiveEntry ? configuredColorActiveEntry.label : "",
+          pc
         );
       }
     }, 120);
-  }
-
-  function applyConfiguredColorMainPhoto(fileName, label) {
-    var mainImg = global.document.getElementById("product_photo");
-    if (!mainImg || !fileName) return;
-    var previousSrc = mainImg.getAttribute("src") || "";
-    if (
-      !configuredColorDefaultSrc &&
-      previousSrc &&
-      previousSrc.indexOf("/manufacturers/") === -1 &&
-      !configuredColorActiveEntry
-    ) {
-      configuredColorDefaultSrc = previousSrc;
-    }
-    var token = String(Date.now()) + ":" + Math.random();
-    global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ = token;
-    loadConfiguredColorImage(buildConfiguredColorImageCandidates(fileName), function (resolvedSrc) {
-      if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
-      var finalSrc = resolvedSrc;
-      if (!finalSrc && configuredColorActiveEntry) {
-        finalSrc = previousSrc;
-      }
-      if (!finalSrc) finalSrc = previousSrc || configuredColorDefaultSrc;
-      if (!finalSrc) return;
-      configuredColorActiveSrc = finalSrc;
-      configuredColorEnforceUntil = Date.now() + (configuredColorActiveEntry ? 8000 : 2500);
-      setConfiguredColorPhotoSrc(finalSrc, label);
-      enforceConfiguredColorPhoto();
-    });
   }
 
   // Parse the trailing option-category id out of a Volusion select name,
@@ -3936,13 +4052,10 @@
       )
       .forEach(function (btn) {
         if (btn.style.display === "none") return;
-        var img = btn.querySelector("img");
-        var thumbSrc = img ? img.getAttribute("src") || "" : "";
-        if (!thumbSrc) return;
         visible.push({
           btn: btn,
           optionId: btn.getAttribute("data-option-id"),
-          thumbSrc: thumbSrc,
+          mainImage: btn.getAttribute("data-main-image") || "",
         });
       });
     var picker =
@@ -3958,10 +4071,10 @@
     }
     var signature =
       ctx.productCode +
-      "|" +
+      "|main|" +
       visible
         .map(function (v) {
-          return v.optionId + ":" + v.thumbSrc;
+          return v.optionId + ":" + v.mainImage;
         })
         .join(",");
     if (!picker) {
@@ -4007,10 +4120,12 @@
       a.setAttribute("data-option-id", item.optionId);
       a.setAttribute("data-label", entry.label);
       var altImg = global.document.createElement("img");
-      altImg.src = item.thumbSrc;
       altImg.alt = entry.label;
       altImg.className = "vCSS_img_alternate_product_photo mc-saranoni-alt-thumb";
       altImg.id = "alternate_product_photo_" + entry.optionId;
+      loadProductScopedColorImage(ctx.productCode, entry.mainImage, function (resolved) {
+        if (resolved) altImg.src = resolved;
+      });
       a.appendChild(altImg);
       a.addEventListener("click", function (e) {
         e.preventDefault();
@@ -4266,7 +4381,8 @@
         btn.setAttribute("data-label", entry.label);
         btn.innerHTML = '<img alt="' + escapeHtmlText(entry.label) + '" />';
         var img = btn.querySelector("img");
-        var candidates = buildConfiguredColorThumbCandidates(entry);
+        var productCode = resolveConfiguredColorProductCode(ctx);
+        var candidates = buildConfiguredColorThumbCandidates(entry, productCode);
         if (ctx.dataDriven) {
           probeState.pending++;
           var primarySrc = candidates[0] || "";
@@ -4275,7 +4391,10 @@
             if (settled) return;
             settled = true;
             probeState.pending--;
-            if (resolvedSrc) {
+            if (
+              resolvedSrc &&
+              configuredColorImageBelongsToProduct(resolvedSrc, productCode)
+            ) {
               probeState.loaded++;
               img.src = resolvedSrc;
               btn.style.display = "";
@@ -4292,21 +4411,42 @@
             img.src = primarySrc;
             btn.style.display = "";
             img.onload = function () {
-              settleDataDrivenSwatch(primarySrc);
+              if (configuredColorImageBelongsToProduct(primarySrc, productCode)) {
+                settleDataDrivenSwatch(primarySrc);
+              } else {
+                loadProductScopedColorImage(productCode, entry.swatchImage, function (swatchSrc) {
+                  if (swatchSrc) settleDataDrivenSwatch(swatchSrc);
+                  else loadProductScopedColorImage(productCode, entry.mainImage, settleDataDrivenSwatch);
+                });
+              }
             };
             img.onerror = function () {
-              loadConfiguredColorImage(candidates.slice(1), settleDataDrivenSwatch);
+              loadProductScopedColorImage(productCode, entry.swatchImage, function (swatchSrc) {
+                if (swatchSrc) settleDataDrivenSwatch(swatchSrc);
+                else loadProductScopedColorImage(productCode, entry.mainImage, settleDataDrivenSwatch);
+              });
             };
             global.setTimeout(function () {
               if (settled) return;
-              if (img.complete && img.naturalWidth > 0) settleDataDrivenSwatch(primarySrc);
+              if (img.complete && img.naturalWidth > 0) {
+                var curSrc = img.getAttribute("src") || "";
+                if (configuredColorImageBelongsToProduct(curSrc, productCode)) {
+                  settleDataDrivenSwatch(curSrc);
+                }
+              }
             }, 250);
           } else {
-            loadConfiguredColorImage(candidates, settleDataDrivenSwatch);
+            loadProductScopedColorImage(productCode, entry.swatchImage, function (swatchSrc) {
+              if (swatchSrc) settleDataDrivenSwatch(swatchSrc);
+              else loadProductScopedColorImage(productCode, entry.mainImage, settleDataDrivenSwatch);
+            });
           }
         } else {
-          loadConfiguredColorImage(candidates, function (resolvedSrc) {
-            img.src = resolvedSrc || candidates[0] || "";
+          loadProductScopedColorImage(productCode, entry.swatchImage, function (resolvedSrc) {
+            img.src =
+              resolvedSrc ||
+              buildProductScopedColorImageCandidates(productCode, entry.mainImage)[0] ||
+              "";
           });
         }
         rail.appendChild(btn);
@@ -4374,7 +4514,11 @@
         selected.optionId !== configuredColorLastAppliedOptionId ||
         !configuredColorActiveSrc
       ) {
-        applyConfiguredColorMainPhoto(selected.mainImage, selected.label);
+        applyConfiguredColorMainPhoto(
+          selected.mainImage,
+          selected.label,
+          resolveConfiguredColorProductCode(ctx)
+        );
         configuredColorLastAppliedOptionId = selected.optionId;
       }
     }
@@ -4417,6 +4561,9 @@
       }
       return;
     }
+    var productCode = resolveConfiguredColorProductCode(ctx);
+    resetConfiguredColorStateForProduct(productCode);
+    bindConfiguredColorHeroGuard(productCode);
     renderConfiguredColorSwatches(ctx);
     bindConfiguredColorSwatchSelect(ctx.select);
     restoreConfiguredColorActiveEntry(ctx);
