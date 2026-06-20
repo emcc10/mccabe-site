@@ -330,6 +330,11 @@ maybe_put_primary "vspfiles/js/mc-pdp-price-stack.js" "mc-pdp-price-stack" \
   "/vspfiles/js/mc-pdp-price-stack.js" \
   "vspfiles/js/mc-pdp-price-stack.js"
 
+maybe_put_primary "vspfiles/js/mc-bedroom-collection-section.js" "mc-bedroom-collection-section" \
+  "/v/vspfiles/js/mc-bedroom-collection-section.js" \
+  "/vspfiles/js/mc-bedroom-collection-section.js" \
+  "vspfiles/js/mc-bedroom-collection-section.js"
+
 maybe_put_primary "vspfiles/templates/266/js/mc-plp-enforcer.js" "mc-plp-enforcer-template" \
   "/vspfiles/templates/266/js/mc-plp-enforcer.js" \
   "vspfiles/templates/266/js/mc-plp-enforcer.js"
