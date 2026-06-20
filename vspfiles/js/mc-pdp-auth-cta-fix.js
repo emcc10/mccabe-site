@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero3
-  var VERSION = "20260620sshero4";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero5
+  var VERSION = "20260620sshero5";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -3557,6 +3557,9 @@
     } catch (eLockGlobal) {}
     var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
     if (wrap) wrap.setAttribute("data-mc-active-option-id", entry.optionId);
+    global.document.querySelectorAll(".mc-saranoni-color-picker").forEach(function (picker) {
+      picker.setAttribute("data-mc-active-option-id", entry.optionId);
+    });
   }
 
   function restoreConfiguredColorActiveEntry(ctx) {
@@ -3569,6 +3572,10 @@
       var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
       lockedId = wrap ? wrap.getAttribute("data-mc-active-option-id") || "" : "";
     }
+    if (!lockedId) {
+      var picker = global.document.querySelector(".mc-saranoni-color-picker[data-mc-active-option-id]");
+      lockedId = picker ? picker.getAttribute("data-mc-active-option-id") || "" : "";
+    }
     if (!lockedId) return;
     var i;
     for (i = 0; i < ctx.entries.length; i++) {
@@ -3577,6 +3584,38 @@
         return;
       }
     }
+  }
+
+  function resolveConfiguredColorEntry(ctx, optionId) {
+    if (!ctx || !ctx.entries || !optionId) return null;
+    var id = String(optionId);
+    var i;
+    for (i = 0; i < ctx.entries.length; i++) {
+      if (ctx.entries[i].optionId === id) return ctx.entries[i];
+    }
+    return null;
+  }
+
+  function updateConfiguredColorLabels(selected) {
+    var label = selected ? selected.label : "";
+    var labelEl = global.document.getElementById("mc-configured-color-selected-name");
+    if (labelEl) labelEl.textContent = label;
+    var sarNameEl = global.document.getElementById("mc-saranoni-selected-color-name");
+    if (sarNameEl) sarNameEl.textContent = label;
+  }
+
+  function applyConfiguredColorSelection(ctx, entry, forcePhoto) {
+    if (!ctx || !entry) return false;
+    lockConfiguredColorActiveEntry(entry);
+    var opt = findConfiguredColorOption(ctx.select, entry);
+    if (opt) {
+      syncConfiguredColorSelect(ctx.select, opt);
+      ensureConfiguredColorCartField(ctx.select, opt, null);
+    }
+    syncConfiguredColorSwatchUi(ctx, true, forcePhoto);
+    if (isSaranoniPdpPage()) syncSaranoniColorPicker(ctx);
+    syncSaranoniAltviewActiveState();
+    return true;
   }
 
   function enforceConfiguredColorPhoto() {
@@ -3897,22 +3936,9 @@
     }
     if (picker.getAttribute("data-mc-sar-color-signature") === signature) {
       syncSaranoniAltviewActiveState();
-      var sarNameKeep = global.document.getElementById("mc-saranoni-selected-color-name");
-      if (sarNameKeep) {
-        var activeEntry =
-          configuredColorActiveEntry ||
-          (function () {
-            var activeBtn = global.document.querySelector(".mc-configured-color-swatch.active");
-            if (!activeBtn) return null;
-            var oid = activeBtn.getAttribute("data-option-id");
-            var ei;
-            for (ei = 0; ei < ctx.entries.length; ei++) {
-              if (ctx.entries[ei].optionId === oid) return ctx.entries[ei];
-            }
-            return null;
-          })();
-        sarNameKeep.textContent = activeEntry ? activeEntry.label : "";
-      }
+      updateConfiguredColorLabels(
+        configuredColorActiveEntry || findConfiguredColorSelectedEntry(ctx)
+      );
       return;
     }
     picker.setAttribute("data-mc-sar-color-signature", signature);
@@ -3945,7 +3971,7 @@
       a.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        selectConfiguredColorByOptionId(item.optionId);
+        applyConfiguredColorSelection(ctx, entry, true);
       });
       thumbs.appendChild(a);
     });
@@ -3973,6 +3999,13 @@
       return;
     }
     body.classList.remove("mc-saranoni-swatches-ready");
+    global.document.querySelectorAll(".mc-saranoni-color-picker").forEach(function (picker) {
+      if (picker && picker.parentNode) {
+        try {
+          picker.parentNode.removeChild(picker);
+        } catch (eRmPicker) {}
+      }
+    });
     if (wrap && wrap.parentNode) {
       try {
         wrap.parentNode.removeChild(wrap);
@@ -4061,7 +4094,7 @@
       select.style.setProperty("clip-path", "inset(50%)", "important");
       select.style.setProperty("white-space", "nowrap", "important");
       select.style.setProperty("opacity", "0", "important");
-      select.style.setProperty("pointer-events", "none", "important");
+      select.tabIndex = -1;
     } catch (eHide) {}
   }
 
@@ -4279,23 +4312,21 @@
     return null;
   }
 
-  function syncConfiguredColorSwatchUi(ctx, applyPhoto) {
-    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
-    if (!ctx || !wrap) return;
-    // Prefer the user's locked selection so a Volusion-driven select reset can't
-    // wipe the active swatch. Fall back to whatever the native select reports.
+  function syncConfiguredColorSwatchUi(ctx, applyPhoto, forcePhoto) {
+    if (!ctx) return;
     var selected = configuredColorActiveEntry || findConfiguredColorSelectedEntry(ctx);
-    var labelEl = global.document.getElementById("mc-configured-color-selected-name");
-    if (labelEl) labelEl.textContent = selected ? selected.label : "";
-    var sarNameEl = global.document.getElementById("mc-saranoni-selected-color-name");
-    if (sarNameEl) sarNameEl.textContent = selected ? selected.label : "";
-    wrap.querySelectorAll(".mc-configured-color-swatch").forEach(function (btn) {
-      var active = !!selected && btn.getAttribute("data-option-id") === selected.optionId;
-      btn.classList.toggle("active", active);
-      btn.setAttribute("aria-pressed", active ? "true" : "false");
-    });
+    updateConfiguredColorLabels(selected);
+    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    if (wrap) {
+      wrap.querySelectorAll(".mc-configured-color-swatch").forEach(function (btn) {
+        var active = !!selected && btn.getAttribute("data-option-id") === selected.optionId;
+        btn.classList.toggle("active", active);
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
     if (applyPhoto && selected) {
       if (
+        forcePhoto ||
         selected.optionId !== configuredColorLastAppliedOptionId ||
         !configuredColorActiveSrc
       ) {
@@ -4313,8 +4344,7 @@
       var ctx = findConfiguredColorSwatchContext();
       if (!ctx || ctx.select !== select) return;
       var entry = findConfiguredColorSelectedEntry(ctx);
-      if (entry) lockConfiguredColorActiveEntry(entry);
-      syncConfiguredColorSwatchUi(ctx, true);
+      if (entry) applyConfiguredColorSelection(ctx, entry, true);
     });
   }
 
@@ -4322,21 +4352,9 @@
     if (!optionId) return false;
     var ctx = findConfiguredColorSwatchContext();
     if (!ctx) return false;
-    var i;
-    for (i = 0; i < ctx.entries.length; i++) {
-      if (ctx.entries[i].optionId !== String(optionId)) continue;
-      var entry = ctx.entries[i];
-      var opt = findConfiguredColorOption(ctx.select, entry);
-      if (!opt) return false;
-      // Lock this selection first so subsequent re-renders / Volusion resets keep it.
-      lockConfiguredColorActiveEntry(entry);
-      syncConfiguredColorSelect(ctx.select, opt);
-      syncConfiguredColorSwatchUi(ctx, true);
-      if (isSaranoniPdpPage()) syncSaranoniColorPicker(ctx);
-      syncSaranoniAltviewActiveState();
-      return true;
-    }
-    return false;
+    var entry = resolveConfiguredColorEntry(ctx, optionId);
+    if (!entry) return false;
+    return applyConfiguredColorSelection(ctx, entry, true);
   }
 
   function handleConfiguredColorSwatchClick(btn) {
@@ -6997,7 +7015,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260620sshero3";
+  var WANT = "20260620sshero5";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
