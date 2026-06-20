@@ -3238,7 +3238,7 @@ body.mc-product-page select.mc-native-leather {
     height: auto !important;
     margin: 0 auto !important;
     flex: none !important;
-margin-left: 65px !important;
+margin-left: 0 !important;
   }
 
   /* Put alternative views below (and make them horizontal thumbnails) */
@@ -8186,6 +8186,53 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
   text-transform: none !important;
   color: #111 !important;
   text-decoration: none !important;
+}
+
+/* PDP related items: stack full-width cards on mobile (4-across row squished thumbnails) */
+@media (max-width: 991px) {
+  html body.productdetails #v65-product-related .mc-related-plp-grid,
+  html body.mc-product-page #v65-product-related .mc-related-plp-grid,
+  :is(body.productdetails, body.mc-product-page) .mc-related-plp-grid {
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 28px !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+
+  :is(body.productdetails, body.mc-product-page) .mc-related-plp-card {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  :is(body.productdetails, body.mc-product-page) .mc-related-plp-card__media {
+    height: min(240px, 52vw) !important;
+    min-height: 200px !important;
+    max-height: 280px !important;
+  }
+}
+
+/* Orphan alt-view wrappers must not stack vertical gap on mobile PDP */
+@media (max-width: 991px) {
+  body.productdetails #content_area .mc-altviews-outer:not(:has(#altviews, span#altviews, .altviews)),
+  body.mc-product-page #content_area .mc-altviews-outer:not(:has(#altviews, span#altviews, .altviews)) {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.productdetails #content_area #altviews,
+  body.mc-product-page #content_area #altviews,
+  body.productdetails #content_area span#altviews,
+  body.mc-product-page #content_area span#altviews {
+    margin-bottom: 8px !important;
+  }
 }
 
 /* Category listing thumbs: see --mc-plp-* block (~6400) and final #content_area lock at file end */

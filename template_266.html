@@ -10867,32 +10867,48 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope);
     if (!thumbs) return;
 
-    var contentArea = scope && scope.id === 'content_area' ? scope : (q('#content_area') || document.body);
-    var node = thumbs.parentNode;
-    while (node && node !== contentArea && node !== document.body) {
-      node.style.setProperty('width', '100%', 'important');
-      node.style.setProperty('max-width', '100%', 'important');
-      if (node.tagName === 'TR') node.style.setProperty('display', 'block', 'important');
-      if (node.tagName === 'TD' || node.tagName === 'TH') {
-        node.style.setProperty('display', 'block', 'important');
-        node.style.setProperty('text-align', 'center', 'important');
+    /* Drop orphaned wrappers left when Volusion re-parents #altviews (observer + interval were stacking empty shells). */
+    var altRoot = scope && scope.querySelectorAll ? scope : document;
+    qa('.mc-altviews-outer', altRoot).forEach(function (shell) {
+      if (shell.contains(thumbs)) return;
+      if (!shell.querySelector('#altviews, span#altviews, .altviews') && !(shell.textContent || '').replace(/\s+/g, '').length) {
+        try { shell.remove(); } catch (eRmShell) {}
       }
-      node = node.parentNode;
+    });
+
+    var contentArea = scope && scope.id === 'content_area' ? scope : (q('#content_area') || document.body);
+    if (thumbs.getAttribute('data-mc-alt-ancestors') !== '1') {
+      var node = thumbs.parentNode;
+      while (node && node !== contentArea && node !== document.body) {
+        node.style.setProperty('width', '100%', 'important');
+        node.style.setProperty('max-width', '100%', 'important');
+        if (node.tagName === 'TR') node.style.setProperty('display', 'block', 'important');
+        if (node.tagName === 'TD' || node.tagName === 'TH') {
+          node.style.setProperty('display', 'block', 'important');
+          node.style.setProperty('text-align', 'center', 'important');
+        }
+        node = node.parentNode;
+      }
+      thumbs.setAttribute('data-mc-alt-ancestors', '1');
     }
 
-    var parent = thumbs.parentNode;
-    if (parent && parent.className && parent.className.indexOf('mc-altviews-outer') !== -1) {
-      parent.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:4px 0!important;padding:0!important;order:2!important;';
-    } else if (parent && parent !== document.body) {
-      var outer = document.createElement('div');
-      outer.className = 'mc-altviews-outer';
-      outer.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:4px 0!important;padding:0!important;order:2!important;';
-      parent.insertBefore(outer, thumbs);
-      outer.appendChild(thumbs);
+    var outer = thumbs.closest ? thumbs.closest('.mc-altviews-outer') : null;
+    if (!outer) {
+      var parent = thumbs.parentNode;
+      if (parent && parent !== document.body) {
+        outer = document.createElement('div');
+        outer.className = 'mc-altviews-outer';
+        parent.insertBefore(outer, thumbs);
+        outer.appendChild(thumbs);
+      }
+    }
+    if (outer) {
+      outer.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:4px 0 8px 0!important;padding:0!important;order:2!important;';
     }
 
     /* No negative margins: they yank price/options under the hero and flash/jump when this runs (observer + interval). */
-    thumbs.style.cssText = 'display:flex!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:100%!important;max-width:100%!important;margin:8px auto 12px auto!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
+    thumbs.style.cssText = 'display:flex!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:100%!important;max-width:100%!important;margin:0 auto 8px auto!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
+    thumbs.setAttribute('data-mc-alt-synced', '1');
 
     var allLinks = thumbs.querySelectorAll('a');
     for (var i = 0; i < allLinks.length; i++) {
@@ -11011,10 +11027,16 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     wireAltThumbClicks(scope);
 
     if (isMobile()) {
-      unwrapDesktopMediaWrap(scope);
-      stackMediaAbovePricing(scope);
-      centerMainImageMobile(scope);
-      syncAltviewsToMainImage(scope);
+      if (window.__mcMediaLayoutBusy) return;
+      window.__mcMediaLayoutBusy = true;
+      try {
+        unwrapDesktopMediaWrap(scope);
+        stackMediaAbovePricing(scope);
+        centerMainImageMobile(scope);
+        syncAltviewsToMainImage(scope);
+      } finally {
+        setTimeout(function () { window.__mcMediaLayoutBusy = false; }, 80);
+      }
       return;
     }
 
