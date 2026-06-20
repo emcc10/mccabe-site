@@ -8,6 +8,10 @@ on:
       - "vspfiles/windsor-home.mp4"
       - "vspfiles/windsor.mp4"
       - "scripts/upload_windsor_home_video.py"
+      - "vspfiles/js/mc-pdp-auth-cta-fix.js"
+      - "vspfiles/js/mc-windsor-hero-fix.js"
+      - "vspfiles/templates/266/js/min/template.min.js"
+      - "template_266.html"
       - ".github/workflows/deploy-windsor-video.yml"
   workflow_dispatch:
 
@@ -33,9 +37,11 @@ jobs:
           SFTP_PORT: "2222"
         run: python3 scripts/upload_windsor_home_video.py
 
-      - name: Verify live windsor-home.mp4 size
+      - name: Verify live Windsor MP4 sizes
         run: |
           want=$(wc -c < vspfiles/windsor-home.mp4 | tr -d ' ')
-          live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=$(date +%s)" | wc -c | tr -d ' ')
-          echo "local=$want live=$live"
-          test "$live" = "$want"
+          for name in windsor-home.mp4 windsor.mp4; do
+            live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/${name}?v=$(date +%s)" | wc -c | tr -d ' ')
+            echo "${name}: local=${want} live=${live}"
+            test "$live" = "$want"
+          done

@@ -1,0 +1,93 @@
+{
+  "generated": "2026-06-20T17:09:34.786Z",
+  "site": "https://www.mccabestheaterandliving.com",
+  "pages": [
+    "https://www.mccabestheaterandliving.com/",
+    "https://www.mccabestheaterandliving.com/category-s/177.htm",
+    "https://www.mccabestheaterandliving.com/bean-bag-seating-s/103.htm",
+    "https://www.mccabestheaterandliving.com/product-p/bb-nest.htm",
+    "https://www.mccabestheaterandliving.com/product-p/77656.htm",
+    "https://www.mccabestheaterandliving.com/searchresults.asp?Search=sofa"
+  ],
+  "viewports": [
+    {
+      "label": "320",
+      "width": 320,
+      "height": 568
+    },
+    {
+      "label": "375",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "label": "390",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "label": "768",
+      "width": 768,
+      "height": 1024
+    }
+  ],
+  "issueCount": 8,
+  "issues": [
+    {
+      "page": "pdp-beanbag",
+      "viewport": "320",
+      "severity": "high",
+      "category": "pdp-price",
+      "detail": "No visible price elements detected"
+    },
+    {
+      "page": "pdp-beanbag",
+      "viewport": "375",
+      "severity": "high",
+      "category": "pdp-price",
+      "detail": "No visible price elements detected"
+    },
+    {
+      "page": "pdp-beanbag",
+      "viewport": "390",
+      "severity": "high",
+      "category": "pdp-price",
+      "detail": "No visible price elements detected"
+    },
+    {
+      "page": "pdp-beanbag",
+      "viewport": "768",
+      "severity": "high",
+      "category": "pdp-price",
+      "detail": "No visible price elements detected"
+    },
+    {
+      "page": "pdp-sectional",
+      "viewport": "320",
+      "severity": "high",
+      "category": "pdp-price",
+      "detail": "No visible price elements detected"
+    },
+    {
+      "page": "pdp-sectional",
+      "viewport": "375",
+      "severity": "high",
+      "category": "pdp-price",
+      "detail": "No visible price elements detected"
+    },
+    {
+      "page": "pdp-sectional",
+      "viewport": "390",
+      "severity": "high",
+      "category": "pdp-price",
+      "detail": "No visible price elements detected"
+    },
+    {
+      "page": "pdp-sectional",
+      "viewport": "768",
+      "severity": "high",
+      "category": "pdp-price",
+      "detail": "No visible price elements detected"
+    }
+  ]
+}

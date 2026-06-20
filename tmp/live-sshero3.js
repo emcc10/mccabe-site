@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620windsor1
-  var VERSION = "20260620windsor1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero3
+  var VERSION = "20260620sshero4";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -3284,101 +3284,6 @@
     return m ? String(m[1] || "").toUpperCase() : "";
   }
 
-  function resolveConfiguredColorProductCode(ctx) {
-    var fromPage = resolveSoftGoodsProductCode();
-    if (fromPage) return fromPage;
-    if (ctx && ctx.productCode) return String(ctx.productCode).trim().toUpperCase();
-    return "";
-  }
-
-  function configuredColorImageBelongsToProduct(src, productCode) {
-    if (!src || !productCode) return false;
-    var hay = String(src).toUpperCase();
-    var pc = String(productCode).trim().toUpperCase();
-    if (hay.indexOf(pc) !== -1) return true;
-    return hay.indexOf(pc.replace(/-/g, "%2D")) !== -1;
-  }
-
-  function resetConfiguredColorStateForProduct(productCode) {
-    var pc = String(productCode || "").trim().toUpperCase();
-    if (!pc) return;
-    var prev = "";
-    try {
-      prev = String(global.__MC_CONFIGURED_COLOR_PRODUCT__ || "").trim().toUpperCase();
-    } catch (ePrevPc) {}
-    if (prev && prev === pc) return;
-    configuredColorActiveEntry = null;
-    configuredColorActiveSrc = "";
-    configuredColorDefaultSrc = "";
-    configuredColorLastAppliedOptionId = "";
-    configuredColorEnforceUntil = 0;
-    try {
-      delete global.__MC_CONFIGURED_COLOR_ACTIVE_OPTION_ID__;
-      global.__MC_CONFIGURED_COLOR_INIT__ = false;
-    } catch (eResetGlobal) {}
-    global.__MC_CONFIGURED_COLOR_PRODUCT__ = pc;
-  }
-
-  function buildProductScopedColorImageCandidates(productCode, fileName) {
-    if (!productCode || !fileName) return [];
-    var pc = String(productCode).trim().toUpperCase();
-    var base = String(fileName).trim();
-    if (
-      base.toUpperCase().indexOf(pc) === -1 &&
-      base.toUpperCase().indexOf(pc.replace(/-/g, "_")) === -1
-    ) {
-      return [];
-    }
-    return buildConfiguredColorImageCandidates(base, pc).filter(function (url) {
-      return configuredColorImageBelongsToProduct(url, pc);
-    });
-  }
-
-  function loadProductScopedColorImage(productCode, fileName, done) {
-    loadConfiguredColorImage(
-      buildProductScopedColorImageCandidates(productCode, fileName),
-      function (resolved) {
-        if (resolved && configuredColorImageBelongsToProduct(resolved, productCode)) {
-          done(resolved);
-          return;
-        }
-        done("");
-      }
-    );
-  }
-
-  function bindConfiguredColorHeroGuard(productCode) {
-    var pc = String(productCode || "").trim().toUpperCase();
-    if (!pc) return;
-    var img = global.document.getElementById("product_photo");
-    if (!img || img.__mcConfiguredColorHeroGuard) return;
-    img.__mcConfiguredColorHeroGuard = true;
-    try {
-      new global.MutationObserver(function () {
-        if (!isSaranoniPdpPage()) return;
-        var cur = img.getAttribute("src") || "";
-        if (!cur || cur.indexOf("/manufacturers/") !== -1) return;
-        if (configuredColorActiveSrc && cur === configuredColorActiveSrc) return;
-        if (configuredColorImageBelongsToProduct(cur, pc)) return;
-        if (configuredColorActiveSrc) {
-          setConfiguredColorPhotoSrc(
-            configuredColorActiveSrc,
-            configuredColorActiveEntry ? configuredColorActiveEntry.label : "",
-            pc
-          );
-          return;
-        }
-        var ctx = findConfiguredColorSwatchContext();
-        var entry = ctx ? findConfiguredColorSelectedEntry(ctx) : null;
-        if (entry && entry.mainImage) {
-          loadProductScopedColorImage(pc, entry.mainImage, function (resolved) {
-            if (resolved) setConfiguredColorPhotoSrc(resolved, entry.label, pc);
-          });
-        }
-      }).observe(img, { attributes: true, attributeFilter: ["src"] });
-    } catch (eHeroGuard) {}
-  }
-
   function optionMatchesConfiguredColorEntry(opt, entry) {
     if (!opt || !entry) return false;
     var val = String(opt.value || "");
@@ -3500,38 +3405,10 @@
     return out;
   }
 
-  function isSaranoniColorSelect(select) {
-    if (!select || !select.name) return false;
-    if (select.classList && select.classList.contains("mc-native-leather")) return false;
-    if (!/^SAR/i.test(parseProductCodeFromSelectName(select.name))) return false;
-    if (parseOptionCategoryFromSelectName(select.name) === SARANONI_COLOR_OPTION_CATEGORY) return true;
-    var labelHay = "";
-    try {
-      var row = select.closest ? select.closest("tr") : null;
-      labelHay = String(
-        (select.getAttribute("title") || "") +
-          " " +
-          (row ? row.textContent : "") +
-          " " +
-          (select.options[0] && select.options[0].text ? select.options[0].text : "")
-      ).toLowerCase();
-    } catch (eLbl) {}
-    return /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color)/.test(labelHay);
-  }
-
-  function buildConfiguredColorThumbCandidates(entry, productCode) {
-    var out = buildProductScopedColorImageCandidates(productCode, entry.swatchImage);
-    buildProductScopedColorImageCandidates(productCode, entry.mainImage).forEach(function (candidate) {
-      if (candidate && out.indexOf(candidate) === -1) out.push(candidate);
-    });
-    return out;
-  }
-
   function findConfiguredColorSwatchContext() {
     // Bean bag PDPs have their own native swatch system (#beanbag-swatch-wrapper);
     // never let the configured-color swatches take over those pages.
     if (isBeanBagPdpPage()) return null;
-    var pagePc = resolveConfiguredColorProductCode(null);
     var selects = global.document.querySelectorAll("#options_table select, #v65-product-parent select");
     var best = null;
     var i;
@@ -3543,8 +3420,7 @@
       if (sarSel.classList && sarSel.classList.contains("mc-native-leather")) continue;
       var sarPc = parseProductCodeFromSelectName(sarSel.name);
       if (!/^SAR/i.test(sarPc)) continue;
-      if (pagePc && sarPc !== pagePc) continue;
-      if (!isSaranoniColorSelect(sarSel)) continue;
+      if (parseOptionCategoryFromSelectName(sarSel.name) !== SARANONI_COLOR_OPTION_CATEGORY) continue;
       var sarEntries = buildDataDrivenSaranoniEntries(sarSel, sarPc);
       if (!sarEntries.length) continue;
       return {
@@ -3585,8 +3461,7 @@
       if (sel.classList && sel.classList.contains("mc-native-leather")) continue;
       var pc = parseProductCodeFromSelectName(sel.name);
       if (!/^SAR/i.test(pc)) continue;
-      if (pagePc && pc !== pagePc) continue;
-      if (!isSaranoniColorSelect(sel)) continue;
+      if (parseOptionCategoryFromSelectName(sel.name) !== SARANONI_COLOR_OPTION_CATEGORY) continue;
       var dynEntries = buildDataDrivenSaranoniEntries(sel, pc);
       if (!dynEntries.length) continue;
       return {
@@ -3600,7 +3475,7 @@
     return null;
   }
 
-  function buildConfiguredColorImageCandidates(fileName, productCode) {
+  function buildConfiguredColorImageCandidates(fileName) {
     var candidates = [];
     if (!fileName) return candidates;
     candidates.push(
@@ -3619,11 +3494,9 @@
     }
     candidates.push("/v/vspfiles/photos/" + fileName);
     candidates.push("/v/vspfiles/images/" + fileName);
-    if (!productCode) {
-      var mainImg = global.document.getElementById("product_photo");
-      var src = mainImg && mainImg.getAttribute ? mainImg.getAttribute("src") || "" : "";
-      if (src) candidates.push(src.replace(/[^/]+$/, fileName));
-    }
+    var mainImg = global.document.getElementById("product_photo");
+    var src = mainImg && mainImg.getAttribute ? mainImg.getAttribute("src") || "" : "";
+    if (src) candidates.push(src.replace(/[^/]+$/, fileName));
     return candidates.filter(function (item, idx, arr) {
       return item && arr.indexOf(item) === idx;
     });
@@ -3647,10 +3520,9 @@
     tryNext();
   }
 
-  function setConfiguredColorPhotoSrc(resolvedSrc, label, productCode) {
+  function setConfiguredColorPhotoSrc(resolvedSrc, label) {
     var mainImg = global.document.getElementById("product_photo");
     if (!mainImg || !resolvedSrc) return;
-    if (productCode && !configuredColorImageBelongsToProduct(resolvedSrc, productCode)) return;
     try {
       if ((mainImg.getAttribute("src") || "") !== resolvedSrc) mainImg.src = resolvedSrc;
       if (mainImg.hasAttribute("srcset")) mainImg.removeAttribute("srcset");
@@ -3685,9 +3557,6 @@
     } catch (eLockGlobal) {}
     var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
     if (wrap) wrap.setAttribute("data-mc-active-option-id", entry.optionId);
-    global.document.querySelectorAll(".mc-saranoni-color-picker").forEach(function (picker) {
-      picker.setAttribute("data-mc-active-option-id", entry.optionId);
-    });
   }
 
   function restoreConfiguredColorActiveEntry(ctx) {
@@ -3700,10 +3569,6 @@
       var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
       lockedId = wrap ? wrap.getAttribute("data-mc-active-option-id") || "" : "";
     }
-    if (!lockedId) {
-      var picker = global.document.querySelector(".mc-saranoni-color-picker[data-mc-active-option-id]");
-      lockedId = picker ? picker.getAttribute("data-mc-active-option-id") || "" : "";
-    }
     if (!lockedId) return;
     var i;
     for (i = 0; i < ctx.entries.length; i++) {
@@ -3714,79 +3579,7 @@
     }
   }
 
-  function resolveConfiguredColorEntry(ctx, optionId) {
-    if (!ctx || !ctx.entries || !optionId) return null;
-    var id = String(optionId);
-    var i;
-    for (i = 0; i < ctx.entries.length; i++) {
-      if (ctx.entries[i].optionId === id) return ctx.entries[i];
-    }
-    return null;
-  }
-
-  function updateConfiguredColorLabels(selected) {
-    var label = selected ? selected.label : "";
-    var labelEl = global.document.getElementById("mc-configured-color-selected-name");
-    if (labelEl) labelEl.textContent = label;
-    var sarNameEl = global.document.getElementById("mc-saranoni-selected-color-name");
-    if (sarNameEl) sarNameEl.textContent = label;
-  }
-
-  function applyConfiguredColorSelection(ctx, entry, forcePhoto) {
-    if (!ctx || !entry) return false;
-    lockConfiguredColorActiveEntry(entry);
-    var opt = findConfiguredColorOption(ctx.select, entry);
-    if (opt) {
-      syncConfiguredColorSelect(ctx.select, opt);
-      ensureConfiguredColorCartField(ctx.select, opt, null);
-    }
-    syncConfiguredColorSwatchUi(ctx, true, forcePhoto);
-    if (isSaranoniPdpPage()) {
-      syncSaranoniColorPicker(ctx);
-      [0, 120, 400].forEach(function (delay) {
-        global.setTimeout(function () {
-          applyConfiguredColorMainPhoto(entry.mainImage, entry.label, resolveConfiguredColorProductCode(ctx));
-        }, delay);
-      });
-    }
-    syncSaranoniAltviewActiveState();
-    return true;
-  }
-
-  function applyConfiguredColorMainPhoto(fileName, label, productCode) {
-    var mainImg = global.document.getElementById("product_photo");
-    if (!mainImg || !fileName) return;
-    var pc = productCode || resolveConfiguredColorProductCode(null);
-    var previousSrc = mainImg.getAttribute("src") || "";
-    if (
-      !configuredColorDefaultSrc &&
-      previousSrc &&
-      previousSrc.indexOf("/manufacturers/") === -1 &&
-      !configuredColorActiveEntry &&
-      (!pc || configuredColorImageBelongsToProduct(previousSrc, pc))
-    ) {
-      configuredColorDefaultSrc = previousSrc;
-    }
-    var token = String(Date.now()) + ":" + Math.random();
-    global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ = token;
-    loadProductScopedColorImage(pc, fileName, function (resolvedSrc) {
-      if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
-      var finalSrc = resolvedSrc;
-      if (!finalSrc && configuredColorActiveEntry) {
-        finalSrc = previousSrc;
-      }
-      if (!finalSrc) finalSrc = previousSrc || configuredColorDefaultSrc;
-      if (!finalSrc) return;
-      if (pc && !configuredColorImageBelongsToProduct(finalSrc, pc)) return;
-      configuredColorActiveSrc = finalSrc;
-      configuredColorEnforceUntil = Date.now() + (configuredColorActiveEntry ? 8000 : 2500);
-      setConfiguredColorPhotoSrc(finalSrc, label, pc);
-      enforceConfiguredColorPhoto(pc);
-    });
-  }
-
-  function enforceConfiguredColorPhoto(productCode) {
-    var pc = productCode || resolveConfiguredColorProductCode(null);
+  function enforceConfiguredColorPhoto() {
     if (configuredColorEnforceTimer) return;
     configuredColorEnforceTimer = global.setInterval(function () {
       var enforceActive =
@@ -3797,22 +3590,45 @@
         configuredColorEnforceTimer = null;
         return;
       }
-      if (pc && !configuredColorImageBelongsToProduct(configuredColorActiveSrc, pc)) {
-        global.clearInterval(configuredColorEnforceTimer);
-        configuredColorEnforceTimer = null;
-        return;
-      }
       var mainImg = global.document.getElementById("product_photo");
       if (!mainImg) return;
       var cur = mainImg.getAttribute("src") || "";
       if (cur !== configuredColorActiveSrc) {
         setConfiguredColorPhotoSrc(
           configuredColorActiveSrc,
-          configuredColorActiveEntry ? configuredColorActiveEntry.label : "",
-          pc
+          configuredColorActiveEntry ? configuredColorActiveEntry.label : ""
         );
       }
     }, 120);
+  }
+
+  function applyConfiguredColorMainPhoto(fileName, label) {
+    var mainImg = global.document.getElementById("product_photo");
+    if (!mainImg || !fileName) return;
+    var previousSrc = mainImg.getAttribute("src") || "";
+    if (
+      !configuredColorDefaultSrc &&
+      previousSrc &&
+      previousSrc.indexOf("/manufacturers/") === -1 &&
+      !configuredColorActiveEntry
+    ) {
+      configuredColorDefaultSrc = previousSrc;
+    }
+    var token = String(Date.now()) + ":" + Math.random();
+    global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ = token;
+    loadConfiguredColorImage(buildConfiguredColorImageCandidates(fileName), function (resolvedSrc) {
+      if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
+      var finalSrc = resolvedSrc;
+      if (!finalSrc && configuredColorActiveEntry) {
+        finalSrc = previousSrc;
+      }
+      if (!finalSrc) finalSrc = previousSrc || configuredColorDefaultSrc;
+      if (!finalSrc) return;
+      configuredColorActiveSrc = finalSrc;
+      configuredColorEnforceUntil = Date.now() + (configuredColorActiveEntry ? 8000 : 2500);
+      setConfiguredColorPhotoSrc(finalSrc, label);
+      enforceConfiguredColorPhoto();
+    });
   }
 
   // Parse the trailing option-category id out of a Volusion select name,
@@ -3858,7 +3674,8 @@
     var i;
     for (i = 0; i < selects.length; i++) {
       var sel = selects[i];
-      if (!isSaranoniColorSelect(sel)) continue;
+      if (parseOptionCategoryFromSelectName(sel.name) !== SARANONI_COLOR_OPTION_CATEGORY) continue;
+      if (!/^SAR/i.test(parseProductCodeFromSelectName(sel.name))) continue;
       return sel;
     }
     return null;
@@ -4007,22 +3824,6 @@
       global.document.getElementById("altviews") ||
       global.document.querySelector("span#altviews, #content_area .altviews, #v65-product-parent .altviews");
     if (!alt) return;
-    var visibleSwatches = 0;
-    global.document.querySelectorAll("#mc-configured-color-swatch-wrapper .mc-configured-color-swatch").forEach(function (btn) {
-      if (btn.style.display !== "none") visibleSwatches++;
-    });
-    var pickerThumbs = global.document.querySelectorAll(".mc-saranoni-color-picker a[data-option-id]").length;
-    if (!(visibleSwatches > 0 || pickerThumbs > 0)) {
-      try {
-        alt.style.removeProperty("display");
-        alt.style.removeProperty("visibility");
-        alt.style.removeProperty("height");
-        alt.style.removeProperty("overflow");
-        alt.style.removeProperty("margin");
-        alt.style.removeProperty("padding");
-      } catch (eShowAlt) {}
-      return;
-    }
     alt.classList.remove("mc-saranoni-color-altviews", "mc-unified-altviews");
     if (alt.getAttribute("data-mc-sar-alt-signature")) {
       alt.removeAttribute("data-mc-sar-alt-signature");
@@ -4052,10 +3853,13 @@
       )
       .forEach(function (btn) {
         if (btn.style.display === "none") return;
+        var img = btn.querySelector("img");
+        var thumbSrc = img ? img.getAttribute("src") || "" : "";
+        if (!thumbSrc) return;
         visible.push({
           btn: btn,
           optionId: btn.getAttribute("data-option-id"),
-          mainImage: btn.getAttribute("data-main-image") || "",
+          thumbSrc: thumbSrc,
         });
       });
     var picker =
@@ -4071,10 +3875,10 @@
     }
     var signature =
       ctx.productCode +
-      "|main|" +
+      "|" +
       visible
         .map(function (v) {
-          return v.optionId + ":" + v.mainImage;
+          return v.optionId + ":" + v.thumbSrc;
         })
         .join(",");
     if (!picker) {
@@ -4093,9 +3897,22 @@
     }
     if (picker.getAttribute("data-mc-sar-color-signature") === signature) {
       syncSaranoniAltviewActiveState();
-      updateConfiguredColorLabels(
-        configuredColorActiveEntry || findConfiguredColorSelectedEntry(ctx)
-      );
+      var sarNameKeep = global.document.getElementById("mc-saranoni-selected-color-name");
+      if (sarNameKeep) {
+        var activeEntry =
+          configuredColorActiveEntry ||
+          (function () {
+            var activeBtn = global.document.querySelector(".mc-configured-color-swatch.active");
+            if (!activeBtn) return null;
+            var oid = activeBtn.getAttribute("data-option-id");
+            var ei;
+            for (ei = 0; ei < ctx.entries.length; ei++) {
+              if (ctx.entries[ei].optionId === oid) return ctx.entries[ei];
+            }
+            return null;
+          })();
+        sarNameKeep.textContent = activeEntry ? activeEntry.label : "";
+      }
       return;
     }
     picker.setAttribute("data-mc-sar-color-signature", signature);
@@ -4120,17 +3937,15 @@
       a.setAttribute("data-option-id", item.optionId);
       a.setAttribute("data-label", entry.label);
       var altImg = global.document.createElement("img");
+      altImg.src = item.thumbSrc;
       altImg.alt = entry.label;
       altImg.className = "vCSS_img_alternate_product_photo mc-saranoni-alt-thumb";
       altImg.id = "alternate_product_photo_" + entry.optionId;
-      loadProductScopedColorImage(ctx.productCode, entry.mainImage, function (resolved) {
-        if (resolved) altImg.src = resolved;
-      });
       a.appendChild(altImg);
       a.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        applyConfiguredColorSelection(ctx, entry, true);
+        selectConfiguredColorByOptionId(item.optionId);
       });
       thumbs.appendChild(a);
     });
@@ -4158,13 +3973,6 @@
       return;
     }
     body.classList.remove("mc-saranoni-swatches-ready");
-    global.document.querySelectorAll(".mc-saranoni-color-picker").forEach(function (picker) {
-      if (picker && picker.parentNode) {
-        try {
-          picker.parentNode.removeChild(picker);
-        } catch (eRmPicker) {}
-      }
-    });
     if (wrap && wrap.parentNode) {
       try {
         wrap.parentNode.removeChild(wrap);
@@ -4253,7 +4061,7 @@
       select.style.setProperty("clip-path", "inset(50%)", "important");
       select.style.setProperty("white-space", "nowrap", "important");
       select.style.setProperty("opacity", "0", "important");
-      select.tabIndex = -1;
+      select.style.setProperty("pointer-events", "none", "important");
     } catch (eHide) {}
   }
 
@@ -4381,8 +4189,7 @@
         btn.setAttribute("data-label", entry.label);
         btn.innerHTML = '<img alt="' + escapeHtmlText(entry.label) + '" />';
         var img = btn.querySelector("img");
-        var productCode = resolveConfiguredColorProductCode(ctx);
-        var candidates = buildConfiguredColorThumbCandidates(entry, productCode);
+        var candidates = buildConfiguredColorImageCandidates(entry.swatchImage);
         if (ctx.dataDriven) {
           probeState.pending++;
           var primarySrc = candidates[0] || "";
@@ -4391,10 +4198,7 @@
             if (settled) return;
             settled = true;
             probeState.pending--;
-            if (
-              resolvedSrc &&
-              configuredColorImageBelongsToProduct(resolvedSrc, productCode)
-            ) {
+            if (resolvedSrc) {
               probeState.loaded++;
               img.src = resolvedSrc;
               btn.style.display = "";
@@ -4411,42 +4215,21 @@
             img.src = primarySrc;
             btn.style.display = "";
             img.onload = function () {
-              if (configuredColorImageBelongsToProduct(primarySrc, productCode)) {
-                settleDataDrivenSwatch(primarySrc);
-              } else {
-                loadProductScopedColorImage(productCode, entry.swatchImage, function (swatchSrc) {
-                  if (swatchSrc) settleDataDrivenSwatch(swatchSrc);
-                  else loadProductScopedColorImage(productCode, entry.mainImage, settleDataDrivenSwatch);
-                });
-              }
+              settleDataDrivenSwatch(primarySrc);
             };
             img.onerror = function () {
-              loadProductScopedColorImage(productCode, entry.swatchImage, function (swatchSrc) {
-                if (swatchSrc) settleDataDrivenSwatch(swatchSrc);
-                else loadProductScopedColorImage(productCode, entry.mainImage, settleDataDrivenSwatch);
-              });
+              loadConfiguredColorImage(candidates.slice(1), settleDataDrivenSwatch);
             };
             global.setTimeout(function () {
               if (settled) return;
-              if (img.complete && img.naturalWidth > 0) {
-                var curSrc = img.getAttribute("src") || "";
-                if (configuredColorImageBelongsToProduct(curSrc, productCode)) {
-                  settleDataDrivenSwatch(curSrc);
-                }
-              }
+              if (img.complete && img.naturalWidth > 0) settleDataDrivenSwatch(primarySrc);
             }, 250);
           } else {
-            loadProductScopedColorImage(productCode, entry.swatchImage, function (swatchSrc) {
-              if (swatchSrc) settleDataDrivenSwatch(swatchSrc);
-              else loadProductScopedColorImage(productCode, entry.mainImage, settleDataDrivenSwatch);
-            });
+            loadConfiguredColorImage(candidates, settleDataDrivenSwatch);
           }
         } else {
-          loadProductScopedColorImage(productCode, entry.swatchImage, function (resolvedSrc) {
-            img.src =
-              resolvedSrc ||
-              buildProductScopedColorImageCandidates(productCode, entry.mainImage)[0] ||
-              "";
+          loadConfiguredColorImage(candidates, function (resolvedSrc) {
+            img.src = resolvedSrc || candidates[0] || "";
           });
         }
         rail.appendChild(btn);
@@ -4496,29 +4279,27 @@
     return null;
   }
 
-  function syncConfiguredColorSwatchUi(ctx, applyPhoto, forcePhoto) {
-    if (!ctx) return;
-    var selected = configuredColorActiveEntry || findConfiguredColorSelectedEntry(ctx);
-    updateConfiguredColorLabels(selected);
+  function syncConfiguredColorSwatchUi(ctx, applyPhoto) {
     var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
-    if (wrap) {
-      wrap.querySelectorAll(".mc-configured-color-swatch").forEach(function (btn) {
-        var active = !!selected && btn.getAttribute("data-option-id") === selected.optionId;
-        btn.classList.toggle("active", active);
-        btn.setAttribute("aria-pressed", active ? "true" : "false");
-      });
-    }
+    if (!ctx || !wrap) return;
+    // Prefer the user's locked selection so a Volusion-driven select reset can't
+    // wipe the active swatch. Fall back to whatever the native select reports.
+    var selected = configuredColorActiveEntry || findConfiguredColorSelectedEntry(ctx);
+    var labelEl = global.document.getElementById("mc-configured-color-selected-name");
+    if (labelEl) labelEl.textContent = selected ? selected.label : "";
+    var sarNameEl = global.document.getElementById("mc-saranoni-selected-color-name");
+    if (sarNameEl) sarNameEl.textContent = selected ? selected.label : "";
+    wrap.querySelectorAll(".mc-configured-color-swatch").forEach(function (btn) {
+      var active = !!selected && btn.getAttribute("data-option-id") === selected.optionId;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
     if (applyPhoto && selected) {
       if (
-        forcePhoto ||
         selected.optionId !== configuredColorLastAppliedOptionId ||
         !configuredColorActiveSrc
       ) {
-        applyConfiguredColorMainPhoto(
-          selected.mainImage,
-          selected.label,
-          resolveConfiguredColorProductCode(ctx)
-        );
+        applyConfiguredColorMainPhoto(selected.mainImage, selected.label);
         configuredColorLastAppliedOptionId = selected.optionId;
       }
     }
@@ -4532,7 +4313,8 @@
       var ctx = findConfiguredColorSwatchContext();
       if (!ctx || ctx.select !== select) return;
       var entry = findConfiguredColorSelectedEntry(ctx);
-      if (entry) applyConfiguredColorSelection(ctx, entry, true);
+      if (entry) lockConfiguredColorActiveEntry(entry);
+      syncConfiguredColorSwatchUi(ctx, true);
     });
   }
 
@@ -4540,9 +4322,21 @@
     if (!optionId) return false;
     var ctx = findConfiguredColorSwatchContext();
     if (!ctx) return false;
-    var entry = resolveConfiguredColorEntry(ctx, optionId);
-    if (!entry) return false;
-    return applyConfiguredColorSelection(ctx, entry, true);
+    var i;
+    for (i = 0; i < ctx.entries.length; i++) {
+      if (ctx.entries[i].optionId !== String(optionId)) continue;
+      var entry = ctx.entries[i];
+      var opt = findConfiguredColorOption(ctx.select, entry);
+      if (!opt) return false;
+      // Lock this selection first so subsequent re-renders / Volusion resets keep it.
+      lockConfiguredColorActiveEntry(entry);
+      syncConfiguredColorSelect(ctx.select, opt);
+      syncConfiguredColorSwatchUi(ctx, true);
+      if (isSaranoniPdpPage()) syncSaranoniColorPicker(ctx);
+      syncSaranoniAltviewActiveState();
+      return true;
+    }
+    return false;
   }
 
   function handleConfiguredColorSwatchClick(btn) {
@@ -4561,9 +4355,6 @@
       }
       return;
     }
-    var productCode = resolveConfiguredColorProductCode(ctx);
-    resetConfiguredColorStateForProduct(productCode);
-    bindConfiguredColorHeroGuard(productCode);
     renderConfiguredColorSwatches(ctx);
     bindConfiguredColorSwatchSelect(ctx.select);
     restoreConfiguredColorActiveEntry(ctx);
@@ -5836,7 +5627,8 @@
         if (!isSaranoniPdpPage()) return;
         var sel = eSarSel.target;
         if (!sel || !sel.matches || !sel.matches("select")) return;
-        if (!isSaranoniColorSelect(sel)) return;
+        if (parseOptionCategoryFromSelectName(sel.name) !== SARANONI_COLOR_OPTION_CATEGORY) return;
+        if (!/^SAR/i.test(parseProductCodeFromSelectName(sel.name))) return;
         var ctx = findConfiguredColorSwatchContext();
         if (!ctx || ctx.select !== sel) return;
         var entry = findConfiguredColorSelectedEntry(ctx);
@@ -6680,141 +6472,21 @@
     return tr && tr.tagName === "TR" ? tr : null;
   }
 
-  function parseBreadCrumbCategoryIds() {
-    var ids = [];
-    global.document.querySelectorAll("script").forEach(function (sc) {
-      var m = (sc.textContent || "").match(/breadCrumb\s*=\s*["']([^"']+)["']/);
-      if (!m) return;
-      m[1].split("|").forEach(function (p) {
-        if (p && /^\d+$/.test(p)) ids.push(p);
-      });
-    });
-    return ids;
-  }
-
-  function lookupPdpCategoryById(catId) {
-    var id = String(catId || "");
-    if (!/^\d+$/.test(id)) return null;
-    var sel =
-      'a[href$="-s/' +
-      id +
-      '.htm"], a[href*="-s/' +
-      id +
-      '.htm"], a[href*="category-s/' +
-      id +
-      '.htm"]';
-    var roots = [
-      global.document.getElementById("display_menu_1"),
-      global.document.getElementById("display_menu_2"),
-      global.document.getElementById("content_area"),
-      global.document.body,
-    ];
-    var links = [];
-    var ri;
-    for (ri = 0; ri < roots.length; ri++) {
-      if (!roots[ri]) continue;
-      roots[ri].querySelectorAll(sel).forEach(function (link) {
-        if (links.indexOf(link) === -1) links.push(link);
-      });
-    }
-    if (!links.length) {
-      global.document.querySelectorAll(sel).forEach(function (link) {
-        if (links.indexOf(link) === -1) links.push(link);
-      });
-    }
-    var i;
-    for (i = 0; i < links.length; i++) {
-      var name = (links[i].textContent || "").replace(/\s+/g, " ").trim();
-      var href = links[i].getAttribute("href") || "";
-      if (!name || !href || /about us/i.test(name)) continue;
-      return { name: name, href: href };
-    }
-    return { name: "", href: "/category-s/" + id + ".htm" };
-  }
-
-  function mcResolvePdpReturnCategory() {
-    var pc = "";
-    var title = "";
-    var hay = "";
-    try {
-      pc = resolveSoftGoodsProductCode();
-      title = String(
-        (global.document.querySelector("[itemprop='name'], h1, .productnamecolor, .colors_productname") || {})
-          .textContent || global.document.title || ""
-      ).toUpperCase();
-      hay = [pc, title, global.location && global.location.pathname || ""].join(" ").toUpperCase();
-    } catch (eHay) {}
-
-    if (isBeanBagPdpPage()) {
-      return { name: "Bean Bags", href: "/bean-bag-seating-s/103.htm" };
-    }
-    if (/^SAR/.test(pc) && /(ROBE|SNUGGLE|WEAR|BAMBONI)/.test(hay)) {
-      return { name: "Snugglewear", href: "/category-s/208.htm" };
-    }
-    if (/^SAR/.test(pc) && /(BABY)/.test(hay)) {
-      return { name: "Baby Blankets", href: "/category-s/207.htm" };
-    }
-    if (/^SAR/.test(pc) && /(KID|CHILD|MINI)/.test(hay)) {
-      return { name: "Kids Blankets", href: "/category-s/206.htm" };
-    }
-
-    var bcTd = global.document.querySelector(
-      "#v65-product-parent .vCSS_breadcrumb_td, #content_area .vCSS_breadcrumb_td"
-    );
-    var bcLinks = bcTd
-      ? Array.prototype.slice.call(bcTd.querySelectorAll('a[href*="-s/"], a[href*="category-s/"]'))
-      : [];
-    var ids = parseBreadCrumbCategoryIds();
-    var BLOCK = { 136: true };
-    var i;
-    for (i = ids.length - 1; i >= 0; i--) {
-      if (BLOCK[ids[i]] && ids.length > 1) continue;
-      var id = ids[i];
-      var j;
-      for (j = bcLinks.length - 1; j >= 0; j--) {
-        var href = bcLinks[j].getAttribute("href") || "";
-        if (
-          href.indexOf("-s/" + id) !== -1 ||
-          href.indexOf("category-s/" + id) !== -1 ||
-          new RegExp("[?&]categoryid=" + id + "\\b", "i").test(href)
-        ) {
-          var linkName = (bcLinks[j].textContent || "").replace(/\s+/g, " ").trim();
-          if (linkName) return { name: linkName, href: href };
-        }
-      }
-      var navHit = lookupPdpCategoryById(id);
-      if (navHit && navHit.name) return navHit;
-    }
-    for (i = bcLinks.length - 1; i >= 0; i--) {
-      var t = (bcLinks[i].textContent || "").replace(/\s+/g, " ").trim();
-      var h = bcLinks[i].getAttribute("href") || "";
-      if (!t || !h || /about us/i.test(t)) continue;
-      return { name: t, href: h };
-    }
-    if (/^SAR/.test(pc) && /(CHAIR|SAUCER|PILLOW|SOCK|SWADDLE|HAT|RUG)/.test(hay)) {
-      var luxe = lookupPdpCategoryById("196");
-      if (luxe && luxe.name) return luxe;
-      return { name: "Luxe Comforts", href: "/category-s/196.htm" };
-    }
-    if (/^SAR/.test(pc)) {
-      return { name: "Adult Blankets", href: "/category-s/205.htm" };
-    }
-    if (ids.length) {
-      var deepest = lookupPdpCategoryById(ids[ids.length - 1]);
-      if (deepest && deepest.name) return deepest;
-    }
-    return null;
-  }
-
-  global.mcResolvePdpReturnCategory = mcResolvePdpReturnCategory;
-
   function resolveSoftGoodsReturnCategory() {
-    var resolved = mcResolvePdpReturnCategory();
-    if (resolved && resolved.name) return resolved;
     if (isBeanBagPdpPage()) {
       return { name: "Bean Bags", href: "/bean-bag-seating-s/103.htm" };
     }
     if (isSaranoniPdpPage()) {
+      try {
+        var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+        var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
+        var titleHay = String(
+          (global.document.querySelector("[itemprop='name']") || {}).textContent || ""
+        ).toUpperCase();
+        if (/^SAR/.test(pc) && /(KID|CHILD|MINI)/.test(titleHay + pc)) {
+          return { name: "Kids Blankets", href: "/category-s/206.htm" };
+        }
+      } catch (eCat) {}
       return { name: "Adult Blankets", href: "/category-s/205.htm" };
     }
     return null;
@@ -7076,7 +6748,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260620returncat1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260620unified23&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -7325,7 +6997,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260620windsor1";
+  var WANT = "20260620sshero3";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -7565,17 +7237,6 @@
 /* MC_RETURN_LINK_ONLY_20260618 */
 (function (g, d) {
   function getReturnData() {
-    if (typeof g.mcResolvePdpReturnCategory === "function") {
-      try {
-        var cat = g.mcResolvePdpReturnCategory();
-        if (cat && cat.name && String(cat.name).toUpperCase() !== "FURNITURE") {
-          return {
-            text: "\u2190 RETURN TO " + cat.name.toUpperCase(),
-            href: cat.href || "/",
-          };
-        }
-      } catch (eRetCat) {}
-    }
     if (d.body && /\bmc-bean-bag-pdp\b/.test(d.body.className || "")) {
       return { text: "\u2190 RETURN TO BEAN BAGS", href: "/bean-bag-seating-s/103.htm" };
     }
@@ -7760,79 +7421,4 @@ try {
   } else {
     centerAltImages();
   }
-})(window, document);
-
-/* MC_WINDSOR_HERO_FIX_20260620 — live CDN still caches 4MB slideshow at windsor.mp4; use windsor-home.mp4 */
-(function (g, d) {
-  if (!g || !d || g.__MC_WINDSOR_HERO_FIX_20260620__) return;
-  g.__MC_WINDSOR_HERO_FIX_20260620__ = true;
-
-  var SRC =
-    "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1";
-
-  function isHome() {
-    var p = String(g.location.pathname || "").toLowerCase();
-    return (
-      p === "/" ||
-      p === "/default.asp" ||
-      p === "/default.htm" ||
-      p === "/default.html" ||
-      p === "/index.htm" ||
-      p === "/index.html"
-    );
-  }
-
-  function applyWindsorHero() {
-    if (!isHome()) return;
-    var v =
-      d.querySelector("#slideshow-container video.mc-hero-video-el") ||
-      d.querySelector("video.mc-hero-video-el");
-    if (!v) return;
-
-    var srcEl = v.querySelector("source");
-    var cur = srcEl
-      ? String(srcEl.getAttribute("src") || srcEl.src || "")
-      : String(v.getAttribute("src") || v.src || "");
-    if (cur.indexOf("windsor-home.mp4") === -1 || v.dataset.mcWindsorHomeApplied !== SRC) {
-      if (srcEl) srcEl.setAttribute("src", SRC);
-      else v.setAttribute("src", SRC);
-      try {
-        delete v.dataset.mcStartedAtSeven;
-      } catch (eDel) {}
-      v.dataset.mcWindsorHomeApplied = SRC;
-      try {
-        v.load();
-      } catch (eLoad) {}
-    }
-
-    v.muted = true;
-    v.loop = true;
-    v.playsInline = true;
-    v.autoplay = true;
-    v.classList.remove("is-preloading");
-    v.classList.add("is-ready");
-    try {
-      v.style.setProperty("opacity", "1", "important");
-    } catch (eOp) {}
-
-    function seekPlay() {
-      try {
-        if (!v.dataset.mcStartedAtSeven) {
-          v.dataset.mcStartedAtSeven = "1";
-          v.currentTime = 7;
-        }
-        v.play && v.play().catch(function () {});
-      } catch (ePlay) {}
-    }
-
-    if (v.readyState >= 1) seekPlay();
-    else v.addEventListener("loadedmetadata", seekPlay, { once: true });
-  }
-
-  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", applyWindsorHero);
-  else applyWindsorHero();
-  g.addEventListener("load", applyWindsorHero);
-  [250, 1000, 2500, 5000].forEach(function (ms) {
-    g.setTimeout(applyWindsorHero, ms);
-  });
 })(window, document);

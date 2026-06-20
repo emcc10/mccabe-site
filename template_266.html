@@ -630,6 +630,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
   <link href="/v/vspfiles/css/custom-safe.css?v=20260619layout4" rel="stylesheet" id="mc-custom-safe-css-static">
+  <script src="/v/vspfiles/js/mc-windsor-hero-fix.js?v=20260620windsor1"></script><!-- MC_WINDSOR_HERO_FIX -->
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -1526,7 +1527,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260620variants1"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260620variants1 -->
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260620windsor1"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260620windsor1 -->
   <script id="mc-ss-piece-hero-boot">
 (function (g, d) {
   function productCode() {
@@ -1876,12 +1877,12 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     <!-- HERO VIDEO -->
 <section class="mc-hero-video">
  <video class="mc-hero-video-el" autoplay muted loop playsinline preload="auto">
-  <source src="https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620" type="video/mp4">
+  <source src="https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1" type="video/mp4">
 </video>
 <script>
 (function () {
   window.MC_WINDSOR_HERO_SRC =
-    "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620";
+    "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1";
 
   window.mcEnsureWindsorHeroSrc = function (v) {
     if (!v) return false;
@@ -4281,7 +4282,7 @@ try {
 </script>
  <script>
 (function(){
-  var expected = "20260620variants1";
+  var expected = "20260620windsor1";
   if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== expected) {
     if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
       document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
@@ -21674,21 +21675,46 @@ s0.parentNode.insertBefore(s1,s0);
       if (typeof window.mcPlayWindsorHeroAtSeven === "function") {
         window.mcPlayWindsorHeroAtSeven(v);
       } else {
+        var wantSrc =
+          "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1";
+        var srcEl = v.querySelector("source");
+        var cur = srcEl
+          ? String(srcEl.getAttribute("src") || srcEl.src || "")
+          : String(v.getAttribute("src") || v.src || "");
+        if (cur.indexOf("windsor-home.mp4") === -1 || v.dataset.mcWindsorHomeApplied !== wantSrc) {
+          if (srcEl) srcEl.setAttribute("src", wantSrc);
+          else v.setAttribute("src", wantSrc);
+          try {
+            delete v.dataset.mcStartedAtSeven;
+          } catch (eDelSrc) {}
+          v.dataset.mcWindsorHomeApplied = wantSrc;
+          try {
+            v.load();
+          } catch (eLoadSrc) {}
+        }
+
         v.muted = true;
         v.loop = true;
         v.playsInline = true;
         v.autoplay = true;
+        v.classList.remove("is-preloading");
+        v.classList.add("is-ready");
 
-        if (!v.dataset.mcStartedAtSeven) {
+        function seekAndPlayFallback() {
           try {
-            v.dataset.mcStartedAtSeven = "1";
-            v.currentTime = 7;
-          } catch (eSeek) {}
+            if (!v.dataset.mcStartedAtSeven) {
+              v.dataset.mcStartedAtSeven = "1";
+              v.currentTime = 7;
+            }
+            v.play && v.play().catch(function () {});
+          } catch (eSeekFb) {}
         }
 
-        try {
-          v.play && v.play().catch(function () {});
-        } catch (ePlay) {}
+        if (v.readyState >= 1) {
+          seekAndPlayFallback();
+        } else {
+          v.addEventListener("loadedmetadata", seekAndPlayFallback, { once: true });
+        }
       }
     }
   }
