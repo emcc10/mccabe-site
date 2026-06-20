@@ -34,7 +34,7 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260620sshero5
-  var VERSION = "20260620sshero5";
+  var VERSION = "20260620returncat1";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -3405,6 +3405,35 @@
     return out;
   }
 
+  function isSaranoniColorSelect(select) {
+    if (!select || !select.name) return false;
+    if (select.classList && select.classList.contains("mc-native-leather")) return false;
+    if (!/^SAR/i.test(parseProductCodeFromSelectName(select.name))) return false;
+    if (parseOptionCategoryFromSelectName(select.name) === SARANONI_COLOR_OPTION_CATEGORY) return true;
+    var labelHay = "";
+    try {
+      var row = select.closest ? select.closest("tr") : null;
+      labelHay = String(
+        (select.getAttribute("title") || "") +
+          " " +
+          (row ? row.textContent : "") +
+          " " +
+          (select.options[0] && select.options[0].text ? select.options[0].text : "")
+      ).toLowerCase();
+    } catch (eLbl) {}
+    return /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color)/.test(labelHay);
+  }
+
+  function buildConfiguredColorThumbCandidates(entry) {
+    var out = buildConfiguredColorImageCandidates(entry.swatchImage);
+    if (entry.mainImage) {
+      buildConfiguredColorImageCandidates(entry.mainImage).forEach(function (candidate) {
+        if (candidate && out.indexOf(candidate) === -1) out.push(candidate);
+      });
+    }
+    return out;
+  }
+
   function findConfiguredColorSwatchContext() {
     // Bean bag PDPs have their own native swatch system (#beanbag-swatch-wrapper);
     // never let the configured-color swatches take over those pages.
@@ -3420,7 +3449,7 @@
       if (sarSel.classList && sarSel.classList.contains("mc-native-leather")) continue;
       var sarPc = parseProductCodeFromSelectName(sarSel.name);
       if (!/^SAR/i.test(sarPc)) continue;
-      if (parseOptionCategoryFromSelectName(sarSel.name) !== SARANONI_COLOR_OPTION_CATEGORY) continue;
+      if (!isSaranoniColorSelect(sarSel)) continue;
       var sarEntries = buildDataDrivenSaranoniEntries(sarSel, sarPc);
       if (!sarEntries.length) continue;
       return {
@@ -3461,7 +3490,7 @@
       if (sel.classList && sel.classList.contains("mc-native-leather")) continue;
       var pc = parseProductCodeFromSelectName(sel.name);
       if (!/^SAR/i.test(pc)) continue;
-      if (parseOptionCategoryFromSelectName(sel.name) !== SARANONI_COLOR_OPTION_CATEGORY) continue;
+      if (!isSaranoniColorSelect(sel)) continue;
       var dynEntries = buildDataDrivenSaranoniEntries(sel, pc);
       if (!dynEntries.length) continue;
       return {
@@ -3713,8 +3742,7 @@
     var i;
     for (i = 0; i < selects.length; i++) {
       var sel = selects[i];
-      if (parseOptionCategoryFromSelectName(sel.name) !== SARANONI_COLOR_OPTION_CATEGORY) continue;
-      if (!/^SAR/i.test(parseProductCodeFromSelectName(sel.name))) continue;
+      if (!isSaranoniColorSelect(sel)) continue;
       return sel;
     }
     return null;
@@ -3863,6 +3891,22 @@
       global.document.getElementById("altviews") ||
       global.document.querySelector("span#altviews, #content_area .altviews, #v65-product-parent .altviews");
     if (!alt) return;
+    var visibleSwatches = 0;
+    global.document.querySelectorAll("#mc-configured-color-swatch-wrapper .mc-configured-color-swatch").forEach(function (btn) {
+      if (btn.style.display !== "none") visibleSwatches++;
+    });
+    var pickerThumbs = global.document.querySelectorAll(".mc-saranoni-color-picker a[data-option-id]").length;
+    if (!(visibleSwatches > 0 || pickerThumbs > 0)) {
+      try {
+        alt.style.removeProperty("display");
+        alt.style.removeProperty("visibility");
+        alt.style.removeProperty("height");
+        alt.style.removeProperty("overflow");
+        alt.style.removeProperty("margin");
+        alt.style.removeProperty("padding");
+      } catch (eShowAlt) {}
+      return;
+    }
     alt.classList.remove("mc-saranoni-color-altviews", "mc-unified-altviews");
     if (alt.getAttribute("data-mc-sar-alt-signature")) {
       alt.removeAttribute("data-mc-sar-alt-signature");
@@ -4222,7 +4266,7 @@
         btn.setAttribute("data-label", entry.label);
         btn.innerHTML = '<img alt="' + escapeHtmlText(entry.label) + '" />';
         var img = btn.querySelector("img");
-        var candidates = buildConfiguredColorImageCandidates(entry.swatchImage);
+        var candidates = buildConfiguredColorThumbCandidates(entry);
         if (ctx.dataDriven) {
           probeState.pending++;
           var primarySrc = candidates[0] || "";
@@ -5645,8 +5689,7 @@
         if (!isSaranoniPdpPage()) return;
         var sel = eSarSel.target;
         if (!sel || !sel.matches || !sel.matches("select")) return;
-        if (parseOptionCategoryFromSelectName(sel.name) !== SARANONI_COLOR_OPTION_CATEGORY) return;
-        if (!/^SAR/i.test(parseProductCodeFromSelectName(sel.name))) return;
+        if (!isSaranoniColorSelect(sel)) return;
         var ctx = findConfiguredColorSwatchContext();
         if (!ctx || ctx.select !== sel) return;
         var entry = findConfiguredColorSelectedEntry(ctx);
@@ -6490,21 +6533,141 @@
     return tr && tr.tagName === "TR" ? tr : null;
   }
 
+  function parseBreadCrumbCategoryIds() {
+    var ids = [];
+    global.document.querySelectorAll("script").forEach(function (sc) {
+      var m = (sc.textContent || "").match(/breadCrumb\s*=\s*["']([^"']+)["']/);
+      if (!m) return;
+      m[1].split("|").forEach(function (p) {
+        if (p && /^\d+$/.test(p)) ids.push(p);
+      });
+    });
+    return ids;
+  }
+
+  function lookupPdpCategoryById(catId) {
+    var id = String(catId || "");
+    if (!/^\d+$/.test(id)) return null;
+    var sel =
+      'a[href$="-s/' +
+      id +
+      '.htm"], a[href*="-s/' +
+      id +
+      '.htm"], a[href*="category-s/' +
+      id +
+      '.htm"]';
+    var roots = [
+      global.document.getElementById("display_menu_1"),
+      global.document.getElementById("display_menu_2"),
+      global.document.getElementById("content_area"),
+      global.document.body,
+    ];
+    var links = [];
+    var ri;
+    for (ri = 0; ri < roots.length; ri++) {
+      if (!roots[ri]) continue;
+      roots[ri].querySelectorAll(sel).forEach(function (link) {
+        if (links.indexOf(link) === -1) links.push(link);
+      });
+    }
+    if (!links.length) {
+      global.document.querySelectorAll(sel).forEach(function (link) {
+        if (links.indexOf(link) === -1) links.push(link);
+      });
+    }
+    var i;
+    for (i = 0; i < links.length; i++) {
+      var name = (links[i].textContent || "").replace(/\s+/g, " ").trim();
+      var href = links[i].getAttribute("href") || "";
+      if (!name || !href || /about us/i.test(name)) continue;
+      return { name: name, href: href };
+    }
+    return { name: "", href: "/category-s/" + id + ".htm" };
+  }
+
+  function mcResolvePdpReturnCategory() {
+    var pc = "";
+    var title = "";
+    var hay = "";
+    try {
+      pc = resolveSoftGoodsProductCode();
+      title = String(
+        (global.document.querySelector("[itemprop='name'], h1, .productnamecolor, .colors_productname") || {})
+          .textContent || global.document.title || ""
+      ).toUpperCase();
+      hay = [pc, title, global.location && global.location.pathname || ""].join(" ").toUpperCase();
+    } catch (eHay) {}
+
+    if (isBeanBagPdpPage()) {
+      return { name: "Bean Bags", href: "/bean-bag-seating-s/103.htm" };
+    }
+    if (/^SAR/.test(pc) && /(ROBE|SNUGGLE|WEAR|BAMBONI)/.test(hay)) {
+      return { name: "Snugglewear", href: "/category-s/208.htm" };
+    }
+    if (/^SAR/.test(pc) && /(BABY)/.test(hay)) {
+      return { name: "Baby Blankets", href: "/category-s/207.htm" };
+    }
+    if (/^SAR/.test(pc) && /(KID|CHILD|MINI)/.test(hay)) {
+      return { name: "Kids Blankets", href: "/category-s/206.htm" };
+    }
+
+    var bcTd = global.document.querySelector(
+      "#v65-product-parent .vCSS_breadcrumb_td, #content_area .vCSS_breadcrumb_td"
+    );
+    var bcLinks = bcTd
+      ? Array.prototype.slice.call(bcTd.querySelectorAll('a[href*="-s/"], a[href*="category-s/"]'))
+      : [];
+    var ids = parseBreadCrumbCategoryIds();
+    var BLOCK = { 136: true };
+    var i;
+    for (i = ids.length - 1; i >= 0; i--) {
+      if (BLOCK[ids[i]] && ids.length > 1) continue;
+      var id = ids[i];
+      var j;
+      for (j = bcLinks.length - 1; j >= 0; j--) {
+        var href = bcLinks[j].getAttribute("href") || "";
+        if (
+          href.indexOf("-s/" + id) !== -1 ||
+          href.indexOf("category-s/" + id) !== -1 ||
+          new RegExp("[?&]categoryid=" + id + "\\b", "i").test(href)
+        ) {
+          var linkName = (bcLinks[j].textContent || "").replace(/\s+/g, " ").trim();
+          if (linkName) return { name: linkName, href: href };
+        }
+      }
+      var navHit = lookupPdpCategoryById(id);
+      if (navHit && navHit.name) return navHit;
+    }
+    for (i = bcLinks.length - 1; i >= 0; i--) {
+      var t = (bcLinks[i].textContent || "").replace(/\s+/g, " ").trim();
+      var h = bcLinks[i].getAttribute("href") || "";
+      if (!t || !h || /about us/i.test(t)) continue;
+      return { name: t, href: h };
+    }
+    if (/^SAR/.test(pc) && /(CHAIR|SAUCER|PILLOW|SOCK|SWADDLE|HAT|RUG)/.test(hay)) {
+      var luxe = lookupPdpCategoryById("196");
+      if (luxe && luxe.name) return luxe;
+      return { name: "Luxe Comforts", href: "/category-s/196.htm" };
+    }
+    if (/^SAR/.test(pc)) {
+      return { name: "Adult Blankets", href: "/category-s/205.htm" };
+    }
+    if (ids.length) {
+      var deepest = lookupPdpCategoryById(ids[ids.length - 1]);
+      if (deepest && deepest.name) return deepest;
+    }
+    return null;
+  }
+
+  global.mcResolvePdpReturnCategory = mcResolvePdpReturnCategory;
+
   function resolveSoftGoodsReturnCategory() {
+    var resolved = mcResolvePdpReturnCategory();
+    if (resolved && resolved.name) return resolved;
     if (isBeanBagPdpPage()) {
       return { name: "Bean Bags", href: "/bean-bag-seating-s/103.htm" };
     }
     if (isSaranoniPdpPage()) {
-      try {
-        var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-        var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
-        var titleHay = String(
-          (global.document.querySelector("[itemprop='name']") || {}).textContent || ""
-        ).toUpperCase();
-        if (/^SAR/.test(pc) && /(KID|CHILD|MINI)/.test(titleHay + pc)) {
-          return { name: "Kids Blankets", href: "/category-s/206.htm" };
-        }
-      } catch (eCat) {}
       return { name: "Adult Blankets", href: "/category-s/205.htm" };
     }
     return null;
@@ -6766,7 +6929,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260620unified23&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260620returncat1&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -7255,6 +7418,17 @@
 /* MC_RETURN_LINK_ONLY_20260618 */
 (function (g, d) {
   function getReturnData() {
+    if (typeof g.mcResolvePdpReturnCategory === "function") {
+      try {
+        var cat = g.mcResolvePdpReturnCategory();
+        if (cat && cat.name && String(cat.name).toUpperCase() !== "FURNITURE") {
+          return {
+            text: "\u2190 RETURN TO " + cat.name.toUpperCase(),
+            href: cat.href || "/",
+          };
+        }
+      } catch (eRetCat) {}
+    }
     if (d.body && /\bmc-bean-bag-pdp\b/.test(d.body.className || "")) {
       return { text: "\u2190 RETURN TO BEAN BAGS", href: "/bean-bag-seating-s/103.htm" };
     }

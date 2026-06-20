@@ -6,7 +6,7 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260620unified23";
+  var LAYOUT_VER = "20260620returncat1";
   var AUTH_LAYOUT_VER = "20260617pdp76";
   var moTimer = null;
   var moBound = false;
@@ -194,6 +194,39 @@
     return ids;
   }
 
+  function lookupCategoryById(catId) {
+    var id = String(catId || "");
+    if (!/^\d+$/.test(id)) return null;
+    var sel =
+      'a[href$="-s/' +
+      id +
+      '.htm"], a[href*="-s/' +
+      id +
+      '.htm"], a[href*="category-s/' +
+      id +
+      '.htm"]';
+    var roots = [qs("#display_menu_1"), qs("#display_menu_2"), qs("#content_area"), global.document.body];
+    var links = [];
+    var ri;
+    for (ri = 0; ri < roots.length; ri++) {
+      if (!roots[ri]) continue;
+      qsa(sel, roots[ri]).forEach(function (link) {
+        if (links.indexOf(link) === -1) links.push(link);
+      });
+    }
+    if (!links.length) qsa(sel).forEach(function (link) {
+      if (links.indexOf(link) === -1) links.push(link);
+    });
+    var i;
+    for (i = 0; i < links.length; i++) {
+      var name = (links[i].textContent || "").replace(/\s+/g, " ").trim();
+      var href = links[i].getAttribute("href") || "";
+      if (!name || !href || /about us/i.test(name)) continue;
+      return { name: name, href: href };
+    }
+    return { name: "", href: "/category-s/" + id + ".htm" };
+  }
+
   function fallbackReturnCategory() {
     var pc = "";
     var title = "";
@@ -212,6 +245,11 @@
     }
     if (/^SAR/.test(pc) && /(KID|CHILD|MINI)/.test(hay)) {
       return { name: "Kids Blankets", href: "/category-s/206.htm" };
+    }
+    if (/^SAR/.test(pc) && /(CHAIR|SAUCER|PILLOW|SOCK|SWADDLE|HAT|BAMBONI|RUG)/.test(hay)) {
+      var luxeBc = lookupCategoryById("196");
+      if (luxeBc && luxeBc.name) return luxeBc;
+      return { name: "Luxe Comforts", href: "/category-s/196.htm" };
     }
     if (/^SAR/.test(pc)) {
       return { name: "Adult Blankets", href: "/category-s/205.htm" };
@@ -237,10 +275,16 @@
     if (/SOFA/.test(pc) || /SOFA/.test(title)) {
       return { name: "Sofas", href: "/sofas-s/197.htm" };
     }
-    return { name: "Furniture", href: "/" };
+    return null;
   }
 
   function resolveReturnCategory() {
+    if (typeof global.mcResolvePdpReturnCategory === "function") {
+      try {
+        var shared = global.mcResolvePdpReturnCategory();
+        if (shared && shared.name && String(shared.name).toUpperCase() !== "FURNITURE") return shared;
+      } catch (eShared) {}
+    }
     var fallback = fallbackReturnCategory();
     var productAwareNames = {
       "BEAN BAGS": true,
@@ -251,16 +295,17 @@
       "BABY BLANKETS": true,
       "KIDS BLANKETS": true,
       "ADULT BLANKETS": true,
+      "LUXE COMFORTS": true,
     };
-    var BLOCK = { 136: true, 196: true };
-    if (productAwareNames[String(fallback.name || "").toUpperCase()]) return fallback;
+    var BLOCK = { 136: true };
+    if (fallback && productAwareNames[String(fallback.name || "").toUpperCase()]) return fallback;
     var bcTd = qs("#v65-product-parent .vCSS_breadcrumb_td, #content_area .vCSS_breadcrumb_td");
     var links = bcTd ? qsa('a[href*="-s/"], a[href*="category-s/"]', bcTd) : [];
     var ids = parseBreadCrumbIds();
 
     var i;
     for (i = ids.length - 1; i >= 0; i--) {
-      if (BLOCK[ids[i]]) continue;
+      if (BLOCK[ids[i]] && ids.length > 1) continue;
       var id = ids[i];
       var j;
       for (j = links.length - 1; j >= 0; j--) {
@@ -274,17 +319,25 @@
           if (name) return { name: name, href: href };
         }
       }
+      var navHit = lookupCategoryById(id);
+      if (navHit && navHit.name) return navHit;
     }
 
     for (i = links.length - 1; i >= 0; i--) {
       var t = (links[i].textContent || "").replace(/\s+/g, " ").trim();
       var h = links[i].getAttribute("href") || "";
       if (!t || !h || /about us/i.test(t)) continue;
-      if (/luxe comforts/i.test(t) && productAwareNames[String(fallback.name || "").toUpperCase()]) continue;
       return { name: t, href: h };
     }
-    return fallback;
+    if (fallback && String(fallback.name || "").toUpperCase() !== "FURNITURE") return fallback;
+    if (ids.length) {
+      var deepest = lookupCategoryById(ids[ids.length - 1]);
+      if (deepest && deepest.name) return deepest;
+    }
+    return { name: "Shop", href: "/" };
   }
+
+  global.mcResolvePdpReturnCategory = resolveReturnCategory;
 
   function ensureReturnRow(mainRow, table) {
     if (!mainRow || !table) return;
