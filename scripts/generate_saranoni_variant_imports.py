@@ -132,8 +132,8 @@ def write_product_imports(
     option_ids = ",".join(id_map[r["label"]] for r in rows)
     with prod_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["ProductCode", "applytoproductcodes", "EnableOptions_InventoryControl"])
-        w.writerow([code, option_ids, "Y"])
+        w.writerow(["productcode", "optionids"])
+        w.writerow([code, option_ids])
 
     legacy_prod = out_dir / "Products_OptionIDs_Import.csv"
     if legacy_prod.is_file():
@@ -213,7 +213,7 @@ def write_product_imports(
         "2. **Import** `Options_Import.csv` (Inventory → Import/Export → Options). "
         "Creates option rows only — no `applytoproductcodes` on Options.\n"
         "3. **Import** `Products_Import.csv` (Products import). "
-        "Column **`applytoproductcodes`** = comma-separated **option IDs** for this SKU.\n"
+        "Columns: **`productcode`**, **`optionids`** (comma-separated option IDs).\n"
         "4. Run `py -3 scripts/fetch_saranoni_variant_import_images.py {code}` to download "
         "T/S images into `vspfiles/photos/`, then deploy (push triggers SFTP photo upload).\n"
         "   Or upload swatch/hero images from `variant_images.csv` manually to "
@@ -261,9 +261,7 @@ def build_batch_imports() -> None:
                     option_rows[oid] = [row["id"], row["optioncatid"], row["optionsdesc"], row["pricediff"]]
         with prod_path.open(newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
-                product_rows.append(
-                    [row["ProductCode"], row["applytoproductcodes"], row["EnableOptions_InventoryControl"]]
-                )
+                product_rows.append([row["productcode"], row["optionids"]])
 
     with (batch_dir / "Options_Import.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -273,7 +271,7 @@ def build_batch_imports() -> None:
 
     with (batch_dir / "Products_Import.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["ProductCode", "applytoproductcodes", "EnableOptions_InventoryControl"])
+        w.writerow(["productcode", "optionids"])
         for row in sorted(product_rows, key=lambda r: r[0]):
             w.writerow(row)
 
