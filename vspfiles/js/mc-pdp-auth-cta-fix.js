@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620hpicons3
-  var VERSION = "20260620hpicons3";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620hpicons4
+  var VERSION = "20260620hpicons4";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -3647,6 +3647,170 @@
   }
 
   var saranoniSizeActiveOptionId = "";
+  var saranoniSizeActiveImageFile = "";
+
+  function extractVolusionCacheQuery(src) {
+    var m = String(src || "").match(/[?&]v-cache=([^&]+)/i);
+    return m ? "?v-cache=" + m[1] : "?v-cache=" + Date.now();
+  }
+
+  function dismissSaranoniProductPhotoLoading() {
+    var mainImg = global.document.getElementById("product_photo");
+    if (!mainImg) return;
+    var scopes = [];
+    if (mainImg.closest) {
+      var anchor = mainImg.closest("a");
+      if (anchor && anchor.parentNode) scopes.push(anchor.parentNode);
+      var td = mainImg.closest("td");
+      if (td) scopes.push(td);
+    }
+    if (!scopes.length) scopes.push(global.document.getElementById("v65-product-parent"));
+    scopes.forEach(function (scope) {
+      if (!scope || !scope.querySelectorAll) return;
+      scope.querySelectorAll("div, span, font, td, b").forEach(function (el) {
+        if (el === mainImg || (el.contains && el.contains(mainImg))) return;
+        var t = String(el.textContent || "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase();
+        if (t !== "loading..." && t !== "loading") return;
+        try {
+          el.style.setProperty("display", "none", "important");
+          el.style.setProperty("visibility", "hidden", "important");
+        } catch (eHide) {}
+      });
+    });
+    try {
+      mainImg.style.setProperty("opacity", "1", "important");
+      mainImg.style.removeProperty("visibility");
+    } catch (eImg) {}
+  }
+
+  function syncSaranoniOptionPriceFromVolusion() {
+    var pwo =
+      global.document.getElementById("priceWithOptions") ||
+      global.document.getElementById("priceWithOptionsNoTax");
+    if (!pwo) return;
+    var amt =
+      parseMoney(
+        (pwo.getAttribute && (pwo.getAttribute("value") || pwo.getAttribute("content"))) ||
+          pwo.textContent ||
+          ""
+      ) || 0;
+    if (!(amt > 0)) return;
+    var host = global.document.getElementById("mc-pdp-price-stack-host");
+    if (host) {
+      host.querySelectorAll(".mc-pdp-stack-retail-amt, .product_list_price").forEach(function (el) {
+        try {
+          el.textContent = fmtMoney(amt);
+        } catch (eAmt) {}
+      });
+      host.querySelectorAll("[itemprop='price']").forEach(function (el) {
+        try {
+          el.setAttribute("content", amt.toFixed(2));
+          el.textContent = fmtMoney(amt);
+        } catch (eMeta) {}
+      });
+    }
+    if (typeof global.updateBNPLMessaging === "function") {
+      try {
+        global.updateBNPLMessaging(Math.round(amt * 100));
+      } catch (eBnpl) {}
+    }
+  }
+
+  function setSaranoniSizePhotoSrc(resolvedSrc, label, productCode) {
+    var mainImg = global.document.getElementById("product_photo");
+    if (!mainImg || !resolvedSrc) return;
+    if (productCode && !configuredColorImageBelongsToProduct(resolvedSrc, productCode)) return;
+    var full = resolvedSrc.replace(/-T\.jpg/i, ".jpg").replace(/-S\.jpg/i, ".jpg");
+    function finishHeroSwap() {
+      dismissSaranoniProductPhotoLoading();
+      try {
+        if (global.vZoom && typeof global.vZoom.add === "function") {
+          global.vZoom.add(mainImg, extractVolusionCacheQuery(resolvedSrc));
+        }
+      } catch (eVz) {}
+    }
+    try {
+      mainImg.onload = finishHeroSwap;
+      if ((mainImg.getAttribute("src") || "") !== resolvedSrc) mainImg.src = resolvedSrc;
+      if (mainImg.hasAttribute("srcset")) mainImg.removeAttribute("srcset");
+      mainImg.style.setProperty("opacity", "1", "important");
+      if (label) {
+        mainImg.title = label;
+        mainImg.alt = label;
+      }
+      if (mainImg.complete && mainImg.naturalWidth > 0) finishHeroSwap();
+    } catch (eSrc) {}
+    ["product_photo_zoom_url", "product_photo_zoom_url2"].forEach(function (id) {
+      var zoom = global.document.getElementById(id);
+      if (!zoom) return;
+      try {
+        zoom.href = full;
+        if (label) zoom.title = label;
+      } catch (eZoom) {}
+    });
+  }
+
+  function scheduleSaranoniSizeHeroLock(productCode, fileName, label) {
+    [0, 120, 400, 900].forEach(function (delay) {
+      global.setTimeout(function () {
+        if (saranoniSizeActiveImageFile !== fileName) return;
+        loadProductScopedColorImage(productCode, fileName, function (resolvedSrc) {
+          if (!resolvedSrc || saranoniSizeActiveImageFile !== fileName) return;
+          setSaranoniSizePhotoSrc(resolvedSrc, label, productCode);
+        });
+      }, delay);
+    });
+  }
+
+  function applySaranoniSizeHeroPhoto(productCode, fileName, label) {
+    if (!productCode || !fileName) return;
+    saranoniSizeActiveImageFile = fileName;
+    loadProductScopedColorImage(productCode, fileName, function (resolvedSrc) {
+      if (!resolvedSrc || saranoniSizeActiveImageFile !== fileName) return;
+      setSaranoniSizePhotoSrc(resolvedSrc, label, productCode);
+      scheduleSaranoniSizeHeroLock(productCode, fileName, label);
+    });
+  }
+
+  function syncSaranoniSizeSelect(select, opt) {
+    if (!select || !opt) return false;
+    try {
+      select.dataset.mcConfiguredColorSyncing = "1";
+    } catch (eSyncFlag) {}
+    select.value = opt.value;
+    try {
+      select.selectedIndex = opt.index;
+    } catch (eIdx) {}
+    var catRaw = parseOptionCategoryFromSelectName(select.name);
+    var catId = catRaw ? parseInt(catRaw, 10) : 58;
+    // Skip change_option for size-only Saranoni — it hijacks #product_photo with a
+    // stuck "loading..." overlay when option photos live on our CDN, not Volusion.
+    if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
+      try {
+        global.AutoUpdatePriceWithSelectedOptions(opt.value, catId);
+      } catch (ePrice) {}
+    }
+    try {
+      select.disabled = false;
+      select.removeAttribute("disabled");
+    } catch (eEn) {}
+    [0, 80, 250, 600].forEach(function (delay) {
+      global.setTimeout(syncSaranoniOptionPriceFromVolusion, delay);
+    });
+    global.setTimeout(function () {
+      try {
+        delete select.dataset.mcConfiguredColorSyncing;
+      } catch (eSyncClear) {
+        try {
+          select.dataset.mcConfiguredColorSyncing = "0";
+        } catch (eSyncClear2) {}
+      }
+    }, 0);
+    return true;
+  }
 
   function findSaranoniSizeVariantContext() {
     if (isBeanBagPdpPage()) return null;
@@ -3736,12 +3900,12 @@
     } catch (ePick) {}
     var opt = findConfiguredColorOption(ctx.select, entry);
     if (opt) {
-      syncConfiguredColorSelect(ctx.select, opt);
+      syncSaranoniSizeSelect(ctx.select, opt);
       ensureConfiguredColorCartField(ctx.select, opt, null);
     }
     updateSaranoniSizeThumbUi(entry.optionId);
     if (updateHero !== false) {
-      applyConfiguredColorMainPhoto(entry.mainImage, entry.label, ctx.productCode);
+      applySaranoniSizeHeroPhoto(ctx.productCode, entry.mainImage, entry.label);
     }
     return true;
   }
@@ -3749,6 +3913,10 @@
   function bindSaranoniSizeVariantSelect(ctx) {
     if (!ctx || !ctx.select || ctx.select.dataset.mcSarSizeBound === "1") return;
     ctx.select.dataset.mcSarSizeBound = "1";
+    try {
+      ctx.select.setAttribute("onchange", "");
+      ctx.select.onchange = null;
+    } catch (eInline) {}
     ctx.select.addEventListener("change", function () {
       if (ctx.select.dataset.mcConfiguredColorSyncing === "1") return;
       var entry = readConfiguredColorSelectEntry(ctx);
@@ -3830,18 +3998,28 @@
     if (!isSaranoniPdpPage()) return;
     var box = global.document.querySelector("#v65-product-parent .colors_pricebox");
     if (!box) return;
-    box.querySelectorAll(".option_pricing, #priceWithOptions, #priceWithOptionsNoTax, font.option_pricing").forEach(
-      function (node) {
-        try {
-          node.style.setProperty("display", "none", "important");
-          node.style.setProperty("visibility", "hidden", "important");
-          node.style.setProperty("height", "0", "important");
-          node.style.setProperty("overflow", "hidden", "important");
-        } catch (eHide) {}
-      }
-    );
+    box.querySelectorAll(".option_pricing, font.option_pricing").forEach(function (node) {
+      try {
+        node.style.setProperty("display", "none", "important");
+        node.style.setProperty("visibility", "hidden", "important");
+        node.style.setProperty("height", "0", "important");
+        node.style.setProperty("overflow", "hidden", "important");
+      } catch (eHide) {}
+    });
+    var pwo = global.document.getElementById("priceWithOptions");
+    if (pwo) {
+      try {
+        pwo.style.setProperty("position", "absolute", "important");
+        pwo.style.setProperty("left", "-9999px", "important");
+        pwo.style.setProperty("width", "1px", "important");
+        pwo.style.setProperty("height", "1px", "important");
+        pwo.style.setProperty("overflow", "hidden", "important");
+        pwo.style.setProperty("opacity", "0", "important");
+      } catch (ePwo) {}
+    }
     var host = global.document.getElementById("mc-pdp-price-stack-host");
     if (host) hideAllStrayPdpPriceNodes(host);
+    syncSaranoniOptionPriceFromVolusion();
   }
 
   function ensureSaranoniVariantUi() {
