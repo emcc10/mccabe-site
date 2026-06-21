@@ -1,0 +1,66 @@
+{
+  "ver": "20260621sarlayout5",
+  "visibleIds": [
+    "mc-pdp-brand-logo",
+    "mc-pdp-title-right",
+    "mc-pdp-price-stack-host",
+    "mc-pdp-features",
+    "mc-pdp-purchase-stack",
+    "mc-pdp-option-block"
+  ],
+  "idx": {
+    "mc-pdp-brand-logo": 0,
+    "mc-pdp-title-right": 1,
+    "mc-pdp-price-stack-host": 2,
+    "messaging-element": -1,
+    "mc-pdp-option-block": 5,
+    "mc-pdp-features": 3,
+    "mc-pdp-description-below-features": -1,
+    "mc-pdp-purchase-stack": 4
+  },
+  "orderOk": false,
+  "rects": {
+    "mc-pdp-brand-logo": {
+      "top": 275,
+      "left": 732,
+      "h": 39
+    },
+    "mc-pdp-title-right": {
+      "top": 328,
+      "left": 732,
+      "h": 72
+    },
+    "mc-pdp-price-stack-host": {
+      "top": 414,
+      "left": 732,
+      "h": 30
+    },
+    "messaging-element": {
+      "top": 183,
+      "left": 747,
+      "h": 58
+    },
+    "mc-pdp-option-block": {
+      "top": 930,
+      "left": 732,
+      "h": 161
+    },
+    "mc-pdp-features": {
+      "top": 456,
+      "left": 732,
+      "h": 312
+    },
+    "mc-pdp-purchase-stack": {
+      "top": 796,
+      "left": 732,
+      "h": 106
+    }
+  },
+  "messagingInCol": false,
+  "strayPrice": false,
+  "stackedPriceLabels": 0,
+  "hasSizeBlock": true,
+  "hasThumbs": true,
+  "thumbInMedia": true,
+  "optionsTable": true
+}
