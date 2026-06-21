@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260620windsor1 — Windsor hero CDN cache bypass */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260620mobile1 — mobile full-view + PDP return links */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -16722,6 +16722,31 @@ html body.mc-saranoni-pdp .mc-pdp-return-link:hover {
   text-decoration: underline !important;
 }
 
+#mc-pdp-return-link-static,
+.mc-pdp-return-link-static {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 14px 0 !important;
+  padding: 0 !important;
+  clear: both !important;
+  overflow: visible !important;
+}
+
+#mc-pdp-return-link-static .mc-pdp-return-link,
+.mc-pdp-return-link-static .mc-pdp-return-link {
+  display: inline-block !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: #111 !important;
+}
+
 html body.mc-saranoni-pdp .mc-saranoni-color-picker__heading,
 html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__heading {
   display: block !important;
@@ -18600,5 +18625,127 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
   html.mc-commerce-surface td.mc-cart-actions-cell .mc-cart-actions-bar,
   body.shoppingcart td.mc-cart-actions-cell .mc-cart-actions-bar {
     margin-left: 0 !important;
+  }
+}
+
+/* === MC_MOBILE_FULL_VIEW_20260620 — keep storefront content fully visible on phones === */
+@media (max-width: 991px) {
+  html,
+  body {
+    max-width: 100% !important;
+    overflow-x: clip !important;
+  }
+
+  .content_area-wrapper,
+  .container--content,
+  .container--content > .row,
+  .container--content > .row > [class*="col-"],
+  #content_area,
+  #content_area_home,
+  #v65-product-parent,
+  .vol-container,
+  .page-wrap {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+
+  #content_area table,
+  #content_area tbody,
+  #content_area tr,
+  #content_area td,
+  #content_area th,
+  #v65-product-parent table,
+  #v65-product-parent tbody,
+  #v65-product-parent tr,
+  #v65-product-parent td,
+  #v65-product-parent th {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #content_area table,
+  #v65-product-parent table {
+    width: 100% !important;
+    table-layout: auto !important;
+  }
+
+  #content_area img,
+  #content_area video,
+  #v65-product-parent img,
+  #v65-product-parent video {
+    max-width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  #content_area input,
+  #content_area select,
+  #content_area textarea,
+  #content_area button,
+  #v65-product-parent input,
+  #v65-product-parent select,
+  #v65-product-parent textarea,
+  #v65-product-parent button,
+  .mc-config-btn,
+  #mcPlannerBtn,
+  #mcProductSummaryBtn,
+  #mcLeatherBtn {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .mc-config-btn:not(#mcLeatherBtn),
+  #mcPlannerBtn,
+  #mcProductSummaryBtn,
+  #mcLeatherBtn {
+    width: 100% !important;
+  }
+
+  #mcLeatherSwatchStrip,
+  .mc-saranoni-color-picker__grid {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  #mc-pdp-return-link-static,
+  .mc-pdp-return-link-static {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  html body.mc-saranoni-pdp .mc-pdp-return-row,
+  html body.mc-bean-bag-pdp .mc-pdp-return-row,
+  html body.mc-pdp-unified-ready .mc-pdp-return-row,
+  html body.productdetails .mc-pdp-return-row,
+  html body.mc-product-page .mc-pdp-return-row {
+    display: table-row !important;
+    visibility: visible !important;
+  }
+
+  html body .mc-pdp-return-link {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  header.header,
+  footer.footer,
+  nav.push-menu {
+    max-width: 100% !important;
   }
 }

@@ -541,6 +541,37 @@
     var links = bcTd ? qsa('a[href*="-s/"], a[href*="category-s/"]', bcTd) : [];
     var ids = parseBreadCrumbIds();
 
+    var pc = "";
+    try {
+      pc = String((qs('input[name="ProductCode"], input[name="productcode"]') || {}).value || "").toUpperCase();
+    } catch (ePc) {}
+    var sarLeafOrder = ["208", "207", "206", "196", "205"];
+    var filtered = [];
+    var fi;
+    for (fi = 0; fi < ids.length; fi++) {
+      if (ids[fi] !== "136" && filtered.indexOf(ids[fi]) === -1) filtered.push(ids[fi]);
+    }
+    if (/^SAR/.test(pc)) {
+      for (fi = 0; fi < sarLeafOrder.length; fi++) {
+        if (filtered.indexOf(sarLeafOrder[fi]) === -1) continue;
+        var sid = sarLeafOrder[fi];
+        var sj;
+        for (sj = links.length - 1; sj >= 0; sj--) {
+          var shref = links[sj].getAttribute("href") || "";
+          if (
+            shref.indexOf("-s/" + sid) !== -1 ||
+            shref.indexOf("category-s/" + sid) !== -1 ||
+            new RegExp("[?&]categoryid=" + sid + "\\b", "i").test(shref)
+          ) {
+            var sname = (links[sj].textContent || "").replace(/\s+/g, " ").trim();
+            if (sname) return { name: sname, href: shref };
+          }
+        }
+        var snav = lookupCategoryById(sid);
+        if (snav && snav.name) return snav;
+      }
+    }
+
     var i;
     for (i = ids.length - 1; i >= 0; i--) {
       if (BLOCK[ids[i]] && ids.length > 1) continue;

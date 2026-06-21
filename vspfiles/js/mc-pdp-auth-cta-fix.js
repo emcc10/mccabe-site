@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620hpicons1
-  var VERSION = "20260620hpicons1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620mobile1
+  var VERSION = "20260620mobile1";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -6760,17 +6760,81 @@
   }
 
   function findSoftGoodsProductRow() {
-    var tagged = global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row");
+    var table = global.document.getElementById("v65-product-parent");
+    var tagged = table && table.querySelector("tr.mc-pdp-main-row");
     if (tagged) return tagged;
-    var opt = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
-    if (!opt) return null;
-    var tr = opt.parentNode;
-    while (tr && tr.tagName !== "TR") tr = tr.parentNode;
-    while (tr && tr.parentNode && tr.parentNode.id !== "v65-product-parent") {
-      if (tr.parentNode.tagName === "TR") tr = tr.parentNode;
-      else tr = tr.parentNode;
+
+    var opt = table && table.querySelector("td.mc-pdp-options-td");
+    if (opt) {
+      var optRow = opt.closest ? opt.closest("tr") : null;
+      if (optRow) return optRow;
     }
-    return tr && tr.tagName === "TR" ? tr : null;
+
+    if (!table) return null;
+
+    var addBtn = table.querySelector(
+      'input[name="btnaddtocart"], button[name="btnaddtocart"], input[id*="btnaddtocart" i]'
+    );
+    if (addBtn) {
+      var addRow = addBtn.closest ? addBtn.closest("tr") : null;
+      if (addRow) return addRow;
+    }
+
+    var photo = table.querySelector("#product_photo, img#product_photo");
+    if (photo) {
+      var photoRow = photo.closest ? photo.closest("tr") : null;
+      if (photoRow) return photoRow;
+    }
+
+    var nameEl = table.querySelector(
+      "[itemprop='name'], .productnamecolor, .colors_productname, h1"
+    );
+    if (nameEl) {
+      var nameRow = nameEl.closest ? nameEl.closest("tr") : null;
+      if (nameRow) return nameRow;
+    }
+
+    var rows = table.querySelectorAll("tbody > tr, tr");
+    var ri;
+    for (ri = 0; ri < rows.length; ri++) {
+      if (
+        rows[ri].querySelector(
+          "#product_photo, [itemprop='name'], .productnamecolor, input[name='btnaddtocart']"
+        )
+      ) {
+        return rows[ri];
+      }
+    }
+
+    return rows.length ? rows[0] : null;
+  }
+
+  function tagSoftGoodsPdpCells() {
+    if (!isSoftGoodsPdpPage()) return;
+    var table = global.document.getElementById("v65-product-parent");
+    if (!table) return;
+
+    var photo = table.querySelector("#product_photo, img#product_photo");
+    if (photo) {
+      var mediaTd = photo.closest ? photo.closest("td") : null;
+      if (mediaTd) mediaTd.classList.add("mc-pdp-media-td");
+    }
+
+    var optTd = table.querySelector("td.mc-pdp-options-td");
+    if (!optTd) {
+      var addBtn = table.querySelector(
+        'input[name="btnaddtocart"], button[name="btnaddtocart"], input[id*="btnaddtocart" i]'
+      );
+      if (addBtn) optTd = addBtn.closest ? addBtn.closest("td") : null;
+    }
+    if (!optTd) {
+      var sel = table.querySelector("select:not(.mc-native-leather)");
+      if (sel) optTd = sel.closest ? sel.closest("td") : null;
+    }
+    if (optTd) optTd.classList.add("mc-pdp-options-td");
+
+    var mainRow = findSoftGoodsProductRow();
+    if (mainRow) mainRow.classList.add("mc-pdp-main-row");
   }
 
   function parseBreadCrumbCategoryIds() {
@@ -6825,6 +6889,47 @@
     return { name: "", href: "/category-s/" + id + ".htm" };
   }
 
+  function resolvePdpCategoryFromIds(ids, bcLinks, pc) {
+    var BLOCK = { 136: true };
+    var filtered = [];
+    var i;
+    for (i = 0; i < ids.length; i++) {
+      if (!BLOCK[ids[i]] && filtered.indexOf(ids[i]) === -1) filtered.push(ids[i]);
+    }
+    if (!filtered.length) return null;
+
+    function hitForId(id) {
+      var j;
+      for (j = bcLinks.length - 1; j >= 0; j--) {
+        var href = bcLinks[j].getAttribute("href") || "";
+        if (
+          href.indexOf("-s/" + id) !== -1 ||
+          href.indexOf("category-s/" + id) !== -1 ||
+          new RegExp("[?&]categoryid=" + id + "\\b", "i").test(href)
+        ) {
+          var linkName = (bcLinks[j].textContent || "").replace(/\s+/g, " ").trim();
+          if (linkName) return { name: linkName, href: href };
+        }
+      }
+      return lookupPdpCategoryById(id);
+    }
+
+    var sarLeafOrder = ["208", "207", "206", "196", "205"];
+    if (/^SAR/.test(pc || "")) {
+      for (i = 0; i < sarLeafOrder.length; i++) {
+        if (filtered.indexOf(sarLeafOrder[i]) === -1) continue;
+        var sarHit = hitForId(sarLeafOrder[i]);
+        if (sarHit && sarHit.name) return sarHit;
+      }
+    }
+
+    for (i = filtered.length - 1; i >= 0; i--) {
+      var hit = hitForId(filtered[i]);
+      if (hit && hit.name) return hit;
+    }
+    return null;
+  }
+
   function mcResolvePdpReturnCategory() {
     var pc = "";
     var title = "";
@@ -6850,6 +6955,11 @@
     if (/^SAR/.test(pc) && /(KID|CHILD|MINI)/.test(hay)) {
       return { name: "Kids Blankets", href: "/category-s/206.htm" };
     }
+    if (/^SAR/.test(pc) && /(CHAIR|SAUCER|PILLOW|SOCK|SWADDLE|HAT|RUG)/.test(hay)) {
+      var luxeEarly = lookupPdpCategoryById("196");
+      if (luxeEarly && luxeEarly.name) return luxeEarly;
+      return { name: "Luxe Comforts", href: "/category-s/196.htm" };
+    }
 
     var bcTd = global.document.querySelector(
       "#v65-product-parent .vCSS_breadcrumb_td, #content_area .vCSS_breadcrumb_td"
@@ -6858,36 +6968,15 @@
       ? Array.prototype.slice.call(bcTd.querySelectorAll('a[href*="-s/"], a[href*="category-s/"]'))
       : [];
     var ids = parseBreadCrumbCategoryIds();
-    var BLOCK = { 136: true };
+    var fromBc = resolvePdpCategoryFromIds(ids, bcLinks, pc);
+    if (fromBc) return fromBc;
+
     var i;
-    for (i = ids.length - 1; i >= 0; i--) {
-      if (BLOCK[ids[i]] && ids.length > 1) continue;
-      var id = ids[i];
-      var j;
-      for (j = bcLinks.length - 1; j >= 0; j--) {
-        var href = bcLinks[j].getAttribute("href") || "";
-        if (
-          href.indexOf("-s/" + id) !== -1 ||
-          href.indexOf("category-s/" + id) !== -1 ||
-          new RegExp("[?&]categoryid=" + id + "\\b", "i").test(href)
-        ) {
-          var linkName = (bcLinks[j].textContent || "").replace(/\s+/g, " ").trim();
-          if (linkName) return { name: linkName, href: href };
-        }
-      }
-      var navHit = lookupPdpCategoryById(id);
-      if (navHit && navHit.name) return navHit;
-    }
     for (i = bcLinks.length - 1; i >= 0; i--) {
       var t = (bcLinks[i].textContent || "").replace(/\s+/g, " ").trim();
       var h = bcLinks[i].getAttribute("href") || "";
       if (!t || !h || /about us/i.test(t)) continue;
       return { name: t, href: h };
-    }
-    if (/^SAR/.test(pc) && /(CHAIR|SAUCER|PILLOW|SOCK|SWADDLE|HAT|RUG)/.test(hay)) {
-      var luxe = lookupPdpCategoryById("196");
-      if (luxe && luxe.name) return luxe;
-      return { name: "Luxe Comforts", href: "/category-s/196.htm" };
     }
     if (/^SAR/.test(pc)) {
       return { name: "Adult Blankets", href: "/category-s/205.htm" };
@@ -6932,6 +7021,7 @@
 
   function ensureSoftGoodsReturnRow() {
     if (!isSoftGoodsPdpPage()) return;
+    tagSoftGoodsPdpCells();
     var cat = resolveSoftGoodsReturnCategory();
     if (!cat) return;
     var table = global.document.getElementById("v65-product-parent");
@@ -6963,6 +7053,8 @@
       linkEl.setAttribute("aria-label", "Return to " + cat.name);
     }
   }
+
+  global.ensureSoftGoodsReturnRow = ensureSoftGoodsReturnRow;
 
   function ensureBeanBagReturnLink() {
     if (!isBeanBagPdpPage()) return;
@@ -7676,8 +7768,18 @@
   };
   (d.head || d.documentElement).appendChild(s);
 })(window);
-/* MC_RETURN_LINK_ONLY_20260618 */
+/* MC_RETURN_LINK_ONLY_20260620mobile1 */
 (function (g, d) {
+  function isPdpPage() {
+    var b = d.body;
+    if (!b) return false;
+    return (
+      b.classList.contains("productdetails") ||
+      b.classList.contains("mc-product-page") ||
+      !!d.getElementById("v65-product-parent")
+    );
+  }
+
   function getReturnData() {
     if (typeof g.mcResolvePdpReturnCategory === "function") {
       try {
@@ -7693,16 +7795,43 @@
     if (d.body && /\bmc-bean-bag-pdp\b/.test(d.body.className || "")) {
       return { text: "\u2190 RETURN TO BEAN BAGS", href: "/bean-bag-seating-s/103.htm" };
     }
-    if (d.body && /\bmc-saranoni-pdp\b/.test(d.body.className || "")) {
-      return { text: "\u2190 RETURN TO ADULT BLANKETS", href: "/category-s/205.htm" };
-    }
     return null;
   }
 
+  function rowReturnLinkVisible() {
+    var rowLink = d.querySelector("#v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-link");
+    if (!rowLink) return false;
+    var t = (rowLink.textContent || "").replace(/\s+/g, " ").trim();
+    if (!t) return false;
+    try {
+      var st = g.getComputedStyle(rowLink);
+      if (st.display === "none" || st.visibility === "hidden") return false;
+      if (parseFloat(st.opacity || "1") < 0.1) return false;
+    } catch (eVis) {}
+    return rowLink.offsetWidth > 0 || rowLink.offsetHeight > 0;
+  }
+
   function restoreReturnLink() {
+    if (!isPdpPage()) return;
+
+    if (typeof g.ensureSoftGoodsReturnRow === "function") {
+      try {
+        g.ensureSoftGoodsReturnRow();
+      } catch (eSoftReturn) {}
+    }
+
+    if (rowReturnLinkVisible()) {
+      var stale = d.getElementById("mc-pdp-return-link-static");
+      if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
+      return;
+    }
+
     var data = getReturnData();
+    if (!data) return;
+
     var table = d.getElementById("v65-product-parent");
-    if (!data || !table || !table.parentNode) return;
+    var host = (table && table.parentNode) || d.getElementById("content_area");
+    if (!host) return;
 
     var wrap = d.getElementById("mc-pdp-return-link-static");
     if (!wrap) {
@@ -7714,7 +7843,8 @@
       link.className = "mc-pdp-return-link";
       wrap.appendChild(link);
 
-      table.parentNode.insertBefore(wrap, table);
+      if (table && table.parentNode === host) host.insertBefore(wrap, table);
+      else host.insertBefore(wrap, host.firstChild);
     }
 
     var a = wrap.querySelector("a");
@@ -7723,26 +7853,9 @@
     a.href = data.href;
     a.textContent = data.text;
     a.setAttribute("aria-label", data.text.replace("\u2190 ", ""));
-
-    wrap.style.setProperty("display", "block", "important");
-    wrap.style.setProperty("visibility", "visible", "important");
-    wrap.style.setProperty("opacity", "1", "important");
-    wrap.style.setProperty("width", "100%", "important");
-    wrap.style.setProperty("margin", "0 0 14px 0", "important");
-    wrap.style.setProperty("padding", "0", "important");
-    wrap.style.setProperty("clear", "both", "important");
-
-    a.style.setProperty("display", "inline-block", "important");
-    a.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
-    a.style.setProperty("font-size", "11px", "important");
-    a.style.setProperty("font-weight", "600", "important");
-    a.style.setProperty("letter-spacing", "0.14em", "important");
-    a.style.setProperty("text-transform", "uppercase", "important");
-    a.style.setProperty("text-decoration", "none", "important");
-    a.style.setProperty("color", "#111", "important");
   }
 
-  [0, 150, 500, 1200, 2500, 5000].forEach(function (ms) {
+  [0, 150, 500, 1200, 2500, 5000, 8000].forEach(function (ms) {
     g.setTimeout(restoreReturnLink, ms);
   });
 
