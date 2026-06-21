@@ -17912,6 +17912,19 @@ html body.mc-saranoni-pdp #mc-pdp-features { order: 70 !important; clear: both !
 html body.mc-saranoni-pdp #mc-pdp-description-below-features { order: 80 !important; }
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack { order: 90 !important; }
 
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table.colors_pricebox,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info:has(#mc-pdp-price-stack-host) > table.colors_pricebox,
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-option-block) > #options_table,
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-option-block) > table:has(> #options_table) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row {
   display: table-row !important;
 }
@@ -18787,23 +18800,25 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     max-width: 400px !important;
   }
 
-  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
-  html body.mc-saranoni-pdp .mc-saranoni-size-thumbs,
   html body.mc-saranoni-pdp .mc-saranoni-color-picker,
   html body.mc-saranoni-pdp .mc-sar-hotfix-picker {
     order: 60 !important;
     width: 100% !important;
     max-width: 400px !important;
-    margin: 10px 0 16px 0 !important;
+    margin: 0 0 16px 0 !important;
     align-self: flex-start !important;
   }
 
-  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
-  html body.mc-saranoni-pdp .mc-saranoni-size-thumbs {
+  html body.mc-saranoni-pdp td.mc-pdp-media-td #mc-saranoni-size-thumbs,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media #mc-saranoni-size-thumbs,
+  html body.mc-saranoni-pdp #product_photo_td #mc-saranoni-size-thumbs {
     display: flex !important;
     flex-wrap: wrap !important;
     justify-content: flex-start !important;
     gap: 10px !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 12px 0 0 !important;
     padding: 0 !important;
   }
 
