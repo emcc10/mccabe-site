@@ -16,6 +16,15 @@ SIZE_CAT = "58"
 HANDLE_TO_CODE = {
     "cotton-muslin-4-layer-quilt": "SAR-COTTON-MSLN-4-LAYER",
     "wizarding-world-charm-minky-lush": "SAR-WIZARDIN-WORLD-CHARM",
+    "harry-potter-icons-minky-lush": "SAR-HP-HP-ICONS-MNKY-LUSH",
+}
+
+# Shared Saranoni blanket sizes (Volusion option category 58) — one ID per size label store-wide.
+SARANONI_SIZE_OPTION_IDS = {
+    "Mini": "1202",
+    "Receiving": "1203",
+    "Toddler": "1204",
+    "XL": "1205",
 }
 
 # Pre-assign option IDs (empty Volusion slots / new size rows). Re-export Options after import to confirm.
@@ -26,13 +35,15 @@ PRODUCT_OPTION_IDS: dict[str, dict[str, str]] = {
         "Olive Branch": "1161",
         "Floral Fields": "1162",
     },
-    "SAR-WIZARDIN-WORLD-CHARM": {
-        "Mini": "1202",
-        "Receiving": "1203",
-        "Toddler": "1204",
-        "XL": "1205",
-    },
+    "SAR-WIZARDIN-WORLD-CHARM": SARANONI_SIZE_OPTION_IDS,
+    "SAR-HP-HP-ICONS-MNKY-LUSH": SARANONI_SIZE_OPTION_IDS,
 }
+
+# Products that share the same size option rows (append all codes on Options import).
+SIZE_OPTION_SHARED_PRODUCTS = [
+    "SAR-WIZARDIN-WORLD-CHARM",
+    "SAR-HP-HP-ICONS-MNKY-LUSH",
+]
 
 
 def fetch_product(handle: str) -> dict:
@@ -96,12 +107,15 @@ def write_product_imports(code: str, handle: str, cat: str, rows: list[dict]) ->
         raise ValueError(f"{code}: missing option id map for: {missing_ids}")
 
     opt_path = out_dir / "Options_Import.csv"
+    apply_codes = code
+    if cat == SIZE_CAT and code in SIZE_OPTION_SHARED_PRODUCTS:
+        apply_codes = ",".join(SIZE_OPTION_SHARED_PRODUCTS)
     with opt_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["id", "optioncatid", "optionsdesc", "pricediff", "applytoproductcodes"])
         for r in rows:
             oid = id_map[r["label"]]
-            w.writerow([oid, cat, r["label"], r["pricediff"], code])
+            w.writerow([oid, cat, r["label"], r["pricediff"], apply_codes])
 
     prod_path = out_dir / "Products_OptionIDs_Import.csv"
     option_ids = ",".join(id_map[r["label"]] for r in rows)
@@ -140,7 +154,7 @@ def write_product_imports(code: str, handle: str, cat: str, rows: list[dict]) ->
 
     readme = out_dir / "README.md"
     axis_name = "color" if cat == COLOR_CAT else "size"
-    readme.write_text(
+    readme_body = (
         f"# {code} — missing {axis_name} variants\n\n"
         f"Saranoni handle: `{handle}`\n\n"
         "## Volusion import steps\n\n"
@@ -152,7 +166,17 @@ def write_product_imports(code: str, handle: str, cat: str, rows: list[dict]) ->
         "4. Upload swatch/hero images from `variant_images.csv` to "
         f"`/v/vspfiles/photos/` as `ThumbFile` / `SmallFile`.\n"
         "5. Re-export Options to confirm IDs, then verify the PDP shows the selector.\n\n"
-        "## Variants\n\n"
+    )
+    if cat == SIZE_CAT:
+        readme_body += (
+            "Size options **1202–1205** are shared across licensed Minky/Lush blankets "
+            f"({', '.join(SIZE_OPTION_SHARED_PRODUCTS)}). "
+            "If you already imported sizes for another SKU, import **`Products_OptionIDs_Import.csv` only** "
+            "and add this product code to each size option's `applytoproductcodes` in Volusion admin.\n\n"
+        )
+    readme_body += "## Variants\n\n"
+    readme.write_text(
+        readme_body
         + "\n".join(
             f"- **{r['label']}** — option ID `{id_map[r['label']]}`, "
             f"pricediff `{r['pricediff']}`, Saranoni ${float(r['price']):.2f}"

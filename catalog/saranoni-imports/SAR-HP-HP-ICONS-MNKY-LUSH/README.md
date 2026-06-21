@@ -1,6 +1,6 @@
-# SAR-WIZARDIN-WORLD-CHARM — missing size variants
+# SAR-HP-HP-ICONS-MNKY-LUSH — missing size variants
 
-Saranoni handle: `wizarding-world-charm-minky-lush`
+Saranoni handle: `harry-potter-icons-minky-lush`
 
 ## Volusion import steps
 
