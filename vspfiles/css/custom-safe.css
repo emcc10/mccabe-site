@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260620mobile1 — mobile full-view + PDP return links */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260621sarlayout2 — Saranoni PDP layout: block column, no flex order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -17903,15 +17903,6 @@ html body [id*="soft"][id*="cart"] a[href*="ShoppingCart"] {
   }
 }
 
-html body.mc-saranoni-pdp #mc-pdp-price-stack-host { order: 30 !important; }
-html body.mc-saranoni-pdp #messaging-element { order: 40 !important; display: block !important; visibility: visible !important; opacity: 1 !important; }
-html body.mc-saranoni-pdp #mc-pdp-option-block { order: 50 !important; }
-html body.mc-saranoni-pdp .mc-saranoni-color-picker,
-html body.mc-saranoni-pdp .mc-sar-hotfix-picker { order: 60 !important; }
-html body.mc-saranoni-pdp #mc-pdp-features { order: 70 !important; clear: both !important; margin-top: 12px !important; }
-html body.mc-saranoni-pdp #mc-pdp-description-below-features { order: 80 !important; }
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack { order: 90 !important; }
-
 html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table.colors_pricebox,
 html body.mc-saranoni-pdp td.mc-unified-pdp-info:has(#mc-pdp-price-stack-host) > table.colors_pricebox,
 html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-option-block) > #options_table,
@@ -18764,49 +18755,12 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
   }
 }
 
-/* MC_SARANONI_PDP_ORDER_REPAIR_20260621 - keep Saranoni variant UI from reordering the PDP column. */
+/* MC_SARANONI_PDP_LAYOUT_20260621sarlayout2 — DOM order via JS appendChild; never flex the info column. */
 @media (min-width: 992px) {
   html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
   html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td,
   html body.mc-saranoni-pdp td.mc-unified-pdp-info {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    box-sizing: border-box !important;
-  }
-
-  html body.mc-saranoni-pdp #mc-pdp-brand-logo {
-    order: 10 !important;
-  }
-
-  html body.mc-saranoni-pdp #mc-pdp-title-right {
-    order: 20 !important;
-  }
-
-  html body.mc-saranoni-pdp #mc-pdp-price-stack-host {
-    order: 30 !important;
-  }
-
-  html body.mc-saranoni-pdp #messaging-element {
-    order: 40 !important;
     display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  html body.mc-saranoni-pdp #mc-pdp-option-block {
-    order: 50 !important;
-    width: 100% !important;
-    max-width: 400px !important;
-  }
-
-  html body.mc-saranoni-pdp .mc-saranoni-color-picker,
-  html body.mc-saranoni-pdp .mc-sar-hotfix-picker {
-    order: 60 !important;
-    width: 100% !important;
-    max-width: 400px !important;
-    margin: 0 0 16px 0 !important;
-    align-self: flex-start !important;
   }
 
   html body.mc-saranoni-pdp td.mc-pdp-media-td #mc-saranoni-size-thumbs,
@@ -18820,26 +18774,5 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     max-width: 650px !important;
     margin: 12px 0 0 !important;
     padding: 0 !important;
-  }
-
-  html body.mc-saranoni-pdp #mc-pdp-features {
-    order: 70 !important;
-    width: 100% !important;
-    max-width: 400px !important;
-    clear: both !important;
-    margin-top: 12px !important;
-  }
-
-  html body.mc-saranoni-pdp #mc-pdp-description-below-features {
-    order: 80 !important;
-    width: 100% !important;
-    max-width: 400px !important;
-  }
-
-  html body.mc-saranoni-pdp #mc-pdp-purchase-stack,
-  html body.mc-saranoni-pdp .mc-unified-purchase-controls {
-    order: 90 !important;
-    width: 100% !important;
-    max-width: 400px !important;
   }
 }

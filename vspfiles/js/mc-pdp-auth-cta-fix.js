@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260621sarlayout1
-  var VERSION = "20260621sarlayout1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260621sarlayout2
+  var VERSION = "20260621sarlayout2";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2794,6 +2794,7 @@
 
   function appendSaranoniInfoColumnOrder() {
     if (!isSaranoniPdpPage()) return;
+    ensureSaranoniPdpLayoutCss();
     ensureSoftGoodsReturnRow();
     removeSaranoniOutsideReturnLinks();
     ensureSaranoniSizeOptionBlock();
@@ -2952,6 +2953,13 @@
       try {
         host.appendChild(table);
       } catch (eTable) {}
+    }
+    var sizeSel = table.querySelector("select[name*='___58']");
+    if (sizeSel) {
+      try {
+        sizeSel.setAttribute("onchange", "");
+        sizeSel.onchange = null;
+      } catch (eInlineSize) {}
     }
   }
 
@@ -3791,12 +3799,31 @@
       global.document.getElementById("priceWithOptions") ||
       global.document.getElementById("priceWithOptionsNoTax");
     if (!pwo) return;
+    var baseAmt =
+      parseMoney(
+        (pwo.getAttribute && (pwo.getAttribute("value") || pwo.getAttribute("content"))) || ""
+      ) || 0;
     var amt =
       parseMoney(
         (pwo.getAttribute && (pwo.getAttribute("value") || pwo.getAttribute("content"))) ||
           pwo.textContent ||
           ""
       ) || 0;
+    var sizeCtx = findSaranoniSizeVariantContext();
+    if (sizeCtx && sizeCtx.select && sizeCtx.select.selectedIndex >= 0) {
+      var add = extractAdditionalFromOptionText(
+        sizeCtx.select.options[sizeCtx.select.selectedIndex].text ||
+          sizeCtx.select.options[sizeCtx.select.selectedIndex].innerText ||
+          ""
+      );
+      var base = baseAmt > 0 ? baseAmt : amt;
+      if (base > 0) {
+        var computed = base + add;
+        if (computed > 0 && computed > amt + 0.009) {
+          amt = computed;
+        }
+      }
+    }
     if (!(amt > 0)) return;
     var host = global.document.getElementById("mc-pdp-price-stack-host");
     if (host) {
@@ -3970,7 +3997,19 @@
     }
   }
 
+  function ensureSaranoniPdpLayoutCss() {
+    if (global.document.getElementById("mc-saranoni-pdp-layout-css")) return;
+    var st = global.document.createElement("style");
+    st.id = "mc-saranoni-pdp-layout-css";
+    st.textContent =
+      "@media (min-width:992px){html body.mc-saranoni-pdp td.mc-pdp-options-td,html body.mc-saranoni-pdp td.mc-unified-pdp-info{display:block!important}}" +
+      "html body.mc-saranoni-pdp td.mc-pdp-options-td>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-unified-pdp-info>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-pdp-options-td>#options_table:not(#mc-pdp-option-block #options_table),html body.mc-saranoni-pdp td.mc-pdp-options-td>table:has(>#options_table):not(:has(#mc-pdp-option-block)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-brand-logo,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-price-stack-host,html body.mc-saranoni-pdp #messaging-element,html body.mc-saranoni-pdp #mc-pdp-option-block,html body.mc-saranoni-pdp #mc-pdp-features,html body.mc-saranoni-pdp #mc-pdp-description-below-features,html body.mc-saranoni-pdp #mc-pdp-purchase-stack{order:unset!important}";
+    (global.document.head || global.document.documentElement).appendChild(st);
+  }
+
   function ensureSaranoniSizeVariantCss() {
+    ensureSaranoniPdpLayoutCss();
     if (global.document.getElementById("mc-saranoni-size-variant-css")) return;
     var st = global.document.createElement("style");
     st.id = "mc-saranoni-size-variant-css";
@@ -4126,6 +4165,7 @@
 
   function ensureSaranoniVariantUi() {
     if (!isSaranoniPdpPage()) return;
+    ensureSaranoniPdpLayoutCss();
     var sizeCtx = findSaranoniSizeVariantContext();
     if (sizeCtx) {
       removeSaranoniColorPickerUi();
@@ -7601,6 +7641,7 @@
       sanitizeBeanBagAltviews();
       mountPdpFeaturesBlock();
     } else if (isSaranoniPdpPage()) {
+      ensureSaranoniPdpLayoutCss();
       ensureSaranoniBrandLogo();
       ensureSaranoniSizeOptionBlock();
       mountPdpFeaturesBlock();
