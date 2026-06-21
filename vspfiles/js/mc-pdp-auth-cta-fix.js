@@ -7873,7 +7873,7 @@ try {
   function loadCartFix() {
     if (g.__MC_CART_CHECKOUT_FIX__) return;
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-cart-checkout-fix.js?v=20260620cart2&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-cart-checkout-fix.js?v=20260620cart3&mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }

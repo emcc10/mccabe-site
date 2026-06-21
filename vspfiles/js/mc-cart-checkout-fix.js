@@ -1,7 +1,7 @@
 (function (g, d) {
   "use strict";
 
-  g.__MC_CART_CHECKOUT_FIX__ = "20260620cart2";
+  g.__MC_CART_CHECKOUT_FIX__ = "20260620cart3";
 
   function isCartPage() {
     var p = (g.location.pathname || "").toLowerCase();
@@ -152,31 +152,82 @@
     }
   }
 
-  function ensureFallbackBar(root) {
-    if (!root) return;
-    var hasItems = cartHasLineItems(root);
-    var visibleCheckout = findVisibleCheckoutCta(root);
-    if (hasItems && visibleCheckout) return;
+  function rowLooksLikeCartTotal(tr) {
+    if (!tr || tr.querySelector("th")) return false;
+    var txt = (tr.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+    if (!/\btotal\b/.test(txt) || !/\$\d/.test(txt)) return false;
+    if (/\bsubtotal\b/.test(txt) || /\bmerchandise total\b/.test(txt)) return false;
+    if (/\bitem description\b/.test(txt) || /\beach\b/.test(txt)) return false;
+    if (tr.querySelector('input[name^="QTY"], input[name*="quantity" i]')) return false;
+    return true;
+  }
 
-    var existing = d.getElementById("mc-cart-actions-bar");
-    if (existing) {
-      if (!hasItems && existing.parentNode) existing.parentNode.removeChild(existing);
-      return;
+  function findCartTotalRow(root) {
+    var rows = root.querySelectorAll("tr");
+    var i, tr, best = null;
+    for (i = rows.length - 1; i >= 0; i--) {
+      tr = rows[i];
+      if (rowLooksLikeCartTotal(tr)) {
+        best = tr;
+        break;
+      }
+    }
+    return best;
+  }
+
+  function insertNodeAfter(ref, node) {
+    if (!ref || !ref.parentNode || !node) return false;
+    if (ref.nextSibling) ref.parentNode.insertBefore(node, ref.nextSibling);
+    else ref.parentNode.appendChild(node);
+    return true;
+  }
+
+  function placeActionsBar(root, bar) {
+    var checkoutTable = root.querySelector("#table_checkout_cart0");
+    if (checkoutTable && checkoutTable.parentNode) {
+      checkoutTable.parentNode.insertBefore(bar, checkoutTable);
+      bar.classList.add("mc-cart-actions-bar--anchored");
+      return true;
     }
 
-    if (!hasItems && !root.querySelector('input[name="btnContinue"]')) return;
+    var totalRow = findCartTotalRow(root);
+    if (totalRow && totalRow.parentNode) {
+      var hostRow = d.createElement("tr");
+      hostRow.className = "mc-cart-actions-row";
+      var cell = d.createElement("td");
+      cell.className = "mc-cart-actions-cell";
+      cell.colSpan = 99;
+      cell.appendChild(bar);
+      hostRow.appendChild(cell);
+      insertNodeAfter(totalRow, hostRow);
+      bar.classList.add("mc-cart-actions-bar--anchored");
+      return true;
+    }
 
+    var shippingAnchor = null;
+    root.querySelectorAll("td, th, strong, b, span, div").forEach(function (el) {
+      if (shippingAnchor) return;
+      if (/calculate shipping/i.test(el.textContent || "")) {
+        shippingAnchor = el.closest("table") || el.parentElement;
+      }
+    });
+    if (shippingAnchor && shippingAnchor.parentNode) {
+      insertNodeAfter(shippingAnchor, bar);
+      bar.classList.add("mc-cart-actions-bar--anchored");
+      return true;
+    }
+
+    bar.classList.add("mc-cart-actions-bar--fallback");
+    root.appendChild(bar);
+    return true;
+  }
+
+  function buildActionsBar(hasItems) {
     var bar = d.createElement("div");
     bar.id = "mc-cart-actions-bar";
     bar.className = "mc-cart-actions-bar";
     bar.setAttribute("role", "group");
     bar.setAttribute("aria-label", "Cart actions");
-
-    var continueBtn = d.createElement("a");
-    continueBtn.className = "mc-cart-actions-bar__btn mc-cart-actions-bar__btn--secondary";
-    continueBtn.href = "/default.asp";
-    continueBtn.textContent = "Continue Shopping";
-    bar.appendChild(continueBtn);
 
     if (hasItems) {
       var checkoutBtn = d.createElement("button");
@@ -187,8 +238,44 @@
       bar.appendChild(checkoutBtn);
     }
 
-    d.body.appendChild(bar);
-    d.body.classList.add("mc-cart-actions-visible");
+    var continueBtn = d.createElement("a");
+    continueBtn.className = "mc-cart-actions-bar__btn mc-cart-actions-bar__btn--secondary";
+    continueBtn.href = "/default.asp";
+    continueBtn.textContent = "Continue Shopping";
+    bar.appendChild(continueBtn);
+
+    return bar;
+  }
+
+  function ensureFallbackBar(root) {
+    if (!root) return;
+    var hasItems = cartHasLineItems(root);
+    var visibleCheckout = findVisibleCheckoutCta(root);
+    if (hasItems && visibleCheckout) {
+      var existing = d.getElementById("mc-cart-actions-bar");
+      if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+      d.body.classList.remove("mc-cart-actions-visible");
+      return;
+    }
+
+    var bar = d.getElementById("mc-cart-actions-bar");
+    if (!hasItems && !root.querySelector('input[name="btnContinue"]')) {
+      if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+      d.body.classList.remove("mc-cart-actions-visible");
+      return;
+    }
+
+    if (!bar) {
+      bar = buildActionsBar(hasItems);
+      placeActionsBar(root, bar);
+    } else if (!bar.classList.contains("mc-cart-actions-bar--anchored")) {
+      if (bar.parentNode) bar.parentNode.removeChild(bar);
+      var oldHost = root.querySelector("tr.mc-cart-actions-row");
+      if (oldHost && oldHost.parentNode) oldHost.parentNode.removeChild(oldHost);
+      placeActionsBar(root, bar);
+    }
+
+    d.body.classList.remove("mc-cart-actions-visible");
   }
 
   function run() {
