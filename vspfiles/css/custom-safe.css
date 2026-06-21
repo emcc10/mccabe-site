@@ -9,6 +9,7 @@ body {
   font-weight: 400;
   letter-spacing: 0.02em;
 }
+
 body * {
   font-family: inherit !important;
 }
@@ -18747,5 +18748,83 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
   footer.footer,
   nav.push-menu {
     max-width: 100% !important;
+  }
+}
+
+/* MC_SARANONI_PDP_ORDER_REPAIR_20260621 - keep Saranoni variant UI from reordering the PDP column. */
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-info {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-brand-logo {
+    order: 10 !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-title-right {
+    order: 20 !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-price-stack-host {
+    order: 30 !important;
+  }
+
+  html body.mc-saranoni-pdp #messaging-element {
+    order: 40 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-option-block {
+    order: 50 !important;
+    width: 100% !important;
+    max-width: 400px !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
+  html body.mc-saranoni-pdp .mc-saranoni-size-thumbs,
+  html body.mc-saranoni-pdp .mc-saranoni-color-picker,
+  html body.mc-saranoni-pdp .mc-sar-hotfix-picker {
+    order: 60 !important;
+    width: 100% !important;
+    max-width: 400px !important;
+    margin: 10px 0 16px 0 !important;
+    align-self: flex-start !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
+  html body.mc-saranoni-pdp .mc-saranoni-size-thumbs {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    padding: 0 !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-features {
+    order: 70 !important;
+    width: 100% !important;
+    max-width: 400px !important;
+    clear: both !important;
+    margin-top: 12px !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-description-below-features {
+    order: 80 !important;
+    width: 100% !important;
+    max-width: 400px !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-purchase-stack,
+  html body.mc-saranoni-pdp .mc-unified-purchase-controls {
+    order: 90 !important;
+    width: 100% !important;
+    max-width: 400px !important;
   }
 }

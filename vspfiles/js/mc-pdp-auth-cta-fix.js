@@ -2796,8 +2796,16 @@
     if (!isSaranoniPdpPage()) return;
     ensureSoftGoodsReturnRow();
     removeSaranoniOutsideReturnLinks();
-    var infoColumn = findPdpHeroColumnTd();
+    var infoColumn =
+      global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
+      findPdpHeroColumnTd();
     if (!infoColumn) return;
+    try {
+      infoColumn.style.setProperty("display", "flex", "important");
+      infoColumn.style.setProperty("flex-direction", "column", "important");
+      infoColumn.style.setProperty("align-items", "flex-start", "important");
+      infoColumn.style.setProperty("box-sizing", "border-box", "important");
+    } catch (eInfoFlex) {}
     var brandElement = global.document.getElementById("mc-pdp-brand-logo");
     var titleElement = global.document.getElementById("mc-pdp-title-right");
     var priceElement = global.document.getElementById("mc-pdp-price-stack-host");
@@ -2806,6 +2814,7 @@
     if (sizeOptionsElement && !sizeOptionsElement.querySelector("select")) {
       sizeOptionsElement = null;
     }
+    var sizeThumbsElement = global.document.getElementById("mc-saranoni-size-thumbs");
     var coverOptionsElement = global.document.getElementById("mc-configured-color-swatch-wrapper");
     var colorPickerElement = global.document.querySelector(".mc-saranoni-color-picker");
     if (coverOptionsElement && global.document.body.classList.contains("mc-saranoni-swatches-ready")) {
@@ -2825,6 +2834,7 @@
       priceElement,
       klarnaElement,
       sizeOptionsElement,
+      sizeThumbsElement,
       coverOptionsElement,
       colorPickerElement,
       featuresElement,
@@ -2839,8 +2849,10 @@
     });
     hideSaranoniStrayHeroCopy(infoColumn);
     hideSaranoniNativeOptionPricing();
+    dismissSaranoniProductPhotoLoading();
     infoColumn.querySelectorAll(":scope > table, :scope > div").forEach(function (node) {
       if (node.id && /^(mc-pdp-|messaging|mc-configured)/.test(node.id)) return;
+      if (node.id === "mc-saranoni-size-thumbs") return;
       if (node.id) return;
       var txt = String(node.textContent || "");
       if (/stripe|product_productprice/i.test(txt) || node.querySelector(".product_productprice")) {
@@ -2853,6 +2865,24 @@
       }
     });
     syncPdpDescriptionViewMore();
+  }
+
+  function scheduleSaranoniColumnOrderRepair() {
+    if (!isSaranoniPdpPage()) return;
+    var now = Date.now ? Date.now() : new Date().getTime();
+    if (global.__MC_SARANONI_COLUMN_ORDER_REPAIR_UNTIL__ > now) return;
+    global.__MC_SARANONI_COLUMN_ORDER_REPAIR_UNTIL__ = now + 3200;
+    [0, 80, 200, 500, 1000, 1800, 3000].forEach(function (delay) {
+      global.setTimeout(function () {
+        try {
+          appendSaranoniInfoColumnOrder();
+          dismissSaranoniProductPhotoLoading();
+          if (delay === 3000) {
+            global.__MC_SARANONI_COLUMN_ORDER_REPAIR_UNTIL__ = 0;
+          }
+        } catch (eSarOrder) {}
+      }, delay);
+    });
   }
 
   function appendSteveSilverInfoColumnOrder() {
@@ -7512,6 +7542,7 @@
       appendBeanBagInfoColumnOrder();
     } else if (isSaranoniPdpPage()) {
       appendSaranoniInfoColumnOrder();
+      scheduleSaranoniColumnOrderRepair();
       applySoftGoodsColumnPurchaseStackLayout(
         global.document.getElementById("mc-pdp-purchase-stack"),
         global.document.getElementById("mc-pdp-qty-row"),
@@ -7582,6 +7613,7 @@
         ensureBeanBagReturnLink();
       } else if (isSaranoniPdpPage()) {
         appendSaranoniInfoColumnOrder();
+        scheduleSaranoniColumnOrderRepair();
       } else {
         ensurePdpInfoColumnOrder();
         ensurePdpContentColumnOrder();
@@ -7811,6 +7843,7 @@
       scheduleAtcBlackLock();
       scheduleBeanBagOptionRepair();
       scheduleSaranoniColorRepair();
+      scheduleSaranoniColumnOrderRepair();
       scheduleSteveSilverLayoutRepair();
       installDescriptionViewMoreResize();
       syncPdpDescriptionViewMore();
