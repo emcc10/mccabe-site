@@ -1,0 +1,5 @@
+ProductCode,ProductName,ColorName,DisplayOrder,OptionCategory,Required,PriceDiff,SourceURL,CheckedOn,Verification
+SAR-COTTON-MSLN-4-LAYER,Cotton Muslin 4-Layer Quilt,Simple Buds,1,Choose Color,Y,0,https://saranoni.com/products/cotton-muslin-4-layer-quilt,2026-06-19,Exact current Saranoni product-page selector
+SAR-COTTON-MSLN-4-LAYER,Cotton Muslin 4-Layer Quilt,Pine,2,Choose Color,Y,0,https://saranoni.com/products/cotton-muslin-4-layer-quilt,2026-06-19,Exact current Saranoni product-page selector
+SAR-COTTON-MSLN-4-LAYER,Cotton Muslin 4-Layer Quilt,Olive Branch,3,Choose Color,Y,-13,https://saranoni.com/products/cotton-muslin-4-layer-quilt,2026-06-19,Exact current Saranoni product-page selector
+SAR-COTTON-MSLN-4-LAYER,Cotton Muslin 4-Layer Quilt,Floral Fields,4,Choose Color,Y,-13,https://saranoni.com/products/cotton-muslin-4-layer-quilt,2026-06-19,Exact current Saranoni product-page selector
