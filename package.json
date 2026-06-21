@@ -62,5 +62,19 @@
   "devDependencies": {
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
-  }
+  },
+  "version": "1.0.0",
+  "description": "",
+  "main": "mrp.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emcc10/mccabe-site.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/emcc10/mccabe-site/issues"
+  },
+  "homepage": "https://github.com/emcc10/mccabe-site#readme"
 }

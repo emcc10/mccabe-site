@@ -1,0 +1,137 @@
+{
+  "unifiedCls": null,
+  "optionsCls": "mc-pdp-options-td",
+  "sameCell": null,
+  "brandParent": {
+    "id": "",
+    "cls": "mc-pdp-options-td"
+  },
+  "optionParent": {
+    "id": "",
+    "cls": "mc-pdp-options-td"
+  },
+  "descParent": {
+    "id": "",
+    "cls": "mc-pdp-options-td"
+  },
+  "messagingParent": {
+    "id": "",
+    "cls": ""
+  },
+  "ver": "20260621sarlayout2",
+  "body": [
+    "mc-saranoni-pdp",
+    "mc-product-page",
+    "mc-pdp-price-stack",
+    "mc-pdp-hero-ready"
+  ],
+  "jsSrc": "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260617pdp78&mcrd=1782076746351",
+  "infoDisplay": "block",
+  "infoFlexDir": "column",
+  "children": [
+    {
+      "tag": "INPUT",
+      "id": "",
+      "cls": "",
+      "text": "",
+      "display": "none",
+      "order": "0",
+      "visible": false
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "cls": "",
+      "text": "",
+      "display": "none",
+      "order": "0",
+      "visible": false
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "cls": "",
+      "text": "",
+      "display": "none",
+      "order": "0",
+      "visible": false
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "cls": "",
+      "text": "",
+      "display": "none",
+      "order": "0",
+      "visible": false
+    },
+    {
+      "tag": "DIV",
+      "id": "mc-pdp-option-block",
+      "cls": "mc-pdp-option-block",
+      "text": "Size Mini Receiving [Additional $33.00] Toddler [Additional $63.00] XL [Addition",
+      "display": "block",
+      "order": "0",
+      "visible": true
+    },
+    {
+      "tag": "DIV",
+      "id": "mc-pdp-description-below-features",
+      "cls": "mc-pdp-description-below-features mc-pdp-description-below-f",
+      "text": "The Harry Potter™ Icons Minky/Lush Blanket combines Harry Potter™ artwork with p",
+      "display": "block",
+      "order": "0",
+      "visible": true
+    },
+    {
+      "tag": "DIV",
+      "id": "mc-pdp-brand-logo",
+      "cls": "mc-pdp-brand-logo",
+      "text": "",
+      "display": "flex",
+      "order": "0",
+      "visible": true
+    },
+    {
+      "tag": "DIV",
+      "id": "mc-pdp-title-right",
+      "cls": "mc-pdp-title-right",
+      "text": "Harry Potter™ Icons Minky/Lush Blanket",
+      "display": "block",
+      "order": "0",
+      "visible": true
+    },
+    {
+      "tag": "DIV",
+      "id": "mc-pdp-price-stack-host",
+      "cls": "mc-pdp-price-stack-host",
+      "text": "$32",
+      "display": "flex",
+      "order": "0",
+      "visible": true
+    },
+    {
+      "tag": "DIV",
+      "id": "mc-pdp-features",
+      "cls": "mc-pdp-features",
+      "text": "Features:Official Harry Potter™ character-inspired designPlush Lush fabric on on",
+      "display": "block",
+      "order": "0",
+      "visible": true
+    },
+    {
+      "tag": "DIV",
+      "id": "mc-pdp-purchase-stack",
+      "cls": "mc-pdp-purchase-controls mc-pdp-cart-row mc-soft-goods-purch",
+      "text": "Quantity",
+      "display": "flex",
+      "order": "0",
+      "visible": true
+    }
+  ],
+  "hasSizeThumbs": true,
+  "sizeThumbParent": "",
+  "price": "$32",
+  "heroLoading": false,
+  "heroSrc": "https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/SAR-HP-HP-ICONS-MNKY-LUSH-2T.jpg?v-cache=1781995476"
+}
