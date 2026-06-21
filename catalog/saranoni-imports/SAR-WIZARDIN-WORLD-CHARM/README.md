@@ -5,12 +5,13 @@ Saranoni handle: `wizarding-world-charm-minky-lush`
 ## Volusion import steps
 
 1. Set the product **base price** to the lowest variant price ($32.00 on Saranoni).
-2. **Import** `Options_Import.csv` (Inventory → Import/Export → Options). Uses `applytoproductcodes` to link options to this product.
-3. **Import** `Products_OptionIDs_Import.csv` (Products import).
-4. Upload swatch/hero images from `variant_images.csv` to `/v/vspfiles/photos/` as `ThumbFile` / `SmallFile`.
+2. **Import** `Options_Import.csv` (Inventory → Import/Export → Options). Creates option rows only — no `applytoproductcodes` on Options.
+3. **Import** `Products_Import.csv` (Products import). Column **`applytoproductcodes`** = comma-separated **option IDs** for this SKU.
+4. Run `py -3 scripts/fetch_saranoni_variant_import_images.py {code}` to download T/S images into `vspfiles/photos/`, then deploy (push triggers SFTP photo upload).
+   Or upload swatch/hero images from `variant_images.csv` manually to `/v/vspfiles/photos/` as `ThumbFile` / `SmallFile`.
 5. Re-export Options to confirm IDs, then verify the PDP shows the selector.
 
-Size options **1202–1205** are shared across licensed Minky/Lush blankets (SAR-WIZARDIN-WORLD-CHARM, SAR-HP-HP-ICONS-MNKY-LUSH). If you already imported sizes for another SKU, import **`Products_OptionIDs_Import.csv` only** and add this product code to each size option's `applytoproductcodes` in Volusion admin.
+Size option IDs **1202–1205** (Mini / Receiving / Toddler / XL) are reused across licensed Minky/Lush SKUs (SAR-WIZARDIN-WORLD-CHARM, SAR-HP-HP-ICONS-MNKY-LUSH). Import Options once from `_batch/Options_Import.csv`, then import each product row from `_batch/Products_Import.csv` (or this SKU's `Products_Import.csv` only).
 
 ## Variants
 

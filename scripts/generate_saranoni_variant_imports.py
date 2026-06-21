@@ -51,7 +51,7 @@ PRODUCT_OPTION_IDS: dict[str, dict[str, str]] = {
     },
 }
 
-# Products that share the same size option rows (append all codes on Options import).
+# Products that share the same size option IDs (1202–1205); Options import is once per ID in batch.
 SIZE_OPTION_SHARED_PRODUCTS = [
     "SAR-WIZARDIN-WORLD-CHARM",
     "SAR-HP-HP-ICONS-MNKY-LUSH",
@@ -121,22 +121,23 @@ def write_product_imports(
         raise ValueError(f"{code}: missing option id map for: {missing_ids}")
 
     opt_path = out_dir / "Options_Import.csv"
-    apply_codes = code
-    if cat == SIZE_CAT and code in SIZE_OPTION_SHARED_PRODUCTS:
-        apply_codes = ",".join(SIZE_OPTION_SHARED_PRODUCTS)
     with opt_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["id", "optioncatid", "optionsdesc", "pricediff", "applytoproductcodes"])
+        w.writerow(["id", "optioncatid", "optionsdesc", "pricediff"])
         for r in rows:
             oid = id_map[r["label"]]
-            w.writerow([oid, cat, r["label"], r["pricediff"], apply_codes])
+            w.writerow([oid, cat, r["label"], r["pricediff"]])
 
-    prod_path = out_dir / "Products_OptionIDs_Import.csv"
+    prod_path = out_dir / "Products_Import.csv"
     option_ids = ",".join(id_map[r["label"]] for r in rows)
     with prod_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["ProductCode", "OptionIDs", "EnableOptions_InventoryControl"])
+        w.writerow(["ProductCode", "applytoproductcodes", "EnableOptions_InventoryControl"])
         w.writerow([code, option_ids, "Y"])
+
+    legacy_prod = out_dir / "Products_OptionIDs_Import.csv"
+    if legacy_prod.is_file():
+        legacy_prod.unlink()
 
     img_path = out_dir / "variant_images.csv"
     with img_path.open("w", newline="", encoding="utf-8") as f:
@@ -210,8 +211,9 @@ def write_product_imports(
         "1. Set the product **base price** to the lowest variant price "
         f"(${min(float(r['price']) for r in rows):.2f} on Saranoni).\n"
         "2. **Import** `Options_Import.csv` (Inventory → Import/Export → Options). "
-        "Uses `applytoproductcodes` to link options to this product.\n"
-        "3. **Import** `Products_OptionIDs_Import.csv` (Products import).\n"
+        "Creates option rows only — no `applytoproductcodes` on Options.\n"
+        "3. **Import** `Products_Import.csv` (Products import). "
+        "Column **`applytoproductcodes`** = comma-separated **option IDs** for this SKU.\n"
         "4. Run `py -3 scripts/fetch_saranoni_variant_import_images.py {code}` to download "
         "T/S images into `vspfiles/photos/`, then deploy (push triggers SFTP photo upload).\n"
         "   Or upload swatch/hero images from `variant_images.csv` manually to "
@@ -220,10 +222,10 @@ def write_product_imports(
     )
     if cat == SIZE_CAT:
         readme_body += (
-            "Size options **1202–1205** are shared across licensed Minky/Lush blankets "
-            f"({', '.join(SIZE_OPTION_SHARED_PRODUCTS)}). "
-            "If you already imported sizes for another SKU, import **`Products_OptionIDs_Import.csv` only** "
-            "and add this product code to each size option's `applytoproductcodes` in Volusion admin.\n\n"
+            "Size option IDs **1202–1205** (Mini / Receiving / Toddler / XL) are reused across "
+            f"licensed Minky/Lush SKUs ({', '.join(SIZE_OPTION_SHARED_PRODUCTS)}). "
+            "Import Options once from `_batch/Options_Import.csv`, then import each product row "
+            "from `_batch/Products_Import.csv` (or this SKU's `Products_Import.csv` only).\n\n"
         )
     readme_body += "## Variants\n\n"
     readme.write_text(
@@ -237,6 +239,47 @@ def write_product_imports(
         encoding="utf-8",
     )
     return out_dir
+
+
+def build_batch_imports() -> None:
+    batch_dir = OUT_ROOT / "_batch"
+    batch_dir.mkdir(parents=True, exist_ok=True)
+    option_rows: dict[str, list] = {}
+    product_rows: list[list[str]] = []
+
+    for pack_dir in sorted(OUT_ROOT.iterdir()):
+        if not pack_dir.is_dir() or pack_dir.name.startswith("_"):
+            continue
+        opt_path = pack_dir / "Options_Import.csv"
+        prod_path = pack_dir / "Products_Import.csv"
+        if not opt_path.is_file() or not prod_path.is_file():
+            continue
+        with opt_path.open(newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                oid = row["id"]
+                if oid not in option_rows:
+                    option_rows[oid] = [row["id"], row["optioncatid"], row["optionsdesc"], row["pricediff"]]
+        with prod_path.open(newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                product_rows.append(
+                    [row["ProductCode"], row["applytoproductcodes"], row["EnableOptions_InventoryControl"]]
+                )
+
+    with (batch_dir / "Options_Import.csv").open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["id", "optioncatid", "optionsdesc", "pricediff"])
+        for oid in sorted(option_rows, key=lambda x: int(x)):
+            w.writerow(option_rows[oid])
+
+    with (batch_dir / "Products_Import.csv").open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["ProductCode", "applytoproductcodes", "EnableOptions_InventoryControl"])
+        for row in sorted(product_rows, key=lambda r: r[0]):
+            w.writerow(row)
+
+    legacy = batch_dir / "Products_OptionIDs_Import.csv"
+    if legacy.is_file():
+        legacy.unlink()
 
 
 def main() -> None:
@@ -257,6 +300,9 @@ def main() -> None:
         cat, rows = variant_axis(product)
         out = write_product_imports(code, handle, cat, rows, product.get("title") or "")
         print(f"Wrote {out} ({len(rows)} {('color' if cat == COLOR_CAT else 'size')} options)")
+
+    build_batch_imports()
+    print(f"Wrote batch imports under {OUT_ROOT / '_batch'}")
 
 
 if __name__ == "__main__":
