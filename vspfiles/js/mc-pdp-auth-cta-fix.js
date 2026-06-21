@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620hpicons2
-  var VERSION = "20260620hpicons2";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620hpicons3
+  var VERSION = "20260620hpicons3";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2838,6 +2838,7 @@
       }
     });
     hideSaranoniStrayHeroCopy(infoColumn);
+    hideSaranoniNativeOptionPricing();
     infoColumn.querySelectorAll(":scope > table, :scope > div").forEach(function (node) {
       if (node.id && /^(mc-pdp-|messaging|mc-configured)/.test(node.id)) return;
       if (node.id) return;
@@ -3243,7 +3244,7 @@
       }
       if (isSaranoniPdpPage()) {
         hideSaranoniHeroAltviews();
-        ensureConfiguredColorSwatches();
+        ensureSaranoniVariantUi();
       }
       hideNativeVolusionTabPanels();
       return;
@@ -3260,8 +3261,6 @@
     pruneDescriptionDuplicateFeatures();
     if (isSaranoniPdpPage()) {
       hideSaranoniHeroAltviews();
-      var sarFeatCtx = findConfiguredColorSwatchContext();
-      if (sarFeatCtx) syncSaranoniColorPicker(sarFeatCtx);
     }
     hideNativeVolusionTabPanels();
   }
@@ -3601,24 +3600,6 @@
       };
     }
     for (i = 0; i < selects.length; i++) {
-      var sizeSel = selects[i];
-      if (sizeSel.classList && sizeSel.classList.contains("mc-native-leather")) continue;
-      var sizePc = parseProductCodeFromSelectName(sizeSel.name);
-      if (!/^SAR/i.test(sizePc)) continue;
-      if (pagePc && sizePc !== pagePc) continue;
-      if (!isSaranoniSizeSelect(sizeSel)) continue;
-      var sizeEntries = buildDataDrivenSaranoniEntries(sizeSel, sizePc);
-      if (!sizeEntries.length) continue;
-      return {
-        productCode: sizePc,
-        select: sizeSel,
-        entries: sizeEntries,
-        score: sizeEntries.length,
-        dataDriven: true,
-        variantAxis: "size",
-      };
-    }
-    for (i = 0; i < selects.length; i++) {
       var select = selects[i];
       var productCode = parseProductCodeFromSelectName(select.name);
       var entries = PDP_CONFIGURED_COLOR_SWATCHS[productCode];
@@ -3662,25 +3643,217 @@
         variantAxis: "color",
       };
     }
+    return null;
+  }
+
+  var saranoniSizeActiveOptionId = "";
+
+  function findSaranoniSizeVariantContext() {
+    if (isBeanBagPdpPage()) return null;
+    if (findConfiguredColorSwatchContext()) return null;
+    var pagePc = resolveConfiguredColorProductCode(null);
+    var selects = global.document.querySelectorAll("#options_table select, #v65-product-parent select");
+    var i;
     for (i = 0; i < selects.length; i++) {
-      var sizeFallbackSel = selects[i];
-      if (sizeFallbackSel.classList && sizeFallbackSel.classList.contains("mc-native-leather")) continue;
-      var sizeFallbackPc = parseProductCodeFromSelectName(sizeFallbackSel.name);
-      if (!/^SAR/i.test(sizeFallbackPc)) continue;
-      if (pagePc && sizeFallbackPc !== pagePc) continue;
-      if (!isSaranoniSizeSelect(sizeFallbackSel)) continue;
-      var sizeFallbackEntries = buildDataDrivenSaranoniEntries(sizeFallbackSel, sizeFallbackPc);
-      if (!sizeFallbackEntries.length) continue;
+      var sel = selects[i];
+      if (sel.classList && sel.classList.contains("mc-native-leather")) continue;
+      var pc = parseProductCodeFromSelectName(sel.name);
+      if (!/^SAR/i.test(pc)) continue;
+      if (pagePc && pc !== pagePc) continue;
+      if (!isSaranoniSizeSelect(sel)) continue;
+      var entries = buildDataDrivenSaranoniEntries(sel, pc);
+      if (!entries.length) continue;
       return {
-        productCode: sizeFallbackPc,
-        select: sizeFallbackSel,
-        entries: sizeFallbackEntries,
-        score: sizeFallbackEntries.length,
+        productCode: pc,
+        select: sel,
+        entries: entries,
+        score: entries.length,
         dataDriven: true,
         variantAxis: "size",
       };
     }
     return null;
+  }
+
+  function findPdpMediaTd() {
+    var photo = global.document.getElementById("product_photo");
+    if (photo && photo.closest) {
+      var td = photo.closest("td");
+      if (td) return td;
+    }
+    return (
+      global.document.querySelector("#v65-product-parent td.mc-pdp-media-td") ||
+      global.document.getElementById("product_photo_td")
+    );
+  }
+
+  function removeSaranoniColorPickerUi() {
+    global.document.querySelectorAll(".mc-saranoni-color-picker").forEach(function (picker) {
+      if (picker && picker.parentNode) {
+        try {
+          picker.parentNode.removeChild(picker);
+        } catch (eRm) {}
+      }
+    });
+    try {
+      global.document.body.classList.remove("mc-saranoni-swatches-ready");
+    } catch (eCls) {}
+    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    if (wrap && wrap.parentNode) {
+      try {
+        wrap.parentNode.removeChild(wrap);
+      } catch (eRmWrap) {}
+    }
+  }
+
+  function ensureSaranoniSizeVariantCss() {
+    if (global.document.getElementById("mc-saranoni-size-variant-css")) return;
+    var st = global.document.createElement("style");
+    st.id = "mc-saranoni-size-variant-css";
+    st.textContent =
+      ".mc-saranoni-size-thumbs{display:flex!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important;max-width:650px!important;margin:12px 0 0!important;padding:0!important}" +
+      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:72px!important;padding:0!important;border:0!important;background:transparent!important;cursor:pointer!important}" +
+      ".mc-saranoni-size-thumb img{display:block!important;width:72px!important;height:72px!important;object-fit:cover!important;border:2px solid #ddd!important;border-radius:4px!important}" +
+      ".mc-saranoni-size-thumb.active img{border-color:#111!important;box-shadow:0 0 0 1px #111 inset!important}" +
+      ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important}";
+    (global.document.head || global.document.documentElement).appendChild(st);
+  }
+
+  function updateSaranoniSizeThumbUi(optionId) {
+    var id = String(optionId || "");
+    global.document.querySelectorAll(".mc-saranoni-size-thumb[data-option-id]").forEach(function (btn) {
+      var on = !!(id && btn.getAttribute("data-option-id") === id);
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  function applySaranoniSizeVariantSelection(ctx, entry, updateHero) {
+    if (!ctx || !entry || !ctx.select) return false;
+    saranoniSizeActiveOptionId = String(entry.optionId || "");
+    try {
+      global.__MC_SAR_SIZE_USER_PICKED__ = true;
+    } catch (ePick) {}
+    var opt = findConfiguredColorOption(ctx.select, entry);
+    if (opt) {
+      syncConfiguredColorSelect(ctx.select, opt);
+      ensureConfiguredColorCartField(ctx.select, opt, null);
+    }
+    updateSaranoniSizeThumbUi(entry.optionId);
+    if (updateHero !== false) {
+      applyConfiguredColorMainPhoto(entry.mainImage, entry.label, ctx.productCode);
+    }
+    return true;
+  }
+
+  function bindSaranoniSizeVariantSelect(ctx) {
+    if (!ctx || !ctx.select || ctx.select.dataset.mcSarSizeBound === "1") return;
+    ctx.select.dataset.mcSarSizeBound = "1";
+    ctx.select.addEventListener("change", function () {
+      if (ctx.select.dataset.mcConfiguredColorSyncing === "1") return;
+      var entry = readConfiguredColorSelectEntry(ctx);
+      if (!entry) return;
+      applySaranoniSizeVariantSelection(ctx, entry, true);
+    });
+  }
+
+  function ensureSaranoniSizeVariantThumbs(ctx) {
+    if (!ctx || !ctx.select || !ctx.entries || !ctx.entries.length) return;
+    ensureSaranoniSizeVariantCss();
+    bindSaranoniSizeVariantSelect(ctx);
+    var mediaTd = findPdpMediaTd();
+    if (!mediaTd) return;
+    var row = global.document.getElementById("mc-saranoni-size-thumbs");
+    if (!row) {
+      row = global.document.createElement("div");
+      row.id = "mc-saranoni-size-thumbs";
+      row.className = "mc-saranoni-size-thumbs";
+      row.setAttribute("data-product-code", ctx.productCode);
+      var photo = global.document.getElementById("product_photo");
+      var anchor = photo && photo.closest ? photo.closest("a") : null;
+      var insertAfter = anchor || photo;
+      if (insertAfter && insertAfter.parentNode) {
+        insertNodeAfter(insertAfter.parentNode, insertAfter, row);
+      } else {
+        mediaTd.appendChild(row);
+      }
+    }
+    var signature =
+      ctx.productCode + "|" + ctx.entries.map(function (e) { return e.optionId; }).join(",");
+    if (row.getAttribute("data-mc-signature") === signature && row.querySelector(".mc-saranoni-size-thumb")) {
+      if (saranoniSizeActiveOptionId) updateSaranoniSizeThumbUi(saranoniSizeActiveOptionId);
+      return;
+    }
+    row.setAttribute("data-mc-signature", signature);
+    row.innerHTML = "";
+    ctx.entries.forEach(function (entry) {
+      var opt = findConfiguredColorOption(ctx.select, entry);
+      if (!opt) return;
+      var btn = global.document.createElement("button");
+      btn.type = "button";
+      btn.className = "mc-saranoni-size-thumb";
+      btn.setAttribute("data-option-id", entry.optionId);
+      btn.setAttribute("aria-label", entry.label);
+      btn.setAttribute("title", entry.label);
+      btn.innerHTML =
+        '<img alt="' +
+        escapeHtmlText(entry.label) +
+        '" /><span class="mc-saranoni-size-thumb__label">' +
+        escapeHtmlText(entry.label) +
+        "</span>";
+      row.appendChild(btn);
+      var img = btn.querySelector("img");
+      loadProductScopedColorImage(ctx.productCode, entry.swatchImage, function (swatchSrc) {
+        if (swatchSrc) {
+          img.src = swatchSrc;
+          return;
+        }
+        loadProductScopedColorImage(ctx.productCode, entry.mainImage, function (mainSrc) {
+          if (mainSrc) {
+            img.src = mainSrc;
+          } else if (btn.parentNode) {
+            try {
+              btn.parentNode.removeChild(btn);
+            } catch (eRmBtn) {}
+          }
+        });
+      });
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        applySaranoniSizeVariantSelection(ctx, entry, true);
+      });
+    });
+    if (saranoniSizeActiveOptionId) updateSaranoniSizeThumbUi(saranoniSizeActiveOptionId);
+  }
+
+  function hideSaranoniNativeOptionPricing() {
+    if (!isSaranoniPdpPage()) return;
+    var box = global.document.querySelector("#v65-product-parent .colors_pricebox");
+    if (!box) return;
+    box.querySelectorAll(".option_pricing, #priceWithOptions, #priceWithOptionsNoTax, font.option_pricing").forEach(
+      function (node) {
+        try {
+          node.style.setProperty("display", "none", "important");
+          node.style.setProperty("visibility", "hidden", "important");
+          node.style.setProperty("height", "0", "important");
+          node.style.setProperty("overflow", "hidden", "important");
+        } catch (eHide) {}
+      }
+    );
+    var host = global.document.getElementById("mc-pdp-price-stack-host");
+    if (host) hideAllStrayPdpPriceNodes(host);
+  }
+
+  function ensureSaranoniVariantUi() {
+    if (!isSaranoniPdpPage()) return;
+    var sizeCtx = findSaranoniSizeVariantContext();
+    if (sizeCtx) {
+      removeSaranoniColorPickerUi();
+      ensureSaranoniSizeVariantThumbs(sizeCtx);
+      hideSaranoniNativeOptionPricing();
+      return;
+    }
+    ensureConfiguredColorSwatches();
   }
 
   function buildConfiguredColorImageCandidates(fileName, productCode) {
@@ -4019,6 +4192,17 @@
 
   function ensureColorOptionCommittedBeforeAddToCart(trigger) {
     if (!isSaranoniPdpPage()) return;
+    var sizeCtx = findSaranoniSizeVariantContext();
+    if (sizeCtx) {
+      var sizeEntry = readConfiguredColorSelectEntry(sizeCtx);
+      if (!sizeEntry && saranoniSizeActiveOptionId) {
+        sizeEntry = resolveConfiguredColorEntry(sizeCtx, saranoniSizeActiveOptionId);
+      }
+      if (sizeEntry) {
+        applySaranoniSizeVariantSelection(sizeCtx, sizeEntry, false);
+      }
+      return;
+    }
     var ctx = findConfiguredColorSwatchContext();
     var select = (ctx && ctx.select) || findSaranoniColorSelect();
     if (!select) return;
@@ -4710,7 +4894,6 @@
     renderConfiguredColorSwatches(ctx);
     bindConfiguredColorSwatchSelect(ctx.select);
     restoreConfiguredColorActiveEntry(ctx);
-    reassertConfiguredColorActiveSelection(ctx, false);
     if (!configuredColorDefaultSrc) {
       var hero = global.document.getElementById("product_photo");
       var heroSrc = hero ? hero.getAttribute("src") || "" : "";
@@ -5980,26 +6163,17 @@
         if (!isSaranoniPdpPage()) return;
         var sel = eSarSel.target;
         if (!sel || !sel.matches || !sel.matches("select")) return;
-        if (!isSaranoniColorSelect(sel) && !isSaranoniSizeSelect(sel)) return;
+        if (!isSaranoniColorSelect(sel)) return;
         var ctx = findConfiguredColorSwatchContext();
         if (!ctx || ctx.select !== sel) return;
         if (sel.dataset.mcConfiguredColorSyncing === "1") return;
-        if (
-          configuredColorActiveEntry &&
-          global.__MC_CONFIGURED_COLOR_USER_PICKED__
-        ) {
-          var fromSelect = readConfiguredColorSelectEntry(ctx);
-          if (
-            fromSelect &&
-            fromSelect.optionId !== configuredColorActiveEntry.optionId
-          ) {
-            reassertConfiguredColorActiveSelection(ctx, true);
-            syncSaranoniColorPicker(ctx);
-            return;
-          }
-        }
         var entry = readConfiguredColorSelectEntry(ctx);
-        if (entry) applyConfiguredColorSelection(ctx, entry, true);
+        if (entry) {
+          lockConfiguredColorActiveEntry(entry);
+          syncConfiguredColorSwatchUi(ctx, true);
+          syncSaranoniColorPicker(ctx);
+          syncSaranoniAltviewActiveState();
+        }
       },
       true
     );
@@ -6199,12 +6373,9 @@
           if (isSaranoniPdpPage() && global.document.body) {
             global.document.body.classList.remove("mc-bean-bag-pdp");
           }
-          ensureConfiguredColorSwatches();
+          ensureSaranoniVariantUi();
           hideSaranoniHeroAltviews();
-          var ctx = findConfiguredColorSwatchContext();
-          if (ctx) syncSaranoniColorPicker(ctx);
           appendSaranoniInfoColumnOrder();
-          markSaranoniSwatchesReady();
         } catch (eSarRepair) {}
       }, ms);
     });
@@ -7152,11 +7323,8 @@
     } else if (isSaranoniPdpPage()) {
       ensureSaranoniBrandLogo();
       mountPdpFeaturesBlock();
-      ensureConfiguredColorSwatches();
+      ensureSaranoniVariantUi();
       hideSaranoniHeroAltviews();
-      var sarCtx = findConfiguredColorSwatchContext();
-      if (sarCtx) syncSaranoniColorPicker(sarCtx);
-      markSaranoniSwatchesReady();
       mountDescriptionBelowFeatures();
     }
     ensureQuantityAboveAtc();
@@ -7174,6 +7342,12 @@
     }
     var host = global.document.getElementById("mc-pdp-price-stack-host");
     if (host) placePriceStackHost(host);
+    if (isSaranoniPdpPage()) {
+      if (!global.document.getElementById("mc-pdp-price-stack-host")) {
+        forceRebuildCleanPriceStack();
+      }
+      hideSaranoniNativeOptionPricing();
+    }
     fixAddToCartChrome();
   }
 
@@ -7207,7 +7381,11 @@
         ensureHeroColumnOrder();
       }
       mountPrimaryOptionBlock();
-      ensureConfiguredColorSwatches();
+      if (isSaranoniPdpPage()) {
+        ensureSaranoniVariantUi();
+      } else {
+        ensureConfiguredColorSwatches();
+      }
       if (!isBeanBagPdpPage()) {
         mountPdpFeaturesBlock();
       }
@@ -7393,9 +7571,6 @@
       ensurePdpStackCriticalCss();
       ensurePdpHeroCriticalCss();
       disableQuantityHiders();
-      if (!sectional && isSoftGoodsPdpPage()) {
-        ensureConfiguredColorSwatches();
-      }
       if (!sectional && isSoftGoodsPdpPage()) {
         reassertSoftGoodsHeroOrder();
         stripPriceZeroCents();
