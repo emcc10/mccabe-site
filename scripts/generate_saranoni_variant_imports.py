@@ -212,7 +212,9 @@ def write_product_imports(
         "2. **Import** `Options_Import.csv` (Inventory → Import/Export → Options). "
         "Uses `applytoproductcodes` to link options to this product.\n"
         "3. **Import** `Products_OptionIDs_Import.csv` (Products import).\n"
-        "4. Upload swatch/hero images from `variant_images.csv` to "
+        "4. Run `py -3 scripts/fetch_saranoni_variant_import_images.py {code}` to download "
+        "T/S images into `vspfiles/photos/`, then deploy (push triggers SFTP photo upload).\n"
+        "   Or upload swatch/hero images from `variant_images.csv` manually to "
         f"`/v/vspfiles/photos/` as `ThumbFile` / `SmallFile`.\n"
         "5. Re-export Options to confirm IDs, then verify the PDP shows the selector.\n\n"
     )
