@@ -2794,18 +2794,27 @@
 
   function hideSaranoniNativePriceTables(infoColumn) {
     if (!infoColumn || !isSaranoniPdpPage()) return;
-    infoColumn.querySelectorAll(":scope > table").forEach(function (table) {
-      if (table.querySelector("#mc-pdp-option-block")) return;
-      try {
-        table.style.setProperty("display", "none", "important");
-        table.style.setProperty("visibility", "hidden", "important");
-        table.style.setProperty("height", "0", "important");
-        table.style.setProperty("max-height", "0", "important");
-        table.style.setProperty("overflow", "hidden", "important");
-        table.style.setProperty("margin", "0", "important");
-        table.style.setProperty("padding", "0", "important");
-      } catch (eHide) {}
-    });
+    infoColumn.querySelectorAll(":scope > table.colors_pricebox, :scope > table:has(.colors_pricebox)").forEach(
+      function (table) {
+        if (table.querySelector("#mc-pdp-option-block")) return;
+        if (
+          table.querySelector(
+            "#mc-pdp-brand-logo, #mc-pdp-title-right, #mc-pdp-price-stack-host, #mc-pdp-features, #mc-pdp-purchase-stack"
+          )
+        ) {
+          return;
+        }
+        try {
+          table.style.setProperty("display", "none", "important");
+          table.style.setProperty("visibility", "hidden", "important");
+          table.style.setProperty("height", "0", "important");
+          table.style.setProperty("max-height", "0", "important");
+          table.style.setProperty("overflow", "hidden", "important");
+          table.style.setProperty("margin", "0", "important");
+          table.style.setProperty("padding", "0", "important");
+        } catch (eHide) {}
+      }
+    );
     infoColumn.querySelectorAll(".option_pricing, font.option_pricing").forEach(function (node) {
       try {
         node.style.setProperty("display", "none", "important");
@@ -2833,24 +2842,45 @@
     return findPdpHeroColumnTd();
   }
 
-  function anchorSaranoniMessagingElement(infoColumn) {
-    if (!infoColumn) return;
+  function hideSaranoniNativeStripePriceTable(infoColumn) {
     var msg = global.document.getElementById("messaging-element");
     if (!msg) return;
-    var anchor = msg;
-    var wrap = msg.parentElement;
-    if (wrap && wrap !== infoColumn && wrap.tagName === "DIV" && !wrap.id && wrap.childElementCount <= 2) {
-      anchor = wrap;
-    }
-    if (anchor.parentNode !== infoColumn) {
+    var tbl = msg.closest ? msg.closest("table") : null;
+    if (infoColumn && msg) {
       try {
-        infoColumn.appendChild(anchor);
-      } catch (eMsg) {}
+        infoColumn.appendChild(msg);
+      } catch (eMoveMsg) {}
+    }
+    if (tbl && msg && infoColumn && infoColumn.contains(msg)) {
+      if (
+        tbl.querySelector(
+          "#mc-pdp-brand-logo, #mc-pdp-title-right, #mc-pdp-price-stack-host, #mc-pdp-features, #mc-pdp-purchase-stack"
+        )
+      ) {
+        return;
+      }
+      try {
+        tbl.style.setProperty("display", "none", "important");
+        tbl.style.setProperty("visibility", "hidden", "important");
+        tbl.style.setProperty("height", "0", "important");
+        tbl.style.setProperty("max-height", "0", "important");
+        tbl.style.setProperty("overflow", "hidden", "important");
+        tbl.style.setProperty("margin", "0", "important");
+        tbl.style.setProperty("padding", "0", "important");
+      } catch (eHideTbl) {}
     }
   }
 
-  function reorderSaranoniInfoColumnChildren(infoColumn) {
+  function anchorSaranoniMessagingElement(infoColumn) {
+    hideSaranoniNativeStripePriceTable(infoColumn);
+  }
+
+  function reorderSaranoniInfoColumnChildren(infoColumn, skipEnsure) {
     if (!infoColumn) return;
+    if (!skipEnsure) {
+      ensureSaranoniSizeOptionBlock();
+      hideSaranoniNativeStripePriceTable(infoColumn);
+    }
     var nodes = [
       global.document.getElementById("mc-pdp-brand-logo"),
       global.document.getElementById("mc-pdp-title-right"),
@@ -2865,7 +2895,12 @@
     ];
     nodes.forEach(function (element) {
       if (!element) return;
-      if (element.id === "mc-pdp-option-block" && !element.querySelector("select")) return;
+      if (element.id === "mc-pdp-option-block" && !element.querySelector("select")) {
+        try {
+          infoColumn.appendChild(element);
+        } catch (eEmptyOpt) {}
+        return;
+      }
       if (
         element.id === "mc-configured-color-swatch-wrapper" &&
         global.document.body.classList.contains("mc-saranoni-swatches-ready")
@@ -2881,9 +2916,12 @@
   function appendSaranoniInfoColumnOrder() {
     if (!isSaranoniPdpPage()) return;
     ensureSaranoniPdpLayoutCss();
-    ensureSoftGoodsReturnRow();
-    removeSaranoniOutsideReturnLinks();
-    ensureSaranoniSizeOptionBlock();
+    try {
+      ensureSoftGoodsReturnRow();
+    } catch (eRetRow) {}
+    try {
+      removeSaranoniOutsideReturnLinks();
+    } catch (eRmLinks) {}
     var infoColumn = resolveSaranoniInfoColumn();
     if (!infoColumn) return;
     var coverOptionsElement = global.document.getElementById("mc-configured-color-swatch-wrapper");
@@ -2896,8 +2934,6 @@
     }
     reorderSaranoniInfoColumnChildren(infoColumn);
     ensureSaranoniVariantUi();
-    anchorSaranoniMessagingElement(infoColumn);
-    reorderSaranoniInfoColumnChildren(infoColumn);
     ensureSaranoniSizeThumbsInMediaColumn();
     hideSaranoniNativePriceTables(infoColumn);
     hideSaranoniNativeColumnClutter(infoColumn);
@@ -2918,6 +2954,25 @@
       }
     });
     syncPdpDescriptionViewMore();
+    reorderSaranoniInfoColumnChildren(infoColumn, true);
+    infoColumn.querySelectorAll("table").forEach(function (table) {
+      if (
+        !table.querySelector(
+          "#mc-pdp-brand-logo, #mc-pdp-title-right, #mc-pdp-price-stack-host, #mc-pdp-option-block, #mc-pdp-features, #mc-pdp-purchase-stack, #messaging-element"
+        )
+      ) {
+        return;
+      }
+      try {
+        table.style.removeProperty("display");
+        table.style.removeProperty("visibility");
+        table.style.removeProperty("height");
+        table.style.removeProperty("max-height");
+        table.style.removeProperty("overflow");
+        table.style.removeProperty("margin");
+        table.style.removeProperty("padding");
+      } catch (eUnhide) {}
+    });
   }
 
   function ensureSaranoniSizeThumbsInMediaColumn() {
@@ -5349,6 +5404,14 @@
     }
     var features = global.document.getElementById("mc-pdp-features");
     var heroStack = global.document.getElementById("mc-pdp-hero-stack");
+    if (isSaranoniPdpPage()) {
+      if (node.parentNode !== host) {
+        try {
+          host.appendChild(node);
+        } catch (eSarNode) {}
+      }
+      return;
+    }
     var targetParent = (features && features.parentNode) || heroStack || col;
     if (host.parentNode !== targetParent) {
       try {
@@ -5360,7 +5423,6 @@
         host.appendChild(node);
       } catch (eNode) {}
     }
-    if (isSaranoniPdpPage()) return;
     var desc = global.document.getElementById("mc-pdp-description-below-features");
     var beforeNode = desc || features;
     if (beforeNode && host.parentNode === beforeNode.parentNode && host !== beforeNode) {
@@ -5535,6 +5597,11 @@
         host.style.setProperty("box-sizing", "border-box", "important");
         host.style.setProperty("text-align", "left", "important");
       } catch (eHostStyle) {}
+      if (host.parentNode !== col) {
+        try {
+          col.appendChild(host);
+        } catch (eSarHost) {}
+      }
       return;
     }
     if (!col.contains(host)) {
@@ -7672,9 +7739,19 @@
       link.className = "mc-pdp-return-link";
       cell.appendChild(link);
       retRow.appendChild(cell);
-      tbody.insertBefore(retRow, mainRow);
-    } else if (retRow.nextElementSibling !== mainRow) {
-      tbody.insertBefore(retRow, mainRow);
+    }
+    if (mainRow && mainRow.parentNode === tbody) {
+      try {
+        if (retRow.parentNode !== tbody) {
+          tbody.insertBefore(retRow, mainRow);
+        } else if (retRow.nextElementSibling !== mainRow) {
+          tbody.insertBefore(retRow, mainRow);
+        }
+      } catch (eRetInsert) {}
+    } else if (retRow.parentNode !== tbody) {
+      try {
+        tbody.insertBefore(retRow, tbody.firstChild);
+      } catch (eRetFallback) {}
     }
     var cellEl = retRow.querySelector(".mc-pdp-return-cell") || retRow.querySelector("td");
     if (cellEl) cellEl.colSpan = softGoodsReturnTableColspan(table, mainRow);
