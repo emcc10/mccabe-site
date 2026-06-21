@@ -19,7 +19,7 @@ await page.goto(
   "https://www.mccabestheaterandliving.com/product-p/sar-hp-hp-icons-mnky-lush.htm",
   { waitUntil: "domcontentloaded", timeout: 60000 }
 );
-await page.waitForTimeout(9000);
+await page.waitForTimeout(12000);
 const d = await page.evaluate(() => {
   const opt = document.getElementById("mc-pdp-option-block");
   const msg = document.getElementById("messaging-element");
@@ -49,4 +49,5 @@ const d = await page.evaluate(() => {
   };
 });
 console.log(JSON.stringify(d, null, 2));
+await page.screenshot({ path: "tmp/saranoni-pdp-verify/diagnose-local.png", fullPage: false });
 await browser.close();

@@ -18783,7 +18783,17 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
 
 /* MC_HEADER_FLOAT_BUTTON_CLEARANCE_20260621 - keep fixed top buttons above category links. */
 @media (min-width: 992px) {
-  header.header #display_menu_1 {
-    margin-top: 58px !important;
+  html body header.header > .mc-header-desktop-bar,
+  html body header.header > .col-xs-12.no-pad-lg.mc-header-desktop-bar {
+    padding-top: 58px !important;
+    box-sizing: border-box !important;
+  }
+
+  html body header.header .mc-header-desktop-bar .microblock.main-menu,
+  html body header.header .mc-header-desktop-bar #display_menu_1 {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    top: auto !important;
+    transform: none !important;
   }
 }

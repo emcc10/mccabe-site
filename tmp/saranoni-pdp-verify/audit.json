@@ -1,63 +1,70 @@
 {
   "ver": "20260621sarlayout5",
   "visibleIds": [
+    "listOfErrorsSpan",
     "mc-pdp-brand-logo",
     "mc-pdp-title-right",
     "mc-pdp-price-stack-host",
+    "messaging-element",
+    "mc-pdp-option-block",
     "mc-pdp-features",
-    "mc-pdp-purchase-stack",
-    "mc-pdp-option-block"
+    "mc-pdp-purchase-stack"
   ],
   "idx": {
-    "mc-pdp-brand-logo": 0,
-    "mc-pdp-title-right": 1,
-    "mc-pdp-price-stack-host": 2,
-    "messaging-element": -1,
+    "mc-pdp-brand-logo": 1,
+    "mc-pdp-title-right": 2,
+    "mc-pdp-price-stack-host": 3,
+    "messaging-element": 4,
     "mc-pdp-option-block": 5,
-    "mc-pdp-features": 3,
+    "mc-pdp-features": 6,
     "mc-pdp-description-below-features": -1,
-    "mc-pdp-purchase-stack": 4
+    "mc-pdp-purchase-stack": 7
   },
-  "orderOk": false,
+  "orderOk": true,
   "rects": {
     "mc-pdp-brand-logo": {
-      "top": 275,
-      "left": 732,
+      "top": 147,
+      "left": 760,
       "h": 39
     },
     "mc-pdp-title-right": {
-      "top": 328,
-      "left": 732,
-      "h": 72
+      "top": 200,
+      "left": 760,
+      "h": 36
     },
     "mc-pdp-price-stack-host": {
-      "top": 414,
-      "left": 732,
-      "h": 30
+      "top": 250,
+      "left": 760,
+      "h": 39
     },
     "messaging-element": {
-      "top": 183,
-      "left": 747,
-      "h": 58
+      "top": 297,
+      "left": 760,
+      "h": 27
     },
     "mc-pdp-option-block": {
-      "top": 930,
-      "left": 732,
+      "top": 348,
+      "left": 760,
       "h": 161
     },
     "mc-pdp-features": {
-      "top": 456,
-      "left": 732,
-      "h": 312
+      "top": 529,
+      "left": 760,
+      "h": 167
+    },
+    "mc-pdp-description-below-features": {
+      "top": 0,
+      "left": 0,
+      "h": 0
     },
     "mc-pdp-purchase-stack": {
-      "top": 796,
-      "left": 732,
-      "h": 106
+      "top": 723,
+      "left": 760,
+      "h": 108
     }
   },
-  "messagingInCol": false,
-  "strayPrice": false,
+  "messagingInCol": true,
+  "strayPrice": true,
   "stackedPriceLabels": 0,
   "hasSizeBlock": true,
   "hasThumbs": true,

@@ -35,15 +35,17 @@ await page.route("**/mc-pdp-auth-cta-fix.js**", async (route) => {
 try {
   await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 90000 });
   await page.waitForSelector("#v65-product-parent, #product_photo", { timeout: 60000 });
-  await page.waitForTimeout(9000);
+  await page.waitForTimeout(12000);
+  await page.locator("#mc-pdp-brand-logo").scrollIntoViewIfNeeded().catch(function () {});
 
   const audit = await page.evaluate((expected) => {
     const col = document.querySelector("td.mc-pdp-options-td");
     const visibleIds = col
       ? Array.from(col.children)
           .filter((el) => {
+            if (!el.id) return false;
             const st = getComputedStyle(el);
-            return st.display !== "none" && st.visibility !== "hidden" && el.id;
+            return st.display !== "none" && st.visibility !== "hidden";
           })
           .map((el) => el.id)
       : [];
