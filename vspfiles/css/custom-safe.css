@@ -18457,7 +18457,14 @@ html.mc-commerce-surface #content_area input[type="image"][name="btnContinue"],
 html.mc-commerce-surface #content_area input[type="image"][name*="checkout" i],
 html.mc-commerce-surface #content_area input[type="image"][name*="Checkout"],
 html.mc-commerce-surface #content_area a[href*="one-page-checkout"],
-html.mc-commerce-surface #content_area a[href*="checkout.asp"] {
+html.mc-commerce-surface #content_area a[href*="checkout.asp"],
+body.shoppingcart #content_area input[type="image"][name="btnContinue"],
+body.shoppingcart #content_area input[type="image"][name*="checkout" i],
+body.shoppingcart #content_area button[name*="checkout" i],
+body.shoppingcart #content_area input[type="submit"][name*="checkout" i],
+body.shoppingcart #table_checkout_cart0 input,
+body.shoppingcart #table_checkout_cart0 button,
+body.shoppingcart #table_checkout_cart0 a {
   display: inline-block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -18487,16 +18494,30 @@ html.mc-commerce-surface #content_area {
   padding-bottom: 24px !important;
 }
 
-html.mc-commerce-surface .mc-cart-actions-bar {
+html.mc-commerce-surface .mc-cart-actions-bar,
+body.shoppingcart .mc-cart-actions-bar,
+#mc-cart-actions-bar {
   display: flex !important;
   flex-wrap: wrap !important;
   gap: 12px !important;
   align-items: center !important;
-  justify-content: flex-start !important;
-  margin: 24px 0 32px !important;
-  padding: 16px 0 !important;
+  justify-content: center !important;
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 99990 !important;
+  margin: 0 !important;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
   clear: both !important;
+  background: #fff !important;
   border-top: 1px solid #e5e5e5 !important;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12) !important;
+  box-sizing: border-box !important;
+}
+
+body.mc-cart-actions-visible {
+  padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 html.mc-commerce-surface .mc-cart-actions-bar__btn {

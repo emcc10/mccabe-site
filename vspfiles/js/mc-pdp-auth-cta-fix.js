@@ -7864,3 +7864,19 @@ try {
     g.setTimeout(applyWindsorHero, ms);
   });
 })(window, document);
+
+/* Cart checkout CTA — bootstrap from baked template (mc-cart-checkout-fix.js may not be in rebaked HTML). */
+(function (g, d) {
+  "use strict";
+  var p = String(g.location.pathname || "").toLowerCase();
+  if (!/shoppingcart|shopcart\.asp|\/cart\b/.test(p)) return;
+  function loadCartFix() {
+    if (g.__MC_CART_CHECKOUT_FIX__) return;
+    var s = d.createElement("script");
+    s.src = "/v/vspfiles/js/mc-cart-checkout-fix.js?v=20260620cart2&mcrd=" + Date.now();
+    s.async = false;
+    (d.head || d.documentElement).appendChild(s);
+  }
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", loadCartFix);
+  else loadCartFix();
+})(window, document);

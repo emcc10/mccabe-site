@@ -1,11 +1,21 @@
-(function () {
+(function (g, d) {
   "use strict";
-  var g = window;
-  var d = document;
+
+  g.__MC_CART_CHECKOUT_FIX__ = "20260620cart2";
 
   function isCartPage() {
     var p = (g.location.pathname || "").toLowerCase();
-    return /shoppingcart|shopcart\.asp|\/cart\b/i.test(p);
+    var h = (g.location.href || "").toLowerCase();
+    return (
+      /shoppingcart|shopcart\.asp|\/cart\b/i.test(p) ||
+      /shoppingcart|shopcart\.asp/i.test(h)
+    );
+  }
+
+  function ensureCommerceSurface() {
+    try {
+      d.documentElement.classList.add("mc-commerce-surface");
+    } catch (e) {}
   }
 
   function normalizeImageSrc(el) {
@@ -24,16 +34,41 @@
 
   function cartHasLineItems(root) {
     if (!root) return false;
+    var text = (root.textContent || "").replace(/\s+/g, " ");
+    if (/your cart is empty|cart is currently empty|no items in your cart/i.test(text)) {
+      return false;
+    }
+
+    if (root.querySelector(".v65-your-cart-title, h2.v65-your-cart-title")) {
+      if (/\bitem description\b/i.test(text)) {
+        if (
+          root.querySelector(
+            'input[name^="QTY"], input[name*="quantity" i], .vol-qty-input, input[name*="txtQuantity" i]'
+          )
+        ) {
+          return true;
+        }
+        if (/\$\d+\.\d{2}/.test(text) && /\btotal\b/i.test(text)) return true;
+      }
+    }
+
     var rows = root.querySelectorAll("table tr");
     var i, tr, tds;
     for (i = 0; i < rows.length; i++) {
       tr = rows[i];
       if (tr.querySelector("th")) continue;
       tds = tr.querySelectorAll("td");
-      if (tds.length >= 3 && tr.querySelector("img")) return true;
+      if (tds.length >= 3 && (tr.querySelector("img") || tr.querySelector('a[href*="ProductDetails" i]'))) {
+        return true;
+      }
     }
-    var text = (root.textContent || "").replace(/\s+/g, " ").toLowerCase();
-    return /\bsubtotal\b/.test(text) && /\$\d/.test(text);
+
+    if (/\bsubtotal\b/i.test(text) && /\$\d/.test(text)) return true;
+    if (/\bgrand total\b/i.test(text) && /\$\d/.test(text)) return true;
+    if (/\btotal\b/i.test(text) && /\$\d/.test(text) && /\beach\b/i.test(text) && /\bqty\b/i.test(text)) {
+      return true;
+    }
+    return false;
   }
 
   function goCheckout() {
@@ -47,10 +82,49 @@
       "/checkout/?text=656565&bg=FFFFFF&font=Lato%2C+ui%2Dsans%2Dserif%2C+system%2Dui%2C+%2Dapple%2Dsystem%2C+BlinkMacSystemFont%2C+Segoe+UI%2C+Roboto%2C+Helvetica+Neue%2C+Arial";
   }
 
+  function elementVisible(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var rect = el.getBoundingClientRect();
+    if (rect.width > 36 && rect.height > 14) return true;
+    var style = g.getComputedStyle(el);
+    if (style.display === "none" || style.visibility === "hidden") return false;
+    if (parseFloat(style.opacity || "1") < 0.1) return false;
+    return el.offsetWidth > 36 || el.offsetHeight > 14;
+  }
+
+  var checkoutSelectors = [
+    'input[type="image"][name*="checkout" i]',
+    'input[type="submit"][name*="checkout" i]',
+    'button[name*="checkout" i]',
+    'button[id*="checkout" i]',
+    'a[href*="one-page-checkout"]',
+    'a[href*="/checkout/"]',
+    "#table_checkout_cart0 input[type='image']",
+    "#table_checkout_cart0 button",
+    "#table_checkout_cart0 a",
+    ".v65-cart-checkout",
+    ".push-cart__checkout",
+    'input[value*="Checkout" i]',
+    'button[value*="Checkout" i]',
+  ];
+
+  function findVisibleCheckoutCta(root) {
+    if (!root || !root.querySelector) return null;
+    var i, nodes, j, el;
+    for (i = 0; i < checkoutSelectors.length; i++) {
+      nodes = root.querySelectorAll(checkoutSelectors[i]);
+      for (j = 0; j < nodes.length; j++) {
+        el = nodes[j];
+        if (elementVisible(el)) return el;
+      }
+    }
+    return null;
+  }
+
   function wireCheckoutButtons(root) {
     if (!root || !root.querySelectorAll) return;
     root
-      .querySelectorAll('input[type="image"][name*="checkout" i], input[type="image"][name*="Checkout"]')
+      .querySelectorAll('input[type="image"][name*="checkout" i], input[type="submit"][name*="checkout" i]')
       .forEach(function (btn) {
         btn.addEventListener(
           "click",
@@ -70,7 +144,7 @@
     if (form) {
       form.addEventListener("submit", function (e) {
         var sub = e.submitter;
-        if (sub && /checkout/i.test(sub.name || "")) {
+        if (sub && /checkout/i.test(sub.name || sub.value || "")) {
           e.preventDefault();
           goCheckout();
         }
@@ -78,31 +152,20 @@
     }
   }
 
-  function elementVisible(el) {
-    if (!el) return false;
-    var rect = el.getBoundingClientRect();
-    if (rect.width > 40 && rect.height > 16) return true;
-    var style = g.getComputedStyle(el);
-    if (style.display === "none" || style.visibility === "hidden") return false;
-    if (parseFloat(style.opacity || "1") < 0.1) return false;
-    return el.offsetWidth > 40 || el.offsetHeight > 16;
-  }
-
-  function nativeActionsUsable(root) {
-    var continueBtn = root.querySelector('input[type="image"][name="btnContinue"]');
-    var checkoutBtn = root.querySelector('input[type="image"][name*="checkout" i]');
-    var hasItems = cartHasLineItems(root);
-    if (!elementVisible(continueBtn)) return false;
-    if (hasItems && checkoutBtn && !elementVisible(checkoutBtn)) return false;
-    if (hasItems && !checkoutBtn) return false;
-    return true;
-  }
-
   function ensureFallbackBar(root) {
-    if (!root || root.querySelector("#mc-cart-actions-bar")) return;
-    if (nativeActionsUsable(root)) return;
-
+    if (!root) return;
     var hasItems = cartHasLineItems(root);
+    var visibleCheckout = findVisibleCheckoutCta(root);
+    if (hasItems && visibleCheckout) return;
+
+    var existing = d.getElementById("mc-cart-actions-bar");
+    if (existing) {
+      if (!hasItems && existing.parentNode) existing.parentNode.removeChild(existing);
+      return;
+    }
+
+    if (!hasItems && !root.querySelector('input[name="btnContinue"]')) return;
+
     var bar = d.createElement("div");
     bar.id = "mc-cart-actions-bar";
     bar.className = "mc-cart-actions-bar";
@@ -124,16 +187,32 @@
       bar.appendChild(checkoutBtn);
     }
 
-    root.appendChild(bar);
+    d.body.appendChild(bar);
+    d.body.classList.add("mc-cart-actions-visible");
   }
 
   function run() {
     if (!isCartPage()) return;
-    var root = d.getElementById("content_area");
-    if (!root) return;
+    ensureCommerceSurface();
+    var root = d.getElementById("content_area") || d.body;
     fixImageButtonPaths(root);
     wireCheckoutButtons(root);
     ensureFallbackBar(root);
+  }
+
+  function installObserver() {
+    if (!isCartPage() || typeof MutationObserver === "undefined") return;
+    var root = d.getElementById("content_area");
+    if (!root || root.dataset.mcCartCheckoutObserver) return;
+    root.dataset.mcCartCheckoutObserver = "1";
+    var deb = null;
+    var mo = new MutationObserver(function () {
+      if (deb) g.clearTimeout(deb);
+      deb = g.setTimeout(run, 200);
+    });
+    try {
+      mo.observe(root, { childList: true, subtree: true });
+    } catch (eMo) {}
   }
 
   if (d.readyState === "loading") {
@@ -142,6 +221,9 @@
     run();
   }
   g.addEventListener("load", run);
-  setTimeout(run, 800);
-  setTimeout(run, 2500);
-})();
+  [400, 800, 1500, 2500, 5000, 8000].forEach(function (ms) {
+    g.setTimeout(run, ms);
+  });
+  g.setTimeout(installObserver, 600);
+  g.setTimeout(installObserver, 2000);
+})(window, document);
