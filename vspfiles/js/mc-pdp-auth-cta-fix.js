@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620collection1
-  var VERSION = "20260620collection1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620hpicons1
+  var VERSION = "20260620hpicons1";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -3401,10 +3401,13 @@
     return null;
   }
 
-  // Saranoni shares one color option-category (23) across products, one option id
-  // per color. Products not in PDP_CONFIGURED_COLOR_SWATCHS get swatches built from
-  // their native options + the verified filename convention below.
+  // Saranoni shares color option-category (23) and size option-category (58).
+  // Products not in PDP_CONFIGURED_COLOR_SWATCHS get swatches built from their
+  // native options + the verified filename convention below.
   var SARANONI_COLOR_OPTION_CATEGORY = "23";
+  var SARANONI_SIZE_OPTION_CATEGORY = "58";
+  var SARANONI_VARIANT_LABEL_PATTERNS =
+    /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color|choose\s+size|selected\s+size|size\s*\*|^size$)/;
   var SARANONI_SWATCH_PROBE_DIRS = [
     "/v/vspfiles/swatches/saranoni/",
     "/v/vspfiles/swatches/lush/",
@@ -3519,6 +3522,47 @@
     return /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color)/.test(labelHay);
   }
 
+  function isSaranoniSizeSelect(select) {
+    if (!select || !select.name) return false;
+    if (select.classList && select.classList.contains("mc-native-leather")) return false;
+    if (!/^SAR/i.test(parseProductCodeFromSelectName(select.name))) return false;
+    if (parseOptionCategoryFromSelectName(select.name) === SARANONI_SIZE_OPTION_CATEGORY) return true;
+    var labelHay = "";
+    try {
+      var row = select.closest ? select.closest("tr") : null;
+      labelHay = String(
+        (select.getAttribute("title") || "") +
+          " " +
+          (row ? row.textContent : "") +
+          " " +
+          (select.options[0] && select.options[0].text ? select.options[0].text : "")
+      ).toLowerCase();
+    } catch (eLbl) {}
+    return /(choose\s+size|selected\s+size|size\s*\*|^size$)/.test(labelHay);
+  }
+
+  function getConfiguredVariantAxis(ctx) {
+    return ctx && ctx.variantAxis === "size" ? "size" : "color";
+  }
+
+  function configuredVariantChooseLabel(ctx, isSar) {
+    if (getConfiguredVariantAxis(ctx) === "size") {
+      return isSar ? "Choose size: " : "Selected size: ";
+    }
+    return isSar ? "Choose color: " : "Selected color: ";
+  }
+
+  function configuredVariantPickerHeading(ctx) {
+    if (getConfiguredVariantAxis(ctx) === "size") {
+      return "Selected size: ";
+    }
+    return "Selected color: ";
+  }
+
+  function configuredVariantPickerPlaceholder(ctx) {
+    return getConfiguredVariantAxis(ctx) === "size" ? "Choose a size" : "Choose a color";
+  }
+
   function buildConfiguredColorThumbCandidates(entry, productCode) {
     var out = buildProductScopedColorImageCandidates(productCode, entry.swatchImage);
     buildProductScopedColorImageCandidates(productCode, entry.mainImage).forEach(function (candidate) {
@@ -3553,6 +3597,25 @@
         entries: sarEntries,
         score: sarEntries.length,
         dataDriven: true,
+        variantAxis: "color",
+      };
+    }
+    for (i = 0; i < selects.length; i++) {
+      var sizeSel = selects[i];
+      if (sizeSel.classList && sizeSel.classList.contains("mc-native-leather")) continue;
+      var sizePc = parseProductCodeFromSelectName(sizeSel.name);
+      if (!/^SAR/i.test(sizePc)) continue;
+      if (pagePc && sizePc !== pagePc) continue;
+      if (!isSaranoniSizeSelect(sizeSel)) continue;
+      var sizeEntries = buildDataDrivenSaranoniEntries(sizeSel, sizePc);
+      if (!sizeEntries.length) continue;
+      return {
+        productCode: sizePc,
+        select: sizeSel,
+        entries: sizeEntries,
+        score: sizeEntries.length,
+        dataDriven: true,
+        variantAxis: "size",
       };
     }
     for (i = 0; i < selects.length; i++) {
@@ -3573,6 +3636,7 @@
           entries: entries,
           score: score,
           dataDriven: false,
+          variantAxis: "color",
         };
       }
     }
@@ -3595,6 +3659,25 @@
         entries: dynEntries,
         score: dynEntries.length,
         dataDriven: true,
+        variantAxis: "color",
+      };
+    }
+    for (i = 0; i < selects.length; i++) {
+      var sizeFallbackSel = selects[i];
+      if (sizeFallbackSel.classList && sizeFallbackSel.classList.contains("mc-native-leather")) continue;
+      var sizeFallbackPc = parseProductCodeFromSelectName(sizeFallbackSel.name);
+      if (!/^SAR/i.test(sizeFallbackPc)) continue;
+      if (pagePc && sizeFallbackPc !== pagePc) continue;
+      if (!isSaranoniSizeSelect(sizeFallbackSel)) continue;
+      var sizeFallbackEntries = buildDataDrivenSaranoniEntries(sizeFallbackSel, sizeFallbackPc);
+      if (!sizeFallbackEntries.length) continue;
+      return {
+        productCode: sizeFallbackPc,
+        select: sizeFallbackSel,
+        entries: sizeFallbackEntries,
+        score: sizeFallbackEntries.length,
+        dataDriven: true,
+        variantAxis: "size",
       };
     }
     return null;
@@ -4101,8 +4184,11 @@
     }
     picker.setAttribute("data-mc-sar-color-signature", signature);
     picker.innerHTML =
-      '<div class="mc-pdp-features__heading mc-saranoni-color-picker__heading">Selected color: ' +
-      '<span id="mc-saranoni-selected-color-name">Choose a color</span></div>' +
+      '<div class="mc-pdp-features__heading mc-saranoni-color-picker__heading">' +
+      configuredVariantPickerHeading(ctx) +
+      '<span id="mc-saranoni-selected-color-name">' +
+      escapeHtmlText(configuredVariantPickerPlaceholder(ctx)) +
+      "</span></div>" +
       '<div class="mc-saranoni-color-picker__thumbs"></div>';
     var thumbs = picker.querySelector(".mc-saranoni-color-picker__thumbs");
     visible.forEach(function (item) {
@@ -4193,7 +4279,7 @@
         .replace(/\s+/g, " ")
         .trim()
         .toLowerCase();
-      if (prev && /(choose color|selected color|color\*|color:|cover)/.test(prevText)) {
+      if (prev && SARANONI_VARIANT_LABEL_PATTERNS.test(prevText)) {
         try {
           prev.style.setProperty("display", "none", "important");
           prev.style.setProperty("visibility", "hidden", "important");
@@ -4209,7 +4295,7 @@
         .replace(/\s+/g, " ")
         .trim()
         .toLowerCase();
-      if (!/(choose color|selected color|color\*|color:|cover)/.test(txt)) return;
+      if (!SARANONI_VARIANT_LABEL_PATTERNS.test(txt)) return;
       if (lab.contains && lab.contains(select)) return;
       try {
         lab.style.setProperty("display", "none", "important");
@@ -4329,7 +4415,7 @@
         .replace(/\s+/g, " ")
         .trim()
         .toLowerCase();
-      if (prev && /(choose color|choose cover|selected color|color|cover)/.test(prevText)) {
+      if (prev && SARANONI_VARIANT_LABEL_PATTERNS.test(prevText)) {
         try {
           prev.style.setProperty("display", "none", "important");
         } catch (ePrev) {}
@@ -4364,7 +4450,7 @@
       wrap.setAttribute("data-mc-signature", signature);
       wrap.innerHTML =
         '<div class="mc-configured-color-swatch-label">' +
-        (isSar ? "Choose color: " : "Selected color: ") +
+        configuredVariantChooseLabel(ctx, isSar) +
         '<span id="mc-configured-color-selected-name"></span></div>' +
         '<div class="mc-configured-color-swatches' + (isSar ? " mc-saranoni-swatches" : "") + '"></div>';
       var rail = wrap.querySelector(".mc-configured-color-swatches");
