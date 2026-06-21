@@ -1,0 +1,20 @@
+{
+  "ver": "20260621sarlayout7",
+  "ids": [
+    "mc-pdp-brand-logo",
+    "mc-pdp-title-right",
+    "mc-pdp-price-stack-host",
+    "messaging-element",
+    "mc-pdp-option-block",
+    "mc-pdp-features",
+    "mc-pdp-description-below-features",
+    "mc-pdp-purchase-stack"
+  ],
+  "orderOk": true,
+  "colWidth": 194,
+  "mediaWidth": 50,
+  "rowWidth": 1144,
+  "photoWidth": 45,
+  "pickerBeforeFeatures": null,
+  "colDisplay": "block"
+}
