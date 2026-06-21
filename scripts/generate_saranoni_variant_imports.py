@@ -17,6 +17,7 @@ HANDLE_TO_CODE = {
     "cotton-muslin-4-layer-quilt": "SAR-COTTON-MSLN-4-LAYER",
     "wizarding-world-charm-minky-lush": "SAR-WIZARDIN-WORLD-CHARM",
     "harry-potter-icons-minky-lush": "SAR-HP-HP-ICONS-MNKY-LUSH",
+    "satin-back-toddler-blanket": "SAR-SATIN-BACK-TOD",
 }
 
 # Shared Saranoni blanket sizes (Volusion option category 58) — one ID per size label store-wide.
@@ -37,6 +38,17 @@ PRODUCT_OPTION_IDS: dict[str, dict[str, str]] = {
     },
     "SAR-WIZARDIN-WORLD-CHARM": SARANONI_SIZE_OPTION_IDS,
     "SAR-HP-HP-ICONS-MNKY-LUSH": SARANONI_SIZE_OPTION_IDS,
+    "SAR-SATIN-BACK-TOD": {
+        "Navy Twinkle Star": "1163",
+        "Dainty Floral": "1164",
+        "Sun and Sea": "1165",
+        "Tulip": "1166",
+        "Daisy": "1167",
+        "Cedar": "1168",
+        "Camo": "1169",
+        "Flora": "1170",
+        "Sea Glass": "1171",
+    },
 }
 
 # Products that share the same size option rows (append all codes on Options import).
@@ -98,7 +110,9 @@ def variant_axis(product: dict) -> tuple[str, list[dict]]:
     return cat, rows
 
 
-def write_product_imports(code: str, handle: str, cat: str, rows: list[dict]) -> Path:
+def write_product_imports(
+    code: str, handle: str, cat: str, rows: list[dict], product_title: str = ""
+) -> Path:
     out_dir = OUT_ROOT / code
     out_dir.mkdir(parents=True, exist_ok=True)
     id_map = PRODUCT_OPTION_IDS.get(code, {})
@@ -152,6 +166,41 @@ def write_product_imports(code: str, handle: str, cat: str, rows: list[dict]) ->
                 ]
             )
 
+    if cat == COLOR_CAT:
+        assign_path = out_dir / "color_assignments.csv"
+        with assign_path.open("w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(
+                [
+                    "ProductCode",
+                    "ProductName",
+                    "ColorName",
+                    "DisplayOrder",
+                    "OptionCategory",
+                    "Required",
+                    "PriceDiff",
+                    "SourceURL",
+                    "CheckedOn",
+                    "Verification",
+                ]
+            )
+            product_name = product_title or handle.replace("-", " ").title()
+            for i, r in enumerate(rows, start=1):
+                w.writerow(
+                    [
+                        code,
+                        product_name,
+                        r["label"],
+                        i,
+                        "Choose Color",
+                        "Y",
+                        r["pricediff"],
+                        f"https://saranoni.com/products/{handle}",
+                        "2026-06-19",
+                        "Exact current Saranoni product-page selector",
+                    ]
+                )
+
     readme = out_dir / "README.md"
     axis_name = "color" if cat == COLOR_CAT else "size"
     readme_body = (
@@ -204,7 +253,7 @@ def main() -> None:
             raise SystemExit(f"no product code map for handle: {handle}")
         product = fetch_product(handle)
         cat, rows = variant_axis(product)
-        out = write_product_imports(code, handle, cat, rows)
+        out = write_product_imports(code, handle, cat, rows, product.get("title") or "")
         print(f"Wrote {out} ({len(rows)} {('color' if cat == COLOR_CAT else 'size')} options)")
 
 
