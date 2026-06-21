@@ -1,12 +1,15 @@
 {
-  "ver": "20260621sarlayout5",
+  "ver": "20260621sarlayout6",
+  "colWidth": 168,
+  "colDisplay": "flex",
+  "colFlexDir": "column",
   "visibleIds": [
     "mc-pdp-brand-logo",
     "mc-pdp-title-right",
     "mc-pdp-price-stack-host",
     "messaging-element",
-    "mc-pdp-features",
     "mc-pdp-option-block",
+    "mc-pdp-features",
     "mc-pdp-description-below-features",
     "mc-pdp-purchase-stack"
   ],
@@ -15,59 +18,56 @@
     "mc-pdp-title-right": 1,
     "mc-pdp-price-stack-host": 2,
     "messaging-element": 3,
-    "mc-pdp-option-block": 5,
-    "mc-pdp-features": 4,
+    "mc-pdp-option-block": 4,
+    "mc-pdp-features": 5,
     "mc-pdp-description-below-features": 6,
     "mc-pdp-purchase-stack": 7
   },
-  "orderOk": false,
+  "orderOk": true,
   "rects": {
     "mc-pdp-brand-logo": {
-      "top": 119,
+      "top": 129,
       "left": 810,
       "h": 39
     },
     "mc-pdp-title-right": {
-      "top": 172,
+      "top": 182,
       "left": 810,
       "h": 72
     },
     "mc-pdp-price-stack-host": {
-      "top": 258,
+      "top": 280,
       "left": 810,
       "h": 30
     },
     "messaging-element": {
-      "top": 296,
+      "top": 322,
       "left": 810,
-      "h": 63
+      "h": 55
     },
     "mc-pdp-option-block": {
-      "top": 709,
+      "top": 391,
       "left": 810,
-      "h": 161
+      "h": 209
     },
     "mc-pdp-features": {
-      "top": 369,
+      "top": 599,
       "left": 810,
-      "h": 312
+      "h": 316
     },
     "mc-pdp-description-below-features": {
-      "top": 890,
+      "top": 942,
       "left": 810,
       "h": 467
     },
     "mc-pdp-purchase-stack": {
-      "top": 1384,
+      "top": 1436,
       "left": 810,
       "h": 108
     }
   },
   "messagingInCol": true,
-  "strayPrice": false,
-  "stackedPriceLabels": 0,
-  "hasSizeBlock": true,
   "hasThumbs": true,
   "thumbInMedia": true,
-  "optionsTable": true
+  "hasSizeBlock": true
 }
