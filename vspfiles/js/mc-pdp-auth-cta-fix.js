@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620mobile1
-  var VERSION = "20260620mobile1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260620hpicons2
+  var VERSION = "20260620hpicons2";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -3910,6 +3910,9 @@
 
   function syncConfiguredColorSelect(select, opt) {
     if (!select || !opt) return false;
+    try {
+      select.dataset.mcConfiguredColorSyncing = "1";
+    } catch (eSyncFlag) {}
     select.value = opt.value;
     try {
       select.selectedIndex = opt.index;
@@ -3930,12 +3933,46 @@
       select.disabled = false;
       select.removeAttribute("disabled");
     } catch (eEn) {}
-    try {
-      select.dispatchEvent(new Event("input", { bubbles: true }));
-    } catch (eIn) {}
-    try {
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    } catch (eEv) {}
+    // Do not dispatch synthetic change/input here — Volusion handlers can revert
+    // size selects to the first option (Mini) and our listener would lock that in.
+    global.setTimeout(function () {
+      try {
+        delete select.dataset.mcConfiguredColorSyncing;
+      } catch (eSyncClear) {
+        try {
+          select.dataset.mcConfiguredColorSyncing = "0";
+        } catch (eSyncClear2) {}
+      }
+    }, 0);
+    return true;
+  }
+
+  function readConfiguredColorSelectEntry(ctx) {
+    if (!ctx || !ctx.select || !ctx.entries) return null;
+    var opt =
+      ctx.select.options && ctx.select.selectedIndex >= 0
+        ? ctx.select.options[ctx.select.selectedIndex]
+        : null;
+    if (!opt) return null;
+    var i;
+    for (i = 0; i < ctx.entries.length; i++) {
+      if (optionMatchesConfiguredColorEntry(opt, ctx.entries[i])) return ctx.entries[i];
+    }
+    return null;
+  }
+
+  function reassertConfiguredColorActiveSelection(ctx, applyPhoto) {
+    if (!ctx || !ctx.select || !configuredColorActiveEntry) return false;
+    if (!global.__MC_CONFIGURED_COLOR_USER_PICKED__) return false;
+    var opt = findConfiguredColorOption(ctx.select, configuredColorActiveEntry);
+    if (!opt) return false;
+    var fromSelect = readConfiguredColorSelectEntry(ctx);
+    if (!fromSelect || fromSelect.optionId !== configuredColorActiveEntry.optionId) {
+      syncConfiguredColorSelect(ctx.select, opt);
+    }
+    ensureConfiguredColorCartField(ctx.select, opt, null);
+    syncConfiguredColorSwatchUi(ctx, !!applyPhoto);
+    syncSaranoniAltviewActiveState();
     return true;
   }
 
@@ -4222,6 +4259,7 @@
       thumbs.appendChild(a);
     });
     syncSaranoniAltviewActiveState();
+    updateConfiguredColorLabels(resolveDisplayedColorEntry(ctx));
   }
 
   function syncSaranoniSwatchReadyState(wrap, select, visibleCount) {
@@ -4574,13 +4612,11 @@
 
   function findConfiguredColorSelectedEntry(ctx) {
     if (!ctx || !ctx.select || !ctx.entries) return null;
-    var opt = ctx.select.options && ctx.select.selectedIndex >= 0 ? ctx.select.options[ctx.select.selectedIndex] : null;
-    if (!opt) return null;
-    var i;
-    for (i = 0; i < ctx.entries.length; i++) {
-      if (optionMatchesConfiguredColorEntry(opt, ctx.entries[i])) return ctx.entries[i];
+    if (configuredColorActiveEntry && global.__MC_CONFIGURED_COLOR_USER_PICKED__) {
+      var locked = resolveConfiguredColorEntry(ctx, configuredColorActiveEntry.optionId);
+      if (locked) return locked;
     }
-    return null;
+    return readConfiguredColorSelectEntry(ctx);
   }
 
   function resolveDisplayedColorEntry(ctx) {
@@ -4622,9 +4658,23 @@
     if (!select || select.dataset.mcConfiguredColorBound === "1") return;
     select.dataset.mcConfiguredColorBound = "1";
     select.addEventListener("change", function () {
+      if (select.dataset.mcConfiguredColorSyncing === "1") return;
       var ctx = findConfiguredColorSwatchContext();
       if (!ctx || ctx.select !== select) return;
-      var entry = findConfiguredColorSelectedEntry(ctx);
+      if (
+        configuredColorActiveEntry &&
+        global.__MC_CONFIGURED_COLOR_USER_PICKED__
+      ) {
+        var fromSelect = readConfiguredColorSelectEntry(ctx);
+        if (
+          fromSelect &&
+          fromSelect.optionId !== configuredColorActiveEntry.optionId
+        ) {
+          reassertConfiguredColorActiveSelection(ctx, true);
+          return;
+        }
+      }
+      var entry = readConfiguredColorSelectEntry(ctx);
       if (entry) applyConfiguredColorSelection(ctx, entry, true);
     });
   }
@@ -4660,6 +4710,7 @@
     renderConfiguredColorSwatches(ctx);
     bindConfiguredColorSwatchSelect(ctx.select);
     restoreConfiguredColorActiveEntry(ctx);
+    reassertConfiguredColorActiveSelection(ctx, false);
     if (!configuredColorDefaultSrc) {
       var hero = global.document.getElementById("product_photo");
       var heroSrc = hero ? hero.getAttribute("src") || "" : "";
@@ -5929,14 +5980,26 @@
         if (!isSaranoniPdpPage()) return;
         var sel = eSarSel.target;
         if (!sel || !sel.matches || !sel.matches("select")) return;
-        if (!isSaranoniColorSelect(sel)) return;
+        if (!isSaranoniColorSelect(sel) && !isSaranoniSizeSelect(sel)) return;
         var ctx = findConfiguredColorSwatchContext();
         if (!ctx || ctx.select !== sel) return;
-        var entry = findConfiguredColorSelectedEntry(ctx);
-        if (entry) lockConfiguredColorActiveEntry(entry);
-        syncConfiguredColorSwatchUi(ctx, true);
-        syncSaranoniColorPicker(ctx);
-        syncSaranoniAltviewActiveState();
+        if (sel.dataset.mcConfiguredColorSyncing === "1") return;
+        if (
+          configuredColorActiveEntry &&
+          global.__MC_CONFIGURED_COLOR_USER_PICKED__
+        ) {
+          var fromSelect = readConfiguredColorSelectEntry(ctx);
+          if (
+            fromSelect &&
+            fromSelect.optionId !== configuredColorActiveEntry.optionId
+          ) {
+            reassertConfiguredColorActiveSelection(ctx, true);
+            syncSaranoniColorPicker(ctx);
+            return;
+          }
+        }
+        var entry = readConfiguredColorSelectEntry(ctx);
+        if (entry) applyConfiguredColorSelection(ctx, entry, true);
       },
       true
     );
