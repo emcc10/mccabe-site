@@ -68,13 +68,13 @@
   function mcBedroomCurrentName() {
     var candidates = [
       qs('h1[itemprop="name"]'),
-      qs('[itemprop="name"]'),
-      qs("#productname"),
       qs(".productnamecolorLARGE"),
+      qs("#productname"),
       qs(".productnamecolor"),
       qs("h1"),
       qs('meta[property="og:title"]'),
-      qs('meta[name="twitter:title"]')
+      qs('meta[name="twitter:title"]'),
+      qs('[itemprop="name"]')
     ];
     for (var i = 0; i < candidates.length; i++) {
       var name = mcBedroomCleanName(mcBedroomText(candidates[i]) || (candidates[i] && candidates[i].content));
@@ -1202,7 +1202,7 @@
         continue;
       }
       var text = String(el.textContent || "").replace(/\s+/g, " ").trim();
-      if (el.id === "mc-pdp-description-below-features" || text.length >= 40) return el;
+      if (text.length >= 40) return el;
     }
     return null;
   }
@@ -1236,6 +1236,14 @@
           global.mcHideNativeVolusionTabPanels();
         }
       } catch (eSsDesc) {}
+      try {
+        var host = qs("#mc-pdp-description-below-features");
+        var hostText = host ? String(host.textContent || "").replace(/\s+/g, " ").trim() : "";
+        var descText = descNode ? String(descNode.textContent || "").replace(/\s+/g, " ").trim() : "";
+        if (host && descNode && descNode !== host && descText.length >= 40 && hostText.length < 20) {
+          host.appendChild(descNode);
+        }
+      } catch (eSsDescMove) {}
       return;
     }
 

@@ -26,13 +26,13 @@
   function currentName(){
     var candidates=[
       q('h1[itemprop="name"]'),
-      q('[itemprop="name"]'),
-      q('#productname'),
       q('.productnamecolorLARGE'),
+      q('#productname'),
       q('.productnamecolor'),
       q('h1'),
       q('meta[property="og:title"]'),
-      q('meta[name="twitter:title"]')
+      q('meta[name="twitter:title"]'),
+      q('[itemprop="name"]')
     ];
     for(var i=0;i<candidates.length;i++){
       var name=cleanName(text(candidates[i])||(candidates[i]&&candidates[i].content));
