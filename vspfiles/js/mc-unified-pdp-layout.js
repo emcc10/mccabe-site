@@ -302,9 +302,17 @@
     (global.document.head || global.document.documentElement).appendChild(st);
   }
 
+  function directChildByClass(parent, className) {
+    if (!parent) return null;
+    for (var i = 0; i < parent.children.length; i++) {
+      if (parent.children[i].classList && parent.children[i].classList.contains(className)) return parent.children[i];
+    }
+    return null;
+  }
+
   function ensureUnifiedDescriptionInner(host) {
     if (!host) return null;
-    var inner = qs(":scope > .mc-pdp-description-below-features__inner", host);
+    var inner = directChildByClass(host, "mc-pdp-description-below-features__inner");
     if (!inner) {
       inner = global.document.createElement("div");
       inner.className = "mc-pdp-description-below-features__inner";
@@ -326,7 +334,7 @@
     ensureUnifiedDescriptionClampCss();
 
     var isDesktop = global.matchMedia && global.matchMedia("(min-width: 992px)").matches;
-    var toggle = qs(":scope > .mc-pdp-description-view-more", host);
+    var toggle = directChildByClass(host, "mc-pdp-description-view-more");
     if (!toggle) {
       toggle = global.document.createElement("button");
       toggle.type = "button";
@@ -1242,6 +1250,8 @@
         var descText = descNode ? String(descNode.textContent || "").replace(/\s+/g, " ").trim() : "";
         if (host && descNode && descNode !== host && descText.length >= 40 && hostText.length < 20) {
           host.appendChild(descNode);
+          global.setTimeout(syncUnifiedDescriptionViewMore, 0);
+          global.setTimeout(syncUnifiedDescriptionViewMore, 250);
         }
       } catch (eSsDescMove) {}
       return;
