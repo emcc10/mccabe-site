@@ -24,6 +24,34 @@
   }
 
   var BEDROOM_PIECE_RE = /\b(chest|dresser|king bed|queen bed|bed|nightstand|night stand|mirror|armoire|wardrobe|media chest|gentlemans chest|gentleman's chest|drawer chest|door chest|bachelor chest|california king bed|cal king bed|twin bed|full bed)\b/i;
+  var STATIC_BEDROOM_PRODUCTS = [
+    { c: "SS-BC900CTT", n: "Bear Creek Chest", co: "Bear Creek" },
+    { c: "SS-BC950CTBT", n: "Bear Creek Chest", co: "Bear Creek" },
+    { c: "SS-BC900DR", n: "Bear Creek Dresser", co: "Bear Creek" },
+    { c: "SS-BC950DRB", n: "Bear Creek Dresser", co: "Bear Creek" },
+    { c: "SS-BC950KFB", n: "Bear Creek King Bed, Brown", co: "Bear Creek" },
+    { c: "SS-BC900MR", n: "Bear Creek Mirror", co: "Bear Creek" },
+    { c: "SS-BC950MRB", n: "Bear Creek Mirror", co: "Bear Creek" },
+    { c: "SS-BC900NS", n: "Bear Creek Nightstand", co: "Bear Creek" },
+    { c: "SS-BC950NSB", n: "Bear Creek Nightstand", co: "Bear Creek" },
+    { c: "SS-BC950QFB", n: "Bear Creek Queen Bed, Brown", co: "Bear Creek" },
+    { c: "SS-CAS900C", n: "Cassie Illuminating Chest", co: "Cassie Illuminating" },
+    { c: "SS-CAS900DR", n: "Cassie Illuminating Dresser", co: "Cassie Illuminating" },
+    { c: "SS-CAS900KFB", n: "Cassie Illuminating King Bed, Shimmering Pearl Finish", co: "Cassie Illuminating" },
+    { c: "SS-CAS900M", n: "Cassie Illuminating Mirror", co: "Cassie Illuminating" },
+    { c: "SS-CAS900NS", n: "Cassie Illuminating Nightstand", co: "Cassie Illuminating" },
+    { c: "SS-CAS900QFB", n: "Cassie Illuminating Queen Bed, Shimmering Pearl Finish", co: "Cassie Illuminating" },
+    { c: "SS-HP900CTWT", n: "Highland Park Chest, Cathedral White", co: "Highland Park" },
+    { c: "SS-HP900CTDT", n: "Highland Park Chest, Waxed Driftwood", co: "Highland Park" },
+    { c: "SS-HP900KFBW", n: "Highland Park King Bed, Cathedral White", co: "Highland Park" },
+    { c: "SS-HP900KFBD", n: "Highland Park King Bed, Waxed Driftwood", co: "Highland Park" },
+    { c: "SS-HP900MRW", n: "Highland Park Mirror, Cathedral White", co: "Highland Park" },
+    { c: "SS-HP900MRD", n: "Highland Park Mirror, Waxed Driftwood", co: "Highland Park" },
+    { c: "SS-HP900NSW", n: "Highland Park Nightstand, Cathedral White", co: "Highland Park" },
+    { c: "SS-HP900NSD", n: "Highland Park Nightstand, Waxed Driftwood", co: "Highland Park" },
+    { c: "SS-HP900QFBW", n: "Highland Park Queen Bed, Cathedral White", co: "Highland Park" },
+    { c: "SS-HP900QFBD", n: "Highland Park Queen Bed, Waxed Driftwood", co: "Highland Park" }
+  ];
 
   function mcBedroomText(el) {
     return (el && String(el.textContent || (el.getAttribute && el.getAttribute("content")) || "").replace(/\s+/g, " ").trim()) || "";
@@ -228,7 +256,21 @@
     var name = mcBedroomCurrentName();
     var collection = mcBedroomCollectionFromName(name);
     if (!collection) return;
+    var currentCode = mcBedroomProductCode().toUpperCase();
+    var staticProducts = STATIC_BEDROOM_PRODUCTS.filter(function (product) {
+      return product.co.toLowerCase() === collection.toLowerCase() && product.c.toUpperCase() !== currentCode;
+    }).map(function (product) {
+      return {
+        name: product.n,
+        href: "/product-p/" + product.c.toLowerCase() + ".htm",
+        image: "/v/vspfiles/photos/" + product.c + "-1.jpg",
+        price: ""
+      };
+    });
+    if (staticProducts.length) mcBedroomRender(staticProducts, collection);
+    if (qs("#mc-bedroom-collection")) return;
     try {
+      if (typeof XMLHttpRequest === "undefined" || typeof DOMParser === "undefined") return;
       var xhr = new XMLHttpRequest();
       xhr.open("GET", "/SearchResults.asp?Search=" + encodeURIComponent(collection), true);
       xhr.onreadystatechange = function () {
