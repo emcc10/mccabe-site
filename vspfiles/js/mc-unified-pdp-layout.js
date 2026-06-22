@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260622collection4";
-  var AUTH_LAYOUT_VER = "20260617pdp76";
+  var LAYOUT_VER = "20260622imgfix1";
+  var AUTH_LAYOUT_VER = "20260622imgfix1";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -1074,25 +1074,41 @@
     var imgMaxW = isBeanBag ? "600px" : "650px";
     var img = qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image", mediaTd) || qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image");
     if (img && img.style) {
-      img.style.removeProperty("max-width");
-      img.style.removeProperty("width");
-      img.style.removeProperty("height");
-      img.style.setProperty("display", "block", "important");
-      img.style.setProperty("width", "100%", "important");
-      img.style.setProperty("height", "auto", "important");
-      img.style.setProperty("max-width", imgMaxW, "important");
-      img.style.setProperty("max-height", "none", "important");
-      img.style.setProperty("object-fit", "contain", "important");
-      if (isSteveSilver && isDesktop) {
-        img.style.setProperty("margin", "0", "important");
-      } else {
-        img.style.setProperty("margin", "0 0 0 auto", "important");
+      var imgNormVer = img.getAttribute("data-mc-media-norm") || "";
+      if (imgNormVer !== LAYOUT_VER) {
+        img.setAttribute("data-mc-media-norm", LAYOUT_VER);
+        img.style.removeProperty("max-width");
+        img.style.removeProperty("width");
+        img.style.removeProperty("height");
+        img.style.setProperty("display", "block", "important");
+        img.style.setProperty("height", "auto", "important");
+        img.style.setProperty("max-height", "none", "important");
+        img.style.setProperty("object-fit", "contain", "important");
+        if (isSteveSilver) {
+          img.style.setProperty("max-width", imgMaxW, "important");
+          img.style.removeProperty("width");
+          img.style.setProperty("margin", isDesktop ? "0" : "0 auto", "important");
+        } else {
+          img.style.setProperty("width", "100%", "important");
+          img.style.setProperty("max-width", imgMaxW, "important");
+          img.style.setProperty("margin", "0 0 0 auto", "important");
+        }
       }
     }
 
     var alt = qs("#altviews, .altviews, [id*='altviews'], [class*='altviews']", document);
-    if (alt && !mediaTd.contains(alt)) mediaTd.appendChild(alt);
+    var ssWrap = isSteveSilver ? qs("#mc-steve-silver-altviews-wrap", mediaTd) : null;
+    if (alt && ssWrap && ssWrap.contains(alt)) {
+      /* Steve Silver altviews are positioned by mc-steve-silver-altviews-wrap — do not reparent. */
+    } else if (alt && !mediaTd.contains(alt)) {
+      mediaTd.appendChild(alt);
+    }
     if (alt && alt.style) {
+      var altNormVer = alt.getAttribute("data-mc-alt-norm") || "";
+      if (altNormVer === LAYOUT_VER) {
+        /* styles already applied */
+      } else {
+      alt.setAttribute("data-mc-alt-norm", LAYOUT_VER);
       alt.classList.add("mc-unified-altviews");
       alt.style.setProperty("display", "flex", "important");
       alt.style.setProperty("flex-direction", "row", "important");
@@ -1113,6 +1129,7 @@
       alt.style.setProperty("padding", "0", "important");
       alt.style.setProperty("float", "none", "important");
       alt.style.setProperty("clear", "both", "important");
+      }
     }
 
     var altWrap = qs("#mc-steve-silver-altviews-wrap, .mc-steve-silver-altviews-wrap", mediaTd);

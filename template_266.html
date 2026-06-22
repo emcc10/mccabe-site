@@ -1532,6 +1532,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622imgfix1"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260622imgfix1 -->
   <script id="mc-ss-piece-hero-boot">
 (function (g, d) {
+  var SS_HERO_VER = "20260622imgfix1";
   function productCode() {
     var input = d.querySelector('input[name="ProductCode"]');
     return String(
@@ -1543,6 +1544,9 @@ document.addEventListener("DOMContentLoaded", function () {
   function photo(code, n, thumb) {
     return "/v/vspfiles/photos/" + code + "-" + n + (thumb ? "T" : "") + ".jpg";
   }
+  function normalizePhotoUrl(url) {
+    return String(url || "").replace(/\?.*$/, "").split("#")[0];
+  }
   function applyPieceHero() {
     var code = productCode();
     if (!/^SS-/.test(code)) return;
@@ -1550,13 +1554,14 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!img) return;
     var full = photo(code, 1, false);
     var cur = String(img.getAttribute("src") || img.src || "");
-    if (/-2T\.|-2\.jpg/i.test(cur) || cur.indexOf(full) === -1) {
-      img.setAttribute("src", full);
-      img.src = full;
-      img.removeAttribute("srcset");
-    }
+    if (!/-2T\.|-2\.jpg/i.test(cur) && normalizePhotoUrl(cur) === normalizePhotoUrl(full)) return;
+    img.setAttribute("src", full);
+    img.src = full;
+    img.removeAttribute("srcset");
     var zoom = d.querySelector("a#product_photo_zoom_url, a#product_photo_zoom_url2");
-    if (zoom) zoom.setAttribute("href", full);
+    if (zoom && normalizePhotoUrl(zoom.getAttribute("href") || "") !== normalizePhotoUrl(full)) {
+      zoom.setAttribute("href", full);
+    }
     if (!img.__mcSsHeroLock) {
       img.__mcSsHeroLock = true;
       try {
@@ -1570,13 +1575,17 @@ document.addEventListener("DOMContentLoaded", function () {
       } catch (eLock) {}
     }
   }
-  [0, 50, 200, 600, 1500, 4000, 8000].forEach(function (ms) {
+  function runOnce() {
+    if (g.__MC_SS_TEMPLATE_HERO_VER__ === SS_HERO_VER) return;
+    g.__MC_SS_TEMPLATE_HERO_VER__ = SS_HERO_VER;
+    applyPieceHero();
+  }
+  runOnce();
+  [500, 2000].forEach(function (ms) {
     g.setTimeout(applyPieceHero, ms);
   });
   if (d.readyState === "loading") {
-    d.addEventListener("DOMContentLoaded", applyPieceHero);
-  } else {
-    applyPieceHero();
+    d.addEventListener("DOMContentLoaded", runOnce);
   }
 })(window, document);
   </script>

@@ -18091,7 +18091,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
     order: 1 !important;
     display: block !important;
-    width: 650px !important;
+    width: auto !important;
     max-width: 650px !important;
     height: auto !important;
     margin-left: 0 !important;
