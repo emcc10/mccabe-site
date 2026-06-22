@@ -6,7 +6,7 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260620collection3";
+  var LAYOUT_VER = "20260622collection4";
   var AUTH_LAYOUT_VER = "20260617pdp76";
   var moTimer = null;
   var moBound = false;
@@ -238,6 +238,107 @@
       };
       xhr.send();
     } catch (eBedroomFallback) {}
+  }
+
+  function ensureUnifiedDescriptionClampCss() {
+    if (qs("#mc-unified-description-clamp-css")) return;
+    var st = global.document.createElement("style");
+    st.id = "mc-unified-description-clamp-css";
+    st.textContent =
+      "#mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-below-features__inner{" +
+      "position:relative!important;overflow:hidden!important;max-height:var(--mc-desc-clamp-height,180px)!important}" +
+      "#mc-pdp-description-below-features.mc-pdp-description-below-features--expanded .mc-pdp-description-below-features__inner{" +
+      "max-height:none!important;overflow:visible!important}" +
+      "#mc-pdp-description-below-features .mc-pdp-description-view-more{display:none!important}" +
+      "#mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-view-more," +
+      "#mc-pdp-description-below-features.mc-pdp-description-below-features--expanded .mc-pdp-description-view-more{" +
+      "display:inline-block!important;margin:6px 0 0 0!important;padding:0!important;border:0!important;background:transparent!important;color:#111!important;" +
+      "font:600 12px/1.35 Inter,Arial,sans-serif!important;letter-spacing:.12em!important;text-transform:uppercase!important;text-decoration:underline!important;cursor:pointer!important}" +
+      "#mc-pdp-description-below-features.mc-pdp-description-below-features--clamped:not(.mc-pdp-description-below-features--expanded) .mc-pdp-description-below-features__inner:after{" +
+      "content:\"\"!important;position:absolute!important;left:0!important;right:0!important;bottom:0!important;height:1.8em!important;pointer-events:none!important;" +
+      "background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 90%)!important}";
+    (global.document.head || global.document.documentElement).appendChild(st);
+  }
+
+  function ensureUnifiedDescriptionInner(host) {
+    if (!host) return null;
+    var inner = qs(":scope > .mc-pdp-description-below-features__inner", host);
+    if (!inner) {
+      inner = global.document.createElement("div");
+      inner.className = "mc-pdp-description-below-features__inner";
+      var child;
+      while ((child = host.firstElementChild)) {
+        if (child.classList && child.classList.contains("mc-pdp-description-view-more")) break;
+        inner.appendChild(child);
+      }
+      host.insertBefore(inner, host.firstElementChild || null);
+    }
+    return inner;
+  }
+
+  function syncUnifiedDescriptionViewMore() {
+    var host = qs("#mc-pdp-description-below-features");
+    if (!host || !String(host.textContent || "").replace(/\s+/g, " ").trim()) return;
+    var inner = ensureUnifiedDescriptionInner(host);
+    if (!inner) return;
+    ensureUnifiedDescriptionClampCss();
+
+    var isDesktop = global.matchMedia && global.matchMedia("(min-width: 992px)").matches;
+    var toggle = qs(":scope > .mc-pdp-description-view-more", host);
+    if (!toggle) {
+      toggle = global.document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "mc-pdp-description-view-more";
+      toggle.addEventListener("click", function () {
+        var expanded = host.classList.toggle("mc-pdp-description-below-features--expanded");
+        toggle.textContent = expanded ? "View less" : "... View more";
+        if (!expanded) global.setTimeout(syncUnifiedDescriptionViewMore, 0);
+      });
+      host.appendChild(toggle);
+    } else if (toggle.parentNode !== host) {
+      host.appendChild(toggle);
+    }
+
+    if (!isDesktop) {
+      host.classList.remove("mc-pdp-description-below-features--clamped", "mc-pdp-description-below-features--expanded");
+      inner.style.removeProperty("--mc-desc-clamp-height");
+      toggle.style.setProperty("display", "none", "important");
+      return;
+    }
+
+    if (host.classList.contains("mc-pdp-description-below-features--expanded")) {
+      toggle.textContent = "View less";
+      return;
+    }
+
+    var img = qs("#product_photo") || qs("td.mc-unified-pdp-media img#product_photo, td.mc-pdp-media-td img#product_photo, img#main-image");
+    var lineHeight = parseFloat(global.getComputedStyle(inner).lineHeight || "0");
+    if (!lineHeight || lineHeight < 12) lineHeight = 24;
+
+    inner.style.removeProperty("--mc-desc-clamp-height");
+    host.classList.remove("mc-pdp-description-below-features--clamped");
+    var fullHeight = inner.scrollHeight;
+    var available = lineHeight * 8;
+    if (img) {
+      var imgRect = img.getBoundingClientRect();
+      var hostRect = host.getBoundingClientRect();
+      var byImage = imgRect.bottom - hostRect.top - 34;
+      if (byImage > lineHeight * 3) available = byImage;
+    }
+    var lines = Math.max(3, Math.floor(available / lineHeight));
+    var maxHeight = Math.floor(lines * lineHeight);
+
+    if (fullHeight <= maxHeight + Math.ceil(lineHeight / 2)) {
+      host.classList.remove("mc-pdp-description-below-features--clamped", "mc-pdp-description-below-features--expanded");
+      toggle.style.setProperty("display", "none", "important");
+      return;
+    }
+
+    inner.style.setProperty("--mc-desc-clamp-height", maxHeight + "px");
+    host.classList.add("mc-pdp-description-below-features--clamped");
+    host.classList.remove("mc-pdp-description-below-features--expanded");
+    toggle.textContent = "... View more";
+    toggle.style.setProperty("display", "inline-block", "important");
   }
 
   function ensureBedroomCollectionSection() {
@@ -1341,6 +1442,7 @@
 
     var desc = findDescriptionNode();
     ensureDescriptionRow(row, table, desc, mediaTd);
+    syncUnifiedDescriptionViewMore();
 
     global.document.body.classList.add("mc-pdp-unified-ready", "mc-pdp-hero-ready");
     global.document.documentElement.dataset.mcPdpNormalized = "1";
@@ -1397,6 +1499,8 @@
     ensureBedroomCollectionSection();
     global.setTimeout(renderBedroomCollectionFallback, 700);
     global.setTimeout(renderBedroomCollectionFallback, 1800);
+    global.setTimeout(syncUnifiedDescriptionViewMore, 900);
+    global.setTimeout(syncUnifiedDescriptionViewMore, 1900);
     if (mcNormalizePdpLayout()) return;
     bindMutationObserver();
   }
@@ -1413,6 +1517,7 @@
   }
   global.addEventListener("load", function () {
     if (!isUnifiedStable()) mcNormalizePdpLayout();
+    syncUnifiedDescriptionViewMore();
   });
   [250, 800, 1600].forEach(function (delay) {
     global.setTimeout(forceNormalizePass, delay);
