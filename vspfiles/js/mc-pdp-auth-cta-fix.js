@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622sarstable1
-  var VERSION = "20260622sarstable1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622sarstable2
+  var VERSION = "20260622sarstable2";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
