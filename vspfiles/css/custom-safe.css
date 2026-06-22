@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260621sarlayout8 — Saranoni PDP layout restore */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260621saranoni9 — Saranoni PDP single swatch rail */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -16650,10 +16650,57 @@ html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches {
 }
 
 html body.mc-saranoni-pdp .mc-configured-color-swatch-label {
-  display: none !important;
+  display: block !important;
+  margin: 0 0 10px 0 !important;
+  padding: 0 !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #444 !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
 }
 
-/* Hide Saranoni hero altviews — color picker lives in #mc-pdp-features */
+html body.mc-saranoni-pdp #mc-configured-color-selected-name {
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  text-transform: none !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper {
+  display: block !important;
+  clear: both !important;
+  position: static !important;
+  width: 100% !important;
+  max-width: 460px !important;
+  margin: 12px 0 16px 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-features {
+  clear: both !important;
+  position: static !important;
+  margin-top: 8px !important;
+}
+
+/* Legacy duplicate picker — removed in saranoni9; keep hidden if stale markup exists */
+html body.mc-saranoni-pdp #mc-saranoni-color-picker,
+html body.mc-saranoni-pdp .mc-saranoni-color-picker {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Hide Saranoni hero altviews when color swatches are active */
 html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews,
 html body.mc-saranoni-pdp td.mc-unified-pdp-media span#altviews,
 html body.mc-saranoni-pdp td.mc-pdp-media-td #altviews,
@@ -16668,15 +16715,33 @@ html body.mc-saranoni-pdp #product_photo_td span#altviews {
   padding: 0 !important;
 }
 
-/* Saranoni color picker in features section */
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #mc-configured-color-swatch-wrapper,
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready .mc-configured-color-swatch-wrapper {
+/* Saranoni init: hide native Volusion price until mc-pdp-auth-cta-fix places the stack host */
+html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_list_price,
+html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_productprice,
+html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_sale_price,
+html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox font.product_sale_price,
+html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_saleprice {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
+  max-height: 0 !important;
   overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html body.mc-saranoni-pdp-init:not(.mc-saranoni-pdp-ready) #mc-pdp-price-stack-host,
+html body.mc-saranoni-pdp-init:not(.mc-saranoni-pdp-ready) #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp-init:not(.mc-saranoni-pdp-ready) #mc-pdp-features,
+html body.mc-saranoni-pdp-init:not(.mc-saranoni-pdp-ready) #mc-pdp-purchase-stack {
+  visibility: hidden !important;
+}
+
+html body.mc-saranoni-pdp-ready #mc-pdp-price-stack-host,
+html body.mc-saranoni-pdp-ready #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp-ready #mc-pdp-features,
+html body.mc-saranoni-pdp-ready #mc-pdp-purchase-stack {
+  visibility: visible !important;
 }
 
 html body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
@@ -18898,9 +18963,13 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
 
 /* MC_HEADER_FLOAT_BUTTON_CLEARANCE_20260621 - keep fixed top buttons above category links. */
 @media (min-width: 992px) {
+  html body #slideshow-container .hero-menu {
+    top: 76px !important;
+  }
+
   html body header.header > .mc-header-desktop-bar,
   html body header.header > .col-xs-12.no-pad-lg.mc-header-desktop-bar {
-    padding-top: 58px !important;
+    padding-top: 64px !important;
     box-sizing: border-box !important;
   }
 

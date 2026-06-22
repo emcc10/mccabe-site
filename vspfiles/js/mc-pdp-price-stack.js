@@ -21,6 +21,17 @@
     return false;
   }
 
+  function isSaranoniPdp() {
+    try {
+      if (g.document.body && g.document.body.classList.contains("mc-saranoni-pdp")) return true;
+      var codeEl =
+        g.document.querySelector("#ProductCode, input[name='ProductCode'], #v65-product-parent [name='ProductCode']");
+      var code = codeEl ? String(codeEl.value || codeEl.textContent || "").trim().toUpperCase() : "";
+      if (/^SAR[-_]/.test(code)) return true;
+    } catch (eSar) {}
+    return false;
+  }
+
   function parseMoney(text) {
     if (typeof g.parseMcCurrency === "function") {
       return Number(g.parseMcCurrency(text == null ? "" : String(text))) || 0;
@@ -201,6 +212,7 @@
 
   function mcEnsurePdpPriceStack() {
     if (!isPdp()) return false;
+    if (isSaranoniPdp()) return false;
     if (isPalliserPdp()) {
       if (typeof g.mcDedupePalliserMemberPricingBlocks === "function") {
         try {
