@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260621saranoni9
-  var VERSION = "20260621nativebox1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622variant1
+  var VERSION = "20260622variant1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -1687,6 +1687,13 @@
 
     if (isSaranoniPdpPage()) {
       hideSaranoniHeroAltviews();
+      relocateVariantSwatchesFromMediaColumn();
+      if (main.nextElementSibling !== alt) {
+        try {
+          main.parentNode.insertBefore(alt, main.nextSibling);
+        } catch (eSarAlt) {}
+      }
+      applySoftGoodsAltviewsLayout(alt);
       return;
     }
 
@@ -2805,6 +2812,7 @@
       hideBeanBagNativeOptionsTable();
     } catch (eHideNative) {}
     consolidateBeanBagPurchaseBlocks(infoColumn, purchaseElement);
+    relocateVariantSwatchesFromMediaColumn();
     infoColumn.querySelectorAll(":scope > table, :scope > div").forEach(function (node) {
       if (node.id && /^(mc-pdp-|beanbag-|messaging|mc-bb-)/.test(node.id)) return;
       if (node.id) return;
@@ -2916,6 +2924,7 @@
       global.document.getElementById("messaging-element"),
       global.document.getElementById("mc-pdp-option-block"),
       global.document.getElementById("mc-configured-color-swatch-wrapper"),
+      global.document.getElementById("mc-saranoni-size-thumbs"),
       global.document.getElementById("mc-pdp-features"),
       global.document.getElementById("mc-pdp-description-below-features"),
       global.document.getElementById("mc-pdp-purchase-stack"),
@@ -2962,6 +2971,7 @@
     hideSaranoniNestedStrayMediaCol();
     expandSaranoniHeroNestedTables();
     removeSaranoniDuplicateColorPicker();
+    relocateVariantSwatchesFromMediaColumn();
     var infoColumn = resolveSaranoniInfoColumn();
     if (!infoColumn) return;
     var swatchWrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
@@ -2978,6 +2988,7 @@
       } catch (eSwOrd) {}
     }
     reorderSaranoniInfoColumnChildren(infoColumn, true);
+    ensureSaranoniSizeThumbsInInfoColumn();
     hideSaranoniStrayHeroCopy(infoColumn);
     markSaranoniPdpReady();
   }
@@ -2992,17 +3003,10 @@
     var infoColumn = resolveSaranoniInfoColumn();
     if (!infoColumn) return;
     expandSaranoniHeroNestedTables();
-    var coverOptionsElement = global.document.getElementById("mc-configured-color-swatch-wrapper");
-    if (coverOptionsElement && global.document.body.classList.contains("mc-saranoni-swatches-ready")) {
-      try {
-        coverOptionsElement.style.setProperty("display", "none", "important");
-        coverOptionsElement.style.setProperty("visibility", "hidden", "important");
-        coverOptionsElement.setAttribute("aria-hidden", "true");
-      } catch (eHideWrap) {}
-    }
     ensureSaranoniVariantUi();
+    relocateVariantSwatchesFromMediaColumn();
     reorderSaranoniInfoColumnChildren(infoColumn);
-    ensureSaranoniSizeThumbsInMediaColumn();
+    ensureSaranoniSizeThumbsInInfoColumn();
     hideSaranoniNativePriceTables(infoColumn);
     hideSaranoniNativeColumnClutter(infoColumn);
     hideSaranoniStrayHeroCopy(infoColumn);
@@ -3043,20 +3047,31 @@
     });
   }
 
-  function ensureSaranoniSizeThumbsInMediaColumn() {
+  function ensureSaranoniSizeThumbsInInfoColumn() {
     var row = global.document.getElementById("mc-saranoni-size-thumbs");
     if (!row) return;
+    var mediaTd = findPdpMediaTd();
     var infoColumn = resolveSaranoniInfoColumn();
-    if (infoColumn && row.parentNode === infoColumn) {
-      var mediaTd = findPdpMediaTd();
-      var photo = global.document.getElementById("product_photo");
-      var anchor = photo && photo.closest ? photo.closest("a") : null;
-      var insertAfter = anchor || photo;
-      if (insertAfter && insertAfter.parentNode) {
-        insertNodeAfter(insertAfter.parentNode, insertAfter, row);
-      } else if (mediaTd) {
-        mediaTd.appendChild(row);
+    if (!infoColumn) return;
+    if (mediaTd && mediaTd.contains(row)) {
+      try {
+        mediaTd.removeChild(row);
+      } catch (eRmMedia) {}
+    }
+    var anchor =
+      global.document.getElementById("mc-pdp-option-block") ||
+      global.document.getElementById("mc-configured-color-swatch-wrapper") ||
+      global.document.getElementById("messaging-element");
+    if (row.parentNode !== infoColumn) {
+      if (anchor && anchor.parentNode === infoColumn) {
+        insertNodeAfter(infoColumn, anchor, row);
+      } else {
+        infoColumn.appendChild(row);
       }
+      return;
+    }
+    if (anchor && anchor.parentNode === infoColumn && row.previousElementSibling !== anchor) {
+      insertNodeAfter(infoColumn, anchor, row);
     }
   }
 
@@ -4240,6 +4255,56 @@
     );
   }
 
+  var VARIANT_SWATCH_SELECTOR =
+    "#beanbag-swatch-wrapper, #mc-configured-color-swatch-wrapper, #mc-saranoni-size-thumbs, " +
+    "#mc-bb-size-section, #mc-saranoni-color-picker, .mc-saranoni-color-picker";
+
+  function findPdpInfoTd() {
+    return (
+      findPdpHeroColumnTd() ||
+      global.document.querySelector("#v65-product-parent td.mc-pdp-options-td") ||
+      global.document.querySelector("#v65-product-parent td.mc-unified-pdp-info")
+    );
+  }
+
+  function relocateVariantSwatchesFromMediaColumn() {
+    if (!isProductPdp()) return;
+    var mediaTd = findPdpMediaTd();
+    var infoTd = findPdpInfoTd();
+    if (!mediaTd || !infoTd || mediaTd === infoTd) return;
+    var nodes = [];
+    global.document.querySelectorAll(VARIANT_SWATCH_SELECTOR).forEach(function (el) {
+      if (el && mediaTd.contains(el) && nodes.indexOf(el) === -1) nodes.push(el);
+    });
+    if (!nodes.length) return;
+    nodes.forEach(function (node) {
+      try {
+        if (isSaranoniPdpPage() && node.id === "mc-configured-color-swatch-wrapper") {
+          mountSaranoniSwatchWrapper(node);
+          return;
+        }
+        if (node.id === "beanbag-swatch-wrapper") {
+          extractSwatchesIntoCol();
+          return;
+        }
+        var anchor =
+          global.document.getElementById("mc-pdp-option-block") ||
+          global.document.getElementById("mc-configured-color-swatch-wrapper") ||
+          global.document.getElementById("beanbag-swatch-wrapper") ||
+          global.document.getElementById("messaging-element") ||
+          global.document.getElementById("mc-pdp-price-stack-host");
+        var features = global.document.getElementById("mc-pdp-features");
+        if (features && features.parentNode === infoTd) {
+          infoTd.insertBefore(node, features);
+        } else if (anchor && anchor.parentNode === infoTd) {
+          insertNodeAfter(infoTd, anchor, node);
+        } else {
+          infoTd.appendChild(node);
+        }
+      } catch (eMove) {}
+    });
+  }
+
   function removeSaranoniColorPickerUi() {
     global.document.querySelectorAll(".mc-saranoni-color-picker").forEach(function (picker) {
       if (picker && picker.parentNode) {
@@ -4374,28 +4439,28 @@
     if (!ctx || !ctx.select || !ctx.entries || !ctx.entries.length) return;
     ensureSaranoniSizeVariantCss();
     bindSaranoniSizeVariantSelect(ctx);
-    var mediaTd = findPdpMediaTd();
-    if (!mediaTd) return;
+    var infoColumn = resolveSaranoniInfoColumn();
+    if (!infoColumn) return;
     var row = global.document.getElementById("mc-saranoni-size-thumbs");
     if (!row) {
       row = global.document.createElement("div");
       row.id = "mc-saranoni-size-thumbs";
       row.className = "mc-saranoni-size-thumbs";
       row.setAttribute("data-product-code", ctx.productCode);
-      var photo = global.document.getElementById("product_photo");
-      var anchor = photo && photo.closest ? photo.closest("a") : null;
-      var insertAfter = anchor || photo;
-      if (insertAfter && insertAfter.parentNode) {
-        insertNodeAfter(insertAfter.parentNode, insertAfter, row);
+      var mountAnchor =
+        global.document.getElementById("mc-pdp-option-block") ||
+        global.document.getElementById("messaging-element");
+      if (mountAnchor && mountAnchor.parentNode === infoColumn) {
+        insertNodeAfter(infoColumn, mountAnchor, row);
       } else {
-        mediaTd.appendChild(row);
+        infoColumn.appendChild(row);
       }
     }
     var signature =
       ctx.productCode + "|" + ctx.entries.map(function (e) { return e.optionId; }).join(",");
     if (row.getAttribute("data-mc-signature") === signature && row.querySelector(".mc-saranoni-size-thumb")) {
       if (saranoniSizeActiveOptionId) updateSaranoniSizeThumbUi(saranoniSizeActiveOptionId);
-      ensureSaranoniSizeThumbsInMediaColumn();
+      ensureSaranoniSizeThumbsInInfoColumn();
       return;
     }
     row.setAttribute("data-mc-signature", signature);
@@ -4438,7 +4503,7 @@
       });
     });
     if (saranoniSizeActiveOptionId) updateSaranoniSizeThumbUi(saranoniSizeActiveOptionId);
-    ensureSaranoniSizeThumbsInMediaColumn();
+    ensureSaranoniSizeThumbsInInfoColumn();
   }
 
   function hideSaranoniNativeOptionPricing() {
@@ -4931,30 +4996,38 @@
     global.document.querySelectorAll("#mc-configured-color-swatch-wrapper .mc-configured-color-swatch").forEach(function (btn) {
       if (btn.style.display !== "none") visibleSwatches++;
     });
-    if (!visibleSwatches) {
+    if (
+      visibleSwatches > 0 ||
+      global.document.body.classList.contains("mc-saranoni-swatches-ready")
+    ) {
+      alt.classList.remove("mc-saranoni-color-altviews");
+      if (alt.getAttribute("data-mc-sar-alt-signature")) {
+        alt.removeAttribute("data-mc-sar-alt-signature");
+        alt.innerHTML = "";
+      }
       try {
-        alt.style.removeProperty("display");
-        alt.style.removeProperty("visibility");
-        alt.style.removeProperty("height");
-        alt.style.removeProperty("overflow");
-        alt.style.removeProperty("margin");
-        alt.style.removeProperty("padding");
-      } catch (eShowAlt) {}
+        alt.style.setProperty("display", "none", "important");
+        alt.style.setProperty("visibility", "hidden", "important");
+        alt.style.setProperty("height", "0", "important");
+        alt.style.setProperty("overflow", "hidden", "important");
+        alt.style.setProperty("margin", "0", "important");
+        alt.style.setProperty("padding", "0", "important");
+      } catch (eHideAlt) {}
       return;
     }
-    alt.classList.remove("mc-saranoni-color-altviews", "mc-unified-altviews");
+    alt.classList.remove("mc-saranoni-color-altviews");
     if (alt.getAttribute("data-mc-sar-alt-signature")) {
       alt.removeAttribute("data-mc-sar-alt-signature");
       alt.innerHTML = "";
     }
     try {
-      alt.style.setProperty("display", "none", "important");
-      alt.style.setProperty("visibility", "hidden", "important");
-      alt.style.setProperty("height", "0", "important");
-      alt.style.setProperty("overflow", "hidden", "important");
-      alt.style.setProperty("margin", "0", "important");
-      alt.style.setProperty("padding", "0", "important");
-    } catch (eHideAlt) {}
+      alt.style.removeProperty("display");
+      alt.style.removeProperty("visibility");
+      alt.style.removeProperty("height");
+      alt.style.removeProperty("overflow");
+      alt.style.removeProperty("margin");
+      alt.style.removeProperty("padding");
+    } catch (eShowAlt) {}
   }
 
   function syncSaranoniSwatchReadyState(wrap, select, visibleCount) {
@@ -6154,6 +6227,7 @@
     sanitizeBeanBagAltviews();
   };
   global.mcEnsureHeroColumnOrder = ensureHeroColumnOrder;
+  global.mcRelocateVariantSwatchesFromMediaColumn = relocateVariantSwatchesFromMediaColumn;
 
   function findOrCreatePriceStackHost() {
     var host = global.document.getElementById("mc-pdp-price-stack-host");
@@ -6955,7 +7029,7 @@
     if (!isBeanBagPdpPage()) return;
     if (global.__MC_BB_OPTION_REPAIR_VER__ === VERSION) return;
     global.__MC_BB_OPTION_REPAIR_VER__ = VERSION;
-    [80, 250, 700, 1400, 2600, 5000].forEach(function (ms) {
+    [120, 600].forEach(function (ms) {
       global.setTimeout(function () {
         try {
           initBeanBagImageSync();
@@ -6975,7 +7049,7 @@
     if (!shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
     if (global.__MC_SS_LAYOUT_REPAIR_VER__ === VERSION) return;
     global.__MC_SS_LAYOUT_REPAIR_VER__ = VERSION;
-    [80, 250, 700, 1400, 2600, 5000].forEach(function (ms) {
+    [120, 700].forEach(function (ms) {
       global.setTimeout(function () {
         try {
           prepareDeferredUnifiedPdpHero();
@@ -7947,6 +8021,8 @@
       mountPdpFeaturesBlock();
       ensureSaranoniVariantUi();
       hideSaranoniHeroAltviews();
+      moveAltViewsUnderMainImage();
+      relocateVariantSwatchesFromMediaColumn();
       mountDescriptionBelowFeatures();
     }
     ensureQuantityAboveAtc();
@@ -8413,7 +8489,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260621saranoni9";
+  var WANT = "20260622variant1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -8750,7 +8826,7 @@
     a.setAttribute("aria-label", data.text.replace("\u2190 ", ""));
   }
 
-  [0, 150, 500, 1200, 2500, 5000, 8000].forEach(function (ms) {
+  [0, 400, 1500].forEach(function (ms) {
     g.setTimeout(restoreReturnLink, ms);
   });
 
@@ -8764,7 +8840,11 @@
 (function (g, d) {
   function centerAltImages() {
     if (!d.body || !/\b(productdetails|mc-product-page)\b/.test(d.body.className || "")) return;
-    if (d.body.classList.contains("mc-saranoni-pdp")) return;
+    if (typeof g.mcRelocateVariantSwatchesFromMediaColumn === "function") {
+      try {
+        g.mcRelocateVariantSwatchesFromMediaColumn();
+      } catch (eRelocate) {}
+    }
 
     var img = d.querySelector("img#product_photo");
     var alt =
