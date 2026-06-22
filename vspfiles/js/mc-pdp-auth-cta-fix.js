@@ -9451,7 +9451,7 @@
 })(window, document);
 /* MC_CENTER_ALT_IMAGES_UNDER_MAIN_20260618 */
 (function (g, d) {
-  var CENTER_ALT_VER = "20260622saracc1";
+  var CENTER_ALT_VER = "20260622saracc2";
 
   function isSteveSilverPdp() {
     if (d.body && d.body.classList.contains("mc-steve-silver-altview-pdp")) return true;
