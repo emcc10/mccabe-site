@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260621sarlayout7
-  var VERSION = "20260621sarlayout7";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260621sarlayout8
+  var VERSION = "20260621sarlayout8";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -2944,6 +2944,7 @@
 
   function finalizeSaranoniInfoColumnOrder() {
     if (!isSaranoniPdpPage()) return;
+    hideSaranoniNestedStrayMediaCol();
     expandSaranoniHeroNestedTables();
     var infoColumn = resolveSaranoniInfoColumn();
     if (!infoColumn) return;
@@ -3431,6 +3432,8 @@
   function findPdpHeroInsertAfter(parent) {
     if (!parent) return null;
     if (isSaranoniPdpPage()) {
+      var sarPicker = global.document.getElementById("mc-saranoni-color-picker");
+      if (sarPicker && parent.contains(sarPicker)) return sarPicker;
       var sarOpt = global.document.getElementById("mc-pdp-option-block");
       if (sarOpt && parent.contains(sarOpt) && sarOpt.querySelector("select")) return sarOpt;
     }
@@ -3545,6 +3548,7 @@
     pruneDescriptionDuplicateFeatures();
     if (isSaranoniPdpPage()) {
       hideSaranoniHeroAltviews();
+      finalizeSaranoniInfoColumnOrder();
     }
     hideNativeVolusionTabPanels();
   }
@@ -4189,6 +4193,22 @@
       }
       walk = walk.parentNode;
     }
+    row.querySelectorAll("td.mc-pdp-media-td, td.mc-pdp-options-td").forEach(function (cell) {
+      try {
+        cell.style.setProperty("display", "table-cell", "important");
+        cell.style.setProperty("flex", "none", "important");
+        cell.style.setProperty("width", "100%", "important");
+        cell.style.setProperty("max-width", "100%", "important");
+        cell.style.setProperty("box-sizing", "border-box", "important");
+      } catch (eCell) {}
+    });
+    row.querySelectorAll("td > table, td > table table").forEach(function (tbl) {
+      try {
+        tbl.style.setProperty("width", "100%", "important");
+        tbl.style.setProperty("max-width", "100%", "important");
+        tbl.style.setProperty("box-sizing", "border-box", "important");
+      } catch (eTbl) {}
+    });
     try {
       row.style.setProperty("width", "100%", "important");
       row.style.setProperty("max-width", "100%", "important");
@@ -4200,14 +4220,16 @@
   }
 
   function ensureSaranoniPdpLayoutCss() {
-    if (global.document.getElementById("mc-saranoni-pdp-layout-css")) return;
-    var st = global.document.createElement("style");
-    st.id = "mc-saranoni-pdp-layout-css";
+    var st = global.document.getElementById("mc-saranoni-pdp-layout-css");
+    if (!st) {
+      st = global.document.createElement("style");
+      st.id = "mc-saranoni-pdp-layout-css";
+      (global.document.head || global.document.documentElement).appendChild(st);
+    }
     st.textContent =
-      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:44px!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 55%!important;flex-basis:55%!important;max-width:58%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:1 1 42%!important;flex-basis:42%!important;min-width:320px!important;max-width:42%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td,html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:100%!important;max-width:min(650px,100%)!important;height:auto!important;display:block!important}}" +
+      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:44px!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 55%!important;flex-basis:55%!important;max-width:58%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:1 1 42%!important;flex-basis:42%!important;min-width:320px!important;max-width:42%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table.colors_pricebox{display:table!important;table-layout:fixed!important}html body.mc-saranoni-pdp td.mc-pdp-media-td,html body.mc-saranoni-pdp td.mc-pdp-options-td{display:table-cell!important;flex:none!important;flex-basis:auto!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:100%!important;max-width:min(650px,100%)!important;height:auto!important;display:block!important;margin-left:0!important}}" +
       "html body.mc-saranoni-pdp td.mc-pdp-options-td>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-unified-pdp-info>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-pdp-options-td>#options_table:not(#mc-pdp-option-block #options_table),html body.mc-saranoni-pdp td.mc-pdp-options-td>table:has(>#options_table):not(:has(#mc-pdp-option-block)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-brand-logo,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-price-stack-host,html body.mc-saranoni-pdp #messaging-element,html body.mc-saranoni-pdp #mc-pdp-option-block,html body.mc-saranoni-pdp #mc-pdp-features,html body.mc-saranoni-pdp #mc-pdp-description-below-features,html body.mc-saranoni-pdp #mc-pdp-purchase-stack{order:unset!important}";
-    (global.document.head || global.document.documentElement).appendChild(st);
   }
 
   function ensureSaranoniSizeVariantCss() {
@@ -5054,6 +5076,27 @@
     });
   }
 
+  function hideSaranoniNestedStrayMediaCol() {
+    if (!isSaranoniPdpPage()) return;
+    global.document
+      .querySelectorAll("#v65-product-parent td.mc-pdp-hero-media-col, #v65-product-parent td.mc-pdp-media-td")
+      .forEach(function (td) {
+        if (!td || td.classList.contains("mc-pdp-options-td")) return;
+        if (td.querySelector("#product_photo, img#product_photo, #product_photo_zoom_url")) return;
+        try {
+          td.classList.remove("mc-pdp-hero-media-col", "mc-pdp-media-td");
+          td.style.setProperty("display", "none", "important");
+          td.style.setProperty("visibility", "hidden", "important");
+          td.style.setProperty("width", "0", "important");
+          td.style.setProperty("max-width", "0", "important");
+          td.style.setProperty("padding", "0", "important");
+          td.style.setProperty("margin", "0", "important");
+          td.style.setProperty("overflow", "hidden", "important");
+          td.setAttribute("aria-hidden", "true");
+        } catch (eHideStray) {}
+      });
+  }
+
   function hideSaranoniStrayHeroCopy(infoColumn) {
     if (!infoColumn || !isSaranoniPdpPage()) return;
     infoColumn.querySelectorAll(
@@ -5593,6 +5636,7 @@
   }
 
   function tagHeroMediaCol() {
+    if (isSaranoniPdpPage()) return;
     var opt = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
     if (!opt) return;
     if (!opt.classList.contains("mc-pdp-options-td")) {
@@ -8428,7 +8472,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260621sarlayout7";
+  var WANT = "20260621sarlayout8";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;

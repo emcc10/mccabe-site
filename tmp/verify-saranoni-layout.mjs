@@ -102,7 +102,7 @@ for (const p of PAGES) {
   await page.screenshot({ path: path.join(OUT, p.shot), fullPage: false });
 
   const pass =
-    audit.ver === "20260621sarlayout7" &&
+    audit.ver === "20260621sarlayout8" &&
     audit.orderOk &&
     audit.colWidth >= 300 &&
     audit.mediaWidth >= 400 &&
