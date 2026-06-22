@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622variant1
-  var VERSION = "20260622variant1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622imgfix1
+  var VERSION = "20260622imgfix1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -99,6 +99,36 @@
     "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) .mc-unified-purchase-controls,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) .mc-unified-purchase-controls";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
+
+  function normalizePhotoUrl(url) {
+    return String(url || "")
+      .replace(/\?.*$/, "")
+      .split("#")[0];
+  }
+
+  function setProductPhotoSrcIfChanged(img, url) {
+    if (!img || !url) return false;
+    var target = normalizePhotoUrl(url);
+    var cur = normalizePhotoUrl(img.getAttribute("src") || img.src || "");
+    if (cur === target) return false;
+    img.setAttribute("src", url);
+    img.src = url;
+    img.removeAttribute("srcset");
+    return true;
+  }
+
+  function setLinkHrefIfChanged(link, url) {
+    if (!link || !url) return false;
+    var target = normalizePhotoUrl(url);
+    var cur = normalizePhotoUrl(link.getAttribute("href") || "");
+    if (cur === target) return false;
+    link.setAttribute("href", url);
+    return true;
+  }
+
+  global.mcNormalizePhotoUrl = normalizePhotoUrl;
+  global.mcSetProductPhotoSrcIfChanged = setProductPhotoSrcIfChanged;
+  global.mcSetLinkHrefIfChanged = setLinkHrefIfChanged;
 
   (function injectPdpHeroAntiFlickerEarly() {
     try {
@@ -365,7 +395,10 @@
       if (!el || !el.getAttribute) return;
       var val = el.getAttribute(attr) || "";
       if (!/\/TMH-(?:MAT|TRV)-[A-Z0-9-]+-2T\./i.test(val)) return;
-      el.setAttribute(attr, val.replace(/-2T\.(jpg|jpeg|png|webp)/i, "-1.$1"));
+      var next = val.replace(/-2T\.(jpg|jpeg|png|webp)/i, "-1.$1");
+      if (next === val) return;
+      el.setAttribute(attr, next);
+      if (attr === "src" && "src" in el) el.src = next;
     }
     swap2Tto1(global.document.getElementById("product_photo"), "src");
     global.document.querySelectorAll("#product_photo_zoom_url, #product_photo_zoom_url2").forEach(function (link) {
@@ -378,6 +411,9 @@
 
   function applyPdpMainImageCap() {
     if (!isProductPdp()) return;
+    if (isSteveSilverPdpPage()) return;
+    if (global.__MC_PDP_MAIN_IMAGE_CAP_VER__ === VERSION) return;
+    global.__MC_PDP_MAIN_IMAGE_CAP_VER__ = VERSION;
     fixTmhMatPhotoUrls(global.document);
     var img = global.document.getElementById("product_photo");
     var maxW = isBeanBagPdpPage() ? "600px" : "650px";
@@ -1669,6 +1705,7 @@
   }
 
   function moveAltViewsUnderMainImage() {
+    if (isSteveSilverPdpPage()) return;
     var alt =
       global.document.getElementById("altviews") ||
       global.document.querySelector("#content_area .altviews, #v65-product-parent .altviews");
@@ -8215,7 +8252,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260620returncat1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260622imgfix1&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -8489,7 +8526,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260622variant1";
+  var WANT = "20260622imgfix1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -8528,6 +8565,29 @@
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
 (function (g, d) {
+  var SS_ALT_VER = "20260622imgfix1";
+
+  function normalizePhotoUrl(url) {
+    if (typeof g.mcNormalizePhotoUrl === "function") return g.mcNormalizePhotoUrl(url);
+    return String(url || "")
+      .replace(/\?.*$/, "")
+      .split("#")[0];
+  }
+
+  function setPhotoSrcIfChanged(img, url) {
+    if (typeof g.mcSetProductPhotoSrcIfChanged === "function") {
+      return g.mcSetProductPhotoSrcIfChanged(img, url);
+    }
+    if (!img || !url) return false;
+    var target = normalizePhotoUrl(url);
+    var cur = normalizePhotoUrl(img.getAttribute("src") || img.src || "");
+    if (cur === target) return false;
+    img.setAttribute("src", url);
+    img.src = url;
+    img.removeAttribute("srcset");
+    return true;
+  }
+
   function isSteveSilverCode(code) {
     return /^SS-/.test(code);
   }
@@ -8581,15 +8641,33 @@
   function ensureAltViews(code, mediaCell, zoom) {
     var altSlot = 2;
     var alt = d.getElementById("altviews") || d.querySelector("span#altviews");
+    var altBuilt = alt && alt.getAttribute("data-mc-ss-alt-built") === code;
     if (!alt) {
       alt = d.createElement("span");
       alt.id = "altviews";
       alt.className = "mc-steve-silver-altviews";
     }
-    alt.innerHTML =
-      '<a href="' + photo(code, altSlot, false) + '" data-mc-ss-alt="' + altSlot + '">' +
-      '<img id="alternate_product_photo_' + altSlot + '" class="vCSS_img_alternate_product_photo" src="' + photo(code, altSlot, true) + '" alt="Room scene" />' +
-      "</a>";
+    if (!altBuilt) {
+      alt.setAttribute("data-mc-ss-alt-built", code);
+      alt.innerHTML =
+        '<a href="' + photo(code, altSlot, false) + '" data-mc-ss-alt="' + altSlot + '">' +
+        '<img id="alternate_product_photo_' + altSlot + '" class="vCSS_img_alternate_product_photo" src="' + photo(code, altSlot, true) + '" alt="Room scene" />' +
+        "</a>";
+    }
+
+    if (g.__MC_SS_ALT_LAYOUT_VER__ === SS_ALT_VER) {
+      alt.querySelectorAll("a").forEach(function (a) {
+        if (a.__mcSsAltClickBound) return;
+        a.__mcSsAltClickBound = true;
+        a.onclick = function (ev) {
+          if (ev) ev.preventDefault();
+          setHero(code, altSlot);
+          return false;
+        };
+      });
+      return;
+    }
+    g.__MC_SS_ALT_LAYOUT_VER__ = SS_ALT_VER;
 
     var wrap = d.getElementById("mc-steve-silver-altviews-wrap");
     if (!wrap) {
@@ -8640,6 +8718,8 @@
       a.style.setProperty("display", "block", "important");
       a.style.setProperty("width", "72px", "important");
       a.style.setProperty("height", "72px", "important");
+      if (a.__mcSsAltClickBound) return;
+      a.__mcSsAltClickBound = true;
       a.onclick = function (ev) {
         if (ev) ev.preventDefault();
         setHero(code, altSlot);
@@ -8658,11 +8738,8 @@
     var img = d.querySelector("img#product_photo");
     var zoom = d.querySelector("a#product_photo_zoom_url") || d.querySelector("a#product_photo_zoom_url2");
     var full = photo(code, n, false);
-    var thumb = photo(code, n, true);
     if (img) {
-      img.setAttribute("src", full);
-      img.src = full;
-      img.removeAttribute("srcset");
+      setPhotoSrcIfChanged(img, full);
       if (img.onload) img.onload = null;
       if (!img.__mcSsHeroLock) {
         img.__mcSsHeroLock = true;
@@ -8670,15 +8747,18 @@
           new g.MutationObserver(function () {
             var cur = img.getAttribute("src") || "";
             if (/-2T\.|-2\.jpg/i.test(cur)) {
-              img.setAttribute("src", full);
-              img.src = full;
+              setPhotoSrcIfChanged(img, full);
             }
           }).observe(img, { attributes: true, attributeFilter: ["src"] });
         } catch (eObs) {}
       }
     }
     if (zoom) {
-      zoom.setAttribute("href", full);
+      if (typeof g.mcSetLinkHrefIfChanged === "function") {
+        g.mcSetLinkHrefIfChanged(zoom, full);
+      } else if (normalizePhotoUrl(zoom.getAttribute("href") || "") !== normalizePhotoUrl(full)) {
+        zoom.setAttribute("href", full);
+      }
       zoom.title = n === 1 ? "Product image" : "Room scene";
     }
   }
@@ -8708,13 +8788,30 @@
     ensureAltViews(code, mediaCell, zoom);
   }
 
-  [0, 150, 500, 1200, 2500, 5000, 10000].forEach(function (ms) {
-    g.setTimeout(run, ms);
+  function retryHeroIfWrong() {
+    var code = productCode();
+    if (!isSteveSilverCode(code)) return;
+    var img = d.querySelector("img#product_photo");
+    if (!img) return;
+    var full = photo(code, 1, false);
+    var cur = String(img.getAttribute("src") || img.src || "");
+    if (/-2T\.|-2\.jpg/i.test(cur) || normalizePhotoUrl(cur) !== normalizePhotoUrl(full)) {
+      setHero(code, 1);
+    }
+  }
+
+  function runOnce() {
+    if (g.__MC_SS_ALT_RUN_VER__ === SS_ALT_VER) return;
+    g.__MC_SS_ALT_RUN_VER__ = SS_ALT_VER;
+    run();
+  }
+
+  runOnce();
+  [500, 2000].forEach(function (ms) {
+    g.setTimeout(retryHeroIfWrong, ms);
   });
   if (d.readyState === "loading") {
-    d.addEventListener("DOMContentLoaded", run);
-  } else {
-    run();
+    d.addEventListener("DOMContentLoaded", runOnce);
   }
 })(window, document);
 
@@ -8838,9 +8935,26 @@
 })(window, document);
 /* MC_CENTER_ALT_IMAGES_UNDER_MAIN_20260618 */
 (function (g, d) {
+  var CENTER_ALT_VER = "20260622imgfix1";
+
+  function isSteveSilverPdp() {
+    if (d.body && d.body.classList.contains("mc-steve-silver-altview-pdp")) return true;
+    var input = d.querySelector('input[name="ProductCode"]');
+    var code = String(
+      (g.global_Current_ProductCode || "") ||
+      (input && input.value) ||
+      ""
+    ).toUpperCase();
+    return /^SS-/.test(code);
+  }
+
   function centerAltImages() {
     if (!d.body || !/\b(productdetails|mc-product-page)\b/.test(d.body.className || "")) return;
-    if (typeof g.mcRelocateVariantSwatchesFromMediaColumn === "function") {
+    if (isSteveSilverPdp()) return;
+    if (g.__MC_CENTER_ALT_IMAGES_DONE__ === CENTER_ALT_VER) return;
+
+    if (!g.__MC_CENTER_ALT_RELOCATE_DONE__ && typeof g.mcRelocateVariantSwatchesFromMediaColumn === "function") {
+      g.__MC_CENTER_ALT_RELOCATE_DONE__ = true;
       try {
         g.mcRelocateVariantSwatchesFromMediaColumn();
       } catch (eRelocate) {}
@@ -8863,6 +8977,7 @@
 
     if (!mediaCell) return;
 
+    var layoutDone = g.__MC_CENTER_ALT_LAYOUT_VER__ === CENTER_ALT_VER;
     var wrap = d.getElementById("mc-centered-altviews-wrap");
     if (!wrap) {
       wrap = d.createElement("div");
@@ -8890,34 +9005,37 @@
       return null;
     }
 
-    var desc = mediaDescription(mediaCell);
-    var zoomChild = directChildUnder(mediaCell, zoom);
+    if (!layoutDone) {
+      var desc = mediaDescription(mediaCell);
+      var zoomChild = directChildUnder(mediaCell, zoom);
 
-    if (wrap.parentNode !== mediaCell) {
-      if (desc && desc.parentNode === mediaCell) {
+      if (wrap.parentNode !== mediaCell) {
+        if (desc && desc.parentNode === mediaCell) {
+          mediaCell.insertBefore(wrap, desc);
+        } else if (zoomChild && zoomChild.parentNode === mediaCell) {
+          mediaCell.insertBefore(wrap, zoomChild.nextSibling || null);
+        } else {
+          mediaCell.appendChild(wrap);
+        }
+      }
+
+      if (alt.parentNode !== wrap) {
+        wrap.appendChild(alt);
+      }
+
+      desc = mediaDescription(mediaCell);
+      zoomChild = directChildUnder(mediaCell, zoom);
+      if (desc && desc.parentNode === mediaCell && wrap.nextSibling !== desc) {
         mediaCell.insertBefore(wrap, desc);
-      } else if (zoomChild && zoomChild.parentNode === mediaCell) {
+      } else if (zoomChild && zoomChild.parentNode === mediaCell && wrap.previousElementSibling !== zoomChild) {
         mediaCell.insertBefore(wrap, zoomChild.nextSibling || null);
-      } else {
-        mediaCell.appendChild(wrap);
+      } else if (!zoomChild) {
+        var imgChild = directChildUnder(mediaCell, img);
+        if (imgChild && imgChild.parentNode === mediaCell && wrap.previousElementSibling !== imgChild) {
+          mediaCell.insertBefore(wrap, imgChild.nextSibling || null);
+        }
       }
-    }
-
-    if (alt.parentNode !== wrap) {
-      wrap.appendChild(alt);
-    }
-
-    desc = mediaDescription(mediaCell);
-    zoomChild = directChildUnder(mediaCell, zoom);
-    if (desc && desc.parentNode === mediaCell && wrap.nextSibling !== desc) {
-      mediaCell.insertBefore(wrap, desc);
-    } else if (zoomChild && zoomChild.parentNode === mediaCell && wrap.previousElementSibling !== zoomChild) {
-      mediaCell.insertBefore(wrap, zoomChild.nextSibling || null);
-    } else if (!zoomChild) {
-      var imgChild = directChildUnder(mediaCell, img);
-      if (imgChild && imgChild.parentNode === mediaCell && wrap.previousElementSibling !== imgChild) {
-        mediaCell.insertBefore(wrap, imgChild.nextSibling || null);
-      }
+      g.__MC_CENTER_ALT_LAYOUT_VER__ = CENTER_ALT_VER;
     }
 
     wrap.style.setProperty("display", "flex", "important");
@@ -8939,17 +9057,18 @@
     alt.style.setProperty("text-align", "center", "important");
   }
 
-[0, 150, 500, 1200, 2500, 5000, 10000, 15000, 25000, 40000].forEach(function (ms) {
-  g.setTimeout(centerAltImages, ms);
-});
+  g.setTimeout(centerAltImages, 0);
+  g.setTimeout(centerAltImages, 400);
 try {
   if (g.MutationObserver && !g.__MC_CENTER_ALT_IMAGES_OBSERVER__) {
     g.__MC_CENTER_ALT_IMAGES_OBSERVER__ = true;
 
     var timer = null;
     var observer = new g.MutationObserver(function () {
+      if (isSteveSilverPdp() || d.getElementById("mc-steve-silver-altviews-wrap")) return;
+      if (g.__MC_CENTER_ALT_LAYOUT_VER__ === CENTER_ALT_VER) return;
       g.clearTimeout(timer);
-      timer = g.setTimeout(centerAltImages, 120);
+      timer = g.setTimeout(centerAltImages, 250);
     });
 
     observer.observe(d.getElementById("v65-product-parent") || d.body, {
