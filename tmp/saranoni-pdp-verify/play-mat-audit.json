@@ -1,21 +1,21 @@
 {
-  "ver": "20260621sarlayout7",
+  "ver": "20260621sarlayout8",
   "ids": [
     "mc-pdp-brand-logo",
     "mc-pdp-title-right",
     "mc-pdp-price-stack-host",
     "messaging-element",
-    "mc-pdp-features",
     "mc-saranoni-color-picker",
+    "mc-pdp-features",
     "mc-pdp-description-below-features",
     "mc-pdp-purchase-stack",
     "mc-configured-color-swatch-wrapper"
   ],
-  "orderOk": false,
-  "colWidth": 194,
-  "mediaWidth": 9,
+  "orderOk": true,
+  "colWidth": 400,
+  "mediaWidth": 619,
   "rowWidth": 1144,
-  "photoWidth": 4,
-  "pickerBeforeFeatures": false,
-  "colDisplay": "block"
+  "photoWidth": 614,
+  "pickerBeforeFeatures": true,
+  "colDisplay": "table-cell"
 }

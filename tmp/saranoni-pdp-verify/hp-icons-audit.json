@@ -1,5 +1,5 @@
 {
-  "ver": "20260621sarlayout7",
+  "ver": "20260621sarlayout8",
   "ids": [
     "mc-pdp-brand-logo",
     "mc-pdp-title-right",
@@ -11,10 +11,10 @@
     "mc-pdp-purchase-stack"
   ],
   "orderOk": true,
-  "colWidth": 194,
-  "mediaWidth": 50,
+  "colWidth": 400,
+  "mediaWidth": 619,
   "rowWidth": 1144,
-  "photoWidth": 45,
+  "photoWidth": 614,
   "pickerBeforeFeatures": null,
-  "colDisplay": "block"
+  "colDisplay": "table-cell"
 }
