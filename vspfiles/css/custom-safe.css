@@ -18329,6 +18329,31 @@ html body.mc-product-page table.colors_descriptionbox[data-mc-native-panel-hidde
   overflow: hidden !important;
 }
 
+/* MC_NATIVE_EMPTY_DESC_SHELL_HIDE_20260621 — orphan Volusion Care/description boxes after McCabe mount. */
+html body.productdetails table.colors_descriptionbox[data-mc-empty-desc="1"],
+html body.mc-product-page table.colors_descriptionbox[data-mc-empty-desc="1"],
+html body.productdetails [data-mc-empty-desc="1"],
+html body.mc-product-page [data-mc-empty-desc="1"],
+html body.productdetails:has(#mc-pdp-features) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div):not(:has(.mc-unified-pdp-description--media)),
+html body.mc-product-page:has(#mc-pdp-features) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div):not(:has(.mc-unified-pdp-description--media)),
+html body.mc-saranoni-pdp:has(#mc-pdp-features) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div),
+html body.mc-saranoni-pdp-ready table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div):not(:has(#mc-pdp-description-below-features)),
+html body.productdetails:has(#mc-pdp-description-below-features #ProductDetail_ProductDetails_div) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div):not(:has(#ProductDetail_ProductDetails_div)),
+html body.mc-product-page:has(#mc-pdp-description-below-features #ProductDetail_ProductDetails_div) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div):not(:has(#ProductDetail_ProductDetails_div)),
+html body.productdetails #ProductDetail_ProductDetails_div2 > table.colors_descriptionbox:not(:has(#product_description)):not(:has(span[itemprop="description"])),
+html body.mc-product-page #ProductDetail_ProductDetails_div2 > table.colors_descriptionbox:not(:has(#product_description)):not(:has(span[itemprop="description"])),
+html body.productdetails #ProductDetail_ProductDetails_div2[data-mc-native-panel-hidden="1"],
+html body.mc-product-page #ProductDetail_ProductDetails_div2[data-mc-native-panel-hidden="1"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+}
+
 /* MC_SS_UNIFIED_HERO_OFFSET_20260620 — match Saranoni vertical breathing room on Steve Silver unified PDPs. */
 @media (min-width: 992px) {
   html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
