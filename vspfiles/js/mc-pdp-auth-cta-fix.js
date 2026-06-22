@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622sarfast1
-  var VERSION = "20260622sarfast1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622sarstable1
+  var VERSION = "20260622sarstable1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -8818,7 +8818,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260622sarfast1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260622sarstable1&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -8879,6 +8879,23 @@
     global.setTimeout(mcReleaseMo, 250);
     try {
       tagSoftGoodsBodyClasses();
+      if (isSaranoniPdpPage()) {
+        try {
+          var sarBody = global.document.body;
+          if (sarBody) {
+            sarBody.classList.add("mc-saranoni-pdp", "mc-saranoni-pdp-ready", "mc-pdp-hero-ready");
+            sarBody.classList.remove("mc-saranoni-pdp-init", "mc-pdp-unified-ready");
+          }
+          var sarImg = global.document.getElementById("product_photo");
+          if (sarImg) {
+            sarImg.style.setProperty("display", "block", "important");
+            sarImg.style.setProperty("visibility", "visible", "important");
+            sarImg.style.setProperty("opacity", "1", "important");
+          }
+          dismissSaranoniProductPhotoLoading();
+        } catch (eSarBypass) {}
+        return;
+      }
       installSaranoniColorAtcGuard();
       installPdpStackApiGuards();
       initBeanBagImageSync();
@@ -9092,7 +9109,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260622sarfast1";
+  var WANT = "20260622sarstable1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -9131,7 +9148,7 @@
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
 (function (g, d) {
-  var SS_ALT_VER = "20260622sarfast1";
+  var SS_ALT_VER = "20260622sarstable1";
 
   function normalizePhotoUrl(url) {
     if (typeof g.mcNormalizePhotoUrl === "function") return g.mcNormalizePhotoUrl(url);
@@ -9501,7 +9518,7 @@
 })(window, document);
 /* MC_CENTER_ALT_IMAGES_UNDER_MAIN_20260618 */
 (function (g, d) {
-  var CENTER_ALT_VER = "20260622sarfast1";
+  var CENTER_ALT_VER = "20260622sarstable1";
 
   function isSteveSilverPdp() {
     if (d.body && d.body.classList.contains("mc-steve-silver-altview-pdp")) return true;
