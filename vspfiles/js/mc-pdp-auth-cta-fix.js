@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622sarstable2
-  var VERSION = "20260622sarstable2";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622sarstable3
+  var VERSION = "20260622sarstable3";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -3930,7 +3930,7 @@
     try {
       var pc = resolveSoftGoodsProductCode();
       if (/^SAR/.test(pc)) return true;
-      if (global.document.body && global.document.body.classList.contains("mc-saranoni-pdp")) return true;
+      if (global.document.body && global.document.body.classList.contains("mc-saranoni-product")) return true;
     } catch (eSar) {}
     return false;
   }
@@ -8223,8 +8223,8 @@
       var body = global.document.body;
       if (!body) return;
       if (isSaranoniPdpPage()) {
-        body.classList.add("mc-saranoni-pdp");
-        body.classList.remove("mc-bean-bag-pdp");
+        body.classList.add("mc-saranoni-product");
+        body.classList.remove("mc-saranoni-pdp", "mc-saranoni-pdp-init", "mc-bean-bag-pdp");
         return;
       }
       if (isBeanBagPdpPage()) body.classList.add("mc-bean-bag-pdp");
@@ -8818,7 +8818,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260622sarstable2&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260622sarstable3&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -8883,8 +8883,13 @@
         try {
           var sarBody = global.document.body;
           if (sarBody) {
-            sarBody.classList.add("mc-saranoni-pdp", "mc-saranoni-pdp-ready", "mc-pdp-hero-ready");
-            sarBody.classList.remove("mc-saranoni-pdp-init", "mc-pdp-unified-ready");
+            sarBody.classList.add("mc-saranoni-product", "mc-pdp-hero-ready");
+            sarBody.classList.remove(
+              "mc-saranoni-pdp",
+              "mc-saranoni-pdp-init",
+              "mc-saranoni-pdp-ready",
+              "mc-pdp-unified-ready"
+            );
           }
           var sarImg = global.document.getElementById("product_photo");
           if (sarImg) {
@@ -9109,7 +9114,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260622sarstable2";
+  var WANT = "20260622sarstable3";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -9148,7 +9153,7 @@
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
 (function (g, d) {
-  var SS_ALT_VER = "20260622sarstable2";
+  var SS_ALT_VER = "20260622sarstable3";
 
   function normalizePhotoUrl(url) {
     if (typeof g.mcNormalizePhotoUrl === "function") return g.mcNormalizePhotoUrl(url);
@@ -9518,7 +9523,7 @@
 })(window, document);
 /* MC_CENTER_ALT_IMAGES_UNDER_MAIN_20260618 */
 (function (g, d) {
-  var CENTER_ALT_VER = "20260622sarstable2";
+  var CENTER_ALT_VER = "20260622sarstable3";
 
   function isSteveSilverPdp() {
     if (d.body && d.body.classList.contains("mc-steve-silver-altview-pdp")) return true;
