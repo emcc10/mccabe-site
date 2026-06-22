@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260622saracc1 — Saranoni hero restore + accordion */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260622saracc2 — Saranoni accordion + hero column fix */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -16408,6 +16408,22 @@ html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-description-below-feat
   visibility: hidden !important;
 }
 
+html body.mc-saranoni-pdp #mc-pdp-accordion,
+html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-header,
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-features,
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper {
+  visibility: visible !important;
+}
+
+html body.mc-saranoni-pdp img#product_photo,
+html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,
+html body.mc-saranoni-pdp #product_photo_td img#product_photo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 /* Orphan qty from legacy mount: hide until unified layout moves it into purchase controls */
 html body.productdetails:not(.mc-pdp-unified-ready) td.mc-pdp-options-td:not(:has(.mc-unified-purchase-controls)) > #mc-pdp-qty-row,
 html body.mc-product-page:not(.mc-pdp-unified-ready) td.mc-pdp-options-td:not(:has(.mc-unified-purchase-controls)) > #mc-pdp-qty-row,
@@ -16711,6 +16727,7 @@ html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-brand-logo,
 html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-title-right,
 html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-price-stack-host,
 html body.mc-saranoni-pdp td.mc-pdp-options-td > #messaging-element,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-accordion,
 html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-option-block,
 html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-configured-color-swatch-wrapper,
 html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-saranoni-size-thumbs,
@@ -16721,6 +16738,7 @@ html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-brand-logo,
 html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-title-right,
 html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-price-stack-host,
 html body.mc-saranoni-pdp td.mc-unified-pdp-info > #messaging-element,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-accordion,
 html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-option-block,
 html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-configured-color-swatch-wrapper,
 html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-saranoni-size-thumbs,
@@ -16802,15 +16820,20 @@ html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_sal
 }
 
 html body.mc-saranoni-pdp-init:not(.mc-saranoni-pdp-ready) #mc-pdp-price-stack-host,
-html body.mc-saranoni-pdp-init:not(.mc-saranoni-pdp-ready) #mc-configured-color-swatch-wrapper,
-html body.mc-saranoni-pdp-init:not(.mc-saranoni-pdp-ready) #mc-pdp-features,
 html body.mc-saranoni-pdp-init:not(.mc-saranoni-pdp-ready) #mc-pdp-purchase-stack {
   visibility: hidden !important;
 }
 
+html body.mc-saranoni-pdp #mc-pdp-accordion,
+html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-header,
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-features,
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-saranoni-size-thumbs {
+  visibility: visible !important;
+}
+
 html body.mc-saranoni-pdp-ready #mc-pdp-price-stack-host,
-html body.mc-saranoni-pdp-ready #mc-configured-color-swatch-wrapper,
-html body.mc-saranoni-pdp-ready #mc-pdp-features,
 html body.mc-saranoni-pdp-ready #mc-pdp-purchase-stack {
   visibility: visible !important;
 }
@@ -19042,6 +19065,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
   html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-title-right,
   html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-price-stack-host,
   html body.mc-saranoni-pdp td.mc-pdp-options-td > #messaging-element,
+  html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-accordion,
   html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-option-block,
   html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker,
   html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-features,
@@ -19069,6 +19093,36 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     visibility: visible !important;
     opacity: 1 !important;
     min-height: 44px !important;
+  }
+
+  html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,
+  html body.mc-saranoni-pdp #product_photo_td img#product_photo,
+  html body.mc-saranoni-pdp-init img#product_photo,
+  html body.mc-saranoni-pdp.mc-saranoni-pdp-init img#product_photo {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: min(650px, 100%) !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-accordion {
+    width: 100% !important;
+    max-width: 460px !important;
+    margin: 12px 0 16px !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content--saranoni-options #mc-pdp-option-block,
+  html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content--saranoni-options #mc-configured-color-swatch-wrapper,
+  html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content--saranoni-options #mc-saranoni-size-thumbs {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 12px !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-accordion .mc-pdp-features__heading {
+    display: none !important;
   }
 
   html body.mc-saranoni-pdp td.mc-pdp-media-td #mc-saranoni-size-thumbs,
