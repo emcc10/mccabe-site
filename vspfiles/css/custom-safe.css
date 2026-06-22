@@ -16744,6 +16744,23 @@ html body.mc-saranoni-pdp-ready #mc-pdp-purchase-stack {
   visibility: visible !important;
 }
 
+/* One price only: hide Volusion native price nodes after stack host is mounted */
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_list_price,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_productprice,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_sale_price,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox font.product_sale_price,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #content_area .colors_pricebox .product_list_price,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #content_area .colors_pricebox .product_productprice {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 html body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
 html body.mc-saranoni-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
 html body.mc-bean-bag-pdp #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,

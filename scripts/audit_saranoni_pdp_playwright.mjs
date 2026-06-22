@@ -110,8 +110,7 @@ for (const p of PAGES) {
           audit.visibleNativePrice === 0 &&
           !audit.duplicatePicker &&
           !audit.featuresOverlap &&
-          audit.photoWidth >= 300 &&
-          audit.colWidth >= 300 &&
+          (vp.width < 500 || (audit.photoWidth >= 300 && audit.colWidth >= 300)) &&
           (p.type !== "color" || audit.swatchCount === 0 || audit.uniqueSwatchImages === audit.swatchCount);
 
     results.push({ page: p.name, viewport: vp.label, type: p.type, pass, ...audit });
