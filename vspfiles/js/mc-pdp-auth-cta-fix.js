@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622saracc2
-  var VERSION = "20260622saracc2";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622saracc3
+  var VERSION = "20260622saracc3";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -2022,6 +2022,11 @@
     if (isSectionalPdpPage()) return;
     if (shouldDeferToUnifiedPdpLayout()) return;
     if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
+    if (isSaranoniPdpPage()) {
+      var sarCol = resolveSaranoniInfoColumn();
+      var sarStack = global.document.getElementById("mc-pdp-purchase-stack");
+      if (!sarCol || !sarStack || !sarCol.contains(sarStack)) return;
+    }
     try {
       if (
         global.document.body &&
@@ -2968,6 +2973,27 @@
     hideSaranoniNativeStripePriceTable(infoColumn);
   }
 
+  var saranoniLayoutTimer = null;
+  var saranoniLayoutLastRun = 0;
+  function scheduleSaranoniLayoutPass(force) {
+    if (!isSaranoniPdpPage() || isStalePdpAuthRun()) return;
+    if (force) {
+      if (saranoniLayoutTimer) {
+        global.clearTimeout(saranoniLayoutTimer);
+        saranoniLayoutTimer = null;
+      }
+      finalizeSaranoniInfoColumnOrder();
+      return;
+    }
+    if (saranoniLayoutTimer) return;
+    if (Date.now() - saranoniLayoutLastRun < 120) return;
+    saranoniLayoutTimer = global.setTimeout(function () {
+      saranoniLayoutTimer = null;
+      saranoniLayoutLastRun = Date.now();
+      finalizeSaranoniInfoColumnOrder();
+    }, 60);
+  }
+
   function extractSaranoniAvailabilityText() {
     var scope = global.document.getElementById("v65-product-parent") || global.document;
     var bolds = scope.querySelectorAll("b");
@@ -3159,6 +3185,14 @@
     }
     if (!pc) pc = resolveSoftGoodsProductCode();
     if (!pc) {
+      global.document.querySelectorAll("#v65-product-parent img[src]").forEach(function (img) {
+        var s = img.getAttribute("src") || "";
+        if (s.indexOf("/manufacturers/") !== -1) return;
+        if (/-\dT\.(jpg|jpeg|png|webp)/i.test(s)) {
+          setConfiguredColorPhotoSrc(s, "", "");
+          dismissSaranoniProductPhotoLoading();
+        }
+      });
       dismissSaranoniProductPhotoLoading();
       try {
         mainImg.style.setProperty("display", "block", "important");
@@ -3198,29 +3232,34 @@
       hideSaranoniNativeStripePriceTable(infoColumn);
     }
     ensureSaranoniPdpAccordion();
-    var ordered = [
-      global.document.getElementById("mc-pdp-brand-logo"),
-      global.document.getElementById("mc-pdp-title-right"),
-      global.document.getElementById("mc-pdp-price-stack-host"),
-      global.document.getElementById("messaging-element"),
-      global.document.getElementById("mc-pdp-accordion"),
-      global.document.getElementById("mc-pdp-purchase-stack"),
+    ensurePurchaseStackCentered();
+    hideSaranoniNativePurchaseUi(infoColumn);
+    hideVolusionQuantityRows();
+    var ids = [
+      "mc-pdp-brand-logo",
+      "mc-pdp-title-right",
+      "mc-pdp-price-stack-host",
+      "messaging-element",
+      "mc-pdp-accordion",
+      "mc-pdp-purchase-stack",
     ];
-    ordered.forEach(function (element) {
-      if (!element) return;
-      hoistSaranoniInfoColumnNode(infoColumn, element);
-    });
     var anchor = null;
-    ordered.forEach(function (element) {
+    ids.forEach(function (id) {
+      var element = global.document.getElementById(id);
       if (!element) return;
+      if (element.parentNode !== infoColumn) {
+        try {
+          infoColumn.appendChild(element);
+        } catch (eHoist) {}
+      }
       try {
         if (anchor) {
           insertNodeAfter(infoColumn, anchor, element);
-        } else if (element.parentNode === infoColumn && infoColumn.firstElementChild !== element) {
+        } else if (infoColumn.firstElementChild !== element) {
           infoColumn.insertBefore(element, infoColumn.firstElementChild);
         }
         if (element.parentNode === infoColumn) anchor = element;
-      } catch (eAppend) {}
+      } catch (eOrd) {}
     });
   }
 
@@ -3298,6 +3337,7 @@
     hideSaranoniNativePurchaseUi(infoColumn);
     ensureSaranoniPdpAccordion();
     ensurePurchaseStackCentered();
+    ensureQuantityAboveAtc();
     reorderSaranoniInfoColumnChildren(infoColumn, true);
     ensureSaranoniSizeThumbsInInfoColumn();
     hideSaranoniStrayHeroCopy(infoColumn);
@@ -3310,9 +3350,22 @@
   function hideSaranoniNativePurchaseUi(infoColumn) {
     if (!infoColumn || !isSaranoniPdpPage()) return;
     var stack = global.document.getElementById("mc-pdp-purchase-stack");
-    infoColumn.querySelectorAll(":scope > table, :scope > form").forEach(function (node) {
-      if (stack && (node === stack || node.contains(stack))) return;
-      if (!node.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]')) return;
+    infoColumn.querySelectorAll("table, form").forEach(function (node) {
+      if (stack && (node === stack || node.contains(stack) || stack.contains(node))) return;
+      if (
+        node.querySelector(
+          "#mc-pdp-brand-logo, #mc-pdp-title-right, #mc-pdp-price-stack-host, #mc-pdp-accordion, #messaging-element"
+        )
+      ) {
+        return;
+      }
+      if (
+        !node.querySelector(
+          'input[name="btnaddtocart"], button[name="btnaddtocart"], input[name^="QTY."], input.v65-productdetail-cartqty'
+        )
+      ) {
+        return;
+      }
       try {
         node.style.setProperty("display", "none", "important");
         node.style.setProperty("visibility", "hidden", "important");
@@ -3361,6 +3414,7 @@
     });
     syncPdpDescriptionViewMore();
     ensurePurchaseStackCentered();
+    ensureQuantityAboveAtc();
     hideSaranoniNativePurchaseUi(infoColumn);
     ensureSaranoniPdpAccordion();
     reorderSaranoniInfoColumnChildren(infoColumn, true);
@@ -5547,7 +5601,7 @@
       } catch (eShowWrap) {}
       removeSaranoniDuplicateColorPicker();
       mountSaranoniSwatchWrapper(wrap);
-      if (ctx) finalizeSaranoniInfoColumnOrder();
+      if (ctx) scheduleSaranoniLayoutPass(false);
       return;
     }
     body.classList.remove("mc-saranoni-swatches-ready");
@@ -5559,7 +5613,7 @@
     }
     if (select && select.options && select.options.length > 1) {
       showSaranoniNativeColorFallback(select);
-      if (ctx) finalizeSaranoniInfoColumnOrder();
+      if (ctx) scheduleSaranoniLayoutPass(false);
       return;
     }
     restoreConfiguredColorNativeSelect(select);
@@ -6089,7 +6143,7 @@
     if (isSaranoniPdpPage()) {
       hideSaranoniHeroAltviews();
       removeSaranoniDuplicateColorPicker();
-      finalizeSaranoniInfoColumnOrder();
+      scheduleSaranoniLayoutPass(false);
     }
   }
 
@@ -8647,8 +8701,8 @@
       }
       patchBeanBagPdp();
       mountDescriptionBelowFeatures();
-      ensureQuantityAboveAtc();
       if (!isSaranoniPdpPage()) {
+        ensureQuantityAboveAtc();
         ensurePurchaseStackCentered();
       }
       if (isBeanBagPdpPage()) {
@@ -8661,15 +8715,12 @@
         styleBeanBagPriceAtc();
         ensureBeanBagReturnLink();
       } else if (isSaranoniPdpPage()) {
-        appendSaranoniInfoColumnOrder();
-        finalizeSaranoniInfoColumnOrder();
-        ensurePurchaseStackCentered();
+        scheduleSaranoniLayoutPass(true);
         applySoftGoodsColumnPurchaseStackLayout(
           global.document.getElementById("mc-pdp-purchase-stack"),
           global.document.getElementById("mc-pdp-qty-row"),
           resolveAtcPurchaseTarget() ? resolveAtcPurchaseTarget().stackNode : null
         );
-        finalizeSaranoniInfoColumnOrder();
       } else {
         ensurePdpInfoColumnOrder();
         ensurePdpContentColumnOrder();
@@ -9042,7 +9093,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260622saracc2";
+  var WANT = "20260622saracc3";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
