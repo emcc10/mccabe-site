@@ -1,4 +1,5 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260607deploy — deploy-path verify only; no layout change */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260621sarlayout2 — Saranoni PDP layout: block column, no flex order */
+/* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -8,6 +9,7 @@ body {
   font-weight: 400;
   letter-spacing: 0.02em;
 }
+
 body * {
   font-family: inherit !important;
 }
@@ -2589,8 +2591,8 @@ body.mc-product-page select.mc-native-leather {
    PDP FIX: force media TD left, options TD right (desktop only)
 ========================================= */
 @media (min-width: 992px) {
-  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
-  body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-media-td {
+  body.mc-product-page #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-media-td,
+  body.productdetails #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-media-td {
     flex: 1 1 0% !important;
     flex-basis: 55% !important;
     width: auto !important;
@@ -2604,8 +2606,8 @@ body.mc-product-page select.mc-native-leather {
     isolation: isolate !important;
   }
 
-  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td,
-  body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td {
+  body.mc-product-page #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-options-td,
+  body.productdetails #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-options-td {
     flex: 1 1 0% !important;
     flex-basis: 42% !important;
     width: auto !important;
@@ -3237,7 +3239,7 @@ body.mc-product-page select.mc-native-leather {
     height: auto !important;
     margin: 0 auto !important;
     flex: none !important;
-margin-left: 65px !important;
+margin-left: 0 !important;
   }
 
   /* Put alternative views below (and make them horizontal thumbnails) */
@@ -5390,26 +5392,50 @@ body.mc-product-page #content_area #options_table tr:has(select[id*="leather" i]
   display: none !important;
 }
 
-/* Bean bag PDPs: restore all real option rows (size + cover + fabric), but keep leather rows hidden */
-body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select),
-body.mc-bean-bag-pdp #content_area #options_table tr:has(select),
-body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(input[type="radio"]),
-body.mc-bean-bag-pdp #content_area #options_table tr:has(input[type="radio"]) {
-  display: table-row !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+/* Bean bag PDPs: suppress native #options_table once custom size/cover UI is mounted. */
+body.mc-bean-bag-pdp.mc-bb-native-options-hidden #v65-product-parent #options_table,
+body.mc-bean-bag-pdp.mc-bb-native-options-hidden #content_area #options_table,
+body.mc-bean-bag-pdp.mc-bb-native-options-hidden #v65-product-parent table[id*="options_table"],
+body.mc-bean-bag-pdp.mc-bb-native-options-hidden #content_area table[id*="options_table"],
+body.mc-bean-bag-pdp:has(#mc-bb-size-section) #v65-product-parent #options_table,
+body.mc-bean-bag-pdp:has(#mc-bb-size-section) #content_area #options_table,
+body.mc-bean-bag-pdp #v65-product-parent #options_table[data-mc-bb-native-suppressed="1"],
+body.mc-bean-bag-pdp #content_area #options_table[data-mc-bb-native-suppressed="1"],
+body.mc-bean-bag-pdp #v65-product-parent table[id*="options_table"][data-mc-bb-native-suppressed="1"],
+body.mc-bean-bag-pdp #content_area table[id*="options_table"][data-mc-bb-native-suppressed="1"],
+body.mc-bean-bag-pdp #options_table.mc-bb-native-options-suppressed,
+body.mc-bean-bag-pdp table[id*="options_table"].mc-bb-native-options-suppressed {
+  position: absolute !important;
+  left: -9999px !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  z-index: -1 !important;
 }
 
-body.mc-bean-bag-pdp #v65-product-parent #options_table select,
-body.mc-bean-bag-pdp #content_area #options_table select,
-body.mc-bean-bag-pdp #v65-product-parent #options_table input[type="radio"],
-body.mc-bean-bag-pdp #content_area #options_table input[type="radio"] {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: static !important;
-  width: 100% !important;
-  max-width: 100% !important;
+body.mc-bean-bag-pdp tr[data-mc-bb-stray-option-row="1"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+body.mc-bean-bag-pdp #v65-product-parent #options_table[data-mc-bb-native-suppressed="1"] tr,
+body.mc-bean-bag-pdp #content_area #options_table[data-mc-bb-native-suppressed="1"] tr,
+body.mc-bean-bag-pdp #v65-product-parent table[id*="options_table"][data-mc-bb-native-suppressed="1"] tr,
+body.mc-bean-bag-pdp #content_area table[id*="options_table"][data-mc-bb-native-suppressed="1"] tr {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }
 
 /* Keep leather-related hidden on bean bags */
@@ -5798,8 +5824,7 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   }
 }
 
-/* Add to Cart: visual chrome lives on `.mc-atc-button-wrap` (#e2dfd8 border — template_266 ~7937, custom-safe ~12343).
-   Do NOT paint the raw Volusion submit (border #111 / white text) — it defeats the outline pill and reads as black. */
+/* Add to Cart: unified layout styles `.mc-unified-purchase-controls` (see MC_UNIFIED_PDP_LAYOUT at EOF). */
 
 /* Don’t clip the Add to Cart button in the options column */
 /* Single Add to Cart: no second container/color – wrapper matches button */
@@ -6461,9 +6486,9 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 
 @media (max-width: 991px) {
   :root {
-    --mc-plp-tile-h: 220px;
-    --mc-plp-stage-h: 172px;
-    --mc-plp-mat-pad: 12px;
+    --mc-plp-tile-h: 260px;
+    --mc-plp-stage-h: 260px;
+    --mc-plp-mat-pad: 8px;
   }
 }
 
@@ -6478,7 +6503,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) .v-product-grid .v-product a.v-product__img.mc-plp-image-box {
   height: 260px;
   min-height: 0;
-  max-height: none;
+  max-height: var(--mc-plp-tile-h);
   overflow: visible;
 }
 
@@ -6490,7 +6515,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   height: var(--mc-plp-tile-h);
   min-height: var(--mc-plp-tile-h);
   max-height: var(--mc-plp-tile-h);
-  overflow: hidden;
+  overflow: visible;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -6512,7 +6537,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__image a,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image a {
   display: flex !important;
-  align-items: flex-end !important;
+  align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
@@ -6522,18 +6547,13 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   box-sizing: border-box !important;
 }
 
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,
-:is(html.category, body.category) .v-product-grid .v-product .product_image img,
-:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .product_image img,
-:is(html.category, body.category) .v-product-grid .v-product a.v-product__img.mc-plp-image-box > img {
-  width: auto !important;
-  height: auto !important;
-  max-width: none !important;
-  max-height: none !important;
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img a > img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image a > img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a > img,
+:is(html.category, body.category) .v-product-grid .v-product .product_image a > img,
+:is(html.category, body.category) .v-product-grid .v-product .vcss_img a > img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img a > img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .product_image a > img {
   transform: none !important;
   clip-path: none !important;
 }
@@ -6600,7 +6620,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   min-height: 0 !important;
   max-height: none !important;
   display: flex !important;
-  align-items: flex-end !important;
+  align-items: center !important;
   justify-content: center !important;
   background: transparent !important;
 }
@@ -6753,10 +6773,10 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
     min-height: var(--mc-plp-tile-h) !important;
     max-height: var(--mc-plp-tile-h) !important;
     padding: var(--mc-plp-mat-pad) !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     margin-bottom: 0 !important;
     display: flex !important;
-    align-items: flex-end !important;
+    align-items: center !important;
     justify-content: center !important;
     background: var(--mc-plp-mat-bg) !important;
   }
@@ -6769,10 +6789,14 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image img,
   :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img {
-width: 100%;
-height: 100%;
-object-fit: contain;
-    object-position: center bottom !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    object-fit: contain !important;
+    object-position: center center !important;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
@@ -7074,7 +7098,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   z-index: 1600 !important;
   display: flex !important;
   flex-direction: row !important;
-  align-items: flex-end !important;
+  align-items: center !important;
   justify-content: space-between !important;
   gap: 16px !important;
   padding: 10px max(14px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)) !important;
@@ -8165,6 +8189,53 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
   text-decoration: none !important;
 }
 
+/* PDP related items: stack full-width cards on mobile (4-across row squished thumbnails) */
+@media (max-width: 991px) {
+  html body.productdetails #v65-product-related .mc-related-plp-grid,
+  html body.mc-product-page #v65-product-related .mc-related-plp-grid,
+  :is(body.productdetails, body.mc-product-page) .mc-related-plp-grid {
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 28px !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+
+  :is(body.productdetails, body.mc-product-page) .mc-related-plp-card {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  :is(body.productdetails, body.mc-product-page) .mc-related-plp-card__media {
+    height: min(240px, 52vw) !important;
+    min-height: 200px !important;
+    max-height: 280px !important;
+  }
+}
+
+/* Orphan alt-view wrappers must not stack vertical gap on mobile PDP */
+@media (max-width: 991px) {
+  body.productdetails #content_area .mc-altviews-outer:not(:has(#altviews, span#altviews, .altviews)),
+  body.mc-product-page #content_area .mc-altviews-outer:not(:has(#altviews, span#altviews, .altviews)) {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.productdetails #content_area #altviews,
+  body.mc-product-page #content_area #altviews,
+  body.productdetails #content_area span#altviews,
+  body.mc-product-page #content_area span#altviews {
+    margin-bottom: 8px !important;
+  }
+}
+
 /* Category listing thumbs: see --mc-plp-* block (~6400) and final #content_area lock at file end */
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
@@ -8341,12 +8412,16 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__img img,
 :is(html.category, body.category) #content_area .v-product-grid > .v-product .v-product__img img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img img {
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img img,
+:is(html.category, body.category) #content_area .v-product-grid > .v-product a.v-product__img > img,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product a.v-product__img > img {
   display: block !important;
+  width: 100% !important;
+  height: 100% !important;
   max-width: 100% !important;
   max-height: 100% !important;
-  width: auto !important;
-  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   object-fit: contain !important;
   object-position: center center !important;
   margin: 0 !important;
@@ -8983,14 +9058,14 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 /* #altviews is a *direct* child of #product_photo_td / media td: pull up (legacy Volusion).
    When #altviews is nested *inside* the same td/table as the hero, do NOT use margin hacks — use nested flex block below. */
 @media (min-width: 992px) {
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews {
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews {
     margin-top: var(--mc-pdp-altviews-shift, min(-58vh, -620px)) !important;
   }
 }
@@ -9046,12 +9121,12 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 
   /* Same as above but #altviews + hero live inside a wrapper div inside td */
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(img#product_photo),
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(a#product_photo_zoom_url),
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):has(img#product_photo),
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(img#product_photo),
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(a#product_photo_zoom_url),
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):has(img#product_photo) {
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(a#product_photo_zoom_url),
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(a#product_photo_zoom_url),
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo) {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -9062,12 +9137,12 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     box-sizing: border-box !important;
   }
 
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) #altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) span#altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews) #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) span#altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews) #altviews {
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack) #altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack) span#altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack) #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack) #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack) span#altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack) #altviews {
     order: -1 !important;
     flex: 0 0 72px !important;
     width: 72px !important;
@@ -9143,10 +9218,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 
   /* Lift alt thumbnails back to the top of the media area */
-  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
-  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews,
-  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
-  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -9158,10 +9233,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     z-index: 5 !important;
   }
 
-  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
-  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a,
-  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
-  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a {
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a {
     display: block !important;
     width: 86px !important;
     max-width: 86px !important;
@@ -9169,10 +9244,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     padding: 0 !important;
   }
 
-  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
-  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img,
-  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
-  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img {
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img {
     display: block !important;
     width: 86px !important;
     max-width: 86px !important;
@@ -9195,6 +9270,81 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin-left: 40px !important;
     position: relative !important;
     z-index: 1 !important;
+  }
+}
+
+/* Bean bag PDP last-win: main hero then horizontal thumbs (overrides grid/lift/wrapper rules above). */
+@media (min-width: 992px) {
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    column-gap: 0 !important;
+    row-gap: 10px !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack > table,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack > table,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td > table:first-of-type,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td > table:first-of-type,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media > table:first-of-type,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media > table:first-of-type {
+    order: 1 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 600px !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack #altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack span#altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack #altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack span#altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td > #altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td > span#altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td > #altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td > span#altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media > #altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media > span#altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media > #altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media > span#altviews {
+    order: 2 !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 10px 0 0 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    clear: both !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    z-index: auto !important;
   }
 }
 
@@ -9502,7 +9652,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 
   body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row {
     display: flex !important;
-    align-items: flex-end !important;
+    align-items: center !important;
     margin: 0 !important;
     padding: 0 0 6px 0 !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.28) !important;
@@ -9573,7 +9723,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 
   #mcHeroSearchOverlay .collapsing-search__form .row {
     display: flex !important;
-    align-items: flex-end !important;
+    align-items: center !important;
     margin: 0 !important;
     padding: 0 0 6px 0 !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.55) !important;
@@ -9629,6 +9779,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   .content_area-wrapper {
     margin-left: auto !important;
     margin-right: auto !important;
+    margin-top: -40px !important;
   }
 }
 
@@ -9721,7 +9872,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 
   #mcHeroSearchOverlay .collapsing-search__form .row {
     display: flex !important;
-    align-items: flex-end !important;
+    align-items: center !important;
     margin: 0 !important;
     padding: 0 0 6px 0 !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.55) !important;
@@ -9776,7 +9927,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 
   body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row {
     display: flex !important;
-    align-items: flex-end !important;
+    align-items: center !important;
     margin: 0 !important;
     padding: 0 0 6px 0 !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.28) !important;
@@ -10545,6 +10696,30 @@ body.mc-product-page table[id*="options_table"][data-mc-hide-native-options="1"]
   z-index: -1 !important;
 }
 
+/* Bean-bag + Saranoni: never offscreen the whole native options table */
+body.mc-bean-bag-pdp #options_table.mc-native-options-offscreen,
+body.mc-bean-bag-pdp table[id*="options_table"].mc-native-options-offscreen,
+body.mc-bean-bag-pdp #options_table[data-mc-hide-native-options="1"],
+body.mc-bean-bag-pdp table[id*="options_table"][data-mc-hide-native-options="1"],
+body.mc-saranoni-pdp #options_table.mc-native-options-offscreen,
+body.mc-saranoni-pdp table[id*="options_table"].mc-native-options-offscreen,
+body.mc-saranoni-pdp #options_table[data-mc-hide-native-options="1"],
+body.mc-saranoni-pdp table[id*="options_table"][data-mc-hide-native-options="1"] {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  margin: inherit !important;
+  padding: inherit !important;
+  border: inherit !important;
+  z-index: auto !important;
+}
+
 /* Final 992–1199 desktop header clamp: center menu; search is off-flow (.mc-search-float). */
 @media (min-width: 992px) and (max-width: 1199px) {
   body:not(.is-home) header.header .mc-header-desktop-bar .microblock.main-menu {
@@ -10574,14 +10749,14 @@ body.mc-product-page table[id*="options_table"][data-mc-hide-native-options="1"]
 }
 
 /* Final PDP safety: never hide the native Volusion price/options table. */
-body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
+body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #content_area #options_table,
+body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #content_area table[id*="options_table"],
+body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #v65-product-parent #options_table,
+body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #v65-product-parent table[id*="options_table"],
+body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #content_area #options_table,
+body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #content_area table[id*="options_table"],
+body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #v65-product-parent #options_table,
+body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #v65-product-parent table[id*="options_table"] {
   position: static !important;
   left: auto !important;
   opacity: 1 !important;
@@ -12514,27 +12689,38 @@ body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart
 body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
 body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
 body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
-  display: inline-block !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+body.productdetails #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+body.mc-product-page #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"] {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
   min-width: 0 !important;
-  padding: 0 !important;
-  border: none !important;
+  max-width: 100% !important;
+  min-height: 46px !important;
+  padding: 0 28px !important;
+  margin: 0 !important;
+  border: 1px solid #111 !important;
   border-radius: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  background: #111 !important;
+  background-color: #111 !important;
   background-image: none !important;
   -webkit-appearance: none !important;
   appearance: none !important;
   box-shadow: none !important;
-  color: inherit !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
-  letter-spacing: inherit !important;
-  text-transform: inherit !important;
+  color: #fff !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
   cursor: pointer !important;
-  font-family: inherit !important;
 }
 
 body.productdetails #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
@@ -12907,7 +13093,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     border-color: #222 !important;
   }
 
-  /* Wrapper: transparent shell — let the button itself carry the black fill. */
+  /* Wrapper carries black fill when JS wraps the submit. */
   body.mc-product-page #content_area .mc-atc-button-wrap,
   body.productdetails #content_area .mc-atc-button-wrap,
   body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
@@ -12915,17 +13101,24 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: transparent !important;
-    background-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+    background: #000 !important;
+    background-color: #000 !important;
+    border: 1px solid #000 !important;
     border-radius: 0 !important;
-    padding: 0 !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    padding: 12px 22px !important;
     margin: 0 !important;
     width: fit-content !important;
     min-width: 0 !important;
     max-width: none !important;
-    gap: 0 !important;
+    gap: 8px !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    line-height: 1 !important;
   }
 }
 
@@ -13218,21 +13411,27 @@ body.productdetails #content_area .mc-atc-button-wrap {
 }
 
 .mc-atc-button-wrap {
-  /* Outline — thin light grey border, square, fit-content width. */
-  background: #fff !important;
-  background-color: #fff !important;
-  border: 1px solid #e0e0e0 !important;
+  /* Black rectangular Add to Cart — superseded by MC_UNIFIED_PDP_LAYOUT when .mc-pdp-unified-ready */
+  background: #000 !important;
+  background-color: #000 !important;
+  border: 1px solid #000 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  color: #444 !important;
+  color: #fff !important;
   width: fit-content !important;
   min-width: 0 !important;
   max-width: none !important;
-  padding: 10px 18px !important;
+  padding: 12px 22px !important;
   margin-left: 0 !important;
-  margin-right: 0px !important;
-  margin-top: 5px !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
   box-sizing: border-box !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
 }
 
 
@@ -13556,17 +13755,26 @@ body * {
   letter-spacing: 1.14px;
 }
 
-/* PDP description text — !important + high specificity so the broad
-   `html body…#content_area span` rule below doesn't override these. */
+/* PDP description text — match #mc-pdp-features body/list (14px / 400). */
 html body.productdetails span[itemprop="description"],
 html body.mc-product-page span[itemprop="description"],
 html body.productdetails #content_area span[itemprop="description"],
 html body.mc-product-page #content_area span[itemprop="description"],
 html body.productdetails #v65-product-parent span[itemprop="description"],
-html body.mc-product-page #v65-product-parent span[itemprop="description"] {
-  font-size: 13px !important;
-  letter-spacing: 1.14px !important;
-font-weight: 300px !important;
+html body.mc-product-page #v65-product-parent span[itemprop="description"],
+html body.productdetails #product_description,
+html body.mc-product-page #product_description,
+html body.productdetails #ProductDetail_ProductDetails_div,
+html body.mc-product-page #ProductDetail_ProductDetails_div,
+html body.productdetails #ProductDetail_ProductDetails_div2,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
 }
 
 /* Retail / member labels: uppercase + semibold weight. */
@@ -13802,29 +14010,8 @@ a.productnamecolor {
    PDP button borders + divider lines = #e2dfd8 (sitewide brand line color).
    Late, broad sweep so every visible button border / horizontal rule on a PDP
    uses the same warm-grey line color regardless of which earlier rule painted it.
+   Add to Cart excluded — MC_PDP_ATC_BLACK_LOCK at EOF.
    ========================================================= */
-
-/* Add to Cart button (input/button + wrap) */
-html body.mc-product-page #content_area input[name="btnaddtocart"],
-html body.mc-product-page #content_area input[id*="btnaddtocart"],
-html body.mc-product-page #content_area button[name="btnaddtocart"],
-html body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-product-page #content_area .v65-product-addtocart input[id*="btnaddtocart"],
-html body.mc-product-page #content_area .v65-product-addtocart button[name="btnaddtocart"],
-html body.productdetails #content_area input[name="btnaddtocart"],
-html body.productdetails #content_area input[id*="btnaddtocart"],
-html body.productdetails #content_area button[name="btnaddtocart"],
-html body.productdetails #content_area .v65-product-addtocart input[name="btnaddtocart"],
-html body.productdetails #content_area .v65-product-addtocart input[id*="btnaddtocart"],
-html body.productdetails #content_area .v65-product-addtocart button[name="btnaddtocart"],
-html body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
-html body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
-html body.productdetails #v65-product-parent input[name="btnaddtocart"],
-html body.productdetails #v65-product-parent button[name="btnaddtocart"],
-html body.mc-product-page .mc-atc-button-wrap,
-html body.productdetails .mc-atc-button-wrap {
-  border-color: #e2dfd8 !important;
-}
 
 /* Accordion shell + rows + panels */
 html body.mc-product-page .mc-pdp-accordion,
@@ -14044,13 +14231,13 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
 :is(html.category, body.category) a.v-product__img.mc-plp-thumb-mat {
   order: 1 !important;
   display: flex !important;
-  align-items: flex-end !important;
+  align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   height: var(--mc-plp-tile-h, 280px) !important;
   min-height: var(--mc-plp-tile-h, 280px) !important;
   max-height: var(--mc-plp-tile-h, 280px) !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   margin: 0 !important;
   padding: var(--mc-plp-mat-pad, 14px) !important;
   box-sizing: border-box !important;
@@ -14074,12 +14261,12 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img
 :is(html.category, body.category) .v-product-grid a.mc-plp-thumb-mat > img,
 :is(html.category, body.category) a.v-product__img.mc-plp-thumb-mat > img {
   width: 100% !important;
-  height: var(--mc-plp-stage-h, 220px) !important;
+  height: 100% !important;
   min-height: 0 !important;
   max-width: 100% !important;
-  max-height: var(--mc-plp-stage-h, 220px) !important;
+  max-height: 100% !important;
   object-fit: contain !important;
-  object-position: center bottom !important;
+  object-position: center center !important;
   margin: 0 auto !important;
   border: 0 !important;
   border-width: 0 !important;
@@ -14111,8 +14298,8 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img
   :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img,
   :is(html.category, body.category) .v-product-grid a.mc-plp-thumb-mat > img,
   :is(html.category, body.category) a.v-product__img.mc-plp-thumb-mat > img {
-    height: var(--mc-plp-stage-h, 172px) !important;
-    max-height: var(--mc-plp-stage-h, 172px) !important;
+    height: 100% !important;
+    max-height: 100% !important;
   }
 }
 
@@ -14160,7 +14347,7 @@ body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
 html.is-category-or-listing-page #content_area ul.v-product-grid > li.v-product > a.v-product__img,
 html.is-category-or-listing-page .v-product-grid a.v-product__img {
   display: flex !important;
-  align-items: flex-end !important;
+  align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   height: var(--mc-plp-tile-h, 280px) !important;
@@ -14168,7 +14355,7 @@ html.is-category-or-listing-page .v-product-grid a.v-product__img {
   max-height: var(--mc-plp-tile-h, 280px) !important;
   margin: 0 !important;
   padding: var(--mc-plp-mat-pad, 14px) !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   box-sizing: border-box !important;
   background: var(--mc-plp-mat-bg, #ffffff) !important;
   line-height: 0 !important;
@@ -14179,11 +14366,12 @@ body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img,
 html.is-category-or-listing-page #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
 html.is-category-or-listing-page .v-product-grid a.v-product__img > img {
   width: 100% !important;
-  height: var(--mc-plp-stage-h, 220px) !important;
+  height: 100% !important;
   max-width: 100% !important;
-  max-height: var(--mc-plp-stage-h, 220px) !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
   object-fit: contain !important;
-  object-position: center bottom !important;
+  object-position: center center !important;
   margin: 0 auto !important;
   border: 0 !important;
   border-width: 0 !important;
@@ -14247,7 +14435,7 @@ html.category .v-product-grid .v-product a.v-product__img,
 body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img,
 body:not(.productdetails) #content_area .v-product-grid a.v-product__img {
   display: flex !important;
-  align-items: flex-end !important;
+  align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   height: var(--mc-plp-tile-h, 280px) !important;
@@ -14255,7 +14443,7 @@ body:not(.productdetails) #content_area .v-product-grid a.v-product__img {
   max-height: var(--mc-plp-tile-h, 280px) !important;
   margin: 0 !important;
   padding: var(--mc-plp-mat-pad, 14px) !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   box-sizing: border-box !important;
   background: var(--mc-plp-mat-bg, #ffffff) !important;
   line-height: 0 !important;
@@ -14271,12 +14459,12 @@ html.category .v-product-grid .v-product .v-product__img img,
 body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
 body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img {
   width: 100% !important;
-  height: var(--mc-plp-stage-h, 220px) !important;
+  height: 100% !important;
   max-width: 100% !important;
-  max-height: var(--mc-plp-stage-h, 220px) !important;
+  max-height: 100% !important;
   min-height: 0 !important;
   object-fit: contain !important;
-  object-position: center bottom !important;
+  object-position: center center !important;
   margin: 0 auto !important;
   border: 0 !important;
   border-width: 0 !important;
@@ -14302,8 +14490,8 @@ body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img {
   html.category .v-product-grid .v-product > a.v-product__img > img,
   html.category .v-product-grid .v-product a.v-product__img > img,
   body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img {
-    height: var(--mc-plp-stage-h, 172px) !important;
-    max-height: var(--mc-plp-stage-h, 172px) !important;
+    height: 100% !important;
+    max-height: 100% !important;
   }
 }
 
@@ -14558,9 +14746,7 @@ html body.productdetails #content_area .mc-option-accordion__toggle {
   letter-spacing: 0 !important;
   text-transform: none !important;
 }
-/* ATC + accordion + config buttons — brand line #e2dfd8 */
-html body.mc-product-page .mc-atc-button-wrap,
-html body.productdetails .mc-atc-button-wrap,
+/* Accordion + config buttons — brand line #e2dfd8 (ATC uses black lock at EOF) */
 html body.mc-product-page #mcPlannerBtn,
 html body.productdetails #mcPlannerBtn,
 html body.mc-product-page #mcProductSummaryBtn,
@@ -14939,10 +15125,8 @@ html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .color
   opacity: 0 !important;
   pointer-events: none !important;
 }
-html body.is-sectional-product #mc-pdp-price-stack-host,
-html.is-sectional-product #mc-pdp-price-stack-host,
-html body.is-sectional-product #mtl-pdp-top-price,
-html.is-sectional-product #mtl-pdp-top-price {
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) #mc-pdp-price-stack-host,
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) #mtl-pdp-top-price {
   display: none !important;
   height: 0 !important;
   overflow: hidden !important;
@@ -15720,7 +15904,10 @@ html body.mc-product-page #mc-pdp-top-price-panel .mc-pdp-top-price-value,
 html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-top-price-value,
 html body.productdetails #mc-pdp-top-price-panel .mtl-top-price__amount,
 html body.mc-product-page #mc-pdp-top-price-panel .mtl-top-price__amount,
-html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount {
+html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount,
+html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host .product_list_price,
+html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host [itemprop="price"] {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 20px !important;
   font-weight: 400 !important;
@@ -15785,6 +15972,14 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list {
 html body.productdetails #mc-pdp-features .mc-pdp-features__list li,
 html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
   margin: 0 0 4px 0 !important;
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+}
+
+html body.productdetails #mc-pdp-features .mc-pdp-features__list li::before,
+html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li::before {
+  content: none !important;
+  display: none !important;
 }
 
 /* =====================================================
@@ -15873,9 +16068,11 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
   html body.productdetails #content_area .mc-atc-button-wrap,
   html body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
   html body.productdetails #v65-product-parent .mc-atc-button-wrap {
-    border: 1px solid #e0e0e0 !important;
+    border: 1px solid #111 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    background: #111 !important;
+    background-color: #111 !important;
   }
 }
 
@@ -16133,8 +16330,8 @@ html body.mc-product-page #mc-pdp-price-stack-host [itemprop="price"] {
   color: #444 !important;
 }
 
-html body.productdetails .mc-pdp-purchase-controls,
-html body.mc-product-page .mc-pdp-purchase-controls {
+html body.productdetails:not(.mc-pdp-unified-ready) .mc-pdp-purchase-controls,
+html body.mc-product-page:not(.mc-pdp-unified-ready) .mc-pdp-purchase-controls {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -16211,6 +16408,14 @@ html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-description-below-feat
   visibility: hidden !important;
 }
 
+/* Orphan qty from legacy mount: hide until unified layout moves it into purchase controls */
+html body.productdetails:not(.mc-pdp-unified-ready) td.mc-pdp-options-td:not(:has(.mc-unified-purchase-controls)) > #mc-pdp-qty-row,
+html body.mc-product-page:not(.mc-pdp-unified-ready) td.mc-pdp-options-td:not(:has(.mc-unified-purchase-controls)) > #mc-pdp-qty-row,
+html body.productdetails:not(.mc-pdp-unified-ready) td.mc-unified-pdp-info:not(:has(.mc-unified-purchase-controls)) > #mc-pdp-qty-row,
+html body.mc-product-page:not(.mc-pdp-unified-ready) td.mc-unified-pdp-info:not(:has(.mc-unified-purchase-controls)) > #mc-pdp-qty-row {
+  visibility: hidden !important;
+}
+
 html body.productdetails #ProductDetail_ProductDetails_div2 li,
 html body.mc-product-page #ProductDetail_ProductDetails_div2 li,
 html body.productdetails #ProductDetail_ProductDetails_div2 p,
@@ -16250,10 +16455,10 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="desc
   margin: 0 0 4px 0 !important;
 }
 
-html body.productdetails .mc-pdp-purchase-controls,
-html body.mc-product-page .mc-pdp-purchase-controls,
-html body.productdetails #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls,
-html body.mc-product-page #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls {
+html body.productdetails:not(.mc-pdp-unified-ready) .mc-pdp-purchase-controls,
+html body.mc-product-page:not(.mc-pdp-unified-ready) .mc-pdp-purchase-controls,
+html body.productdetails:not(.mc-pdp-unified-ready) #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls,
+html body.mc-product-page:not(.mc-pdp-unified-ready) #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -16401,6 +16606,28 @@ html body.mc-bean-bag-pdp #beanbag-swatch-wrapper .beanbag-swatches {
   justify-content: flex-start !important;
 }
 
+html body.mc-bean-bag-pdp #mc-bb-size-section,
+html body.mc-bean-bag-pdp #mc-bb-size-section #mc-bb-size-label,
+html body.mc-bean-bag-pdp #mc-bb-size-section select {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html body.mc-bean-bag-pdp #mc-bb-size-section {
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 12px 0 10px 0 !important;
+  padding: 0 0 0 1.1em !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+}
+
+html body.mc-bean-bag-pdp #mc-bb-size-section select {
+  width: 100% !important;
+  max-width: 360px !important;
+}
+
 html body.productdetails #mc-pdp-features .mc-pdp-features__heading,
 html body.mc-product-page #mc-pdp-features .mc-pdp-features__heading {
   padding-left: 1.1em !important;
@@ -16415,233 +16642,2137 @@ html body.mc-product-page a#product_photo_zoom_url2 {
   box-sizing: border-box !important;
 }
 
-/* =====================================================================
-   MC PDP LOCK pdp17 — uniform soft-goods PDP layout
-   (bean bags + throws / anything tagged mc-bean-bag-pdp)
-   - tighter gap between image and info column
-   - centered manufacturer logo
-   - price + ADD TO CART on one row (qty removed, borderless compact ATC)
-   - description moved below the Features block
-   ===================================================================== */
-
-/* ---- column widths: shrink media so the info column is roomy (~440px) ---- */
-@media (min-width: 992px) {
-  html body.mc-bean-bag-pdp #v65-product-parent tr:has(> td.mc-pdp-options-td) > td:has(#product_photo) {
-    flex: 0 0 auto !important;
-    width: 660px !important;
-    max-width: 660px !important;
-  }
-  html body.mc-bean-bag-pdp #v65-product-parent tr:has(> td.mc-pdp-options-td) > td.mc-pdp-options-td {
-    flex: 1 1 auto !important;
-    width: auto !important;
-    max-width: none !important;
-    margin-left: 0 !important;
-  }
-}
-html body.mc-bean-bag-pdp #product_photo {
-  width: 100% !important;
-  max-width: 650px !important;
-  height: auto !important;
+html body.mc-saranoni-pdp .mc-saranoni-swatches,
+html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches {
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  overflow-x: visible !important;
 }
 
-/* ---- single ordered hero stack inside the info column ---- */
-html body.mc-bean-bag-pdp #mc-pdp-hero-stack {
+html body.mc-saranoni-pdp .mc-configured-color-swatch-label {
+  display: none !important;
+}
+
+/* Hide Saranoni hero altviews — color picker lives in #mc-pdp-features */
+html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews,
+html body.mc-saranoni-pdp td.mc-unified-pdp-media span#altviews,
+html body.mc-saranoni-pdp td.mc-pdp-media-td #altviews,
+html body.mc-saranoni-pdp td.mc-pdp-media-td span#altviews,
+html body.mc-saranoni-pdp #product_photo_td #altviews,
+html body.mc-saranoni-pdp #product_photo_td span#altviews {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Saranoni color picker in features section */
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready .mc-configured-color-swatch-wrapper {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
+html body.mc-saranoni-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
+html body.mc-bean-bag-pdp #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
+html body.mc-saranoni-pdp #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html body.mc-bean-bag-pdp .mc-pdp-return-row,
+html body.mc-saranoni-pdp .mc-pdp-return-row {
+  display: table-row !important;
+}
+
+html body.mc-bean-bag-pdp .mc-pdp-return-cell,
+html body.mc-saranoni-pdp .mc-pdp-return-cell {
   display: block !important;
   width: 100% !important;
+  padding: 0 0 12px 0 !important;
+  border: 0 !important;
+  vertical-align: top !important;
+}
+
+html body.mc-bean-bag-pdp .mc-pdp-return-link,
+html body.mc-saranoni-pdp .mc-pdp-return-link {
+  display: inline-block !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: #111 !important;
+}
+
+html body.mc-bean-bag-pdp .mc-pdp-return-link:hover,
+html body.mc-saranoni-pdp .mc-pdp-return-link:hover {
+  color: #444 !important;
+  text-decoration: underline !important;
+}
+
+#mc-pdp-return-link-static,
+.mc-pdp-return-link-static {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
   max-width: 100% !important;
-  margin: 0 !important;
+  margin: 0 0 14px 0 !important;
+  padding: 0 !important;
+  clear: both !important;
+  overflow: visible !important;
+}
+
+#mc-pdp-return-link-static .mc-pdp-return-link,
+.mc-pdp-return-link-static .mc-pdp-return-link {
+  display: inline-block !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: #111 !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__heading,
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__heading {
+  display: block !important;
+  margin: 0 0 8px 0 !important;
+  padding: 0 0 0 1.1em !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #444 !important;
+}
+
+html body.mc-saranoni-pdp #mc-saranoni-selected-color-name,
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__heading #mc-saranoni-selected-color-name {
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  text-transform: none !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-color-picker,
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 16px 0 !important;
   padding: 0 !important;
 }
 
-/* ---- centered manufacturer logo (over the info text block) ---- */
-html body.mc-bean-bag-pdp #mc-pdp-brand-logo {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  width: 100% !important;
-  max-width: 450px !important;
-  margin: 0 0 14px 0 !important;
-  padding: 0 0 0 1.1em !important;
-  box-sizing: border-box !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-brand-logo img {
-  margin: 0 !important;
-}
-
-/* ---- price + ADD TO CART on a single row ---- */
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row {
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs,
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs {
   display: flex !important;
   flex-direction: row !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
   flex-wrap: wrap !important;
-  gap: 16px !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
   width: 100% !important;
-  max-width: 450px !important;
-  margin: 6px 0 12px 0 !important;
+  margin: 0 !important;
   padding: 0 0 0 1.1em !important;
   box-sizing: border-box !important;
 }
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row #mc-pdp-price-stack-host {
+
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs a,
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a {
+  display: block !important;
+  width: 72px !important;
+  max-width: 72px !important;
   margin: 0 !important;
+  border: 2px solid transparent !important;
+  border-radius: 4px !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active,
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active {
+  border-color: #111 !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs img,
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  object-fit: cover !important;
+}
+
+/* Bean bag color thumbnails under hero at all breakpoints */
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews,
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media span#altviews,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td #altviews,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td span#altviews,
+html body.mc-bean-bag-pdp #product_photo_td #altviews,
+html body.mc-bean-bag-pdp #product_photo_td span#altviews,
+html body.mc-bean-bag-pdp .mc-unified-altviews {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 10px 0 0 0 !important;
   padding: 0 !important;
-  width: -moz-fit-content !important;
-  width: fit-content !important;
-  max-width: none !important;
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row #mc-pdp-price-stack-host > * {
-  width: auto !important;
-  white-space: nowrap !important;
+  float: none !important;
+  clear: both !important;
 }
 
-/* hide the duplicate legacy Volusion price (clean price is in the row) */
-html body.mc-bean-bag-pdp #v65-product-parent .colors_pricebox .product_productprice {
-  display: none !important;
-}
-/* price color matches the Features heading */
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row #mc-pdp-price-stack-host,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-pdp-stack-retail,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-pdp-stack-retail-amt,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .product_productprice,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .product_list_price {
-  color: #777 !important;
-}
-
-/* compact, borderless ATC sitting to the right of price */
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap {
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews a,
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media span#altviews a,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td #altviews a,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td span#altviews a,
+html body.mc-bean-bag-pdp #product_photo_td #altviews a,
+html body.mc-bean-bag-pdp #product_photo_td span#altviews a,
+html body.mc-bean-bag-pdp .mc-unified-altviews a {
+  display: inline-block !important;
+  width: 72px !important;
+  max-width: 72px !important;
   margin: 0 !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
-  max-width: none !important;
-  display: inline-flex !important;
+  border: 2px solid transparent !important;
+  border-radius: 4px !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews img,
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media span#altviews img,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td #altviews img,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td span#altviews img,
+html body.mc-bean-bag-pdp #product_photo_td #altviews img,
+html body.mc-bean-bag-pdp #product_photo_td span#altviews img,
+html body.mc-bean-bag-pdp .mc-unified-altviews img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  object-fit: cover !important;
+}
+
+/* Bean bag PDP: stack main image then horizontal alt row (override side-thumb grid). */
+@media (min-width: 992px) {
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #product_photo_td,
+  html body.mc-bean-bag-pdp.productdetails #content_area #product_photo_td {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    column-gap: 0 !important;
+    row-gap: 10px !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack > table,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack > table {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area img#product_photo,
+  html body.mc-bean-bag-pdp.productdetails #content_area img#product_photo,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area a#product_photo_zoom_url,
+  html body.mc-bean-bag-pdp.productdetails #content_area a#product_photo_zoom_url {
+    display: block !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto 0 0 !important;
+    box-sizing: border-box !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area span#altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area #altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area span#altviews {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 10px 0 0 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    clear: both !important;
+    position: static !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    text-align: left !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #altviews br,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area span#altviews br,
+  html body.mc-bean-bag-pdp.productdetails #content_area #altviews br,
+  html body.mc-bean-bag-pdp.productdetails #content_area span#altviews br {
+    display: none !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #altviews a,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area span#altviews a,
+  html body.mc-bean-bag-pdp.productdetails #content_area #altviews a,
+  html body.mc-bean-bag-pdp.productdetails #content_area span#altviews a {
+    display: inline-block !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 0 0 72px !important;
+    vertical-align: top !important;
+    font-size: initial !important;
+    line-height: normal !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #altviews img,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area span#altviews img,
+  html body.mc-bean-bag-pdp.productdetails #content_area #altviews img,
+  html body.mc-bean-bag-pdp.productdetails #content_area span#altviews img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 72px !important;
+    height: auto !important;
+    max-height: 72px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(#mc-pdp-description-under-media),
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(#mc-pdp-description-under-media),
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media > *:not(#altviews):not(span#altviews):not(.altviews):not(#mc-pdp-description-under-media),
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media > *:not(#altviews):not(span#altviews):not(.altviews):not(#mc-pdp-description-under-media) {
+    margin-left: 0 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    max-width: 600px !important;
+  }
+}
+
+/* Soft-goods thumbnails under main image (not column layout) — unified + ruched fallback */
+@media (min-width: 992px) {
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews,
+  html body.mc-ruched-blanket-pdp td.mc-unified-pdp-media #altviews {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 10px 0 0 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    clear: both !important;
+  }
+
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews a,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews a,
+  html body.mc-ruched-blanket-pdp td.mc-unified-pdp-media #altviews a,
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews a,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media span#altviews a,
+  html body.mc-ruched-blanket-pdp td.mc-unified-pdp-media span#altviews a {
+    display: block !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    margin: 0 !important;
+  }
+}
+
+html body.mc-bean-bag-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table:first-child .product_productprice,
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table:first-child .product_productprice,
+html body.mc-ruched-blanket-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table:first-child .product_productprice,
+html body.mc-bean-bag-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table:first-child .product_list_price,
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table:first-child .product_list_price,
+html body.mc-ruched-blanket-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table:first-child .product_list_price {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+}
+/* =========================================================
+   MC_UNIFIED_PDP_LAYOUT_20260616 — one global PDP layout system.
+   Replaces product-specific layout patches (bean bag, Saranoni,
+   Gatlin, MC_PDP_ATC_BLACK_LOCK wrapper styling, mc-pdp-purchase-controls).
+   ========================================================= */
+
+html body.mc-pdp-unified-ready .mc-pdp-return-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-return-row {
+  display: table-row !important;
+}
+
+html body.mc-pdp-unified-ready .mc-pdp-return-cell,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-return-cell {
+  display: block !important;
+  width: 100% !important;
+  padding: 0 0 12px 0 !important;
+  border: 0 !important;
+  vertical-align: top !important;
+}
+
+html body.mc-pdp-unified-ready .mc-pdp-return-link,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-return-link {
+  display: inline-block !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: #111 !important;
+}
+
+html body.mc-pdp-unified-ready .mc-pdp-return-link:hover,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-return-link:hover {
+  color: #444 !important;
+  text-decoration: underline !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr) !important;
+    column-gap: 24px !important;
+    align-items: start !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    vertical-align: top !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    max-width: 520px !important;
+  }
+}
+
+@media (max-width: 991px) {
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row > td,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row > td {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls {
+  display: flex !important;
+  flex-direction: column !important;
   align-items: center !important;
-  gap: 0 !important;
-  border: none !important;
+  width: 100% !important;
+  max-width: 360px !important;
+  margin: 28px auto 0 !important;
+  gap: 10px !important;
+  padding: 0 !important;
+  border: 0 !important;
   background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart {
+  display: contents !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls #mc-pdp-qty-row,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-qty-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls #mc-pdp-qty-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-qty-row {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin: 0 auto !important;
   padding: 0 !important;
 }
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap .mc-cart-icon-wrapper {
-  display: none !important;
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name^="QTY."],
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.v65-productdetail-cartqty,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name^="QTY."],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.v65-productdetail-cartqty {
+  width: 52px !important;
+  height: 44px !important;
+  min-width: 52px !important;
+  min-height: 44px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  text-align: center !important;
+  border: 1px solid #d7d7d7 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  box-sizing: border-box !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  color: #444 !important;
 }
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap input,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap button {
-  border: none !important;
-  background: #111 !important;
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.mc-unified-atc-btn,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.mc-unified-atc-btn,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 360px !important;
+  max-width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 0 24px !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  background-image: none !important;
   color: #fff !important;
   font-family: Inter, Arial, sans-serif !important;
   font-size: 11px !important;
   font-weight: 500 !important;
   letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
+  text-align: center !important;
   line-height: 1 !important;
-  padding: 10px 18px !important;
-  margin: 0 !important;
-  width: auto !important;
-  min-width: 0 !important;
-  border-radius: 0 !important;
+  box-shadow: none !important;
   cursor: pointer !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
-/* ---- remove quantity + legacy purchase stack on these pages ---- */
-html body.mc-bean-bag-pdp #mc-pdp-qty-row {
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"]:hover,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"]:focus,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"]:hover,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"]:hover,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"]:focus,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"]:hover {
+  background: #222 !important;
+  border-color: #222 !important;
+  color: #fff !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-cart-icon-wrapper,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-cart-icon-wrapper {
   display: none !important;
 }
 
-html body.mc-bean-bag-pdp .mc-pdp-purchase-controls {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  max-width: 450px !important;
-  margin: 28px auto 0 !important;
-  padding: 0 !important;
-  gap: 28px !important;
-  clear: both !important;
+html body.mc-pdp-unified-ready .mc-pdp-description-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-description-row {
+  display: table-row !important;
 }
 
-html body.mc-bean-bag-pdp .mc-pdp-purchase-controls .v65-product-addtocart,
-html body.mc-bean-bag-pdp .mc-pdp-purchase-controls .mc-atc-button-wrap {
-  display: flex !important;
-  justify-content: center !important;
-  margin: 0 !important;
-  width: auto !important;
-}
-
-/* ---- description below the Features block ---- */
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features {
+html body.mc-pdp-unified-ready .mc-pdp-description-cell,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-description-cell {
   display: block !important;
   width: 100% !important;
-  max-width: 450px !important;
-  margin: 14px 0 0 0 !important;
-  padding: 0 0 0 1.1em !important;
-  text-align: left !important;
-  clear: both !important;
-  box-sizing: border-box !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div2,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features .colors_descriptionbox {
-  display: block !important;
-  visibility: visible !important;
-  height: auto !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description {
+  display: block !important;
+  width: 100% !important;
+  max-width: 1050px !important;
+  margin: 36px auto 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
   box-sizing: border-box !important;
 }
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features p,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features span {
+
+html body.mc-pdp-unified-ready .mc-unified-pdp-description p,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description span,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description li,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description p,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description span,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description li {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 14px !important;
+  font-weight: 400 !important;
   line-height: 1.55 !important;
   letter-spacing: 0.02em !important;
   color: #444 !important;
   text-transform: none !important;
 }
 
-/* hide the now-empty legacy description box + its tab header */
-html body.mc-bean-bag-pdp table.colors_descriptionbox[data-mc-empty-desc],
-html body.mc-bean-bag-pdp [data-mc-empty-desc] {
+html body.mc-pdp-unified-ready #mc-pdp-description-below-features:not(:empty),
+html body.mc-pdp-unified-ready #mc-pdp-description-under-media,
+html body.mc-pdp-unified-ready .mc-pdp-description-under-media,
+html body.mc-pdp-unified-ready .mc-gatlin-description-below,
+html body.mc-pdp-unified-ready #mc-pdp-price-atc-row,
+html body.mc-pdp-unified-ready .mc-pdp-purchase-controls,
+html body.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidden="true"],
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidden="true"],
+html body.mc-pdp-unified-ready td.mc-unified-pdp-info:has(.mc-unified-purchase-controls input[name="btnaddtocart"]) #v65-productdetail-action-wrapper {
   display: none !important;
 }
 
-html body.productdetails #mc-pdp-option-block,
-html body.mc-product-page #mc-pdp-option-block,
-html body.mc-bean-bag-pdp #mc-pdp-option-block {
+/* Gatlin / fixed -SECT sectionals: unified purchase stack below logo + features */
+html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls,
+html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready .mc-unified-purchase-controls {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin: 24px auto 0 !important;
+  gap: 10px !important;
+}
+
+html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,
+html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls .mc-unified-qty-row {
+  order: 1 !important;
+  display: flex !important;
+  justify-content: center !important;
+  visibility: visible !important;
+  width: 100% !important;
+}
+
+html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls .mc-unified-atc-host,
+html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls .v65-product-addtocart,
+html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls button[name="btnaddtocart"] {
+  order: 2 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 991px) {
+  html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+  html body.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"],
+  html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+  html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"] {
+    width: 100% !important;
+    max-width: 360px !important;
+  }
+}
+
+html body.mc-pdp-unified-ready #mc-pdp-option-block,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-option-block {
   display: block !important;
   width: 100% !important;
-  max-width: 450px !important;
+  max-width: 100% !important;
   margin: 0 0 12px 0 !important;
   padding: 0 0 0 1.1em !important;
   text-align: left !important;
   box-sizing: border-box !important;
 }
 
-html body.productdetails #mc-pdp-option-block #options_table,
-html body.mc-product-page #mc-pdp-option-block #options_table,
-html body.mc-bean-bag-pdp #mc-pdp-option-block #options_table {
-  width: 100% !important;
-  max-width: 100% !important;
+html body.mc-pdp-unified-ready .mc-atc-button-wrap,
+html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap {
+  display: contents !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
   margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 
-html body.productdetails #mc-pdp-option-block select,
-html body.mc-product-page #mc-pdp-option-block select,
-html body.mc-bean-bag-pdp #mc-pdp-option-block select {
+html body.mc-pdp-unified-ready .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.mc-pdp-unified-ready .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="btnaddtocart"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 360px !important;
+  max-width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 0 24px !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  background-image: none !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+}
+
+/* MC PDP unified e-product lock 20260616pdp57: consistent layout, black ATC, description follows existing features typography. */
+html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
+html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
+html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
+html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row {
+  display: table-row !important;
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media {
+    display: table-cell !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 22px 0 0 !important;
+    vertical-align: top !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    display: table-cell !important;
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+    padding: 0 0 0 22px !important;
+    vertical-align: top !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-pdp-unified-ready #content_area td.mc-pdp-options-td,
+  html body.mc-pdp-unified-ready #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-product-page.mc-pdp-unified-ready #content_area td.mc-pdp-options-td,
+  html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-pdp-unified-ready #options_table > tbody > tr > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready #options_table > tbody > tr > td.mc-unified-pdp-info {
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+  }
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.mc-unified-atc-btn,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.btn_addtocart,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.btn-primary,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls button.mc-unified-atc-btn,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.mc-unified-atc-btn,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.btn_addtocart,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.btn-primary,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button.mc-unified-atc-btn,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"] {
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  border: 1px solid #000 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-pdp-return-link,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-return-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+html body.mc-pdp-unified-ready .mc-pdp-duplicate-price-hidden,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-duplicate-price-hidden,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-info > .colors_pricebox:not(#mc-pdp-price-stack-host),
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-info > .colors_pricebox:not(#mc-pdp-price-stack-host) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+html body.mc-pdp-unified-ready tr.mc-pdp-description-row,
+html body.mc-product-page.mc-pdp-unified-ready tr.mc-pdp-description-row {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 14px !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin: 28px auto 0 !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart {
+  display: block !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  background: #000 !important;
+  background-color: #000 !important;
+  text-align: center !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host input,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host button,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap input,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap button,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart input,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart button,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host input,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host button,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap input,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap button,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart input,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart button {
+  display: block !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  min-height: 48px !important;
+  margin: 0 auto !important;
+  padding: 0 24px !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  color: #fff !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  line-height: 48px !important;
+  text-align: center !important;
+  text-shadow: none !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.vCSS_input_addtocart,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[type="submit"],
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[type="button"],
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap input[type="submit"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.vCSS_input_addtocart,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[type="submit"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[type="button"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap input[type="submit"] {
+  width: 100% !important;
+  max-width: 400px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-pdp-info .mc-atc-button-wrap,
+html body.mc-pdp-unified-ready .mc-unified-pdp-info .v65-product-addtocart,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info .mc-atc-button-wrap,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info .v65-product-addtocart {
+  display: block !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin: 0 auto !important;
+  background: #000 !important;
+  background-color: #000 !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-pdp-info .mc-atc-button-wrap input,
+html body.mc-pdp-unified-ready .mc-unified-pdp-info .mc-atc-button-wrap button,
+html body.mc-pdp-unified-ready .mc-unified-pdp-info .v65-product-addtocart input,
+html body.mc-pdp-unified-ready .mc-unified-pdp-info .v65-product-addtocart button,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info .mc-atc-button-wrap input,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info .mc-atc-button-wrap button,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info .v65-product-addtocart input,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info .v65-product-addtocart button {
+  width: 100% !important;
+  max-width: 400px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media #product_photo,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media .vCSS_img_product_photo,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media #product_photo,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media .vCSS_img_product_photo,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
+  width: 100% !important;
+  max-width: 650px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls #mc-pdp-qty-row,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-qty-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls #mc-pdp-qty-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-qty-row {
+  width: 100% !important;
+  max-width: 400px !important;
+  justify-content: center !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.v65-productdetail-cartqty,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name^="QTY."],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.v65-productdetail-cartqty,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name^="QTY."] {
+  width: 52px !important;
+  min-width: 18px !important;
+  max-width: 52px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-pdp-info .colors_pricebox,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info .colors_pricebox,
+html body.mc-pdp-unified-ready .mc-unified-pdp-info #mc-pdp-price-stack-host,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info #mc-pdp-price-stack-host {
+  width: 400px !important;
+  max-width: 400px !important;
+}
+
+html body.productdetails.mc-pdp-unified-ready #mc-pdp-features .mc-pdp-features__body,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-features .mc-pdp-features__body,
+html body.productdetails.mc-pdp-unified-ready #mc-pdp-features .mc-pdp-features__list,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-features .mc-pdp-features__list {
+  width: 425px !important;
+  max-width: 425px !important;
+}
+
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description {
+  display: block !important;
+  width: 100% !important;
+  max-width: 650px !important;
+  margin: 24px auto 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description *,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description * {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  color: #444 !important;
+  text-transform: none !important;
+}
+
+/* PDP final lock 20260616pdp57: typography-only description match and black ATC repaint guard. */
+html body.productdetails #mc-pdp-description-below-features,
+html body.productdetails #mc-pdp-description-below-features *,
+html body.productdetails .mc-pdp-description-below-features,
+html body.productdetails .mc-pdp-description-below-features *,
+html body.productdetails #ProductDetail_ProductDetails_div,
+html body.productdetails #ProductDetail_ProductDetails_div *,
+html body.productdetails #ProductDetail_ProductDetails_div2,
+html body.productdetails #ProductDetail_ProductDetails_div2 *,
+html body.productdetails #content_area span[itemprop="description"],
+html body.productdetails #content_area span[itemprop="description"] *,
+html body.mc-product-page #mc-pdp-description-below-features,
+html body.mc-product-page #mc-pdp-description-below-features *,
+html body.mc-product-page .mc-pdp-description-below-features,
+html body.mc-product-page .mc-pdp-description-below-features *,
+html body.mc-product-page #ProductDetail_ProductDetails_div,
+html body.mc-product-page #ProductDetail_ProductDetails_div *,
+html body.mc-product-page #ProductDetail_ProductDetails_div2,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 *,
+html body.mc-product-page #content_area span[itemprop="description"],
+html body.mc-product-page #content_area span[itemprop="description"] *,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description *,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description * {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  color: #444 !important;
+  text-transform: none !important;
+}
+
+html body.productdetails .mc-atc-button-wrap,
+html body.mc-product-page .mc-atc-button-wrap,
+html body.productdetails #v65-product-parent .mc-atc-button-wrap,
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
+html body.productdetails #content_area .mc-atc-button-wrap,
+html body.mc-product-page #content_area .mc-atc-button-wrap {
+  background: #000 !important;
+  background-color: #000 !important;
+  border-color: #000 !important;
+  color: #fff !important;
   width: 100% !important;
   max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-html body.productdetails #mc-pdp-features,
-html body.mc-product-page #mc-pdp-features,
-html body.mc-bean-bag-pdp #mc-pdp-features {
-  max-width: 450px !important;
+html body.productdetails input[name="btnaddtocart"],
+html body.productdetails button[name="btnaddtocart"],
+html body.productdetails input.vCSS_input_addtocart,
+html body.productdetails input.mc-unified-atc-btn,
+html body.mc-product-page input[name="btnaddtocart"],
+html body.mc-product-page button[name="btnaddtocart"],
+html body.mc-product-page input.vCSS_input_addtocart,
+html body.mc-product-page input.mc-unified-atc-btn,
+html body.productdetails .mc-atc-button-wrap input,
+html body.productdetails .mc-atc-button-wrap button,
+html body.mc-product-page .mc-atc-button-wrap input,
+html body.mc-product-page .mc-atc-button-wrap button {
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  border-color: #000 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack input[name="btnaddtocart"],
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack button[name="btnaddtocart"],
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls,
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls .v65-product-addtocart,
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls button[name="btnaddtocart"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls {
+  flex-direction: column !important;
+  max-width: 400px !important;
+}
+
+/* MC_PDP_REPAIR_20260617pdp74: bean bag single size/cover UI; suppress native options below ATC. */
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media #product_photo,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media .vCSS_img_product_photo,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media #product_photo,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media .vCSS_img_product_photo,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 16px 0 !important;
+  padding: 0 !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 0 0 1.1em !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs a,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs a {
+  display: block !important;
+  width: 72px !important;
+  max-width: 72px !important;
+  margin: 0 !important;
+  border: 2px solid transparent !important;
+  border-radius: 4px !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active {
+  border-color: #111 !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs img,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  object-fit: cover !important;
+}
+
+html body .anchored-cart a[href*="shoppingcart"],
+html body .anchored-cart a[href*="ShoppingCart"],
+html body .soft-cart a[href*="shoppingcart"],
+html body .soft-cart a[href*="ShoppingCart"],
+html body .soft_add_wrapper a[href*="shoppingcart"],
+html body .soft_add_wrapper a[href*="ShoppingCart"],
+html body .v65-softcart a[href*="shoppingcart"],
+html body .v65-softcart a[href*="ShoppingCart"],
+html body [class*="soft"][class*="cart"] a[href*="shoppingcart"],
+html body [class*="soft"][class*="cart"] a[href*="ShoppingCart"],
+html body [id*="soft"][id*="cart"] a[href*="shoppingcart"],
+html body [id*="soft"][id*="cart"] a[href*="ShoppingCart"] {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+/* Saranoni PDP: keep the hero image closer to the feature/color column. */
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp #v65-product-parent img#product_photo,
+  html body.mc-saranoni-pdp #content_area #v65-product-parent img#product_photo,
+  html body.mc-saranoni-pdp.productdetails #v65-product-parent img#product_photo,
+  html body.mc-saranoni-pdp.mc-product-page #v65-product-parent img#product_photo {
+    margin-left: 115px !important;
+    margin-top: 30px !important;
+  }
+
+  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-unified-pdp-row {
+    gap: 4px !important;
+    column-gap: 4px !important;
+  }
+}
+
+
+/* Saranoni PDP hard lock: narrow hero/features gap and stable right-column order. */
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-unified-pdp-row {
+    gap: 4px !important;
+    column-gap: 4px !important;
+  }
+
+  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-info {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+  }
+}
+
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table.colors_pricebox,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info:has(#mc-pdp-price-stack-host) > table.colors_pricebox,
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-option-block) > #options_table,
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-option-block) > table:has(> #options_table) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row {
+  display: table-row !important;
+}
+
+html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-cell {
+  display: block !important;
+  width: 100% !important;
+  padding: 0 0 12px 0 !important;
+  border: 0 !important;
+  text-align: left !important;
+  vertical-align: top !important;
+}
+
+html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-link {
+  display: inline-block !important;
+  color: #111 !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+}
+
+html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row .mc-pdp-return-link:hover {
+  color: #444 !important;
+  text-decoration: underline !important;
+}
+
+
+html body.mc-saranoni-pdp #mc-saranoni-visible-return-link,
+html body.productdetails #mc-saranoni-visible-return-link {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  margin: 0 0 14px !important;
+  padding: 0 !important;
+  clear: both !important;
+}
+html body.mc-saranoni-pdp #mc-saranoni-visible-return-link a,
+html body.productdetails #mc-saranoni-visible-return-link a {
+  display: inline-block !important;
+  color: #555 !important;
+  font: 600 12px/1.2 Arial, sans-serif !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+}
+
+/* MC_GATLIN_ALT_STRIP_RESET_20260618 */
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) #altviews,
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) span#altviews,
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altviews {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* MC_SS_UNIFIED_COLUMN_LOCK_20260619 - stop SS bedroom media column from ballooning away from info column. */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready #v65-product-parent {
+    width: 1128px !important;
+    max-width: 1128px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    position: relative !important;
+    left: 42px !important;
+    table-layout: fixed !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 700px !important;
+    min-width: 700px !important;
+    max-width: 700px !important;
+    padding: 0 28px 0 0 !important;
+    vertical-align: top !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    display: table-cell !important;
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+    padding: 30px 0 0 0 !important;
+    vertical-align: top !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
+    order: 1 !important;
+    display: block !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    height: auto !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    margin-top: 30px !important;
+    align-self: flex-start !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews {
+    order: 2 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    align-self: flex-start !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    margin: 12px 0 24px 0 !important;
+    text-align: left !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media span[itemprop="description"] {
+    order: 3 !important;
+    display: block !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    margin: 24px 0 0 0 !important;
+    align-self: flex-start !important;
+    text-align: left !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media .colors_descriptionbox {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* MC_DOUBLE_RUCHED_FAUX_MEDIA_LOCK_20260619 - legacy Saranoni PDP is not unified; keep hero left of features. */
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp form#vCSS_mainform[action*="SAR%2DDBL%2DRCH%2DFX%2DFUR"] img#product_photo,
+  html body.mc-saranoni-pdp form#vCSS_mainform[action*="sar-dbl-rch-fx-fur" i] img#product_photo,
+  html body.mc-saranoni-pdp img#product_photo[src*="SAR-DBL-RCH-FX-FUR"],
+  html body.mc-saranoni-pdp img#product_photo[src*="sar-dbl-rch-fx-fur" i] {
+    display: block !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    height: auto !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 30px !important;
+  }
+}
+
+/* MC_LIVE_PDP_MEDIA_STACK_LOCK_20260619 - works through stale baked templates because custom-safe.css is cache-busted inline. */
+@media (min-width: 992px) {
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+  }
+
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
+    order: 1 !important;
+    display: block !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    height: auto !important;
+    margin: 0 !important;
+    align-self: flex-end !important;
+  }
+
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap #altviews,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap span#altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap #altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap span#altviews {
+    order: 2 !important;
+    display: flex !important;
+    justify-content: center !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    margin: 8px 0 16px auto !important;
+    align-self: flex-end !important;
+  }
+
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-under-media,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-below-features,
+  html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span[itemprop="description"],
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-under-media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-below-features,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span[itemprop="description"] {
+    order: 3 !important;
+    display: block !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    margin: 0 0 0 auto !important;
+    align-self: flex-end !important;
+  }
+}
+
+/* MC_SARANONI_MEDIA_GAP_RESTORE_20260619 - do not right-pack Saranoni into the feature column. */
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-unified-pdp-row {
+    gap: 44px !important;
+    column-gap: 44px !important;
+  }
+
+  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media {
+    padding-right: 20px !important;
+  }
+
+  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-info {
+    padding-left: 20px !important;
+  }
+
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media {
+    align-items: flex-start !important;
+  }
+
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-centered-altviews-wrap,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-steve-silver-altviews-wrap,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #ProductDetail_ProductDetails_div2,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-under-media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-below-features,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media span[itemprop="description"] {
+    align-self: flex-start !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+}
+
+/* MC_SS_MEDIA_LEFT_ALIGN_20260619 — Steve Silver: hero, alt thumbs, description stack left in media column (desktop). */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #altviews,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) span#altviews,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) .altviews,
+  html body.mc-steve-silver-altview-pdp #mc-steve-silver-altviews-wrap,
+  html body.mc-steve-silver-altview-pdp .mc-steve-silver-altviews-wrap {
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-align: left !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #product_photo_td,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media {
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description--media {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-align: left !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+  html body.mc-steve-silver-altview-pdp form .colors_descriptionbox {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: min(650px, 100%) !important;
+  }
+}
+
+/* MC_SS_UNIFIED_NATIVE_PANEL_HIDE_20260620 — hide duplicate Care/tech specs and orphaned description tables. */
+html body.productdetails:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
+html body.mc-product-page:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
+html body.mc-pdp-unified-ready:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
+html body.productdetails:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div),
+html body.mc-product-page:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div),
+html body.mc-pdp-unified-ready:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) table.colors_descriptionbox:has(#ProductDetail_TechSpecs_div),
+html body.productdetails:has(.mc-unified-pdp-description--media) table.colors_descriptionbox:has(#ProductDetail_ProductDetails_div2):not(:has(.mc-unified-pdp-description--media)),
+html body.mc-product-page:has(.mc-unified-pdp-description--media) table.colors_descriptionbox:has(#ProductDetail_ProductDetails_div2):not(:has(.mc-unified-pdp-description--media)),
+html body.mc-pdp-unified-ready:has(.mc-unified-pdp-description--media) table.colors_descriptionbox:has(#ProductDetail_ProductDetails_div2):not(:has(.mc-unified-pdp-description--media)),
+html body.productdetails #ProductDetail_TechSpecs_div[data-mc-native-panel-hidden="1"],
+html body.mc-product-page #ProductDetail_TechSpecs_div[data-mc-native-panel-hidden="1"],
+html body.productdetails table.colors_descriptionbox[data-mc-native-panel-hidden="1"],
+html body.mc-product-page table.colors_descriptionbox[data-mc-native-panel-hidden="1"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* MC_SS_UNIFIED_HERO_OFFSET_20260620 — match Saranoni vertical breathing room on Steve Silver unified PDPs. */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
+  html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-pdp-media-td img#product_photo,
+  html body.mc-steve-silver-altview-pdp:not(.mc-pdp-unified-ready) #v65-product-parent img#product_photo,
+  html body.mc-steve-silver-altview-pdp:not(.mc-pdp-unified-ready) #content_area img#product_photo {
+    margin-top: 30px !important;
+  }
+}
+
+/* MC_SS_INFO_COLUMN_DESC_20260620 — Steve Silver description in info column above qty (Saranoni-style). */
+html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info #mc-pdp-description-below-features,
+html body.mc-steve-silver-altview-pdp td.mc-pdp-options-td #mc-pdp-description-below-features {
+  display: block !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin: 12px 0 0 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+}
+
+html body.productdetails #mc-pdp-description-below-features .mc-pdp-description-below-features__inner,
+html body.mc-product-page #mc-pdp-description-below-features .mc-pdp-description-below-features__inner {
+  display: block !important;
+}
+
+html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media .mc-unified-pdp-description:not(.mc-pdp-description-below-features) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+html body.mc-steve-silver-altview-pdp #mc-pdp-features { order: 70 !important; }
+html body.mc-steve-silver-altview-pdp #mc-pdp-description-below-features { order: 80 !important; }
+html body.mc-steve-silver-altview-pdp .mc-unified-purchase-controls,
+html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack { order: 90 !important; }
+
+html body.productdetails #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-below-features__inner,
+html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-below-features__inner {
+  position: relative !important;
+}
+
+html body.productdetails #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped:not(.mc-pdp-description-below-features--expanded) .mc-pdp-description-below-features__inner::after,
+html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped:not(.mc-pdp-description-below-features--expanded) .mc-pdp-description-below-features__inner::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 36px !important;
+  pointer-events: none !important;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 88%) !important;
+}
+
+html body.productdetails .mc-pdp-description-view-more,
+html body.mc-product-page .mc-pdp-description-view-more {
+  display: none !important;
+  margin: 8px 0 0 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #111 !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
+/* MC_PLP_CONTAIN_NO_CROP_20260619layout4 — tall PLP photos (beds, etc.) must not clip at the top */
+html.category #content_area .v-product-grid a.v-product__img,
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
+html.is-category-or-listing-page #content_area .v-product-grid a.v-product__img,
+body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product a.v-product__img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product > a.v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img,
+:is(html.category, body.category) .v-product-grid a.v-product__img.mc-plp-image-box {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+html.category #content_area .v-product-grid a.v-product__img > img,
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img > img,
+html.is-category-or-listing-page #content_area .v-product-grid a.v-product__img > img,
+body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
+body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img,
+:is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product > a.v-product__img > img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
+:is(html.category, body.category) .v-product-grid a.v-product__img.mc-plp-image-box > img,
+.mc-plp-image-box > img.mc-plp-img-fit,
+.mc-plp-image-box > img.mc-plp-img-sized {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+
+html body.productdetails #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-view-more,
+html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-below-features--clamped .mc-pdp-description-view-more,
+html body.productdetails #mc-pdp-description-below-features.mc-pdp-description-below-features--expanded .mc-pdp-description-view-more,
+html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-below-features--expanded .mc-pdp-description-view-more {
+  display: inline-block !important;
+  order: unset !important;
+}
+
+/* =========================================================
+   MOBILE: "SELECT A CATEGORY" — always viewport-centered
+   (same top band as home/cart floats; beats header flex space-between)
+   ========================================================= */
+@media (max-width: 991px) {
+  header.header .header__section {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Legacy search toggle column steals horizontal space beside the menu */
+  header.header .header__section > .col-xs-6.col-sm-4,
+  header.header .header__section > .microblock-group,
+  header.header .header__section > .col-xs-6.col-sm-8.col-md-9.col-lg-3 {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 0 0 0 !important;
+  }
+
+  header.header .header__section--bottom,
+  header.header .header__section--bottom.visible-xs {
+    position: fixed !important;
+    top: max(12px, env(safe-area-inset-top, 0px)) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 2147483646 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: auto !important;
+    max-width: min(420px, calc(100vw - 112px)) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    pointer-events: none !important;
+  }
+
+  header.header .header__section--bottom .menu-toggle,
+  header.header .header__section--bottom .menu-toggle__link,
+  header.header .header__section--bottom .menu-toggle__text {
+    pointer-events: auto !important;
+  }
+
+  header.header .menu-toggle,
+  header.header .microblock.menu-toggle {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    float: none !important;
+  }
+
+  header.header .menu-toggle__link {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 10px 16px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  header.header .menu-toggle__text {
+    display: inline-block !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  header.header .menu-toggle__icon {
+    display: none !important;
+  }
+
+  :is(
+      html:not(.mc-allow-home-hero) body,
+      body:not(.is-home),
+      body.category,
+      body.productdetails,
+      body.mc-product-page,
+      html.mc-allow-home-hero body.is-home
+    )
+    header.header
+    .header__section:not(.header__section--middle) {
+    display: block !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+}
+
+/* === Cart: continue shopping + checkout actions (shoppingcart.asp) === */
+html.mc-commerce-surface #content_area input[type="image"][name="btnContinue"],
+html.mc-commerce-surface #content_area input[type="image"][name*="checkout" i],
+html.mc-commerce-surface #content_area input[type="image"][name*="Checkout"],
+html.mc-commerce-surface #content_area a[href*="one-page-checkout"],
+html.mc-commerce-surface #content_area a[href*="checkout.asp"],
+body.shoppingcart #content_area input[type="image"][name="btnContinue"],
+body.shoppingcart #content_area input[type="image"][name*="checkout" i],
+body.shoppingcart #content_area button[name*="checkout" i],
+body.shoppingcart #content_area input[type="submit"][name*="checkout" i],
+body.shoppingcart #table_checkout_cart0 input,
+body.shoppingcart #table_checkout_cart0 button,
+body.shoppingcart #table_checkout_cart0 a {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 100px !important;
+  min-height: 32px !important;
+  max-width: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 2 !important;
+  cursor: pointer !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 12px 8px 12px 0 !important;
+  vertical-align: middle !important;
+}
+
+html.mc-commerce-surface body.shoppingcart #content_area,
+html.mc-commerce-surface #content_area {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  padding-bottom: 24px !important;
+}
+
+html.mc-commerce-surface .mc-cart-actions-bar,
+body.shoppingcart .mc-cart-actions-bar,
+#mc-cart-actions-bar {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  position: static !important;
+  z-index: auto !important;
+  width: min(100%, 320px) !important;
+  max-width: 320px !important;
+  margin: 18px 0 8px auto !important;
+  padding: 0 !important;
+  clear: both !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+}
+
+html.mc-commerce-surface .mc-cart-actions-bar--fallback,
+body.shoppingcart .mc-cart-actions-bar--fallback {
+  margin-right: 0 !important;
+}
+
+html.mc-commerce-surface tr.mc-cart-actions-row,
+body.shoppingcart tr.mc-cart-actions-row {
+  display: table-row !important;
+}
+
+html.mc-commerce-surface td.mc-cart-actions-cell,
+body.shoppingcart td.mc-cart-actions-cell {
+  display: table-cell !important;
+  padding: 12px 0 4px !important;
+  text-align: right !important;
+  vertical-align: top !important;
+  border: none !important;
+}
+
+html.mc-commerce-surface td.mc-cart-actions-cell .mc-cart-actions-bar,
+body.shoppingcart td.mc-cart-actions-cell .mc-cart-actions-bar {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+body.mc-cart-actions-visible {
+  padding-bottom: 0 !important;
+}
+
+html.mc-commerce-surface .mc-cart-actions-bar__btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 46px !important;
+  padding: 12px 20px !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  border-radius: 2px !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  border: 1px solid #1a1a1a !important;
+}
+
+html.mc-commerce-surface .mc-cart-actions-bar__btn--primary {
+  color: #fff !important;
+  background: #1a1a1a !important;
+}
+
+html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary {
+  color: #1a1a1a !important;
+  background: #fff !important;
+}
+
+html.mc-commerce-surface .mc-cart-actions-bar__btn--primary:hover {
+  background: #333 !important;
+}
+
+html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
+  background: #f5f5f5 !important;
+}
+
+@media (max-width: 991px) {
+  html.mc-commerce-surface .mc-cart-actions-bar,
+  body.shoppingcart .mc-cart-actions-bar,
+  #mc-cart-actions-bar {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  html.mc-commerce-surface td.mc-cart-actions-cell,
+  body.shoppingcart td.mc-cart-actions-cell {
+    text-align: left !important;
+  }
+
+  html.mc-commerce-surface td.mc-cart-actions-cell .mc-cart-actions-bar,
+  body.shoppingcart td.mc-cart-actions-cell .mc-cart-actions-bar {
+    margin-left: 0 !important;
+  }
+}
+
+/* === MC_MOBILE_FULL_VIEW_20260620 — keep storefront content fully visible on phones === */
+@media (max-width: 991px) {
+  html,
+  body {
+    max-width: 100% !important;
+    overflow-x: clip !important;
+  }
+
+  .content_area-wrapper,
+  .container--content,
+  .container--content > .row,
+  .container--content > .row > [class*="col-"],
+  #content_area,
+  #content_area_home,
+  #v65-product-parent,
+  .vol-container,
+  .page-wrap {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+
+  #content_area table,
+  #content_area tbody,
+  #content_area tr,
+  #content_area td,
+  #content_area th,
+  #v65-product-parent table,
+  #v65-product-parent tbody,
+  #v65-product-parent tr,
+  #v65-product-parent td,
+  #v65-product-parent th {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #content_area table,
+  #v65-product-parent table {
+    width: 100% !important;
+    table-layout: auto !important;
+  }
+
+  #content_area img,
+  #content_area video,
+  #v65-product-parent img,
+  #v65-product-parent video {
+    max-width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  #content_area input,
+  #content_area select,
+  #content_area textarea,
+  #content_area button,
+  #v65-product-parent input,
+  #v65-product-parent select,
+  #v65-product-parent textarea,
+  #v65-product-parent button,
+  .mc-config-btn,
+  #mcPlannerBtn,
+  #mcProductSummaryBtn,
+  #mcLeatherBtn {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .mc-config-btn:not(#mcLeatherBtn),
+  #mcPlannerBtn,
+  #mcProductSummaryBtn,
+  #mcLeatherBtn {
+    width: 100% !important;
+  }
+
+  #mcLeatherSwatchStrip,
+  .mc-saranoni-color-picker__grid {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  #mc-pdp-return-link-static,
+  .mc-pdp-return-link-static {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  html body.mc-saranoni-pdp .mc-pdp-return-row,
+  html body.mc-bean-bag-pdp .mc-pdp-return-row,
+  html body.mc-pdp-unified-ready .mc-pdp-return-row,
+  html body.productdetails .mc-pdp-return-row,
+  html body.mc-product-page .mc-pdp-return-row {
+    display: table-row !important;
+    visibility: visible !important;
+  }
+
+  html body .mc-pdp-return-link {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  header.header,
+  footer.footer,
+  nav.push-menu {
+    max-width: 100% !important;
+  }
+}
+
+/* MC_SARANONI_PDP_LAYOUT_20260621sarlayout2 — DOM order via JS appendChild; never flex the info column. */
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-info {
+    display: block !important;
+  }
+
+  html body.mc-saranoni-pdp td.mc-pdp-media-td #mc-saranoni-size-thumbs,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media #mc-saranoni-size-thumbs,
+  html body.mc-saranoni-pdp #product_photo_td #mc-saranoni-size-thumbs {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 12px 0 0 !important;
+    padding: 0 !important;
+  }
 }
