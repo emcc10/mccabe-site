@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260622sartod1";
-  var AUTH_LAYOUT_VER = "20260622sartod1";
+  var LAYOUT_VER = "20260622sarfix2";
+  var AUTH_LAYOUT_VER = "20260622sarfix2";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
