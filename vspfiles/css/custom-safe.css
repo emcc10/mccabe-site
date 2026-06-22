@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260621saranoni9 — Saranoni PDP single swatch rail */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260622sartod1 — Saranoni toddler blanket variant + alignment fix */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -16677,10 +16677,81 @@ html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper {
   clear: both !important;
   position: static !important;
   width: 100% !important;
-  max-width: 460px !important;
+  max-width: 100% !important;
   margin: 12px 0 16px 0 !important;
   padding: 0 !important;
   box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp .mc-configured-color-swatch.mc-saranoni-text-swatch {
+  width: auto !important;
+  height: auto !important;
+  min-width: 56px !important;
+  min-height: 36px !important;
+  border-radius: 4px !important;
+  padding: 6px 10px !important;
+}
+
+html body.mc-saranoni-pdp .mc-configured-color-swatch__text {
+  font: 600 11px/1.2 Inter, Arial, sans-serif !important;
+  color: #444 !important;
+  white-space: normal !important;
+  text-align: center !important;
+}
+
+html body.mc-saranoni-pdp td.mc-pdp-options-td,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info {
+  padding-left: 1.1em !important;
+  padding-right: 0 !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-brand-logo,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-title-right,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-price-stack-host,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #messaging-element,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-option-block,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-saranoni-size-thumbs,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-features,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-description-below-features,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > #mc-pdp-purchase-stack,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-brand-logo,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-title-right,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-price-stack-host,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #messaging-element,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-option-block,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-saranoni-size-thumbs,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-features,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-description-below-features,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > #mc-pdp-purchase-stack {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack,
+html body.mc-saranoni-pdp .mc-saranoni-purchase-stack {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  max-width: 100% !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-option-block #options_table,
+html body.mc-saranoni-pdp #mc-pdp-option-block table[id*="options_table"] {
+  display: table !important;
+  visibility: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 12px 0 0 0 !important;
 }
 
 html body.mc-saranoni-pdp #mc-pdp-features {
