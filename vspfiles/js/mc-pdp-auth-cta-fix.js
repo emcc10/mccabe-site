@@ -3187,6 +3187,17 @@
     if (!isSaranoniPdpPage()) return;
     var mainImg = global.document.getElementById("product_photo");
     if (!mainImg) return;
+    // Give the hero image a real, capped intrinsic width. width:auto avoids the
+    // circular dependency that width:100% has against the (auto-width) photo cell,
+    // and these inline styles beat the high-specificity custom-safe.css rule that
+    // otherwise pins #product_photo to max-width:800px/max-height:100%.
+    try {
+      mainImg.style.setProperty("width", "auto", "important");
+      mainImg.style.setProperty("max-width", "min(650px, 100%)", "important");
+      mainImg.style.setProperty("height", "auto", "important");
+      mainImg.style.setProperty("max-height", "none", "important");
+      mainImg.style.setProperty("margin-left", "0", "important");
+    } catch (eHeroSize) {}
     var pc = resolveConfiguredColorProductCode(null);
     var cur = mainImg.getAttribute("src") || "";
     global.document
@@ -4836,13 +4847,29 @@
     }
     row.querySelectorAll("td.mc-pdp-media-td").forEach(function (cell) {
       try {
-        cell.style.setProperty("display", "block", "important");
-        cell.style.setProperty("flex", "1 1 55%", "important");
-        cell.style.setProperty("flex-basis", "55%", "important");
-        cell.style.setProperty("max-width", "58%", "important");
-        cell.style.setProperty("min-width", "0", "important");
-        cell.style.setProperty("width", "auto", "important");
-        cell.style.setProperty("box-sizing", "border-box", "important");
+        if (cell.parentNode === row) {
+          // mc-pdp-media-td is itself the flex media column (direct child of the
+          // product row) — size it as the 55% flex item.
+          cell.style.setProperty("display", "block", "important");
+          cell.style.setProperty("flex", "1 1 55%", "important");
+          cell.style.setProperty("flex-basis", "55%", "important");
+          cell.style.setProperty("max-width", "58%", "important");
+          cell.style.setProperty("min-width", "0", "important");
+          cell.style.setProperty("width", "auto", "important");
+          cell.style.setProperty("box-sizing", "border-box", "important");
+        } else {
+          // mc-pdp-media-td is the native photo cell nested inside the media
+          // column's inner table. Forcing display:block + width:auto here makes
+          // it shrink-wrap to the hero image's (circular) min-content width and
+          // collapse the image to a few pixels. Keep it a table-cell so it fills
+          // the inner table and gives #product_photo a real width to resolve
+          // against (the flex column sizing comes from tr.mc-pdp-main-row>td).
+          cell.style.setProperty("display", "table-cell", "important");
+          cell.style.setProperty("width", "100%", "important");
+          cell.style.setProperty("max-width", "none", "important");
+          cell.style.setProperty("min-width", "0", "important");
+          cell.style.setProperty("box-sizing", "border-box", "important");
+        }
       } catch (eMedia) {}
     });
     row.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
@@ -4882,7 +4909,7 @@
       (global.document.head || global.document.documentElement).appendChild(st);
     }
     st.textContent =
-      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:44px!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 55%!important;flex-basis:55%!important;max-width:58%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;min-width:460px!important;max-width:460px!important;width:460px!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table.colors_pricebox{display:table!important;table-layout:fixed!important}html body.mc-saranoni-pdp td.mc-pdp-media-td{display:block!important;flex:1 1 55%!important;flex-basis:55%!important;width:auto!important;max-width:58%!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;width:460px!important;max-width:460px!important;min-width:460px!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:100%!important;max-width:min(650px,100%)!important;height:auto!important;display:block!important;margin-left:0!important}}" +
+      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:44px!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 55%!important;flex-basis:55%!important;max-width:58%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;min-width:460px!important;max-width:460px!important;width:460px!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table.colors_pricebox{display:table!important;table-layout:fixed!important}html body.mc-saranoni-pdp td.mc-pdp-media-td{display:table-cell!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;width:460px!important;max-width:460px!important;min-width:460px!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:auto!important;max-width:min(650px,100%)!important;height:auto!important;max-height:none!important;display:block!important;margin-left:0!important;margin-right:auto!important}}" +
       "html body.mc-saranoni-pdp td.mc-pdp-options-td>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-unified-pdp-info>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-pdp-options-td>#options_table:not(#mc-pdp-option-block #options_table),html body.mc-saranoni-pdp td.mc-pdp-options-td>table:has(>#options_table):not(:has(#mc-pdp-option-block)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-brand-logo,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-price-stack-host,html body.mc-saranoni-pdp #messaging-element,html body.mc-saranoni-pdp #mc-pdp-accordion,html body.mc-saranoni-pdp #mc-pdp-option-block,html body.mc-saranoni-pdp #mc-pdp-features,html body.mc-saranoni-pdp #mc-pdp-description-below-features,html body.mc-saranoni-pdp #mc-pdp-purchase-stack{order:unset!important}";
   }
