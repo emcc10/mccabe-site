@@ -39,11 +39,11 @@ jobs:
       - name: Show exact remote paths (for FileZilla comparison)
         run: |
           echo "Remote paths are relative to your SFTP root /."
-          echo "Template will be uploaded to:  /template_266.html"
-          echo "vspfiles will be uploaded to:  /vspfiles/"
-          echo "So custom-safe.css lands at:   /vspfiles/css/custom-safe.css"
+          echo "Template will be uploaded to:  /v/template_266.html"
+          echo "vspfiles will be uploaded to:  /v/vspfiles/"
+          echo "So custom-safe.css lands at:   /v/vspfiles/css/custom-safe.css"
           echo ""
-          echo "In FileZilla: after login, open /vspfiles/css/custom-safe.css and check that Modified time is NOW after this run."
+          echo "In FileZilla: after login, open /v/vspfiles/css/custom-safe.css and check that Modified time is NOW after this run."
 
       - name: Deploy via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
@@ -53,10 +53,14 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            template_266.html => /
-            vspfiles/ => vspfiles/
+            template_266.html => v/
+            vspfiles/ => v/vspfiles/
 
       - name: Deploy summary
         run: |
           echo "If the job succeeded, the files were written to the paths above."
-          echo "Check FileZilla at: /vspfiles/css/custom-safe.css"
+          echo "Check FileZilla at: /v/vspfiles/css/custom-safe.css"
+          echo "Live JS verify marker: MC_PDP_AUTH_DEPLOY_VERIFY_20260623sarrepair2"
+          curl -fsS "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=$(date +%s)" | grep -q 'table-cell' \
+            && echo "Live mc-pdp-auth-cta-fix.js contains Saranoni table-cell fix." \
+            || echo "::warning::Live JS still missing table-cell fix — check SFTP root vs /v/ path."
