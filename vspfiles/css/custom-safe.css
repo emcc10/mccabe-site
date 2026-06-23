@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260622sarstable5 — stop mc-saranoni-pdp CSS; use mc-saranoni-product native */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260622sarstable6 — stop mc-saranoni-pdp CSS; use mc-saranoni-product native */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -19273,7 +19273,7 @@ html body.mc-saranoni-pdp #v65-product-parent img#product_photo {
   }
 }
 
-/* MC_SARANONI_PRODUCT_NATIVE_20260622sarstable5 */
+/* MC_SARANONI_PRODUCT_NATIVE_20260622sarstable6 */
 html body.mc-saranoni-product #v65-product-parent,
 html body.mc-saranoni-product #v65-product-parent table,
 html body.mc-saranoni-product #v65-product-parent tbody,
@@ -19303,7 +19303,7 @@ html body.mc-saranoni-product #v65-product-parent img#product_photo {
   height: auto !important;
 }
 
-/* MC_SARANONI_NATIVE_EMERGENCY_20260622sarstable5 — beat stale mc-saranoni-pdp hide rules on live rebakes */
+/* MC_SARANONI_NATIVE_EMERGENCY_20260622sarstable6 — beat stale mc-saranoni-pdp hide rules on live rebakes */
 html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
 html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
 html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
@@ -19417,7 +19417,7 @@ html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) .mc-unified-purcha
   }
 }
 
-/* MC_SARANONI_NATIVE_VISIBILITY_20260622sarstable5 — beat stale hide rules at all widths */
+/* MC_SARANONI_NATIVE_VISIBILITY_20260622sarstable6 — beat stale hide rules at all widths */
 html body.mc-saranoni-product #v65-product-parent,
 html body.mc-saranoni-product #v65-product-parent * {
   visibility: visible !important;

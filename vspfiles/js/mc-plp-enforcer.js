@@ -722,7 +722,7 @@
     }
   }
 
-  var PDP_AUTH_WANT = "20260622sarstable5";
+  var PDP_AUTH_WANT = "20260622sarstable6";
 
   function isSaranoniPdpPage() {
     try {

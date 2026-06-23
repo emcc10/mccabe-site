@@ -1529,10 +1529,10 @@ document.addEventListener("DOMContentLoaded", function () {
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622sarstable5"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260622sarstable5 -->
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622sarstable6"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260622sarstable6 -->
   <script id="mc-ss-piece-hero-boot">
 (function (g, d) {
-  var SS_HERO_VER = "20260622sarstable5";
+  var SS_HERO_VER = "20260622sarstable6";
   function productCode() {
     var input = d.querySelector('input[name="ProductCode"]');
     return String(
@@ -1615,6 +1615,95 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 ========================================= -->
 
 <body>
+<script id="mc-sar-emergency-body-top-20260622sarstable6">
+(function (g, d) {
+  try {
+    var path = String(g.location.pathname || "").toLowerCase();
+    var search = String(g.location.search || "");
+    var isSar =
+      /\/product-p\/sar-/i.test(path) ||
+      (/productdetails\.asp/i.test(path) && /productcode=sar/i.test(search));
+    if (!isSar) return;
+    g.__MC_SAR_NATIVE_PDP__ = true;
+    g.__MC_SKIP_UNIFIED_PDP_LAYOUT__ = true;
+    var css =
+      "html body #v65-product-parent,html body.mc-saranoni-product #v65-product-parent,html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp-init #v65-product-parent{" +
+      "display:table!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important;overflow:visible!important}" +
+      "html body.mc-saranoni-product #v65-product-parent *,html body.mc-saranoni-product #v65-product-parent table,html body.mc-saranoni-product #v65-product-parent tbody,html body.mc-saranoni-product #v65-product-parent tr,html body.mc-saranoni-product #v65-product-parent td{" +
+      "display:revert!important;visibility:visible!important;opacity:1!important}" +
+      "html body.mc-saranoni-product #mc-pdp-brand-logo,html body.mc-saranoni-product #mc-pdp-title-right,html body.mc-saranoni-product #mc-pdp-accordion,html body.mc-saranoni-product #mc-pdp-option-block,html body.mc-saranoni-product #mc-configured-color-swatch-wrapper,html body.mc-saranoni-product #mc-saranoni-size-thumbs,html body.mc-saranoni-product #mc-pdp-purchase-stack,html body.mc-saranoni-product .mc-saranoni-color-picker,html body.mc-saranoni-product .mc-unified-purchase-controls{" +
+      "display:none!important;height:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}";
+    if (!d.getElementById("mc-sar-emergency-top-css")) {
+      var st = d.createElement("style");
+      st.id = "mc-sar-emergency-top-css";
+      st.textContent = css;
+      (d.head || d.documentElement).appendChild(st);
+    }
+    function guard() {
+      var b = d.body;
+      if (!b) return;
+      if (
+        b.classList.contains("mc-saranoni-pdp") ||
+        b.classList.contains("mc-saranoni-pdp-init") ||
+        b.classList.contains("mc-hide-native-options-until-mc") ||
+        b.classList.contains("mc-pdp-hero-pending")
+      ) {
+        b.classList.remove(
+          "mc-saranoni-pdp",
+          "mc-saranoni-pdp-init",
+          "mc-saranoni-pdp-ready",
+          "mc-saranoni-pdp-custom-layout",
+          "mc-hide-native-options-until-mc",
+          "mc-pdp-hero-pending",
+          "mc-pdp-unified-ready"
+        );
+      }
+      b.classList.add("mc-saranoni-product", "mc-pdp-hero-ready");
+      var pp = d.getElementById("v65-product-parent");
+      if (pp) {
+        pp.style.setProperty("display", "table", "important");
+        pp.style.setProperty("visibility", "visible", "important");
+        pp.style.setProperty("opacity", "1", "important");
+        pp.style.setProperty("height", "auto", "important");
+        pp.style.setProperty("max-height", "none", "important");
+        pp.style.setProperty("overflow", "visible", "important");
+      }
+    }
+    guard();
+    if (d.body && typeof MutationObserver !== "undefined") {
+      new MutationObserver(guard).observe(d.body, { attributes: true, attributeFilter: ["class"] });
+    } else {
+      d.addEventListener("DOMContentLoaded", function () {
+        guard();
+        if (d.body && typeof MutationObserver !== "undefined") {
+          new MutationObserver(guard).observe(d.body, { attributes: true, attributeFilter: ["class"] });
+        }
+      });
+    }
+    [0, 50, 150, 400, 1000, 2500, 5000].forEach(function (ms) {
+      g.setTimeout(guard, ms);
+    });
+    if (!g.__MC_SAR_BLOCK_UNIFIED_APPEND__) {
+      g.__MC_SAR_BLOCK_UNIFIED_APPEND__ = true;
+      var origAppend = Element.prototype.appendChild;
+      Element.prototype.appendChild = function (node) {
+        try {
+          if (
+            isSar &&
+            node &&
+            node.tagName === "SCRIPT" &&
+            node.src &&
+            /mc-unified-pdp-layout\.js/i.test(String(node.src))
+          ) {
+            return node;
+          }
+        } catch (eBlock) {}
+        return origAppend.call(this, node);
+      };
+    }
+  } catch (eSarTop) {}
+})(window, document);
+</script>
  
 <script>
 (function () {
@@ -4347,16 +4436,7 @@ try {
 </script>
  <script>
 (function(){
-  var expected = "20260622sarstable5";
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== expected) {
-    if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
-      document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
-      var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" + expected + "&mcrd=" + Date.now();
-      s.async = false;
-      (document.head || document.documentElement).appendChild(s);
-    }
-  }
+  /* MC_TEMPLATE_AUTH_BOOT_20260622sarstable6 — single script-tag load; no footer reload */
 
   if (window.__MC_INLINE_FINAL__) return;
 
@@ -21481,7 +21561,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <!-- MC removed duplicate static mc-sectional-pdp-emergency.js; dynamic loader may still load one copy when needed -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260622sarstable5"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260622sarstable6"></script>
 <script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260626-top-price-panel-v31"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";

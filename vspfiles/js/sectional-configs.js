@@ -1002,53 +1002,10 @@
     (d.head || d.documentElement).appendChild(s);
   })(document);
 
-  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260622sarstable5 — no external boot.js (404-safe); load auth fix with cache bust */
-  (function (g, d) {
-    var WANT = "20260622sarstable5";
-    function isSaranoniPdpPage() {
-      try {
-        var path = String(g.location.pathname || "").toLowerCase();
-        if (/\/product-p\/sar-/i.test(path)) return true;
-        if (/productdetails\.asp/i.test(path) && /productcode=sar/i.test(String(g.location.search || ""))) {
-          return true;
-        }
-        var pcEl = d.querySelector('input[name="ProductCode"], input[name="productcode"]');
-        var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
-        if (/^SAR/.test(pc)) return true;
-        if (d.body && d.body.classList.contains("mc-saranoni-product")) return true;
-      } catch (eSar) {}
-      return false;
-    }
-    function ensure() {
-      try {
-        if (isSaranoniPdpPage()) return;
-        var onPdp =
-          (d.body && d.body.classList.contains("productdetails")) ||
-          !!d.getElementById("v65-product-parent");
-        if (!onPdp) return;
-        if (String(g.__MC_PDP_AUTH_CTA_FIX_VER__ || "") === WANT) return;
-        d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
-          try {
-            old.remove();
-          } catch (eRm) {}
-        });
-        delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
-        var s = d.createElement("script");
-        s.id = "mc-pdp-auth-cta-inline-loader";
-        s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" + WANT + "&mcrd=" + Date.now();
-        s.async = false;
-        (d.head || d.documentElement).appendChild(s);
-      } catch (eLoad) {}
-    }
-    ensure();
-    if (d.readyState === "loading") {
-      d.addEventListener("DOMContentLoaded", ensure);
-    }
-    g.addEventListener("load", ensure);
-    [0, 200, 600, 1500, 4000].forEach(function (ms) {
-      g.setTimeout(ensure, ms);
-    });
-  })(window, document);
+  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260622sarstable6 — DISABLED: template owns mc-pdp-auth-cta-fix load; reload caused blank Saranoni PDPs */
+  (function () {
+    return;
+  })();
 
   /* MC_SECTIONAL_MTL_RENDERER_INLINE — GitHub raw first (Volusion file body lags ?v= cache bust) */
   (function (g, d) {
