@@ -1526,10 +1526,30 @@ document.addEventListener("DOMContentLoaded", function () {
  
   <!-- DESIGN TOOLKIT -->
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
-  <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
+  <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
+  <script>
+(function (g, d) {
+  var FP = "20260624A";
+  function bootFreshCta() {
+    if (!d.getElementById("v65-product-parent")) return;
+    if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
+    if (d.documentElement.getAttribute("data-mc-pdp-auth-head-boot")) return;
+    d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", "1");
+    d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+      try { old.remove(); } catch (eRm) {}
+    });
+    var s = d.createElement("script");
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+    s.async = false;
+    (d.head || d.documentElement).appendChild(s);
+  }
+  bootFreshCta();
+  d.addEventListener("DOMContentLoaded", bootFreshCta);
+})(window, document);
+  </script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260623sarrepair3"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260623sarrepair3 -->
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=live"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260624A -->
   <script id="mc-ss-piece-hero-boot">
 (function (g, d) {
   var SS_HERO_VER = "20260623sarrepair3";
@@ -4293,15 +4313,18 @@ try {
 </script>
  <script>
 (function(){
-  var expected = "20260623sarrepair3";
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== expected) {
-    if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
-      document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
-      var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" + expected + "&mcrd=" + Date.now();
-      s.async = false;
-      (document.head || document.documentElement).appendChild(s);
-    }
+  var FP = "20260624A";
+  if (String(window.__MC_DEPLOY_FP__ || "") === FP) {
+    /* current bundle loaded */
+  } else if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
+    document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
+    document.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+      try { old.remove(); } catch (eRm) {}
+    });
+    var s = document.createElement("script");
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+    s.async = false;
+    (document.head || document.documentElement).appendChild(s);
   }
 
   if (window.__MC_INLINE_FINAL__) return;
