@@ -7,9 +7,10 @@ const URLS = [
 
 const browser = await chromium.launch({ headless: true });
 for (const url of URLS) {
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-  await page.goto(url, { waitUntil: "networkidle", timeout: 120000 });
-  await page.waitForTimeout(8000);
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
+  await page.waitForSelector("#v65-product-parent", { timeout: 60000 });
+  await page.waitForTimeout(12000);
   const audit = await page.evaluate(() => {
     const pp = document.getElementById("v65-product-parent");
     const ppCs = pp ? getComputedStyle(pp) : null;

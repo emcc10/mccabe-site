@@ -1002,11 +1002,26 @@
     (d.head || d.documentElement).appendChild(s);
   })(document);
 
-  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260617pdp78 — no external boot.js (404-safe); load auth fix with cache bust */
+  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260622sarstable5 — no external boot.js (404-safe); load auth fix with cache bust */
   (function (g, d) {
-    var WANT = "20260617pdp78";
+    var WANT = "20260622sarstable5";
+    function isSaranoniPdpPage() {
+      try {
+        var path = String(g.location.pathname || "").toLowerCase();
+        if (/\/product-p\/sar-/i.test(path)) return true;
+        if (/productdetails\.asp/i.test(path) && /productcode=sar/i.test(String(g.location.search || ""))) {
+          return true;
+        }
+        var pcEl = d.querySelector('input[name="ProductCode"], input[name="productcode"]');
+        var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
+        if (/^SAR/.test(pc)) return true;
+        if (d.body && d.body.classList.contains("mc-saranoni-product")) return true;
+      } catch (eSar) {}
+      return false;
+    }
     function ensure() {
       try {
+        if (isSaranoniPdpPage()) return;
         var onPdp =
           (d.body && d.body.classList.contains("productdetails")) ||
           !!d.getElementById("v65-product-parent");

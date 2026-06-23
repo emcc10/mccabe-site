@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622sarstable4
-  var VERSION = "20260622sarstable4";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260622sarstable5
+  var VERSION = "20260622sarstable5";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
 
   function isLikelySaranoniPdpUrl() {
@@ -45,6 +45,51 @@
       if (/productdetails\.asp/i.test(path) && /productcode=sar/i.test(search)) return true;
     } catch (eSarUrl) {}
     return false;
+  }
+
+  var MC_SARANONI_INJECT_IDS = [
+    "mc-pdp-brand-logo",
+    "mc-pdp-title-right",
+    "mc-pdp-price-stack-host",
+    "mc-pdp-accordion",
+    "mc-pdp-option-block",
+    "mc-configured-color-swatch-wrapper",
+    "mc-saranoni-size-thumbs",
+    "mc-pdp-purchase-stack",
+    "mc-pdp-features",
+    "mc-pdp-description-below-features",
+    "mc-saranoni-color-picker",
+    "mc-pdp-hero-antiflicker-css",
+    "mc-saranoni-pdp-layout-css",
+  ];
+
+  function mcSaranoniStripCustomInjectNodes() {
+    var di;
+    for (di = 0; di < MC_SARANONI_INJECT_IDS.length; di++) {
+      var node = global.document.getElementById(MC_SARANONI_INJECT_IDS[di]);
+      if (node && node.parentNode) {
+        try {
+          node.parentNode.removeChild(node);
+        } catch (eRm) {}
+      }
+    }
+    global.document
+      .querySelectorAll(
+        ".mc-saranoni-color-picker,.mc-unified-purchase-controls,.mc-saranoni-purchase-stack"
+      )
+      .forEach(function (el) {
+        if (el && el.parentNode) {
+          try {
+            el.parentNode.removeChild(el);
+          } catch (eRm2) {}
+        }
+      });
+    try {
+      if (global.document.body) {
+        delete global.document.body.dataset.mcPdpLayoutMounted;
+        delete global.document.body.dataset.mcPdpLayoutVer;
+      }
+    } catch (eDs) {}
   }
 
   function mcSaranoniNativeBypass() {
@@ -63,20 +108,41 @@
         }
       }
       if (!body) return;
+      mcSaranoniStripCustomInjectNodes();
       body.classList.add("mc-saranoni-product", "mc-pdp-hero-ready");
       body.classList.remove(
         "mc-saranoni-pdp",
         "mc-saranoni-pdp-init",
         "mc-saranoni-pdp-ready",
+        "mc-saranoni-pdp-custom-layout",
         "mc-hide-native-options-until-mc",
         "mc-pdp-hero-pending",
         "mc-pdp-unified-ready"
       );
+      var pp = global.document.getElementById("v65-product-parent");
+      if (pp) {
+        pp.style.setProperty("display", "table", "important");
+        pp.style.setProperty("visibility", "visible", "important");
+        pp.style.setProperty("opacity", "1", "important");
+        pp.style.setProperty("height", "auto", "important");
+        pp.style.setProperty("max-height", "none", "important");
+        pp.style.setProperty("overflow", "visible", "important");
+        pp.querySelectorAll("tr.mc-pdp-main-row, tr.mc-unified-pdp-row").forEach(function (row) {
+          row.classList.remove("mc-pdp-main-row", "mc-unified-pdp-row");
+          row.style.setProperty("display", "table-row", "important");
+        });
+        pp.querySelectorAll("td.mc-pdp-media-td, td.mc-pdp-options-td").forEach(function (td) {
+          td.classList.remove("mc-pdp-media-td", "mc-pdp-options-td", "mc-unified-pdp-media", "mc-unified-pdp-info");
+          td.style.setProperty("display", "table-cell", "important");
+          td.style.setProperty("visibility", "visible", "important");
+        });
+      }
       if (!global.document.getElementById("mc-saranoni-native-unblock-css")) {
         var sarSt = global.document.createElement("style");
         sarSt.id = "mc-saranoni-native-unblock-css";
         sarSt.textContent =
           "html body.mc-saranoni-product #v65-product-parent," +
+          "html body.mc-saranoni-product #v65-product-parent *," +
           "html body.mc-saranoni-product #v65-product-parent table," +
           "html body.mc-saranoni-product #v65-product-parent tbody," +
           "html body.mc-saranoni-product #v65-product-parent tr," +
@@ -121,6 +187,15 @@
   if (global.document && global.document.readyState === "loading") {
     global.document.addEventListener("DOMContentLoaded", mcSaranoniNativeBypass);
   }
+  global.addEventListener("load", mcSaranoniNativeBypass);
+  (function mcSaranoniBypassBurst() {
+    var n = 0;
+    var burst = global.setInterval(function () {
+      mcSaranoniNativeBypass();
+      n += 1;
+      if (n >= 12) global.clearInterval(burst);
+    }, 250);
+  })();
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
     if (global.__MC_PDP_LAYOUT_MO__) {
@@ -8905,7 +8980,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260622sarstable4&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260622sarstable5&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -9186,7 +9261,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260622sarstable4";
+  var WANT = "20260622sarstable5";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -9225,7 +9300,7 @@
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
 (function (g, d) {
-  var SS_ALT_VER = "20260622sarstable4";
+  var SS_ALT_VER = "20260622sarstable5";
 
   function normalizePhotoUrl(url) {
     if (typeof g.mcNormalizePhotoUrl === "function") return g.mcNormalizePhotoUrl(url);
@@ -9595,7 +9670,7 @@
 })(window, document);
 /* MC_CENTER_ALT_IMAGES_UNDER_MAIN_20260618 */
 (function (g, d) {
-  var CENTER_ALT_VER = "20260622sarstable4";
+  var CENTER_ALT_VER = "20260622sarstable5";
 
   function isSteveSilverPdp() {
     if (d.body && d.body.classList.contains("mc-steve-silver-altview-pdp")) return true;

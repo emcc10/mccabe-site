@@ -1529,10 +1529,10 @@ document.addEventListener("DOMContentLoaded", function () {
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622sarstable4"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260622sarstable4 -->
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622sarstable5"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260622sarstable5 -->
   <script id="mc-ss-piece-hero-boot">
 (function (g, d) {
-  var SS_HERO_VER = "20260622sarstable4";
+  var SS_HERO_VER = "20260622sarstable5";
   function productCode() {
     var input = d.querySelector('input[name="ProductCode"]');
     return String(
@@ -1728,16 +1728,42 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     var pcUpper = pc.toUpperCase();
     if (/^SAR/.test(pcUpper)) {
       b.classList.add("mc-saranoni-product");
-      b.classList.remove("mc-saranoni-pdp", "mc-saranoni-pdp-init");
+      b.classList.remove(
+        "mc-saranoni-pdp",
+        "mc-saranoni-pdp-init",
+        "mc-saranoni-pdp-ready",
+        "mc-hide-native-options-until-mc",
+        "mc-pdp-hero-pending",
+        "mc-pdp-unified-ready"
+      );
       if (pcUpper === "SAR-RUCHED-MINKY-THROW-BLANKET") {
         b.classList.add("mc-ruched-blanket-pdp");
       }
+      function mcSaranoniEarlyClassGuard() {
+        if (b.classList.contains("mc-saranoni-pdp") || b.classList.contains("mc-saranoni-pdp-init")) {
+          b.classList.remove("mc-saranoni-pdp", "mc-saranoni-pdp-init", "mc-saranoni-pdp-ready");
+          b.classList.add("mc-saranoni-product");
+        }
+        if (b.classList.contains("mc-hide-native-options-until-mc")) {
+          b.classList.remove("mc-hide-native-options-until-mc");
+        }
+      }
+      mcSaranoniEarlyClassGuard();
+      try {
+        if (typeof MutationObserver !== "undefined") {
+          new MutationObserver(mcSaranoniEarlyClassGuard).observe(b, {
+            attributes: true,
+            attributeFilter: ["class"],
+          });
+        }
+      } catch (eSarMo) {}
       try {
         if (!document.getElementById("mc-saranoni-native-unblock-css")) {
           var sarSt = document.createElement("style");
           sarSt.id = "mc-saranoni-native-unblock-css";
           sarSt.textContent =
             "html body.mc-saranoni-product #v65-product-parent," +
+            "html body.mc-saranoni-product #v65-product-parent *," +
             "html body.mc-saranoni-product #v65-product-parent table," +
             "html body.mc-saranoni-product #v65-product-parent tbody," +
             "html body.mc-saranoni-product #v65-product-parent tr," +
@@ -1755,6 +1781,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
           (document.head || document.documentElement).appendChild(sarSt);
         }
       } catch (eSarUnblock) {}
+      return;
     }
     var catEarly =
       document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
@@ -4317,7 +4344,7 @@ try {
 </script>
  <script>
 (function(){
-  var expected = "20260622sarstable4";
+  var expected = "20260622sarstable5";
   if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== expected) {
     if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
       document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
@@ -21451,7 +21478,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <!-- MC removed duplicate static mc-sectional-pdp-emergency.js; dynamic loader may still load one copy when needed -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260617pdp78"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260622sarstable5"></script>
 <script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260626-top-price-panel-v31"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";

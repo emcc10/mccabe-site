@@ -1351,10 +1351,11 @@
         .trim()
         .toUpperCase();
       if (/^SAR/.test(pc)) {
-        global.document.body.classList.add("mc-saranoni-pdp");
+        global.document.body.classList.add("mc-saranoni-product");
+        global.document.body.classList.remove("mc-saranoni-pdp", "mc-saranoni-pdp-init");
         global.document.body.classList.toggle("mc-ruched-blanket-pdp", pc === "SAR-RUCHED-MINKY-THROW-BLANKET");
       } else {
-        global.document.body.classList.remove("mc-saranoni-pdp", "mc-ruched-blanket-pdp");
+        global.document.body.classList.remove("mc-saranoni-product", "mc-saranoni-pdp", "mc-ruched-blanket-pdp");
       }
       global.document.body.classList.toggle("mc-gatlin-sectional-pdp", /GATLIN/i.test(pc) && /-SECT/i.test(pc));
       global.document.body.classList.toggle("mc-steve-silver-altview-pdp", /^SS-/.test(pc));
@@ -1365,6 +1366,13 @@
     if (!isPDP()) return false;
     if (isSectionalConfigurator()) return false;
     if (isUnifiedStable()) return true;
+    try {
+      var sarPc = String((qs('input[name="ProductCode"], input[name="productcode"]') || {}).value || "")
+        .trim()
+        .toUpperCase();
+      if (/^SAR/.test(sarPc)) return false;
+      if (global.document.body && global.document.body.classList.contains("mc-saranoni-product")) return false;
+    } catch (eSarSkip) {}
 
     unwrapBadWrapper();
     tagProductBodyClasses();
