@@ -939,7 +939,7 @@
         if (
           global.document.body &&
           (global.document.body.classList.contains("mc-bean-bag-pdp") ||
-            global.document.body.classList.contains("mc-saranoni-pdp"))
+            global.document.body.classList.contains("mc-saranoni-product"))
         ) {
           return;
         }

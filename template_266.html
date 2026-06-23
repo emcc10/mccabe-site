@@ -1719,6 +1719,9 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     var b = document.body;
     if (!b) return;
     var p = (location.pathname || "").toLowerCase();
+    var isSarUrl =
+      /\/product-p\/sar-/i.test(p) ||
+      (/productdetails\.asp/i.test(p) && /productcode=sar/i.test(String(location.search || "")));
     var pcEl =
       document.querySelector('input[name="ProductCode"]') ||
       document.querySelector('input[name="productcode"]');
@@ -1726,7 +1729,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     // Saranoni product pages: tag the body from the real ProductCode (not URL/title)
     // so layout + the configured-color swatch system can scope to them.
     var pcUpper = pc.toUpperCase();
-    if (/^SAR/.test(pcUpper)) {
+    if (/^SAR/.test(pcUpper) || isSarUrl) {
       b.classList.add("mc-saranoni-product");
       b.classList.remove(
         "mc-saranoni-pdp",

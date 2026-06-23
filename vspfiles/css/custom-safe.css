@@ -19416,3 +19416,36 @@ html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) .mc-unified-purcha
     vertical-align: top !important;
   }
 }
+
+/* MC_SARANONI_NATIVE_VISIBILITY_20260622sarstable5 — beat stale hide rules at all widths */
+html body.mc-saranoni-product #v65-product-parent,
+html body.mc-saranoni-product #v65-product-parent * {
+  visibility: visible !important;
+}
+
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #content_area tr.mc-pdp-main-row,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr.mc-pdp-main-row,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #content_area tr.mc-pdp-main-row,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr.mc-pdp-main-row {
+  display: table-row !important;
+  flex: none !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) tr.mc-pdp-main-row > td,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) tr.mc-pdp-main-row > td,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-media-td,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-options-td,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-media-td,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-options-td {
+  display: table-cell !important;
+  flex: none !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  vertical-align: top !important;
+}
