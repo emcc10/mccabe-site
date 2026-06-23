@@ -1,43 +1,18 @@
 {
-  "ver": "20260621sarlayout5",
-  "script": "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260617pdp78&mcrd=1782078490748",
+  "ver": "20260622sarstable4",
+  "script": "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260617pdp78&mcrd=1782218661994",
   "ids": [
     {
-      "id": "mc-pdp-brand-logo",
-      "top": 285,
-      "vis": true
-    },
-    {
-      "id": "mc-pdp-title-right",
-      "top": 338,
-      "vis": true
-    },
-    {
       "id": "mc-pdp-price-stack-host",
-      "top": 424,
+      "top": 776,
       "vis": true
     },
     {
-      "id": "mc-pdp-features",
-      "top": 466,
-      "vis": true
-    },
-    {
-      "id": "mc-pdp-purchase-stack",
-      "top": 806,
-      "vis": true
-    },
-    {
-      "id": "mc-pdp-option-block",
-      "top": 940,
-      "vis": true
-    },
-    {
-      "id": "mc-pdp-description-below-features",
-      "top": 1121,
+      "id": "mc-pdp-accordion",
+      "top": 775,
       "vis": true
     }
   ],
-  "sizeBeforeFeatures": true,
-  "domOrderOk": false
+  "sizeBeforeFeatures": null,
+  "domOrderOk": null
 }
