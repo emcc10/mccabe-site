@@ -1002,7 +1002,7 @@
     (d.head || d.documentElement).appendChild(s);
   })(document);
 
-  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260622sarstable6 — DISABLED: template owns mc-pdp-auth-cta-fix load; reload caused blank Saranoni PDPs */
+  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260623sarrepair1 — DISABLED: template owns mc-pdp-auth-cta-fix load; reload caused blank Saranoni PDPs */
   (function () {
     return;
   })();
