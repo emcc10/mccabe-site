@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260622sarstable6 — stop mc-saranoni-pdp CSS; use mc-saranoni-product native */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -16838,14 +16838,14 @@ html body.mc-saranoni-pdp-ready #mc-pdp-purchase-stack {
   visibility: visible !important;
 }
 
-/* One price only: hide Volusion native price nodes after stack host is mounted (custom layout only) */
-html body.mc-saranoni-pdp-custom-layout:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_list_price,
-html body.mc-saranoni-pdp-custom-layout:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_productprice,
-html body.mc-saranoni-pdp-custom-layout:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_sale_price,
-html body.mc-saranoni-pdp-custom-layout:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox font.product_sale_price,
-html body.mc-saranoni-pdp-custom-layout:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_saleprice,
-html body.mc-saranoni-pdp-custom-layout:has(#mc-pdp-price-stack-host) #content_area .colors_pricebox .product_list_price,
-html body.mc-saranoni-pdp-custom-layout:has(#mc-pdp-price-stack-host) #content_area .colors_pricebox .product_productprice {
+/* One price only: hide Volusion native price nodes after stack host is mounted */
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_list_price,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_productprice,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_sale_price,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox font.product_sale_price,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #content_area .colors_pricebox .product_list_price,
+html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) #content_area .colors_pricebox .product_productprice {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -16856,9 +16856,9 @@ html body.mc-saranoni-pdp-custom-layout:has(#mc-pdp-price-stack-host) #content_a
 }
 
 html body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
-html body.mc-saranoni-pdp-custom-layout #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
+html body.mc-saranoni-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
 html body.mc-bean-bag-pdp #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
-html body.mc-saranoni-pdp-custom-layout #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title {
+html body.mc-saranoni-pdp #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -18064,9 +18064,21 @@ html body [id*="soft"][id*="cart"] a[href*="ShoppingCart"] {
   }
 }
 
-html body.mc-saranoni-pdp td.mc-pdp-options-td > table.mc-saranoni-obsolete-pricebox,
-html body.mc-saranoni-pdp td.mc-unified-pdp-info > table.mc-saranoni-obsolete-pricebox {
+html body.mc-saranoni-pdp td.mc-pdp-options-td > table.colors_pricebox,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info > table.colors_pricebox,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .option_pricing,
+html body.mc-saranoni-pdp td.mc-pdp-options-td font.option_pricing,
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table.colors_pricebox,
+html body.mc-saranoni-pdp td.mc-unified-pdp-info:has(#mc-pdp-price-stack-host) > table.colors_pricebox,
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-option-block) > #options_table,
+html body.mc-saranoni-pdp td.mc-pdp-options-td:has(#mc-pdp-option-block) > table:has(> #options_table) {
   display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-return-row {
@@ -19146,306 +19158,4 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     top: auto !important;
     transform: none !important;
   }
-}
-
-/* MC_SARANONI_NATIVE_BYPASS_20260622sarstable1 - remove broken custom PDP layout for SAR-* pages. */
-html body.mc-saranoni-pdp,
-html body.mc-saranoni-pdp * {
-  animation-duration: 0s !important;
-}
-
-html body.mc-saranoni-pdp #mc-pdp-accordion,
-html body.mc-saranoni-pdp #mc-pdp-option-block,
-html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper,
-html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack,
-html body.mc-saranoni-pdp #mc-pdp-price-stack-host,
-html body.mc-saranoni-pdp .mc-saranoni-color-picker,
-html body.mc-saranoni-pdp .mc-unified-purchase-controls {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  max-height: 0 !important;
-  overflow: hidden !important;
-}
-
-html body.mc-saranoni-pdp #v65-product-parent,
-html body.mc-saranoni-pdp #content_area #v65-product-parent,
-html body.mc-saranoni-pdp #v65-product-parent table,
-html body.mc-saranoni-pdp #v65-product-parent tbody,
-html body.mc-saranoni-pdp #v65-product-parent tr,
-html body.mc-saranoni-pdp #v65-product-parent td {
-  float: none !important;
-  position: static !important;
-  transform: none !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-
-html body.mc-saranoni-pdp #v65-product-parent table {
-  display: table !important;
-}
-html body.mc-saranoni-pdp #v65-product-parent tbody {
-  display: table-row-group !important;
-}
-html body.mc-saranoni-pdp #v65-product-parent tr {
-  display: table-row !important;
-}
-html body.mc-saranoni-pdp #v65-product-parent td {
-  display: table-cell !important;
-  vertical-align: top !important;
-}
-
-html body.mc-saranoni-pdp #v65-product-parent .colors_pricebox,
-html body.mc-saranoni-pdp #v65-product-parent #options_table,
-html body.mc-saranoni-pdp #v65-product-parent [itemprop="offers"],
-html body.mc-saranoni-pdp #v65-product-parent .v65-productdetail-cartqty,
-html body.mc-saranoni-pdp #v65-product-parent .v65-product-addtocart,
-html body.mc-saranoni-pdp #v65-product-parent input[name="btnaddtocart"],
-html body.mc-saranoni-pdp #v65-product-parent button[name="btnaddtocart"],
-html body.mc-saranoni-pdp #v65-product-parent input[name^="QTY."],
-html body.mc-saranoni-pdp #v65-product-parent select,
-html body.mc-saranoni-pdp #v65-product-parent img#product_photo,
-html body.mc-saranoni-pdp #v65-product-parent a#product_photo_zoom_url {
-  display: revert !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
-}
-
-html body.mc-saranoni-pdp #v65-product-parent img#product_photo {
-  display: block !important;
-  width: auto !important;
-  max-width: 650px !important;
-  height: auto !important;
-  margin: 0 !important;
-}
-
-/* Beat earlier mc-pdp-main-row flex rules that collapse native Volusion tables. */
-@media (min-width: 992px) {
-  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp #v65-product-parent > tbody > tr.mc-pdp-main-row {
-    display: table-row !important;
-    flex: none !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td,
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:first-child,
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:last-child,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
-  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-media-td,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
-  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td,
-  html body.mc-saranoni-pdp td.mc-unified-pdp-info {
-    display: table-cell !important;
-    flex: none !important;
-    flex-basis: auto !important;
-    flex-shrink: 1 !important;
-    width: auto !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    vertical-align: top !important;
-  }
-}
-
-@media (max-width: 991px) {
-  html body.mc-saranoni-pdp #v65-product-parent,
-  html body.mc-saranoni-pdp #v65-product-parent table,
-  html body.mc-saranoni-pdp #v65-product-parent tbody,
-  html body.mc-saranoni-pdp #v65-product-parent tr,
-  html body.mc-saranoni-pdp #v65-product-parent td {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  html body.mc-saranoni-pdp #v65-product-parent img#product_photo {
-    max-width: 100% !important;
-  }
-}
-
-/* MC_SARANONI_PRODUCT_NATIVE_20260622sarstable6 */
-html body.mc-saranoni-product #v65-product-parent,
-html body.mc-saranoni-product #v65-product-parent table,
-html body.mc-saranoni-product #v65-product-parent tbody,
-html body.mc-saranoni-product #v65-product-parent tr,
-html body.mc-saranoni-product #v65-product-parent td,
-html body.mc-saranoni-product #v65-product-parent .colors_pricebox,
-html body.mc-saranoni-product #v65-product-parent #options_table,
-html body.mc-saranoni-product #v65-product-parent h1,
-html body.mc-saranoni-product #v65-product-parent .productnamecolor,
-html body.mc-saranoni-product #v65-product-parent .productnamecolorLARGE,
-html body.mc-saranoni-product #v65-product-parent img#product_photo,
-html body.mc-saranoni-product #v65-product-parent input[name="btnaddtocart"],
-html body.mc-saranoni-product #v65-product-parent input[name^="QTY."] {
-  display: revert !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
-}
-
-html body.mc-saranoni-product #v65-product-parent img#product_photo {
-  display: block !important;
-  width: auto !important;
-  max-width: 650px !important;
-  height: auto !important;
-}
-
-/* MC_SARANONI_NATIVE_EMERGENCY_20260622sarstable6 — beat stale mc-saranoni-pdp hide rules on live rebakes */
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent h1,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent h1 {
-  display: revert !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-  margin: revert !important;
-  padding: revert !important;
-}
-
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent table,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tbody,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent td,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .colors_pricebox,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent #options_table,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent [itemprop="offers"],
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .v65-productdetail-cartqty,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .v65-product-addtocart,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent input[name="btnaddtocart"],
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent button[name="btnaddtocart"],
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent input[name^="QTY."],
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent select,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent table,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tbody,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent td,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .colors_pricebox,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent #options_table,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent [itemprop="offers"],
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .v65-productdetail-cartqty,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .v65-product-addtocart,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent input[name="btnaddtocart"],
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent button[name="btnaddtocart"],
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent input[name^="QTY."],
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent select,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent img#product_photo,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent a#product_photo_zoom_url {
-  display: revert !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
-}
-
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-brand-logo,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-title-right,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-price-stack-host,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-accordion,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-option-block,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-configured-color-swatch-wrapper,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-saranoni-size-thumbs,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-purchase-stack,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) .mc-saranoni-color-picker,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) .mc-unified-purchase-controls,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-brand-logo,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-title-right,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-price-stack-host,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-accordion,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-option-block,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-configured-color-swatch-wrapper,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-saranoni-size-thumbs,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-purchase-stack,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) .mc-saranoni-color-picker,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) .mc-unified-purchase-controls {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  max-height: 0 !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-@media (min-width: 992px) {
-  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #content_area tr.mc-pdp-main-row,
-  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #content_area tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr.mc-pdp-main-row {
-    display: table-row !important;
-    flex: none !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) tr.mc-pdp-main-row > td,
-  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) tr.mc-pdp-main-row > td,
-  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-media-td,
-  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-options-td,
-  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-media-td,
-  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-options-td {
-    display: table-cell !important;
-    flex: none !important;
-    width: auto !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    vertical-align: top !important;
-  }
-}
-
-/* MC_SARANONI_NATIVE_VISIBILITY_20260622sarstable6 — beat stale hide rules at all widths */
-html body.mc-saranoni-product #v65-product-parent,
-html body.mc-saranoni-product #v65-product-parent * {
-  visibility: visible !important;
-}
-
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #content_area tr.mc-pdp-main-row,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr.mc-pdp-main-row,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #content_area tr.mc-pdp-main-row,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr.mc-pdp-main-row {
-  display: table-row !important;
-  flex: none !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  gap: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) tr.mc-pdp-main-row > td,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) tr.mc-pdp-main-row > td,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-media-td,
-html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-options-td,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-media-td,
-html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-options-td {
-  display: table-cell !important;
-  flex: none !important;
-  width: auto !important;
-  max-width: none !important;
-  min-width: 0 !important;
-  vertical-align: top !important;
 }
