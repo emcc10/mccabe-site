@@ -1977,9 +1977,17 @@
 
   function findPurchaseStackAnchor() {
     if (isSaranoniPdpPage()) {
-      var sarAcc = global.document.getElementById("mc-pdp-accordion");
-      if (sarAcc && sarAcc.parentNode) {
-        return { parent: sarAcc.parentNode, after: sarAcc };
+      var sarSize = global.document.getElementById("mc-saranoni-size-thumbs");
+      if (sarSize && sarSize.parentNode) {
+        return { parent: sarSize.parentNode, after: sarSize };
+      }
+      var sarColor = global.document.getElementById("mc-configured-color-swatch-wrapper");
+      if (sarColor && sarColor.parentNode) {
+        return { parent: sarColor.parentNode, after: sarColor };
+      }
+      var sarOpt = global.document.getElementById("mc-pdp-option-block");
+      if (sarOpt && sarOpt.parentNode) {
+        return { parent: sarOpt.parentNode, after: sarOpt };
       }
       var sarBnpl = global.document.getElementById("messaging-element");
       if (sarBnpl && sarBnpl.parentNode) {
@@ -3396,6 +3404,10 @@
   
       if (!infoColumn) return;
   
+      hideSaranoniNativePriceTables(infoColumn);
+      hideSaranoniNativeColumnClutter(infoColumn);
+      hideSaranoniNativeOptionPricing();
+
       hideSaranoniNativePurchaseUi(infoColumn);
   
       ensureSaranoniPdpAccordion();
