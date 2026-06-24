@@ -62,7 +62,7 @@ jobs:
         run: |
           echo "If the job succeeded, the files were written to the paths above."
           echo "Check FileZilla at: /v/vspfiles/css/custom-safe.css"
-          echo "Live JS verify marker: MC_PDP_AUTH_DEPLOY_VERIFY_20260623sarrepair2"
-          curl -fsS "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=$(date +%s)" | grep -q 'table-cell' \
-            && echo "Live mc-pdp-auth-cta-fix.js contains Saranoni table-cell fix." \
-            || echo "::warning::Live JS still missing table-cell fix — check SFTP root vs /v/ path."
+          echo "Live JS verify marker: MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair4"
+          curl -fsS "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=$(date +%s)" | grep -q '20260624sarrepair4' \
+            && echo "Live mc-pdp-auth-cta-fix.js is sarrepair4 — CDN is current." \
+            || echo "::warning::Live JS is NOT sarrepair4 — CDN may be stale. Upload via Volusion admin to force invalidation."
