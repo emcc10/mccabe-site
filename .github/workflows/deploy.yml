@@ -63,6 +63,6 @@ jobs:
           echo "If the job succeeded, the files were written to the paths above."
           echo "Check FileZilla at: /v/vspfiles/css/custom-safe.css"
           echo "Live JS verify marker: MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair4"
-          curl -fsS "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=$(date +%s)" | grep -q '20260624sarrepair4' \
-            && echo "Live mc-pdp-auth-cta-fix.js is sarrepair4 — CDN is current." \
+          curl -fsS "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix2.js?mcrd=$(date +%s)" | grep -q '20260624sarrepair4' \
+            && echo "Live mc-pdp-auth-cta-fix2.js is sarrepair4 — CDN is current." \
             || echo "::warning::Live JS is NOT sarrepair4 — CDN may be stale. Upload via Volusion admin to force invalidation."
