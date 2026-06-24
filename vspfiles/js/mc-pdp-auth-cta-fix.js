@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair7
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair8
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260624sarrepair7";
+  var VERSION = "20260624sarrepair8";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -548,20 +548,6 @@
   }
 
   global.mcStripPriceZeroCents = stripPriceZeroCents;
-
-  function watchPriceForZeroCents() {
-    if (global.__MC_PRICE_ZERO_MO__) return;
-    // Observe a stable ancestor so we catch Volusion replacing price elements,
-    // not just mutating text in existing ones. Falls back to body.
-    var root =
-      global.document.getElementById("mc-pdp-price-stack-host") ||
-      global.document.getElementById("v65-product-parent") ||
-      global.document.body;
-    if (!root) return;
-    var mo = new MutationObserver(function () { stripPriceZeroCents(); });
-    mo.observe(root, { childList: true, subtree: true, characterData: true });
-    global.__MC_PRICE_ZERO_MO__ = mo;
-  }
 
   function authDelay(ms) {
     return new Promise(function (resolve) {
@@ -4934,16 +4920,18 @@
 
   function ensureSaranoniSizeVariantCss() {
     ensureSaranoniPdpLayoutCss();
-    if (global.document.getElementById("mc-saranoni-size-variant-css")) return;
-    var st = global.document.createElement("style");
-    st.id = "mc-saranoni-size-variant-css";
+    var st = global.document.getElementById("mc-saranoni-size-variant-css");
+    if (!st) {
+      st = global.document.createElement("style");
+      st.id = "mc-saranoni-size-variant-css";
+      (global.document.head || global.document.documentElement).appendChild(st);
+    }
     st.textContent =
       ".mc-saranoni-size-thumbs{display:flex!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important;max-width:650px!important;margin:12px 0 0!important;padding:0!important}" +
       ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:90px!important;padding:4px!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important}" +
       ".mc-saranoni-size-thumb img{display:block!important;width:82px!important;height:82px!important;object-fit:cover!important;border:0!important;border-radius:2px!important}" +
       ".mc-saranoni-size-thumb.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
       ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important;margin-top:4px!important;white-space:normal!important;word-break:break-word!important;max-width:86px!important}";
-    (global.document.head || global.document.documentElement).appendChild(st);
   }
 
   function updateSaranoniSizeThumbUi(optionId) {
@@ -5849,9 +5837,12 @@
   }
 
   function ensureConfiguredColorSwatchCss() {
-    if (global.document.getElementById("mc-configured-color-swatch-css")) return;
-    var st = global.document.createElement("style");
-    st.id = "mc-configured-color-swatch-css";
+    var st = global.document.getElementById("mc-configured-color-swatch-css");
+    if (!st) {
+      st = global.document.createElement("style");
+      st.id = "mc-configured-color-swatch-css";
+      (global.document.head || global.document.documentElement).appendChild(st);
+    }
     st.textContent =
       ".mc-configured-color-swatch-wrapper{display:block!important;width:100%!important;max-width:460px!important;margin:12px 0 0!important}" +
       ".mc-configured-color-swatch-label{display:block!important;margin-bottom:8px!important;font:700 12px/1.4 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#444!important}" +
@@ -5863,7 +5854,6 @@
       ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:56px!important;min-height:36px!important;border-radius:4px!important;padding:6px 10px!important}" +
       ".mc-configured-color-swatch__text{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;white-space:normal!important;text-align:center!important}" +
       ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}";
-    (global.document.head || global.document.documentElement).appendChild(st);
   }
 
   function mountSaranoniSwatchWrapper(wrap) {
@@ -9020,7 +9010,6 @@
         }
         stripPriceZeroCents();
       }
-      watchPriceForZeroCents();
       wirePlannerLoginGate();
       guardConfigurationBlockClick();
       patchCaptionSignInCta();
