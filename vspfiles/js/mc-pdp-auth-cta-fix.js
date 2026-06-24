@@ -10044,31 +10044,6 @@ try {
 
   function start() {
     repair();
-
-    var root =
-      document.querySelector("#content_area") ||
-      document.querySelector("#v65-product-parent") ||
-      document.body;
-
-    if (!root || typeof MutationObserver === "undefined") {
-      return;
-    }
-
-    var observer = new MutationObserver(scheduleRepair);
-
-    observer.observe(root, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: [
-        "class",
-        "hidden",
-        "aria-hidden",
-        "src"
-      ]
-    });
-
-    window.__MC_SARANONI_EMERGENCY_OBSERVER_V2__ = observer;
   }
 
   if (document.readyState === "loading") {
