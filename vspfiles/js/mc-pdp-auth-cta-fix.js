@@ -10068,7 +10068,7 @@ try {
       ]
     });
 
-    window.__MC_SARANONI_EMERGENCY_OBSERVER__ = observer;
+    window.__MC_SARANONI_EMERGENCY_OBSERVER_V2__ = observer;
   }
 
   if (document.readyState === "loading") {
@@ -10079,3 +10079,31 @@ try {
     start();
   }
 })();
+
+/* MC_SARANONI_KILL_LEGACY_STABILIZER_20260624
+   Live PDP pages still have a CDN-cached ?mcrd=live copy of this file baked into
+   their template. That old copy installs an emergency-stabilizer MutationObserver
+   (window.__MC_SARANONI_EMERGENCY_OBSERVER__) whose orderRightColumn() forces
+   accordion-above-ATC, fighting this fresh copy's ordering and making the ATC
+   bounce. This fresh copy is always loaded via ?mcrd=Date.now(), so it can
+   disconnect that legacy observer here — leaving the main layout pass as the sole
+   owner of column order. Our own (orderRightColumn-free) observer is renamed
+   _V2__ above so this never disconnects it. Safe to remove once the template
+   (which no longer emits the ?mcrd=live tag) re-bakes onto live pages. */
+(function (g) {
+  function killLegacyStabilizer() {
+    try {
+      var obs = g.__MC_SARANONI_EMERGENCY_OBSERVER__;
+      if (obs && typeof obs.disconnect === "function") {
+        obs.disconnect();
+        g.__MC_SARANONI_EMERGENCY_OBSERVER__ = null;
+      }
+    } catch (eKill) {}
+  }
+  [0, 100, 400, 1000, 2000].forEach(function (ms) {
+    g.setTimeout(killLegacyStabilizer, ms);
+  });
+  if (g.document && g.document.addEventListener) {
+    g.document.addEventListener("DOMContentLoaded", killLegacyStabilizer);
+  }
+})(window);
