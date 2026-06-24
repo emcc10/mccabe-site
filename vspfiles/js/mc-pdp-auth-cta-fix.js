@@ -4923,10 +4923,10 @@
     st.id = "mc-saranoni-size-variant-css";
     st.textContent =
       ".mc-saranoni-size-thumbs{display:flex!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important;max-width:650px!important;margin:12px 0 0!important;padding:0!important}" +
-      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:72px!important;padding:0!important;border:0!important;background:transparent!important;cursor:pointer!important}" +
-      ".mc-saranoni-size-thumb img{display:block!important;width:72px!important;height:72px!important;object-fit:cover!important;border:2px solid #ddd!important;border-radius:4px!important}" +
-      ".mc-saranoni-size-thumb.active img{border-color:#111!important;box-shadow:0 0 0 1px #111 inset!important}" +
-      ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important}";
+      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:56px!important;padding:0!important;border:2px solid #ddd!important;border-radius:999px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important}" +
+      ".mc-saranoni-size-thumb img{display:block!important;width:56px!important;height:56px!important;object-fit:cover!important;border:0!important;border-radius:0!important}" +
+      ".mc-saranoni-size-thumb.active{border-color:#111!important;box-shadow:0 0 0 1px #111 inset!important}" +
+      ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important;margin-top:4px!important}";
     (global.document.head || global.document.documentElement).appendChild(st);
   }
 
@@ -5856,7 +5856,15 @@
     var col = findPdpHeroColumnTd();
     if (col && wrap.parentNode !== col) {
       try {
-        col.appendChild(wrap);
+        // Insert after price-stack (index 2 in SARANONI_INFO_COLUMN_ORDER) so
+        // swatches land in the correct position immediately, not at the bottom
+        // of the column where they'd flash below the ATC until finalize runs.
+        var priceAnchor = global.document.getElementById("mc-pdp-price-stack-host");
+        if (priceAnchor && priceAnchor.parentNode === col) {
+          insertNodeAfter(col, priceAnchor, wrap);
+        } else {
+          col.appendChild(wrap);
+        }
       } catch (eCol) {}
     }
     try {
