@@ -9839,6 +9839,16 @@ try {
     element.style.setProperty("transform", "none", "important");
   }
 
+  function isElementHidden(el) {
+    if (!el) return true;
+    if (el.hidden || el.getAttribute("aria-hidden") === "true") return true;
+    try {
+      var cs = window.getComputedStyle(el);
+      if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true;
+    } catch (e) {}
+    return false;
+  }
+
   function restoreMainImage() {
     var image =
       document.querySelector("#product_photo") ||
@@ -9847,7 +9857,7 @@ try {
         "td.mc-pdp-media-td img[src*='/vspfiles/photos/']"
       );
 
-    if (!image) {
+    if (!image || !isElementHidden(image)) {
       return;
     }
 
@@ -9995,17 +10005,14 @@ try {
       document.querySelector("input[name='btnaddtocart']") ||
       document.querySelector("button[name='btnaddtocart']");
 
-    if (quantity) {
+    if (quantity && isElementHidden(quantity)) {
       showElement(quantity, "inline-block");
       quantity.style.setProperty("position", "static", "important");
     }
 
-    if (addToCart) {
+    if (addToCart && isElementHidden(addToCart)) {
       showElement(addToCart, "inline-block");
       addToCart.style.setProperty("position", "static", "important");
-      addToCart.style.setProperty("background", "#000", "important");
-      addToCart.style.setProperty("color", "#fff", "important");
-      addToCart.style.setProperty("min-height", "48px", "important");
     }
   }
 
