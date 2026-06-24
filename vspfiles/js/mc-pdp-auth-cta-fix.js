@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair6
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair7
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260624sarrepair6";
+  var VERSION = "20260624sarrepair7";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -551,12 +551,15 @@
 
   function watchPriceForZeroCents() {
     if (global.__MC_PRICE_ZERO_MO__) return;
-    var targets = global.document.querySelectorAll(PRICE_ZERO_CENT_SELECTOR);
-    if (!targets.length) return;
+    // Observe a stable ancestor so we catch Volusion replacing price elements,
+    // not just mutating text in existing ones. Falls back to body.
+    var root =
+      global.document.getElementById("mc-pdp-price-stack-host") ||
+      global.document.getElementById("v65-product-parent") ||
+      global.document.body;
+    if (!root) return;
     var mo = new MutationObserver(function () { stripPriceZeroCents(); });
-    targets.forEach(function (el) {
-      mo.observe(el, { childList: true, subtree: true, characterData: true });
-    });
+    mo.observe(root, { childList: true, subtree: true, characterData: true });
     global.__MC_PRICE_ZERO_MO__ = mo;
   }
 
@@ -3280,7 +3283,9 @@
     "mc-configured-color-swatch-wrapper",
     "mc-saranoni-size-thumbs",
     "mc-pdp-option-block",
-    "messaging-element",
+    // messaging-element (Klarna/Affirm) intentionally omitted — any DOM move
+    // after the widget mounts causes a re-render flash. It stays wherever
+    // Volusion placed it and is only given visibility fixes (not repositioned).
     "mc-pdp-accordion",
     "mc-pdp-purchase-stack",
   ];
