@@ -18041,7 +18041,7 @@ html body [id*="soft"][id*="cart"] a[href*="ShoppingCart"] {
   html body.mc-saranoni-pdp.productdetails #v65-product-parent img#product_photo,
   html body.mc-saranoni-pdp.mc-product-page #v65-product-parent img#product_photo {
     margin-left: 0 !important;
-    margin-top: 20px !important;
+    margin-top: 30px !important;
   }
 }
 
