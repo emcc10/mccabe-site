@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair10
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair11
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260624sarrepair10";
+  var VERSION = "20260624sarrepair11";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -525,7 +525,7 @@
     ".product_list_price,.product_sale_price,.product_saleprice,.product_productprice,.product_price," +
     ".v-product__price,.mc-member-grid-price,.mc-pdp-stack-retail-amt,.mc-pdp-top-price-value,.mtl-top-price__amount," +
     "#priceWithOptions,#priceWithOptionsNoTax,.colors_productprice,.pricecolor,.mc-member-price-caption," +
-    ".mc-pdp-member-line__amount,.v65-product-price,.mc-member-grid-price__amount";
+    ".mc-pdp-member-line__amount,.v65-product-price,.mc-member-grid-price__amount,.mc-saranoni-size-thumb__label";
 
   function stripPriceZeroCentsInTextNode(node) {
     if (!node || node.nodeType !== 3) return;
@@ -2692,7 +2692,7 @@
       "html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row{" +
       "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:32px!important}" +
       "html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{" +
-      "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:0!important;column-gap:44px!important}" +
+      "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:0!important;column-gap:0!important}" +
       "html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-media-td{" +
       "padding-right:0!important;margin-right:0!important}" +
       "html body.mc-bean-bag-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-ruched-blanket-pdp #mc-pdp-title-right," +
@@ -2706,7 +2706,7 @@
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button{" +
       "background:#111!important;background-color:#111!important;background-image:none!important;color:#fff!important;" +
       "border:1px solid #111!important;border-radius:0!important;font-size:13px!important;font-weight:600!important;" +
-      "letter-spacing:.12em!important;text-transform:uppercase!important;min-height:48px!important;padding:0 28px!important;opacity:1!important}" +
+      "letter-spacing:.12em!important;text-transform:uppercase!important;min-height:48px!important;padding:0 28px!important;opacity:1!important;outline:none!important;box-shadow:none!important;transition:none!important}" +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper{" +
       "display:none!important}";
   }
@@ -4898,6 +4898,7 @@
       row.style.setProperty("flex-wrap", "nowrap", "important");
       row.style.setProperty("align-items", "flex-start", "important");
       row.style.setProperty("gap", "0", "important");
+      row.style.setProperty("column-gap", "0", "important");
     } catch (eRow) {}
   }
 
@@ -5012,11 +5013,12 @@
       btn.setAttribute("data-option-id", entry.optionId);
       btn.setAttribute("aria-label", entry.label);
       btn.setAttribute("title", entry.label);
+      var displayLabel = entry.label.replace(/(\$\d[\d,]*)\.00(?!\d)/g, "$1");
       btn.innerHTML =
         '<img alt="' +
         escapeHtmlText(entry.label) +
         '" /><span class="mc-saranoni-size-thumb__label">' +
-        escapeHtmlText(entry.label) +
+        escapeHtmlText(displayLabel) +
         "</span>";
       row.appendChild(btn);
       var img = btn.querySelector("img");
@@ -9108,6 +9110,8 @@
       global.AutoUpdatePriceWithSelectedOptions = function () {
         var r = orig.apply(this, arguments);
         try { stripPriceZeroCents(); } catch (e) {}
+        try { global.setTimeout(function () { stripPriceZeroCents(); }, 60); } catch (e) {}
+        try { global.setTimeout(function () { stripPriceZeroCents(); }, 200); } catch (e) {}
         return r;
       };
       global.AutoUpdatePriceWithSelectedOptions.__mcStripped = true;
