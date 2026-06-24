@@ -3168,7 +3168,7 @@
     var purchaseStack = global.document.getElementById("mc-pdp-purchase-stack");
     try {
       if (purchaseStack && purchaseStack.parentNode === infoColumn) {
-        infoColumn.insertBefore(acc, purchaseStack.nextSibling);
+        infoColumn.insertBefore(acc, purchaseStack);
       } else if (!infoColumn.contains(acc)) {
         infoColumn.appendChild(acc);
       }
@@ -3269,9 +3269,9 @@
     "mc-configured-color-swatch-wrapper",
     "mc-saranoni-size-thumbs",
     "mc-pdp-option-block",
-    "mc-pdp-purchase-stack",
     "messaging-element",
     "mc-pdp-accordion",
+    "mc-pdp-purchase-stack",
   ];
 
   function applySaranoniInfoColumnOrder(infoColumn) {
@@ -10018,7 +10018,11 @@ try {
     try {
       restoreMainImage();
       showPurchaseControls();
-      orderRightColumn();
+      // Node ordering (accordion vs purchase controls) is owned solely by the
+      // main layout pass (SARANONI_INFO_COLUMN_ORDER / ensureSaranoniPdpAccordion).
+      // This stabilizer must not move those nodes too: two observers reordering
+      // them in opposite directions caused the ATC to bounce above/below the
+      // accordion. Image restore + visibility below are style-only and idempotent.
     } finally {
       fixing = false;
     }
