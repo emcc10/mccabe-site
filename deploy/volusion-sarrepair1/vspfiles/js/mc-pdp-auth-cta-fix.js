@@ -1,12 +1,12 @@
-﻿/**
- * PDP Sign In / Create Account ΓÇö modal only, no /login.asp redirect, no room planner on gate clicks.
+/**
+ * PDP Sign In / Create Account — modal only, no /login.asp redirect, no room planner on gate clicks.
  * Post-login: close modal first, refresh member/planner pricing in background (works without template rebake).
- * MC_PDP_AUTH_CTA_20260624 ΓÇö price stack repair MC_PDP_PRICE_STACK_20260522 (no template rebake)
+ * MC_PDP_AUTH_CTA_20260624 — price stack repair MC_PDP_PRICE_STACK_20260522 (no template rebake)
  */
 (function (global) {
   "use strict";
 
-  /* Same guard as mc-sectional-pdp-emergency.js ΓÇö only load on sectional configurator PDPs */
+  /* Same guard as mc-sectional-pdp-emergency.js — only load on sectional configurator PDPs */
   (function () {
     if (global.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
     if (global.__MC_SECTIONAL_EMERGENCY_LOADING__ || global.__MC_SECTIONAL_EMERGENCY_LOADED__) return;
@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260623sarrepair1
-  var VERSION = "20260623sarrepair1";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260625sarrepair2
+  var VERSION = "20260625sarrepair2";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -1322,8 +1322,10 @@
       "display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
       "body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pricebox .product_saleprice,body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pricebox .product_sale_price,body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pricebox .product_productprice{" +
       "display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
-      "html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_list_price,html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_productprice,html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_sale_price,html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox font.product_sale_price,html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_saleprice{" +
-      "display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}";
+      (isSaranoniNativeBypassPage()
+        ? ""
+        : "html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_list_price,html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_productprice,html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_sale_price,html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox font.product_sale_price,html body.mc-saranoni-pdp-init #v65-product-parent .colors_pricebox .product_saleprice{" +
+          "display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}");
   }
 
   function placePriceStackHost(host) {
@@ -1394,7 +1396,7 @@
     ensureHeroColumnOrder();
   }
 
-  /** Manufacturer logo + hero typography + ATC chrome (SFTP bundle ΓÇö no template rebake). */
+  /** Manufacturer logo + hero typography + ATC chrome (SFTP bundle — no template rebake). */
   var MC_PDP_LOGO_SKIP =
     "#mc-pdp-brand-logo,#altviews,.altviews,#mcLeatherPicker,#mcLeatherSwatchStrip," +
     ".mtl-leather-modal,.wm-modal,.v-products-list,.v-product,.v65-productDisplay," +
@@ -2699,7 +2701,7 @@
   global.mcPlaceBrandLogoAboveTitle = placeBrandLogoAboveTitle;
   global.mcSyncPdpHeroTopAlign = syncPdpHeroTopAlign;
 
-  /** Logo ΓåÆ title ΓåÆ price ΓåÆ Klarna in the right column (nonΓÇôbean-bag PDPs). */
+  /** Logo → title → price → Klarna in the right column (non–bean-bag PDPs). */
   function ensureHeroColumnOrder() {
     if (isPdpLayoutMounted()) return;
     if (isBeanBagPdpPage()) return;
@@ -2891,6 +2893,7 @@
   }
 
   function hideSaranoniNativePriceTables(infoColumn) {
+    if (isSaranoniNativeBypassPage()) return;
     if (!infoColumn || !isSaranoniPdpPage()) return;
     infoColumn.querySelectorAll(":scope > table.colors_pricebox, :scope > table:has(.colors_pricebox)").forEach(
       function (table) {
@@ -3412,6 +3415,7 @@
   }
 
   function hideSaranoniNativePurchaseUi(infoColumn) {
+    if (isSaranoniNativeBypassPage()) return;
     if (!infoColumn || !isSaranoniPdpPage()) return;
     var stack = global.document.getElementById("mc-pdp-purchase-stack");
     infoColumn.querySelectorAll("table, form").forEach(function (node) {
@@ -3441,6 +3445,7 @@
 
   function appendSaranoniInfoColumnOrder() {
     if (isStalePdpAuthRun()) return;
+    if (isSaranoniNativeBypassPage()) return;
     if (!isSaranoniPdpPage()) return;
     ensureSaranoniPdpLayoutCss();
     try {
@@ -3507,9 +3512,38 @@
   function ensureSaranoniSizeThumbsInInfoColumn() {
     var row = global.document.getElementById("mc-saranoni-size-thumbs");
     if (!row) return;
+    if (isSaranoniNativeBypassPage()) {
+      restoreSaranoniVariantUiVisibility(row);
+      var nativeCol = resolveSaranoniNativeInfoColumn();
+      if (!nativeCol) return;
+      var nativeAnchor =
+        global.document.getElementById("mc-configured-color-swatch-wrapper") ||
+        findSaranoniNativeVariantInsertBefore(nativeCol);
+      if (row.parentNode !== nativeCol) {
+        try {
+          if (
+            nativeAnchor &&
+            nativeAnchor.id === "mc-configured-color-swatch-wrapper" &&
+            nativeCol.contains(nativeAnchor)
+          ) {
+            insertNodeAfter(nativeCol, nativeAnchor, row);
+          } else if (nativeAnchor && nativeCol.contains(nativeAnchor)) {
+            nativeCol.insertBefore(row, nativeAnchor);
+          } else {
+            nativeCol.appendChild(row);
+          }
+        } catch (eNativeSize) {
+          try {
+            nativeCol.appendChild(row);
+          } catch (eNativeSize2) {}
+        }
+      }
+      restoreSaranoniVariantUiVisibility(row);
+      return;
+    }
     ensureSaranoniPdpAccordion();
     var mediaTd = findPdpMediaTd();
-    var infoColumn = resolveSaranoniInfoColumn();
+    var infoColumn = resolveSaranoniVariantMountColumn();
     if (!infoColumn) return;
     if (mediaTd && mediaTd.contains(row)) {
       try {
@@ -3519,6 +3553,7 @@
     var anchor =
       global.document.getElementById("mc-pdp-option-block") ||
       global.document.getElementById("mc-configured-color-swatch-wrapper") ||
+      findSaranoniNativeVariantInsertBefore(infoColumn) ||
       global.document.getElementById("messaging-element");
     if (row.parentNode !== infoColumn) {
       if (anchor && anchor.parentNode === infoColumn) {
@@ -3754,7 +3789,7 @@
   function normalizeFeatureText(text) {
     return String(text || "")
       .replace(/\s+/g, " ")
-      .replace(/^[\s\u2022\u00b7\u25aa\u25cf\u25e6\u2023\u2043\u2219ΓÇó┬╖Γû¬ΓÇúΓùª\-ΓÇôΓÇö*]+\s*/u, "")
+      .replace(/^[\s\u2022\u00b7\u25aa\u25cf\u25e6\u2023\u2043\u2219•·▪‣◦\-–—*]+\s*/u, "")
       .trim();
   }
 
@@ -3956,6 +3991,167 @@
 
   function isSoftGoodsPdpPage() {
     return isBeanBagPdpPage() || isSaranoniPdpPage();
+  }
+
+  function isSaranoniNativeBypassPage() {
+    try {
+      if (global.__MC_SARANONI_NATIVE_BYPASS__ === false) return false;
+      if (global.__MC_SARANONI_NATIVE_BYPASS__ === true) return true;
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (p.indexOf("/product-p/sar-") !== -1 || p.indexOf("-p/sar-") !== -1) return true;
+      var pc = resolveSoftGoodsProductCode();
+      if (/^SAR/.test(pc)) return true;
+      if (global.document.body && global.document.body.classList.contains("mc-saranoni-product")) return true;
+    } catch (eBypass) {}
+    return false;
+  }
+
+  var SARANONI_VARIANT_UI_SELECTOR =
+    "#mc-configured-color-swatch-wrapper, #mc-saranoni-size-thumbs";
+
+  function restoreSaranoniVariantUiVisibility(node) {
+    if (!node || !node.style) return;
+    try {
+      ["display", "visibility", "height", "max-height", "overflow", "opacity", "pointer-events", "margin", "padding"].forEach(
+        function (prop) {
+          node.style.removeProperty(prop);
+        }
+      );
+      node.style.setProperty("display", "block", "important");
+      node.style.setProperty("visibility", "visible", "important");
+      node.style.setProperty("opacity", "1", "important");
+      node.style.setProperty("pointer-events", "auto", "important");
+    } catch (eRestore) {}
+  }
+
+  function resolveSaranoniNativeInfoColumn() {
+    var box = global.document.querySelector("#v65-product-parent .colors_pricebox");
+    if (box && box.closest) {
+      var boxTd = box.closest("td");
+      if (boxTd) return boxTd;
+    }
+    var opts =
+      global.document.getElementById("options_table") ||
+      global.document.querySelector("#v65-product-parent table[id*='options_table']");
+    if (opts && opts.closest) {
+      var optTd = opts.closest("td");
+      if (optTd) return optTd;
+    }
+    return findPdpInfoTd();
+  }
+
+  function resolveSaranoniVariantMountColumn() {
+    if (isSaranoniNativeBypassPage()) return resolveSaranoniNativeInfoColumn();
+    return resolveSaranoniInfoColumn() || findPdpInfoTd();
+  }
+
+  function findSaranoniNativeVariantInsertBefore(parent) {
+    if (!parent) return null;
+    return (
+      global.document.getElementById("options_table") ||
+      parent.querySelector("table[id*='options_table']") ||
+      global.document.getElementById("messaging-element")
+    );
+  }
+
+  function mountSaranoniSwatchWrapperNative(wrap) {
+    if (!wrap) return;
+    var col = resolveSaranoniNativeInfoColumn();
+    if (!col) return;
+    var anchor = findSaranoniNativeVariantInsertBefore(col);
+    if (wrap.parentNode !== col) {
+      try {
+        if (anchor && col.contains(anchor)) {
+          col.insertBefore(wrap, anchor);
+        } else {
+          col.appendChild(wrap);
+        }
+      } catch (eMount) {
+        try {
+          col.appendChild(wrap);
+        } catch (eMount2) {}
+      }
+    } else if (anchor && wrap.nextElementSibling !== anchor && col.contains(anchor)) {
+      try {
+        col.insertBefore(wrap, anchor);
+      } catch (eReorder) {}
+    }
+    restoreSaranoniVariantUiVisibility(wrap);
+    try {
+      wrap.style.setProperty("width", "100%", "important");
+      wrap.style.setProperty("max-width", "100%", "important");
+      wrap.style.setProperty("margin", "12px 0 8px 0", "important");
+      wrap.style.setProperty("padding", "0", "important");
+    } catch (eWrapStyle) {}
+  }
+
+  function mcSaranoniVariantImagesOnly() {
+    if (!isSaranoniNativeBypassPage() || !isSaranoniPdpPage()) return;
+    try {
+      ensureConfiguredColorSwatchCss();
+      ensureSaranoniSizeVariantCss();
+      initSaranoniImageSync();
+      ensureSaranoniVariantUi();
+      global.document.querySelectorAll(SARANONI_VARIANT_UI_SELECTOR).forEach(restoreSaranoniVariantUiVisibility);
+      dismissSaranoniProductPhotoLoading();
+    } catch (eVarOnly) {}
+  }
+
+  function mcSaranoniNativeBypass() {
+    if (!isSaranoniNativeBypassPage()) return;
+    var body = global.document.body;
+    var root = global.document.getElementById("v65-product-parent");
+    if (!body) return;
+    try {
+      body.classList.add("mc-saranoni-product", "mc-saranoni-pdp");
+      body.classList.remove(
+        "mc-saranoni-pdp-init",
+        "mc-saranoni-pdp-custom-layout",
+        "mc-saranoni-pdp-ready",
+        "mc-pdp-unified-ready"
+      );
+    } catch (eCls) {}
+    global.document
+      .querySelectorAll(
+        '[id^="mc-pdp-"], .mc-saranoni-color-picker, .mc-unified-purchase-controls, #messaging-element[data-mc-saranoni-hidden]'
+      )
+      .forEach(function (node) {
+        if (!node || !node.style) return;
+        try {
+          node.style.setProperty("display", "none", "important");
+          node.style.setProperty("visibility", "hidden", "important");
+          node.style.setProperty("height", "0", "important");
+          node.style.setProperty("max-height", "0", "important");
+          node.style.setProperty("overflow", "hidden", "important");
+          node.style.setProperty("opacity", "0", "important");
+          node.style.setProperty("pointer-events", "none", "important");
+        } catch (eHide) {}
+      });
+    if (!root) {
+      mcSaranoniVariantImagesOnly();
+      return;
+    }
+    root.querySelectorAll(
+      "table, tbody, tr, td, .colors_pricebox, #options_table, [itemprop='offers'], " +
+        ".v65-productdetail-cartqty, .v65-product-addtocart, input[name='btnaddtocart'], " +
+        "button[name='btnaddtocart'], input[name^='QTY.'], select, img#product_photo, h1, " +
+        ".productnamecolor, .productnamecolorLARGE, a#product_photo_zoom_url"
+    ).forEach(function (el) {
+      if (!el || !el.style) return;
+      try {
+        ["display", "visibility", "height", "max-height", "overflow", "opacity", "pointer-events"].forEach(
+          function (prop) {
+            el.style.removeProperty(prop);
+          }
+        );
+      } catch (eRestore) {}
+    });
+    try {
+      root.style.removeProperty("display");
+      root.style.removeProperty("visibility");
+      root.style.removeProperty("height");
+    } catch (eRoot) {}
+    mcSaranoniVariantImagesOnly();
   }
 
   function isSteveSilverPdpPage() {
@@ -4685,7 +4881,7 @@
     } catch (eIdx) {}
     var catRaw = parseOptionCategoryFromSelectName(select.name);
     var catId = catRaw ? parseInt(catRaw, 10) : 58;
-    // Skip change_option for size-only Saranoni ΓÇö it hijacks #product_photo with a
+    // Skip change_option for size-only Saranoni — it hijacks #product_photo with a
     // stuck "loading..." overlay when option photos live on our CDN, not Volusion.
     if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
       try {
@@ -4947,7 +5143,7 @@
     if (!ctx || !ctx.select || !ctx.entries || !ctx.entries.length) return;
     ensureSaranoniSizeVariantCss();
     bindSaranoniSizeVariantSelect(ctx);
-    var infoColumn = resolveSaranoniInfoColumn();
+    var infoColumn = resolveSaranoniVariantMountColumn();
     if (!infoColumn) return;
     var row = global.document.getElementById("mc-saranoni-size-thumbs");
     if (!row) {
@@ -4957,6 +5153,7 @@
       row.setAttribute("data-product-code", ctx.productCode);
       var mountAnchor =
         global.document.getElementById("mc-pdp-option-block") ||
+        findSaranoniNativeVariantInsertBefore(infoColumn) ||
         global.document.getElementById("messaging-element");
       if (mountAnchor && mountAnchor.parentNode === infoColumn) {
         insertNodeAfter(infoColumn, mountAnchor, row);
@@ -5308,7 +5505,7 @@
       select.disabled = false;
       select.removeAttribute("disabled");
     } catch (eEn) {}
-    // Do not dispatch synthetic change/input here ΓÇö Volusion handlers can revert
+    // Do not dispatch synthetic change/input here — Volusion handlers can revert
     // size selects to the first option (Mini) and our listener would lock that in.
     global.setTimeout(function () {
       try {
@@ -5824,6 +6021,10 @@
   function mountSaranoniSwatchWrapper(wrap) {
     if (!wrap || !isSaranoniPdpPage()) return;
     wrap.setAttribute("data-mc-saranoni-swatches", "1");
+    if (isSaranoniNativeBypassPage()) {
+      mountSaranoniSwatchWrapperNative(wrap);
+      return;
+    }
     ensureSaranoniPdpAccordion();
     var col = findPdpHeroColumnTd();
     var features = global.document.getElementById("mc-pdp-features");
@@ -6837,7 +7038,7 @@
     // into #mc-pdp-hero-stack while mountPdpFeaturesBlock() pulled it back into
     // the options column on every pass, which made the page bounce indefinitely.
     // Swatch CLICKS are owned solely by the single delegated handler embedded in
-    // the product description ΓÇö no handler is registered here.
+    // the product description — no handler is registered here.
     withMoPaused(function () {
       hideLegacyBeanBagPrice();
       mountBeanBagSwatchesAboveFeatures();
@@ -7061,7 +7262,7 @@
     if (!host) return;
     var sig = String(retailAmt) + "|" + String(saleAmt) + "|" + (guest ? "g" : "m");
     if (host.getAttribute("data-mc-stack-sig") === sig) {
-      // Price unchanged ΓÇö skip innerHTML rebuild so the price display never flashes.
+      // Price unchanged — skip innerHTML rebuild so the price display never flashes.
       // Still run placement and hiding passes below in case the DOM shifted.
     } else {
       host.innerHTML = buildStackHostHtml(retailAmt, saleAmt, guest);
@@ -7072,7 +7273,7 @@
     placePriceStackHost(host);
     hideAllStrayPdpPriceNodes(host);
     hideDuplicatePdpPriceUi();
-    // Never move #messaging-element ΓÇö Stripe has mounted into it and any DOM
+    // Never move #messaging-element — Stripe has mounted into it and any DOM
     // repositioning triggers network calls to r.stripe.com.  Just ensure its
     // inline visibility is clear so nothing accidentally hides it.
     var bnplVis = global.document.getElementById("messaging-element");
@@ -7216,7 +7417,7 @@
     });
   }
 
-  // OptionID ΓåÆ image filename for Faux Fur Bean Bag covers.
+  // OptionID → image filename for Faux Fur Bean Bag covers.
   // Source: Volusion product data. Do not infer by position or text guessing.
   var BB_COVER_IMAGE_BY_OPTION_ID = {
     "799": "bb-fauxfur-navy.jpg",
@@ -7652,12 +7853,16 @@
         if (isSaranoniPdpPage() && global.document.body) {
           global.document.body.classList.remove("mc-bean-bag-pdp");
         }
-        ensureSaranoniBrandLogo();
-        ensureSaranoniVariantUi();
-        hideSaranoniHeroAltviews();
-        removeSaranoniDuplicateColorPicker();
-        finalizeSaranoniInfoColumnOrder();
-        markSaranoniPdpReady();
+        if (isSaranoniNativeBypassPage()) {
+          mcSaranoniVariantImagesOnly();
+        } else {
+          ensureSaranoniBrandLogo();
+          ensureSaranoniVariantUi();
+          hideSaranoniHeroAltviews();
+          removeSaranoniDuplicateColorPicker();
+          finalizeSaranoniInfoColumnOrder();
+          markSaranoniPdpReady();
+        }
       } catch (eSarRepair) {}
     }, 200);
   }
@@ -8251,8 +8456,13 @@
       if (!body) return;
       if (isSaranoniPdpPage()) {
         body.classList.add("mc-saranoni-pdp");
-        body.classList.add("mc-saranoni-pdp-init");
         body.classList.remove("mc-bean-bag-pdp");
+        if (isSaranoniNativeBypassPage()) {
+          body.classList.add("mc-saranoni-product");
+          body.classList.remove("mc-saranoni-pdp-init", "mc-saranoni-pdp-custom-layout", "mc-saranoni-pdp-ready");
+        } else {
+          body.classList.add("mc-saranoni-pdp-init");
+        }
         return;
       }
       if (isBeanBagPdpPage()) body.classList.add("mc-bean-bag-pdp");
@@ -8712,6 +8922,10 @@
   }
 
   function mountPdpLayoutOnce() {
+    if (isSaranoniNativeBypassPage()) {
+      mcSaranoniNativeBypass();
+      return false;
+    }
     if (isPdpLayoutMounted()) return false;
     if (!isProductPdp()) return false;
     if (isSectionalPdpPage()) return false;
@@ -8756,6 +8970,10 @@
         styleBeanBagPriceAtc();
         ensureBeanBagReturnLink();
       } else if (isSaranoniPdpPage()) {
+        if (isSaranoniNativeBypassPage()) {
+          mcSaranoniNativeBypass();
+          return false;
+        }
         scheduleSaranoniLayoutPass(true);
         applySoftGoodsColumnPurchaseStackLayout(
           global.document.getElementById("mc-pdp-purchase-stack"),
@@ -8860,7 +9078,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260623sarrepair1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260625sarrepair2&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -8901,7 +9119,7 @@
     var sectional = isSectionalPdpPage();
     // Pause the MutationObserver for the duration of this patch (plus a couple of
     // animation frames) so the DOM moves/styles we apply here don't get observed
-    // as "new" mutations and schedule yet another runPatch ΓÇö that feedback loop is
+    // as "new" mutations and schedule yet another runPatch — that feedback loop is
     // what makes the PDP visibly bounce/reflow. Released on rAF after the browser
     // has applied our changes. Uses a counter so nested/overlapping runs are safe.
     global.__MC_PDP_MO_PAUSE__ = (global.__MC_PDP_MO_PAUSE__ || 0) + 1;
@@ -8921,6 +9139,9 @@
     global.setTimeout(mcReleaseMo, 250);
     try {
       tagSoftGoodsBodyClasses();
+      if (isSaranoniNativeBypassPage()) {
+        mcSaranoniNativeBypass();
+      }
       installSaranoniColorAtcGuard();
       installPdpStackApiGuards();
       initBeanBagImageSync();
@@ -8995,10 +9216,13 @@
       scheduleSteveSilverLayoutRepair();
       installDescriptionViewMoreResize();
       syncPdpDescriptionViewMore();
-      if (isSaranoniPdpPage()) {
+      if (isSaranoniPdpPage() && !isSaranoniNativeBypassPage()) {
         try {
           finalizeSaranoniInfoColumnOrder();
         } catch (eSarFinal) {}
+      }
+      if (isSaranoniNativeBypassPage()) {
+        mcSaranoniNativeBypass();
       }
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
         prepareDeferredUnifiedPdpHero();
@@ -9078,6 +9302,16 @@
   runPatch();
   global.document.addEventListener("DOMContentLoaded", runPatch);
   global.addEventListener("load", runPatch);
+  (function mcSaranoniNativeBypassInterval() {
+    if (!isSaranoniNativeBypassPage()) return;
+    mcSaranoniNativeBypass();
+    var ticks = 0;
+    var timer = global.setInterval(function () {
+      mcSaranoniNativeBypass();
+      ticks += 1;
+      if (ticks >= 20) global.clearInterval(timer);
+    }, 250);
+  })();
   // Settle the layout only during the brief async window where Volusion injects
   // the options table / price. After ~1.5s we STOP re-running on a timer so the
   // Add-to-Cart block and surrounding layout never move again while the customer
@@ -9132,9 +9366,9 @@
   }
 })(window);
 
-/* MC_PDP_AUTH_SELF_UPGRADE ΓÇö stale ?v= CDN bundles on baked PDPs */
+/* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260623sarrepair1";
+  var WANT = "20260625sarrepair2";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -9171,9 +9405,9 @@
   });
 })(window, document);
 
-/* MC_STEVE_SILVER_ALT_VIEWS_20260620 ΓÇö force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
+/* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
 (function (g, d) {
-  var SS_ALT_VER = "20260623sarrepair1";
+  var SS_ALT_VER = "20260625sarrepair2";
 
   function normalizePhotoUrl(url) {
     if (typeof g.mcNormalizePhotoUrl === "function") return g.mcNormalizePhotoUrl(url);
@@ -9423,7 +9657,7 @@
   }
 })(window, document);
 
-/* MC_PDP_PRICE_STACK_20260522 ΓÇö load standalone repair if this cached bundle is stale */
+/* MC_PDP_PRICE_STACK_20260522 — load standalone repair if this cached bundle is stale */
 (function (g) {
   try {
     if (typeof g.mcEnsurePdpPriceStack === "function") {
@@ -9543,7 +9777,7 @@
 })(window, document);
 /* MC_CENTER_ALT_IMAGES_UNDER_MAIN_20260618 */
 (function (g, d) {
-  var CENTER_ALT_VER = "20260623sarrepair1";
+  var CENTER_ALT_VER = "20260625sarrepair2";
 
   function isSteveSilverPdp() {
     if (d.body && d.body.classList.contains("mc-steve-silver-altview-pdp")) return true;
@@ -9692,7 +9926,7 @@ try {
   }
 })(window, document);
 
-/* MC_WINDSOR_HERO_FIX_20260620 ΓÇö live CDN still caches 4MB slideshow at windsor.mp4; use windsor-home.mp4 */
+/* MC_WINDSOR_HERO_FIX_20260620 — live CDN still caches 4MB slideshow at windsor.mp4; use windsor-home.mp4 */
 (function (g, d) {
   if (!g || !d || g.__MC_WINDSOR_HERO_FIX_20260620__) return;
   g.__MC_WINDSOR_HERO_FIX_20260620__ = true;
@@ -9767,7 +10001,7 @@ try {
   });
 })(window, document);
 
-/* Cart checkout CTA ΓÇö bootstrap from baked template (mc-cart-checkout-fix.js may not be in rebaked HTML). */
+/* Cart checkout CTA — bootstrap from baked template (mc-cart-checkout-fix.js may not be in rebaked HTML). */
 (function (g, d) {
   "use strict";
   var p = String(g.location.pathname || "").toLowerCase();

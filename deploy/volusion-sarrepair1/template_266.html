@@ -1,4 +1,4 @@
-﻿<!-- VOLUSION_EDITOR_MANUAL_MARKER_20260430**** -->
+<!-- VOLUSION_EDITOR_MANUAL_MARKER_20260430**** -->
 <!DOCTYPE html>
 <!-- FINAL TEMPLATE TEST 20260428-HARDVERIFY -->
 <!--[if lte IE 9]><html class="no-js lt-ie10 mc-member-plp-price-pending" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
@@ -370,7 +370,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 <script>
 (function () {
   /**
-   * True homepage URL ΓÇö #if_homepage / hero exist in HTML on every Volusion page; body.is-home toggles visibility.
+   * True homepage URL — #if_homepage / hero exist in HTML on every Volusion page; body.is-home toggles visibility.
    * Match store root and common Volusion entry paths (including subdirectory stores).
    */
   function mcPathLooksLikeProductOrInteriorUrl() {
@@ -740,7 +740,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
       margin: 0 0 14px 0 !important;
       padding: 0 max(12px, 2vw) !important;
     }
-    /* Volusion ΓÇ£Page N of MΓÇ¥ row hidden via data-mc-pager-hidden when custom pager is active */
+    /* Volusion “Page N of M” row hidden via data-mc-pager-hidden when custom pager is active */
     [data-mc-pager-hidden="1"] {
       display: none !important;
       visibility: hidden !important;
@@ -796,7 +796,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
     }
   </style>
   <style id="mc-header-search-critical">
-    /* One interior header column stack ΓÇö no separate theater/Paragon positioning. */
+    /* One interior header column stack — no separate theater/Paragon positioning. */
     body:not(.is-home) header.header,
     body.category header.header,
     html.category body header.header,
@@ -872,7 +872,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
     body.mc-search-open header.header .collapsing-search {
       transform: none !important;
     }
-    /* Hero block exists in HTML on every page ΓÇö default collapsed; only html.mc-allow-home-hero + is-home may open it */
+    /* Hero block exists in HTML on every page — default collapsed; only html.mc-allow-home-hero + is-home may open it */
     #if_homepage {
       display: none !important;
       visibility: hidden !important;
@@ -897,7 +897,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
     meta[itemprop="name"] {
       display: none !important;
     }
-    /* Volusion fills #display_homepage_title with text logo ΓÇö hide on all pages (hero overlay is homepage logo) */
+    /* Volusion fills #display_homepage_title with text logo — hide on all pages (hero overlay is homepage logo) */
     header.header #display_homepage_title,
     header.header #display_homepage_title *,
     #display_homepage_title,
@@ -934,7 +934,7 @@ html.category body:not(.is-home) #slideshow-container .hero-menu {
       height: 0 !important;
       pointer-events: none !important;
     }
-    /* Raw template often includes #if_homepage on every page ΓÇö hide when URL is not homepage */
+    /* Raw template often includes #if_homepage on every page — hide when URL is not homepage */
     html:not(.mc-allow-home-hero) body #if_homepage,
     body:not(.is-home) #if_homepage,
     body.category #if_homepage,
@@ -987,7 +987,7 @@ body.category:not(.is-home) #slideshow-container .mc-hero-video {
       border: 0 !important;
       background: transparent !important;
     }
-    /* Hero overlay search only (desktop nav bar has no visible in-flow search ΓÇö .mc-search-float) */
+    /* Hero overlay search only (desktop nav bar has no visible in-flow search — .mc-search-float) */
     #mcHeroSearchOverlay .header__section--middle,
     #mcHeroSearchOverlay .mc-header-search-below-nav {
       display: block !important;
@@ -1298,7 +1298,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   </style>
-  <!-- Hero headline: IDs + head CSS + sync script ΓÇö Volusion often strips p/class/style; this must win -->
+  <!-- Hero headline: IDs + head CSS + sync script — Volusion often strips p/class/style; this must win -->
   <style id="mc-hero-copy-critical">
     #mc-hero-copy-tagline {
       display: block !important;
@@ -1529,10 +1529,10 @@ document.addEventListener("DOMContentLoaded", function () {
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260623sarrepair1"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260623sarrepair1 -->
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260625sarrepair2"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260625sarrepair2 -->
   <script id="mc-ss-piece-hero-boot">
 (function (g, d) {
-  var SS_HERO_VER = "20260623sarrepair1";
+  var SS_HERO_VER = "20260625sarrepair2";
   function productCode() {
     var input = d.querySelector('input[name="ProductCode"]');
     return String(
@@ -1615,6 +1615,31 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 ========================================= -->
 
 <body>
+<script><!-- MC_SARANONI_NATIVE_INLINE_20260625sarrepair2 -->
+(function () {
+  try {
+    var p = String(location.pathname || "").toLowerCase();
+    if (p.indexOf("/product-p/sar-") === -1 && p.indexOf("-p/sar-") === -1) return;
+    window.__MC_SARANONI_NATIVE_BYPASS__ = true;
+    var b = document.body;
+    if (!b) return;
+    b.classList.add("mc-saranoni-product", "mc-saranoni-pdp");
+    b.classList.remove(
+      "mc-saranoni-pdp-init",
+      "mc-saranoni-pdp-custom-layout",
+      "mc-saranoni-pdp-ready",
+      "mc-pdp-unified-ready"
+    );
+    if (!document.getElementById("mc-saranoni-native-unblock-css")) {
+      var st = document.createElement("style");
+      st.id = "mc-saranoni-native-unblock-css";
+      st.textContent =
+        "html body.mc-saranoni-product #v65-product-parent,html body.mc-saranoni-product #v65-product-parent table,html body.mc-saranoni-product #v65-product-parent tbody,html body.mc-saranoni-product #v65-product-parent tr,html body.mc-saranoni-product #v65-product-parent td,html body.mc-saranoni-product #v65-product-parent .colors_pricebox,html body.mc-saranoni-product #v65-product-parent #options_table,html body.mc-saranoni-product #v65-product-parent [itemprop='offers'],html body.mc-saranoni-product #v65-product-parent img#product_photo,html body.mc-saranoni-product #v65-product-parent h1{display:revert!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important;overflow:visible!important;pointer-events:auto!important}html body.mc-saranoni-product #v65-product-parent img#product_photo{display:block!important}html body.mc-saranoni-product [id^='mc-pdp-'],html body.mc-saranoni-product #mc-configured-color-swatch-wrapper,html body.mc-saranoni-product #mc-saranoni-size-thumbs,html body.mc-saranoni-product .mc-saranoni-color-picker,html body.mc-saranoni-product .mc-unified-purchase-controls{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}";
+      (document.head || document.documentElement).appendChild(st);
+    }
+  } catch (e) {}
+})();
+</script>
  
 <script>
 (function () {
@@ -1633,7 +1658,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     window.isSectionalProductPage = function isSectionalProductPage() {
       var path = String(window.location.pathname || "").toLowerCase();
       if (path.indexOf("room-planner") !== -1) return false;
-      /* Theater seating PDPs use "Choose configuration" for seats ΓÇö must NOT be treated as sofa/sectionals. */
+      /* Theater seating PDPs use "Choose configuration" for seats — must NOT be treated as sofa/sectionals. */
       if (
         path.indexOf("theater-seating") !== -1 ||
         path.indexOf("theatre-seating") !== -1 ||
@@ -1726,8 +1751,9 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     // Saranoni product pages: tag the body from the real ProductCode (not URL/title)
     // so layout + the configured-color swatch system can scope to them.
     var pcUpper = pc.toUpperCase();
-    if (/^SAR/.test(pcUpper)) {
-      b.classList.add("mc-saranoni-pdp");
+    if (/^SAR/.test(pcUpper) || /\/product-p\/sar-/.test(p) || /-p\/sar-/.test(p)) {
+      b.classList.add("mc-saranoni-product", "mc-saranoni-pdp");
+      window.__MC_SARANONI_NATIVE_BYPASS__ = true;
       if (pcUpper === "SAR-RUCHED-MINKY-THROW-BLANKET") {
         b.classList.add("mc-ruched-blanket-pdp");
       }
@@ -1840,7 +1866,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
       el.style.pointerEvents = "auto";
       if (el.dataset.mcFloatNavBound === "1") return;
       el.dataset.mcFloatNavBound = "1";
-      /* Native <a href> navigation ΓÇö do not preventDefault (was blocking taps on live mobile). */
+      /* Native <a href> navigation — do not preventDefault (was blocking taps on live mobile). */
       el.addEventListener("click", function () {
         if (!isMobile()) return;
         closePushMenu();
@@ -1882,7 +1908,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 </nav>
       </div>
 
-    <!-- Search: sibling between hero menu and video ΓÇö z-index below .hero-menu, above video (see custom-safe.css) -->
+    <!-- Search: sibling between hero menu and video — z-index below .hero-menu, above video (see custom-safe.css) -->
     <div class="mc-hero-search-overlay" id="mcHeroSearchOverlay" aria-label="Site search"></div>
 
     <!-- HERO VIDEO -->
@@ -2208,7 +2234,7 @@ document.addEventListener("DOMContentLoaded", function () {
   /**
    * Search block may live in .mc-header-desktop-bar (source HTML) or in #mcHeroSearchOverlay after
    * a homepage mount. If we only query the bar, interior pages return null while the node is still
-   * inside hidden #if_homepage ΓÇö mcMountSearchLayout would exit early and never pull it back.
+   * inside hidden #if_homepage — mcMountSearchLayout would exit early and never pull it back.
    */
   function mcFindHeaderSearchMid() {
     var h = document.querySelector('header.header');
@@ -2776,7 +2802,7 @@ html body.productdetails .v-product-grid > .v-product {
 <script id="wm-leather-modal-js">
 (function(){
   "use strict";
-  // ≡ƒÜ½ EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (codes start with BB)
+  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (codes start with BB)
   var productCodeInput = document.querySelector('input[name="ProductCode"]');
   if (productCodeInput && /^BB/i.test(String(productCodeInput.value || '').trim())) {
     return;
@@ -2951,7 +2977,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
 
     const baseNames = [];
     if (f && c){
-      /* Confirmed working format: Family-Color.jpg ΓÇö try first */
+      /* Confirmed working format: Family-Color.jpg — try first */
       baseNames.push(`${f}-${c}`);
       baseNames.push(`${f}-${c.replace(/\s+/g,"-")}`);
       baseNames.push(`${f.toLowerCase()}-${c.toLowerCase()}`);
@@ -2996,11 +3022,11 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     const t = (opt.textContent || "").replace(/\s+/g, " ").trim();
     const v = String(opt.value || "").trim();
     if (!t || !v) return true;
-    if (/^--+$|^[-ΓÇôΓÇö]$/.test(t)) return true;
+    if (/^--+$|^[-–—]$/.test(t)) return true;
     if (/\bplease\s+select\b/i.test(t)) return true;
-    if (/^choose\s*(\.\.\.|ΓÇª)?$/i.test(t)) return true;
+    if (/^choose\s*(\.\.\.|…)?$/i.test(t)) return true;
     if (/^choose\s+(one|option|your|from|below)\b/i.test(t)) return true;
-    if (/^select\s*(\.\.\.|ΓÇª)?$/i.test(t)) return true;
+    if (/^select\s*(\.\.\.|…)?$/i.test(t)) return true;
     if (/^select\s+one\b/i.test(t)) return true;
     if (/^select\s+from(\s+the)?\s+list\b/i.test(t)) return true;
     if (/^select\s+a\s+(leather|cover|fabric|grade)\b/i.test(t)) return true;
@@ -3072,7 +3098,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     window.wmIsLeatherEligiblePage = wmIsLeatherEligiblePage;
   } catch (eWmEx) {}
 
-  /** Path/body guard: never treat as ΓÇ£sectional leather timingΓÇ¥ on theater PDPs (avoids minOptions=1 + bad swatch parse). */
+  /** Path/body guard: never treat as “sectional leather timing” on theater PDPs (avoids minOptions=1 + bad swatch parse). */
   function wmIsTheaterSeatingPdpEarly(){
     try {
       if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
@@ -3162,12 +3188,12 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
 
 
   function hasRealOptions(sel){
-    /* Same minimum as non-sectional PDPs: one real Volusion surcharge row shouldnΓÇÖt steal the theater leather UX. */
+    /* Same minimum as non-sectional PDPs: one real Volusion surcharge row shouldn’t steal the theater leather UX. */
     const real = Array.from(sel.options || []).filter(o => !isPlaceholderOption(o));
     return real.length >= 2;
   }
 
-  /** Exclude Volusion ΓÇ£Choose configurationΓÇ¥ ΓÇö it is not a leather/cover select and breaks swatch parsing. */
+  /** Exclude Volusion “Choose configuration” — it is not a leather/cover select and breaks swatch parsing. */
   function isNativeConfigurationSelectEl(sel){
     try {
       var rowText = "";
@@ -3186,7 +3212,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     }
   }
 
-  /** Price/surcharge-only Volusion option labels ΓÇö not leather names (avoids wm-name "0.00" + swatch 404s). */
+  /** Price/surcharge-only Volusion option labels — not leather names (avoids wm-name "0.00" + swatch 404s). */
   function wmIsPriceOrNumericOnlyLabel(s) {
     const t = cleanText(String(s || ""));
     if (!t) return true;
@@ -3256,7 +3282,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     return s;
   }
 
-  /** Row + <label for="ΓÇª"> copy (Volusion often puts the real ΓÇ£Choose coverΓÇ¥ text on the label, not inside the <tr>). */
+  /** Row + <label for="…"> copy (Volusion often puts the real “Choose cover” text on the label, not inside the <tr>). */
   function wmCoverRowContext(sel) {
     var parts = [];
     try {
@@ -3294,7 +3320,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
   }
 
   /**
-   * Technical Volusion fields (smart-match hidden category values, naked price ladders) ΓÇö
+   * Technical Volusion fields (smart-match hidden category values, naked price ladders) —
    * never drive __WM_LEATHER_OPTIONS__ / .mc-native-leather.
    */
   function mcRejectTechnicalNonLeatherSelect(sel) {
@@ -3343,7 +3369,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
 
   /**
    * Single source of truth: which native cover <select> drives the Palliser/theater WM leather UI (modal + accordion strip).
-   * Sectional PDP must use the same rules ΓÇö mtl-sectional-renderer delegates here to avoid mismatched selects and rebuild storms.
+   * Sectional PDP must use the same rules — mtl-sectional-renderer delegates here to avoid mismatched selects and rebuild storms.
    */
   function mcCollectNativeLeatherSelectsInner() {
     var allSelects = Array.from(document.querySelectorAll("select"));
@@ -3360,10 +3386,10 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
       if (isNativeConfigurationSelectEl(s)) return false;
       var sec = sectionalDiscoveryEarly();
       var n = countNonPlaceholderOptions(s);
-      /* Theater + non-explicit rows: require same ΓÇ£real leather listΓÇ¥ signal as before (ΓëÑ2 non-placeholder opts + selectLooksLeatherish). */
+      /* Theater + non-explicit rows: require same “real leather list” signal as before (≥2 non-placeholder opts + selectLooksLeatherish). */
       if (sec && rowDeclaresUpholsteryCover(s)) {
         if (n < 1) return false;
-        /* Label says ΓÇ£Choose coverΓÇ¥ but option TEXT may still be Volusion placeholders ΓÇö selectLooksLeatherish often stays false early. */
+        /* Label says “Choose cover” but option TEXT may still be Volusion placeholders — selectLooksLeatherish often stays false early. */
         return true;
       }
       if (n < 2) return false;
@@ -3400,7 +3426,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
         set: function () {
           if (typeof console !== "undefined" && typeof console.warn === "function") {
             console.warn(
-              "[WM] Ignoring reassignment of mcCollectNativeLeatherSelectsForPdp ΓÇö use template #wm-leather-modal-js only for native leather discovery."
+              "[WM] Ignoring reassignment of mcCollectNativeLeatherSelectsForPdp — use template #wm-leather-modal-js only for native leather discovery."
             );
           }
         },
@@ -3966,7 +3992,7 @@ try {
     apex: "44008",
     sanibel: "40111",
     leeds: "77328",
-    /* Alula sectional ΓÇö Palliser spec PDF uses 77427 + ALULA */
+    /* Alula sectional — Palliser spec PDF uses 77427 + ALULA */
     alula: "77427",
     /* Common path/today typo; still resolves to Alula spec sheet */
     aloira: "77427",
@@ -3976,7 +4002,7 @@ try {
     brookes: "77696",
     charli: "77743",
     corissa: "77500",
-    /* Sectionals ΓÇö same model numbers as tools/sectional-diagrams/catalog.json */
+    /* Sectionals — same model numbers as tools/sectional-diagrams/catalog.json */
     colebrook: "77267",
     creighton: "77294",
     essex: "40112",
@@ -4062,7 +4088,7 @@ try {
     var mapped = mcPalliserMapMatch();
     if (mapped && mapped.model) {
       /* Collection name in title/path: Palliser PDFs use the collection model (e.g. 44004 TITAN).
-         Volusion ProductCode often starts with unrelated digits ΓÇö override unless #mcPalliserModel is set. */
+         Volusion ProductCode often starts with unrelated digits — override unless #mcPalliserModel is set. */
       if (!explicitModel) model = mapped.model;
       if (!style) style = mapped.styleKey.toUpperCase();
     }
@@ -4191,7 +4217,7 @@ try {
     var sPretty = mcPalliserSummaryStylePretty(styleDisp);
     var titleDetail =
       url && modelDisp && sPretty
-        ? "Open Palliser product summary (PDF) ΓÇö " + modelDisp + " ┬╖ " + sPretty
+        ? "Open Palliser product summary (PDF) — " + modelDisp + " · " + sPretty
         : url
           ? "Open Palliser product summary (PDF)"
           : "Palliser spec sheet not detected for this product";
@@ -4293,7 +4319,7 @@ try {
 </script>
  <script>
 (function(){
-  var expected = "20260623sarrepair1";
+  var expected = "20260625sarrepair2";
   if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== expected) {
     if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
       document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
@@ -4306,7 +4332,7 @@ try {
 
   if (window.__MC_INLINE_FINAL__) return;
 
-  // ≡ƒÜ½ EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (codes start with BB)
+  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (codes start with BB)
   var productCodeInput = document.querySelector('input[name="ProductCode"]');
   if (productCodeInput && /^BB/i.test(String(productCodeInput.value || '').trim())) {
     try {
@@ -4397,7 +4423,7 @@ try {
     );
   }
 
-  /** Right-hand options column (same heuristic as tagPdpCells) ΓÇö correct home for planner / summary on sectionals. */
+  /** Right-hand options column (same heuristic as tagPdpCells) — correct home for planner / summary on sectionals. */
   function mcFindPdpOptionsColumnCell() {
     var optTd =
       document.querySelector("#v65-product-parent .mc-pdp-options-td") ||
@@ -4432,7 +4458,7 @@ try {
 
   /**
    * Volusion often puts a standalone "Quantity:" / "Qty" row (and Klarna, etc.) before #mc-inline-config.
-   * Anchor = earliest of that label row or .v65-productdetail-cartqty ΓÇö insert planner block before it so
+   * Anchor = earliest of that label row or .v65-productdetail-cartqty — insert planner block before it so
    * Room Planner + Product Summary stay above all cart chrome.
    */
   function mcFindPdpCartQtyAnchor(root) {
@@ -4631,7 +4657,7 @@ try {
   }
 
   /**
-   * Open Palliser leather modal ΓÇö same handler as initIfReady wires on #wmOpen (~2835).
+   * Open Palliser leather modal — same handler as initIfReady wires on #wmOpen (~2835).
    * Ensures programmatic open when #wmOpen was display:none until sectional override applies.
    */
   window.mcOpenWmLeatherModal = function mcOpenWmLeatherModal(ev) {
@@ -4820,13 +4846,13 @@ try {
       try {
         var prSec = document.getElementById("mcPlannerRow");
         if (prSec) prSec.style.setProperty("display", "none", "important");
-        /* Keep #mcConfigurationBlock visible on sectionals ΓÇö native configuration selects update it. */
+        /* Keep #mcConfigurationBlock visible on sectionals — native configuration selects update it. */
         var cbSec = document.getElementById("mcConfigurationBlock");
         if (cbSec) {
           cbSec.style.removeProperty("display");
           cbSec.style.setProperty("display", "block", "important");
         }
-        /* Accordion owns ΓÇ£Select a LeatherΓÇ¥; hide duplicate inline chrome (IDs stay live for scripting). */
+        /* Accordion owns “Select a Leather”; hide duplicate inline chrome (IDs stay live for scripting). */
         var lrHideSec = document.getElementById("mcLeatherRow");
         if (lrHideSec) lrHideSec.style.setProperty("display", "none", "important");
         if (typeof scheduleConfigurationFromDomRetries === "function") scheduleConfigurationFromDomRetries();
@@ -4840,7 +4866,7 @@ try {
       } catch (eLr) {}
     }
 
-    // Room planner removed ΓÇö keep no-op stubs so legacy inline handlers do not throw.
+    // Room planner removed — keep no-op stubs so legacy inline handlers do not throw.
     function openPlannerOverlay() {}
     function closePlannerOverlay() {}
 
@@ -4899,7 +4925,7 @@ try {
 
       var names = [];
       if (f && c) {
-        /* Confirmed working format: Family-Color.jpg ΓÇö try first */
+        /* Confirmed working format: Family-Color.jpg — try first */
         names.push(f + "-" + c);
         names.push(f + "-" + c.replace(/\s+/g,"-"));
         names.push(f.toLowerCase() + "-" + c.toLowerCase());
@@ -5279,7 +5305,7 @@ try {
       });
     }
 
-    // Button + label ΓÇö #wmOpen is created async; mcOpenWmLeatherModal retries init + click.
+    // Button + label — #wmOpen is created async; mcOpenWmLeatherModal retries init + click.
     if (mcLeatherBtn && typeof window.mcOpenWmLeatherModal === "function") {
       mcLeatherBtn.onclick = window.mcOpenWmLeatherModal;
     }
@@ -6047,7 +6073,7 @@ function mcCurrentPageSuggestsLoggedIn(html, publicSeatPrice) {
   if (memberPrice > 0 && (!(publicSeatPrice > 0) || memberPrice <= publicSeatPrice)) return true;
   return false;
 }
-/** Parse primary PDP price from fetched product HTML (logged-in price may equal public ΓÇö no "lower" dollar in DOM). */
+/** Parse primary PDP price from fetched product HTML (logged-in price may equal public — no "lower" dollar in DOM). */
 function extractDisplayedSeatPriceFromHtml(html) {
   if (!html) return 0;
   var parser = new DOMParser();
@@ -6081,7 +6107,7 @@ function extractDisplayedSeatPriceFromHtml(html) {
   return 0;
 }
 /**
- * Volusion "add to cart" / actual selling price ΓÇö NOT the MAP line in #priceWithOptions.
+ * Volusion "add to cart" / actual selling price — NOT the MAP line in #priceWithOptions.
  * Prefers prices strictly below MAP; scrapes scripts; optional meta / window override.
  */
 function scrapeVolusionPriceCandidatesBelowMap(html, mainAmt) {
@@ -6377,7 +6403,7 @@ function mcReadVolusionProductFormSellingUnit(form) {
   return 0;
 }
 /**
- * Per-seat unit fallback chain for nonΓÇômember-guarded callers: member globals/meta first, then hidden form / Volusion helpers.
+ * Per-seat unit fallback chain for non–member-guarded callers: member globals/meta first, then hidden form / Volusion helpers.
  */
 function mcGetPlannerPerSeatUnitFromVolusion(root) {
   root = root || document;
@@ -6569,7 +6595,7 @@ function getPlannerBaseSeatPriceForCalc() {
     }
   } catch (eForm) {}
 
-  /* Volusion option-aware unit (matches add-to-cart) ΓÇö prefer over stale/MAP DOM scrape when they disagree. */
+  /* Volusion option-aware unit (matches add-to-cart) — prefer over stale/MAP DOM scrape when they disagree. */
   var volBacked = fromForm > 0 ? fromForm : volLive > 0 ? volLive : 0;
   if (!(volBacked > 0) && fromState > 0) volBacked = fromState;
   if (!(volBacked > 0) && fromMeta > 0) volBacked = fromMeta;
@@ -6605,7 +6631,7 @@ function getPlannerBaseSeatPriceForCalc() {
     member = floor;
   }
 
-  /* Theater planner: same unit as add-to-cart (hidden SellingPrice / HowToGetSalePrice) ΓÇö not MAP header scrape. */
+  /* Theater planner: same unit as add-to-cart (hidden SellingPrice / HowToGetSalePrice) — not MAP header scrape. */
   if (
     typeof mcIsTheaterPlannerPdp === "function" &&
     mcIsTheaterPlannerPdp() &&
@@ -6727,7 +6753,7 @@ function mcSyncPlannerConfigurationPriceDisplay() {
       cpe.textContent = "Configuration total: " + fmt(lineTotal);
       cpe.style.display = "block";
     } else if (hasPieces) {
-      cpe.textContent = "Calculating member priceΓÇª";
+      cpe.textContent = "Calculating member price…";
       cpe.style.display = "block";
     } else {
       cpe.style.display = "none";
@@ -6927,7 +6953,7 @@ function mcSyncConfigurationFromDom() {
       if (totalAmt > 0) {
         priceHtml.push('<div class="mc-configuration-rh__total-line">Total: ' + fmt(totalAmt) + "</div>");
       } else if (additional > 0) {
-        priceHtml.push('<div class="mc-configuration-rh__total-line">Calculating totalΓÇª</div>');
+        priceHtml.push('<div class="mc-configuration-rh__total-line">Calculating total…</div>');
       }
     }
     if (priceHtml.length) {
@@ -7022,7 +7048,7 @@ function ensurePriceWithOptionsLabel(scope){
 }
 
 /**
- * Collapse planner layout / option keys (e.g. "4L Armless Loveseat") to canonical codes (4L, 5L, ΓÇª)
+ * Collapse planner layout / option keys (e.g. "4L Armless Loveseat") to canonical codes (4L, 5L, …)
  * so 4L billable math and armless cart split stay aligned with Volusion.
  */
 function mcNormalizePlannerPieceKey(raw) {
@@ -7585,7 +7611,7 @@ setTimeout(function () {
 <!--
   Vertex / theater PDP: planner -> Volusion sync for cart.
   Seat count SELECT___...___49 (when present): 750 baseline. 4L uses separate cart SKU armless-love-hts (not discount options).
-  Configuration select: neutral "regular/straight/curved" only ΓÇö never armless-discount / 855.
+  Configuration select: neutral "regular/straight/curved" only — never armless-discount / 855.
 -->
 <script>
 (function mcVertexTheaterDeterministicWriter(){
@@ -7664,7 +7690,7 @@ setTimeout(function () {
     var okCfg = false;
 
     if (configSelect) {
-      /* 4L is cart-split to armless-love-hts ΓÇö never select discount / armless loveseat option codes on the PDP. */
+      /* 4L is cart-split to armless-love-hts — never select discount / armless loveseat option codes on the PDP. */
       var regPatterns = s.isCurved
         ? [/curved/i, /regular/i, /standard/i, /no\s+armless/i, /straight/i]
         : [/regular/i, /standard/i, /no\s+armless/i, /straight/i];
@@ -7907,7 +7933,7 @@ body:not(.is-home) #display_menu_1 .vnav__label:focus-visible {
   border-radius: 4px !important;
 }
 
-/* Submenu typography on non-home ΓÇö left-aligned, lighter than top level */
+/* Submenu typography on non-home — left-aligned, lighter than top level */
 body:not(.is-home) #display_menu_1 .vnav--level2,
 body:not(.is-home) #display_menu_1 .vnav--level3,
 body:not(.is-home) #display_menu_1 .vnav__submenu {
@@ -7959,7 +7985,7 @@ body.mc-product-page #content_area .resp-tabs-list li {
   font-style: normal !important;
 }
 
-/* option labels ΓÇô EXACT same font for every option header (NUMBER OF SEATS, CONFIGURATION, SELECT A LEATHER) + padding */
+/* option labels – EXACT same font for every option header (NUMBER OF SEATS, CONFIGURATION, SELECT A LEATHER) + padding */
 body.productdetails #content_area #options_table label,
 body.mc-product-page #content_area #options_table label,
 body.productdetails #v65-product-parent #options_table label,
@@ -8010,7 +8036,7 @@ html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__pieces * {
   font-size: 13px !important;
   line-height: 1.45 !important;
 }
-/* Product tabs ΓÇô more padding so labels are not too short */
+/* Product tabs – more padding so labels are not too short */
 body.mc-product-page #content_area .tab,
 body.mc-product-page #content_area .tab a,
 body.mc-product-page #content_area .resp-tab-item,
@@ -8081,7 +8107,7 @@ body.mc-product-page #content_area .resp-tabs-list li {
 }
 
 /* At 961px and below: accordion only; hide table label cell (label is in accordion header); panel closed by default.
- * Do NOT clip raw #options_table selects ΓÇö wrapSelectsAsAccordions may be unused; clipping would hide all native options. */
+ * Do NOT clip raw #options_table selects — wrapSelectsAsAccordions may be unused; clipping would hide all native options. */
 @media (max-width: 961px) {
   body.mc-product-page #content_area #options_table .mc-accordion-row td:first-child,
   body.mc-product-page #content_area table[id*="options_table"] .mc-accordion-row td:first-child {
@@ -8202,7 +8228,7 @@ body.mc-product-page #content_area #mcPlannerSummary.mc-has-selections {
   flex: 1 1 auto !important;
 }
 
-/* Add to Cart: same look as Room Planner ΓÇô one white button with cart icon inside */
+/* Add to Cart: same look as Room Planner – one white button with cart icon inside */
 body.mc-product-page #content_area .mc-atc-row {
   display: flex !important;
   align-items: center !important;
@@ -8276,7 +8302,7 @@ body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon {
   vertical-align: middle !important;
 }
 
-/* No separate container ΓÇô every wrapper of Add to Cart transparent */
+/* No separate container – every wrapper of Add to Cart transparent */
 body.mc-product-page #content_area .v65-product-addtocart,
 body.mc-product-page #content_area .v65-product-addtocart div,
 body.mc-product-page #v65-product-parent .v65-product-addtocart,
@@ -8299,7 +8325,7 @@ body.mc-product-page #v65-product-parent table:has(input[name="btnaddtocart"]) {
 }
 
 /* Room Planner + Product Summary: same pill button (not the leather ">" button).
-   Include #v65-product-parent ΓÇö on some PDPs #mc-inline-config is not under #content_area. */
+   Include #v65-product-parent — on some PDPs #mc-inline-config is not under #content_area. */
 body.mc-product-page #content_area #mcPlannerBtn,
 body.mc-product-page #content_area #mcProductSummaryBtn,
 body.mc-product-page #v65-product-parent #mcPlannerBtn,
@@ -8375,7 +8401,7 @@ body:not(.mc-theater-seating-pdp).productdetails #v65-product-parent #mcConfigur
   pointer-events: none !important;
 }
 
-/* Select a Leather ">" button ΓÇô 20px, vertically aligned, no box (matches accordion toggle) */
+/* Select a Leather ">" button – 20px, vertically aligned, no box (matches accordion toggle) */
 body.mc-product-page #content_area #mcLeatherBtn {
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -8423,7 +8449,7 @@ body.mc-product-page #content_area #mcLeatherBtn:focus {
   outline: none !important;
 }
 
-/* Accordion ">" toggle ΓÇô 20px, vertically aligned, no box */
+/* Accordion ">" toggle – 20px, vertically aligned, no box */
 body.mc-product-page #content_area .mc-option-accordion__toggle {
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -8457,7 +8483,7 @@ body.mc-product-page #content_area .mc-option-accordion__toggle:focus {
   outline: none !important;
 }
 
-/* Mini leather swatches ΓÇô no grey boxes, strictly uniform size */
+/* Mini leather swatches – no grey boxes, strictly uniform size */
 body.mc-product-page #content_area #mcLeatherSwatchStrip {
   display: flex !important;
   align-items: center !important;
@@ -8694,7 +8720,7 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 auto !important;
   }
 
-  /* Mobile: main image centered first, then alt images ΓÇô up to 4 per row, single centered column */
+  /* Mobile: main image centered first, then alt images – up to 4 per row, single centered column */
   body.mc-product-page #content_area .mc-pdp-media-td,
   body.mc-product-page #content_area [id*="product_photo_td"],
   body.mc-product-page #content_area td:has(#product_photo),
@@ -8770,7 +8796,7 @@ body.mc-product-page #content_area .wm-swatch img {
     object-fit: contain !important;
     display: block !important;
   }
-  /* Wrapper for centering alt thumbnails ΓÇô applied by JS */
+  /* Wrapper for centering alt thumbnails – applied by JS */
   #content_area .mc-altviews-outer {
     display: block !important;
     text-align: center !important;
@@ -8787,7 +8813,7 @@ body.mc-product-page #content_area .wm-swatch img {
     max-width: 100% !important;
     text-align: center !important;
   }
-  /* Tighter gap: options/price block ΓÇö clear below alt thumbnails (no overlap) */
+  /* Tighter gap: options/price block — clear below alt thumbnails (no overlap) */
   #content_area .mc-pdp-options-td,
   #content_area td:has(.colors_pricebox),
   #content_area td:has(#priceWithOptions) {
@@ -9160,7 +9186,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     return /-s\//.test(location.pathname) || /categoryid=/i.test(location.search || '');
   }
 
-  /** Page index from query string (regex first ΓÇö Volusion uses PageNum= ; split-parse missed some encodings). */
+  /** Page index from query string (regex first — Volusion uses PageNum= ; split-parse missed some encodings). */
   function pageFromSearch(search) {
     if (!search || search === '?') return 1;
     var q = search.charAt(0) === '?' ? search : '?' + search;
@@ -9245,7 +9271,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     }
   }
 
-  /** Volusion: pretty URL `/Name-s/106.htm` vs classic `/category.asp?categoryid=106&PageNum=2` ΓÇö same listing, different pathname. */
+  /** Volusion: pretty URL `/Name-s/106.htm` vs classic `/category.asp?categoryid=106&PageNum=2` — same listing, different pathname. */
   function listingMetaFromHref(href) {
     var out = { cid: '', sid: '', path: '' };
     try {
@@ -9380,7 +9406,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     return location.href;
   }
 
-  /** Volusion SEO: page 2+ often uses ΓÇª-s/{id}-{n}.htm while page 1 is ΓÇª-s/{id}.htm (query PageNum alone may not advance pageFromHref). */
+  /** Volusion SEO: page 2+ often uses …-s/{id}-{n}.htm while page 1 is …-s/{id}.htm (query PageNum alone may not advance pageFromHref). */
   function applySeoPathPageIfNeeded(u, page) {
     if (!u || page < 2) return;
     try {
@@ -9468,10 +9494,10 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
       if (!a.href || /^javascript:/i.test(a.href)) return;
       var t = (a.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
       var ti = (a.getAttribute('title') || '').toLowerCase();
-      if (!nextHref && (t === 'next' || t === '>' || t === '┬╗' || /next\s+page/i.test(t) || ti.indexOf('next') >= 0)) {
+      if (!nextHref && (t === 'next' || t === '>' || t === '»' || /next\s+page/i.test(t) || ti.indexOf('next') >= 0)) {
         nextHref = a.href;
       }
-      if (!prevHref && (t === 'previous' || t === 'prev' || t === '<' || t === '┬½' || ti.indexOf('prev') >= 0)) {
+      if (!prevHref && (t === 'previous' || t === 'prev' || t === '<' || t === '«' || ti.indexOf('prev') >= 0)) {
         prevHref = a.href;
       }
     });
@@ -9487,13 +9513,13 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
         if (firstA && !firstLi.classList.contains('disabled') && !firstLi.classList.contains('active')) {
           var ft = (firstA.textContent || '').toLowerCase();
           var fp = pageFromHref(firstA.href);
-          if (ft.indexOf('prev') >= 0 || ft === 'ΓÇ╣' || ft === '┬½' || ft === '<') prevHref = firstA.href;
+          if (ft.indexOf('prev') >= 0 || ft === '‹' || ft === '«' || ft === '<') prevHref = firstA.href;
           else if (hrefHasPagingParam(firstA.href) && fp > 0 && fp < currPage) prevHref = firstA.href;
         }
         if (lastA && !lastLi.classList.contains('disabled')) {
           var lt = (lastA.textContent || '').toLowerCase();
           var lp = pageFromHref(lastA.href);
-          if (lt.indexOf('next') >= 0 || lt === 'ΓÇ║' || lt === '┬╗' || lt === '>') nextHref = lastA.href;
+          if (lt.indexOf('next') >= 0 || lt === '›' || lt === '»' || lt === '>') nextHref = lastA.href;
           else if (hrefHasPagingParam(lastA.href) && lp > currPage) nextHref = lastA.href;
         }
       }
@@ -9530,13 +9556,13 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
         if (!prevHref && firstA && !firstLi.classList.contains('disabled') && !firstLi.classList.contains('active')) {
           var ft = (firstA.textContent || '').toLowerCase();
           var fp = pageFromHref(firstA.href);
-          if (ft.indexOf('prev') >= 0 || ft === 'ΓÇ╣' || ft === '┬½' || ft === '<') prevHref = firstA.href;
+          if (ft.indexOf('prev') >= 0 || ft === '‹' || ft === '«' || ft === '<') prevHref = firstA.href;
           else if (hrefHasPagingParam(firstA.href) && fp > 0 && fp < currPage) prevHref = firstA.href;
         }
         if (!nextHref && lastA && !lastLi.classList.contains('disabled')) {
           var lt = (lastA.textContent || '').toLowerCase();
           var lp = pageFromHref(lastA.href);
-          if (lt.indexOf('next') >= 0 || lt === 'ΓÇ║' || lt === '┬╗' || lt === '>') nextHref = lastA.href;
+          if (lt.indexOf('next') >= 0 || lt === '›' || lt === '»' || lt === '>') nextHref = lastA.href;
           else if (hrefHasPagingParam(lastA.href) && lp > currPage) nextHref = lastA.href;
         }
       }
@@ -9545,10 +9571,10 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
         if (!a.href || /^javascript:/i.test(a.href)) return;
         var t = (a.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
         var ti = (a.getAttribute('title') || '').toLowerCase();
-        if (!nextHref && (t === 'next' || t === '>' || t === '┬╗' || /next\s+page/i.test(t) || ti.indexOf('next') >= 0)) {
+        if (!nextHref && (t === 'next' || t === '>' || t === '»' || /next\s+page/i.test(t) || ti.indexOf('next') >= 0)) {
           nextHref = a.href;
         }
-        if (!prevHref && (t === 'previous' || t === 'prev' || t === '<' || t === '┬½' || ti.indexOf('prev') >= 0)) {
+        if (!prevHref && (t === 'previous' || t === 'prev' || t === '<' || t === '«' || ti.indexOf('prev') >= 0)) {
           prevHref = a.href;
         }
       });
@@ -9638,7 +9664,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
       if (
         /\bpage\s+\d+/i.test(t) ||
         /\bpage\s+\d+\s+of\s+\d+/i.test(t) ||
-        /\bshowing\s+\d+\s*[-ΓÇô]\s*\d+/i.test(t) ||
+        /\bshowing\s+\d+\s*[-–]\s*\d+/i.test(t) ||
         /^page\s*:/i.test(t)
       ) {
         return el;
@@ -9656,19 +9682,19 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     return m ? parseInt(m[1], 10) : 0;
   }
 
-  /** "Showing 1 - 24 of 96" ΓåÆ at least ceil(96/24) pages (Volusion often omits "Page X of Y"). */
+  /** "Showing 1 - 24 of 96" → at least ceil(96/24) pages (Volusion often omits "Page X of Y"). */
   function minPagesFromShowingOfTotal(root) {
     if (!root) return 1;
     var blob = String(root.textContent || '').replace(/\s+/g, ' ');
     var m =
-      blob.match(/\b\d+\s*[-ΓÇô]\s*\d+\s+of\s+(\d+)\b/i) ||
-      blob.match(/\b(?:showing|displaying|viewing)\s*:?\s*\d+\s*[-ΓÇô]\s*\d+\s+of\s+(\d+)\b/i);
+      blob.match(/\b\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i) ||
+      blob.match(/\b(?:showing|displaying|viewing)\s*:?\s*\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i);
     if (!m) return 1;
     var total = parseInt(m[1], 10);
     if (isNaN(total) || total < 2) return 1;
     var m2 =
-      blob.match(/\b(\d+)\s*[-ΓÇô]\s*\d+\s+of\s+\d+/i) ||
-      blob.match(/\b(?:showing|displaying|viewing)\s*:?\s*(\d+)\s*[-ΓÇô]\s*\d+\s+of\s+\d+/i);
+      blob.match(/\b(\d+)\s*[-–]\s*\d+\s+of\s+\d+/i) ||
+      blob.match(/\b(?:showing|displaying|viewing)\s*:?\s*(\d+)\s*[-–]\s*\d+\s+of\s+\d+/i);
     var per = m2 ? parseInt(m2[1], 10) : 24;
     if (isNaN(per) || per < 1) per = 24;
     return Math.max(1, Math.ceil(total / per));
@@ -9715,7 +9741,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
         if (li && li.classList && li.classList.contains('disabled')) return;
         var t = (a.textContent || '').replace(/\s+/g, ' ').trim();
         var ti = ((a.getAttribute && a.getAttribute('title')) || '').toLowerCase();
-        if (/^next\b|^ΓÇ║|^┬╗|^>$/i.test(t) || /next\s+page/i.test(t) || ti.indexOf('next') >= 0) saw++;
+        if (/^next\b|^›|^»|^>$/i.test(t) || /next\s+page/i.test(t) || ti.indexOf('next') >= 0) saw++;
         if (/^\d+$/.test(t) && parseInt(t, 10) > currPage) saw++;
         if (hrefHasPagingParam(a.href) && sameListingContext(a.href) && pageFromHref(a.href) > currPage) saw++;
         var im = a.querySelector && a.querySelector('img[alt]');
@@ -9726,7 +9752,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     return false;
   }
 
-  /** Count PLP tiles on the current page; fallback from ΓÇ£Showing aΓÇôb of ΓÇªΓÇ¥ when the grid is nonstandard. */
+  /** Count PLP tiles on the current page; fallback from “Showing a–b of …” when the grid is nonstandard. */
   function countCategoryProductsShownOnPage(root) {
     if (!root) return 0;
     var dom = 0;
@@ -9739,7 +9765,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     var fromTxt = 0;
     try {
       var blob = String(root.textContent || '').replace(/\s+/g, ' ');
-      var m = blob.match(/\b(\d+)\s*[-ΓÇô]\s*(\d+)\s+of\s+\d+/i);
+      var m = blob.match(/\b(\d+)\s*[-–]\s*(\d+)\s+of\s+\d+/i);
       if (m) {
         var lo = parseInt(m[1], 10);
         var hi = parseInt(m[2], 10);
@@ -9749,14 +9775,14 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     return Math.max(dom, fromTxt);
   }
 
-  /** ΓÇ£Showing 1 - 24 of 96ΓÇ¥ ΓåÆ 96 (category size when grid count is below per-page threshold). */
+  /** “Showing 1 - 24 of 96” → 96 (category size when grid count is below per-page threshold). */
   function totalProductsInCategoryFromDom(root) {
     if (!root) return 0;
     try {
       var blob = String(root.textContent || '').replace(/\s+/g, ' ');
       var m =
-        blob.match(/\b\d+\s*[-ΓÇô]\s*\d+\s+of\s+(\d+)\b/i) ||
-        blob.match(/\b(?:showing|displaying|viewing)\s*:?\s*\d+\s*[-ΓÇô]\s*\d+\s+of\s+(\d+)\b/i);
+        blob.match(/\b\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i) ||
+        blob.match(/\b(?:showing|displaying|viewing)\s*:?\s*\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i);
       if (!m) return 0;
       var n = parseInt(m[1], 10);
       return isNaN(n) ? 0 : n;
@@ -9765,7 +9791,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     }
   }
 
-  /** Any paging link in the listing (ignores outsideProductGrid ΓÇö some themes nest oddly). */
+  /** Any paging link in the listing (ignores outsideProductGrid — some themes nest oddly). */
   function scanBestNextHrefFromContentArea(root, currPage) {
     if (!root) return null;
     currPage = currPage > 0 ? currPage : 1;
@@ -9852,7 +9878,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
 
       var shownOnPage = countCategoryProductsShownOnPage(ca);
       var categoryTotalN = totalProductsInCategoryFromDom(ca);
-      /* Per-page >30 OR Volusion ΓÇ£of NΓÇ¥ total >30 so 24/page categories still get Next/Prev. */
+      /* Per-page >30 OR Volusion “of N” total >30 so 24/page categories still get Next/Prev. */
       if (shownOnPage <= 30 && categoryTotalN <= 30) {
         teardownCustomCategoryPager(ca);
         return;
@@ -9878,7 +9904,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
         if (candNext) nextHref = candNext;
       }
       if (!nextHref) {
-        /* Do not scan document.body ΓÇö tens of thousands of anchors + URL parsing freezes the tab; ca is enough. */
+        /* Do not scan document.body — tens of thousands of anchors + URL parsing freezes the tab; ca is enough. */
         var scanNext = scanBestNextHrefFromContentArea(ca, curr);
         if (scanNext) nextHref = scanNext;
       }
@@ -10141,7 +10167,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     var ca = document.getElementById('content_area');
     if (!ca) return [];
 
-    /* Fix EVERY listing grid in main content ΓÇö not only the first / v65 match. Volusion splits rows or omits v65 wrapper; a single-grid fallback hid most products. */
+    /* Fix EVERY listing grid in main content — not only the first / v65 match. Volusion splits rows or omits v65 wrapper; a single-grid fallback hid most products. */
     var all = ca.querySelectorAll('.v-product-grid');
     var out = [];
     var seen = new WeakSet();
@@ -10159,7 +10185,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
   function fixCategoryGrid() {
     var b = document.body;
     if (!b) return;
-    /* Do not skip when body has productdetails ΓÇö Volusion sometimes sets it wrongly; rely on presence of a listing grid */
+    /* Do not skip when body has productdetails — Volusion sometimes sets it wrongly; rely on presence of a listing grid */
     var grids = mcFindListingGrids();
     if (!grids.length) return;
 
@@ -10313,7 +10339,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
         btn.type = 'button';
         btn.className = 'mc-sub-toggle';
         btn.setAttribute('aria-expanded','false');
-        btn.textContent = 'Γû╛';
+        btn.textContent = '▾';
         row.appendChild(btn);
 
         var subList = buildFromVnav(sub);
@@ -10718,7 +10744,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
   function q(sel, root){ return (root || document).querySelector(sel); }
   function qa(sel, root){ return Array.from((root || document).querySelectorAll(sel)); }
   function isMobile(){ return window.matchMedia('(max-width: 991px)').matches; }
-  /** Same logic as global parseMcCurrency; IIFE cannot rely on another script blockΓÇÖs scope on Volusion. */
+  /** Same logic as global parseMcCurrency; IIFE cannot rely on another script block’s scope on Volusion. */
   function mcParseCurrency(text){
     if (typeof window.parseMcCurrency === 'function') return window.parseMcCurrency(text);
     var src = text == null ? '' : String(text);
@@ -10732,7 +10758,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
   }
 
   function markProductPage() {
-    /* Volusion injects #content_area asynchronously; donΓÇÖt rely only on ProductCode timing. */
+    /* Volusion injects #content_area asynchronously; don’t rely only on ProductCode timing. */
     var pcInp =
       document.querySelector('input[name="ProductCode"]') ||
       document.querySelector('input[name="productcode"]');
@@ -10832,7 +10858,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
       });
     });
 
-    /* Volusion vCSS_tab strips stay hidden via custom-safe.css ΓÇö do NOT set inline-flex on
+    /* Volusion vCSS_tab strips stay hidden via custom-safe.css — do NOT set inline-flex on
        td[class*="vCSS_tab"] here; inline !important defeats stylesheet hides (#content_area). */
   }
 
@@ -11398,7 +11424,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     }
   }
 
-  /** Exact query param value ΓÇö avoids indexOf('c=103') matching c=1030 / categoryid=1039. */
+  /** Exact query param value — avoids indexOf('c=103') matching c=1030 / categoryid=1039. */
   function mcGetQueryParamValue(name) {
     var q = (location.search || '').replace(/^\?/, '');
     if (!q) return null;
@@ -11415,7 +11441,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     return null;
   }
 
-  /** Volusion category listings use `...-s/{id}.htm` (or `.html`) ΓÇö authoritative vs. stray hidden CategoryID fields in the page. */
+  /** Volusion category listings use `...-s/{id}.htm` (or `.html`) — authoritative vs. stray hidden CategoryID fields in the page. */
   function mcListingCategoryIdFromPath() {
     try {
       var path = (location.pathname || '').toLowerCase();
@@ -11425,7 +11451,7 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     return null;
   }
 
-  /** Path id, else `categoryid` / `c` query (e.g. category.asp?categoryid=157) ΓÇö needed so stray DOM fields donΓÇÖt imply the wrong category. */
+  /** Path id, else `categoryid` / `c` query (e.g. category.asp?categoryid=157) — needed so stray DOM fields don’t imply the wrong category. */
   function mcListingCategoryIdFromVolusion() {
     if (/\/category-s\/157\.htm/i.test(location.pathname || '')) {
       return '157';
@@ -11496,7 +11522,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       );
       var catVal = catInp && String(catInp.value || '').trim();
       if (catVal === '103') return true;
-      /* Fuzzy copy checks must NOT use document.body ΓÇö global nav includes e.g. "Nest Bean Bags" (/nest/), which false-flagged every PDP as a bean bag and killed member pricing. */
+      /* Fuzzy copy checks must NOT use document.body — global nav includes e.g. "Nest Bean Bags" (/nest/), which false-flagged every PDP as a bean bag and killed member pricing. */
       var contentRoot =
         document.getElementById('content_area') ||
         document.getElementById('v65-product-parent') ||
@@ -11639,7 +11665,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (vp) vp.appendChild(caption);
   }
 
-  /** Always search document ΓÇö #v65-product-parent may not be inside #content_area. */
+  /** Always search document — #v65-product-parent may not be inside #content_area. */
   function findMemberCaptionAnchorEl() {
     var el;
     var selectors = [
@@ -11729,7 +11755,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (document.body && document.body.classList.contains('mc-bean-bag-pdp')) return;
     mcRemoveLowestPriceMapPromos(root);
     var anchorEl = findMemberCaptionAnchorEl();
-    /* Do not append into empty #content_area ΓÇö Volusion replaces innerHTML and would delete the caption. */
+    /* Do not append into empty #content_area — Volusion replaces innerHTML and would delete the caption. */
     var fallbackHost =
       document.querySelector('#v65-product-parent .colors_pricebox') ||
       document.querySelector('#v65-product-parent') ||
@@ -12281,7 +12307,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
 <script>
 (function () {
-  /** Volusion PDP ProductCode ΓåÆ same thumbnail filenames category PLP uses (`/v/vspfiles/photos/{CODE}-1.jpg`). */
+  /** Volusion PDP ProductCode → same thumbnail filenames category PLP uses (`/v/vspfiles/photos/{CODE}-1.jpg`). */
   function mcVolusionProductCodeFromHref(href) {
     var h = String(href || '');
     var m =
@@ -12306,9 +12332,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
   }
 
-  /** Volusion often renders two *top-level* related blocks ΓÇö duplicates SKUs (e.g. 8 tiles). Keep one rail.
+  /** Volusion often renders two *top-level* related blocks — duplicates SKUs (e.g. 8 tiles). Keep one rail.
       NOTE: `td#related_products_content` is normally NESTED inside `table#v65-product-related` (single rail).
-      Never hide that cell ΓÇö both roots would match the same `table.v65-productDisplay` and the UI would vanish. */
+      Never hide that cell — both roots would match the same `table.v65-productDisplay` and the UI would vanish. */
   function mcRelatedHideDuplicateVolusionRails() {
     try {
       var primary = document.getElementById('v65-product-related');
@@ -12338,7 +12364,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     } catch (eS) {}
   }
 
-  /** Volusion related grid: row 0 is P|D|P|D|ΓÇª (divider cells); price/photo rows omit divider TDs (rowspan).
+  /** Volusion related grid: row 0 is P|D|P|D|… (divider cells); price/photo rows omit divider TDs (rowspan).
       Capping by raw cell index breaks alignment (e.g. keeps only two products and orphans photo cells). */
   function mcCapRelatedTableProductColumns(table, maxN) {
     if (!table || !table.rows || maxN < 1) return;
@@ -12386,7 +12412,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     } catch (eT) {}
   }
 
-  /** Volusion: name row is P|D|P|D|ΓÇª with rowspan dividers; photo and price rows are one TD per product.
+  /** Volusion: name row is P|D|P|D|… with rowspan dividers; photo and price rows are one TD per product.
       Reordering <tr> breaks rowspan. Rebuild as a PLP-style grid: image, title, price per card. */
   function mcRelatedNthProductTd(row, n) {
     if (!row || !row.cells) return null;
@@ -12598,7 +12624,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
             mcRelatedEnsurePlpCardMedia(media, nameAForCard, phTd);
             card.appendChild(media);
 
-            /* Do not nest <td clone> inside <div> ΓÇö invalid HTML breaks layout/order in browsers */
+            /* Do not nest <td clone> inside <div> — invalid HTML breaks layout/order in browsers */
             var titleEl = document.createElement('div');
             titleEl.className = 'mc-related-plp-card__title';
             if (nameAForCard) titleEl.appendChild(nameAForCard.cloneNode(true));
@@ -12653,7 +12679,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     } catch (eSec) {}
   }
 
-  /** Hard cap related tiles/columns ΓÇö McCabe PDP shows exactly four category-style picks (Volusion often emits 8). */
+  /** Hard cap related tiles/columns — McCabe PDP shows exactly four category-style picks (Volusion often emits 8). */
   function mcCapRelatedProductSlots(maxN) {
     maxN = maxN || 4;
     var roots = document.querySelectorAll(
@@ -12713,7 +12739,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     return false;
   }
 
-  /** Category listing thumbnails for related SKUs (`-1.jpg`, flip `-2T` on error) ΓÇö overrides PDP/detail-sized URLs. */
+  /** Category listing thumbnails for related SKUs (`-1.jpg`, flip `-2T` on error) — overrides PDP/detail-sized URLs. */
   function mcForceRelatedItemCategoryThumbnails(scope) {
     try {
       var rootScope = scope || document;
@@ -13251,7 +13277,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     setTimeout(mcRunRelatedFix, 2600);
     setTimeout(mcRunRelatedFix, 4800);
   });
-  /* Related Items may render outside #content_area (Volusion) ΓÇö observing only #content_area missed late inject + lazy img. */
+  /* Related Items may render outside #content_area (Volusion) — observing only #content_area missed late inject + lazy img. */
   var moRoot = typeof document.body !== 'undefined' && document.body ? document.body : null;
   if (moRoot && typeof MutationObserver !== 'undefined') {
     var t;
@@ -13339,8 +13365,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 })();
 </script>
 
-<!-- PDP: Volusion Product Info / Tech / Ext tabs stay hidden ΓÇö see custom-safe.css vCSS_tab rules.
-     (Earlier ΓÇ£PATCH: Restore product tabsΓÇ¥ JS/CSS reversed those hides ΓÇö removed May 2026.) -->
+<!-- PDP: Volusion Product Info / Tech / Ext tabs stay hidden — see custom-safe.css vCSS_tab rules.
+     (Earlier “PATCH: Restore product tabs” JS/CSS reversed those hides — removed May 2026.) -->
 <script>
 (function(){
   /* Fetch planner dims from Palliser spec-sheet PDFs */
@@ -14277,7 +14303,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       return count;
     }
     function mcApplyRow4LDiscount(tr, fallbackDiscount){
-      /* Planner configuration total already includes 4L bundle math ΓÇö do not subtract again on this line. */
+      /* Planner configuration total already includes 4L bundle math — do not subtract again on this line. */
       if (tr && tr.dataset && tr.dataset.mcPlannerCartTarget === "1") return;
       var txt = tr.innerHTML || "";
       var m = txt.match(/\[MC_4L_DISCOUNT\](\d+(?:\.\d+)?)\[\/MC_4L_DISCOUNT\]/i);
@@ -14650,7 +14676,7 @@ window.addEventListener('load', function () {
 });
 </script>
 <style id="mc-member-grid-inline-fallback">
-/* Fallback if vspfiles/css/custom-safe.css is not deployed ΓÇö keeps MAP swap + modal usable */
+/* Fallback if vspfiles/css/custom-safe.css is not deployed — keeps MAP swap + modal usable */
 .mc-member-grid-price__regular{font-size:15px;color:#333;margin-bottom:6px}
 .mc-member-grid-price__amount{font-size:15px;margin-top:2px;color:#111}
 .mc-member-grid-price__label{font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:none;color:#333}
@@ -14681,7 +14707,7 @@ window.addEventListener('load', function () {
 .mc-login-modal__status.is-error{color:#a11;font-weight:600}
 .mc-login-modal__status.is-success{color:#2d6a4f}
 
-/* Global member-price typography ΓÇö 13px stack (match product title / options) */
+/* Global member-price typography — 13px stack (match product title / options) */
 body .mc-member-grid-price__label,
 body .mc-member-price-caption__option-label,
 body .mc-member-price-caption__headline,
@@ -14832,7 +14858,7 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   text-transform: uppercase !important;
   color: #777 !important;
 }
-/* Native Volusion sale row must not stack on list price in retail block (sale ΓåÆ .mc-pdp-sale-preview). */
+/* Native Volusion sale row must not stack on list price in retail block (sale → .mc-pdp-sale-preview). */
 .mc-pdp-retail-row .product_sale_price,
 .mc-pdp-retail-row .product_saleprice,
 .mc-pdp-retail-row font.product_sale_price,
@@ -15056,7 +15082,7 @@ body.mc-product-page #content_area font.product_sale_price {
       <button type="button" class="mc-login-modal__tab" data-mc-login-tab="signup" role="tab" aria-selected="false">Sign up</button>
     </div>
     <div id="mc-login-modal-panel-login" class="mc-login-modal__panel-body is-active">
-      <p class="mc-login-modal__hint">Sign in below. Member pricing updates on this page when login succeeds ΓÇö you stay on the product.</p>
+      <p class="mc-login-modal__hint">Sign in below. Member pricing updates on this page when login succeeds — you stay on the product.</p>
       <div id="mc-login-modal-login-status" class="mc-login-modal__status" aria-live="polite"></div>
       <form id="mc-member-login-form" class="mc-login-modal__form" method="post" action="/login.asp" autocomplete="on">
         <input type="hidden" name="CustomerNewOld" value="old" />
@@ -15870,7 +15896,7 @@ async function mcSubmitAuthForm(form, mode) {
       mode,
       mode === 'signup'
         ? 'Account setup timed out. Please try again.'
-        : 'Sign-in timed out. Check your email and password, or use ΓÇ£Open in a new tabΓÇ¥ below.',
+        : 'Sign-in timed out. Check your email and password, or use “Open in a new tab” below.',
       'error'
     );
   }, 28000);
@@ -15895,7 +15921,7 @@ async function mcSubmitAuthForm(form, mode) {
       mode,
       mode === 'signup'
         ? 'We could not confirm the new account. Please check your info and try again.'
-        : 'Sign-in failed. Check your email and password, or use ΓÇ£Open in a new tabΓÇ¥ below.',
+        : 'Sign-in failed. Check your email and password, or use “Open in a new tab” below.',
       'error'
     );
     mcToggleAuthPending(form, false);
@@ -16015,7 +16041,7 @@ async function mcSubmitAuthForm(form, mode) {
     var i;
     var el;
     var out = [];
-    /* Plain objects cannot key DOM nodes ΓÇö all divs become "[object HTMLDivElement]" and only the first card was kept. */
+    /* Plain objects cannot key DOM nodes — all divs become "[object HTMLDivElement]" and only the first card was kept. */
     var seen = new WeakSet();
     function pushCard(node) {
       if (!node || seen.has(node)) return;
@@ -16042,9 +16068,9 @@ async function mcSubmitAuthForm(form, mode) {
     }
 
     /*
-     * Volusion category PLP (e.g. /category-s/157.htm): nested table.v65-productDisplay ΓÇö image row + separate title/price row.
+     * Volusion category PLP (e.g. /category-s/157.htm): nested table.v65-productDisplay — image row + separate title/price row.
      * There is NO .v-product wrapper; member-grid paint must target each title <td> (a.productnamecolor, not productnamecolorsmall).
-     * When .v-product-grid exists, collect those first ΓÇö nested v65 tables also appear on many PLPs (sort chrome, etc.); running
+     * When .v-product-grid exists, collect those first — nested v65 tables also appear on many PLPs (sort chrome, etc.); running
      * the table branch first could return a tiny ineligible set and skip the real grid (regression after mc-product-page fix).
      */
     var onCategoryPlp =
@@ -16104,7 +16130,7 @@ async function mcSubmitAuthForm(form, mode) {
 
     raw = document.querySelectorAll(sel);
     for (i = 0; i < raw.length; i++) pushCard(raw[i]);
-    /* Related items: handled separately (image ΓåÆ title ΓåÆ price). Do not run PLP member-grid paint on these cells. */
+    /* Related items: handled separately (image → title → price). Do not run PLP member-grid paint on these cells. */
     if (out.length) return out;
     if (mcIsLikelyListingPage()) {
       raw = document.querySelectorAll('.v-product-grid .v-product, li.v-product');
@@ -16116,7 +16142,7 @@ async function mcSubmitAuthForm(form, mode) {
     return out;
   }
 
-  /* MAP / teaser captions ΓÇö match Volusion variants (case-insensitive) */
+  /* MAP / teaser captions — match Volusion variants (case-insensitive) */
   var MC_MAP_LINK_RE =
     /add\s+to\s+cart\s+for\s+our\s+lowest\s+price|add\s+to\s+cart\s+for\s+the\s+lowest|our\s+lowest\s+price|add\s+to\s+cart\s+for\s+lowest|see\s+price\s+in\s+cart|click\s+for\s+price|call\s+for\s+price|call\s+for\s+pricing|add\s+to\s+cart\s+to\s+see/i;
 
@@ -16348,7 +16374,7 @@ async function mcSubmitAuthForm(form, mode) {
 
   /**
    * Volusion often puts MAP / "Add to cart for our lowest price" in a promo link or callout,
-   * not in .v-product__price ΓÇö find the smallest matching node first, then fall back to price.
+   * not in .v-product__price — find the smallest matching node first, then fall back to price.
    */
   function mcFindCardPricingMount(card) {
     var MAP_RE = MC_MAP_LINK_RE;
@@ -16385,7 +16411,7 @@ async function mcSubmitAuthForm(form, mode) {
     );
   }
 
-  /** Logged-in price restore ΓÇö must stay in DOM after MAP anchor is replaced. */
+  /** Logged-in price restore — must stay in DOM after MAP anchor is replaced. */
   function mcFindCardPriceContainerMount(card) {
     if (!card || !card.querySelectorAll) return null;
     var candidates = [
@@ -16824,7 +16850,7 @@ function mcRenderUniformCardPricing(card, retailText, memberText, loginUrl, isLo
   return "";
 }
 
-  /** LOCKED canonical Palliser retail/member block ΓÇö do not change structure in pricing fixes. */
+  /** LOCKED canonical Palliser retail/member block — do not change structure in pricing fixes. */
  function mcBuildCanonicalMemberPricingHtml(retailText, memberText, loginUrl, isLoggedIn) {
   var retail = String(retailText || '').trim();
   if (!retail) return '';
@@ -17092,7 +17118,7 @@ function mcEnsurePdpPriceStack() {
     }
   }
 
-  /** Category 103 PLP only ΓÇö skip McCabe member grid paint (list + sale only). Other categories unchanged. */
+  /** Category 103 PLP only — skip McCabe member grid paint (list + sale only). Other categories unchanged. */
   function mcPathLooksLikeCategory103Listing() {
     try {
       if (/\/category-s\/157\.htm/i.test(location.pathname || '')) {
@@ -17370,7 +17396,7 @@ function mcEnsurePdpPriceStack() {
         if (typeof window.mcEnsureCategoryListingClasses === 'function') window.mcEnsureCategoryListingClasses();
       } catch (eEnsCat) {}
       /* Do not re-add mc-member-plp-price-pending here: mcPaint runs on a 350ms interval + observers.
-         Re-applying pending every pass hid all PLP prices repeatedly (visible ΓåÆ blank ΓåÆ visible flicker). */
+         Re-applying pending every pass hid all PLP prices repeatedly (visible → blank → visible flicker). */
       var cat103NoMember = mcPathLooksLikeCategory103Listing();
       try {
         var _mcGridLid =
@@ -18195,7 +18221,7 @@ window.addEventListener('mcMemberPricingReady', function () {
 
 <style id="mc-final-mobile-layout-fixes">
 @media (max-width: 991px) {
-  /* 1) Homepage hero logo ΓÇö smaller on phones/tablets; desktop unchanged (this query is mobile-only) */
+  /* 1) Homepage hero logo — smaller on phones/tablets; desktop unchanged (this query is mobile-only) */
   body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   #if_homepage #slideshow-container .mc-hero-overlay .hero-logo-img {
     width: 68% !important;
@@ -18207,7 +18233,7 @@ window.addEventListener('mcMemberPricingReady', function () {
     max-width: 96vw !important;
   }
 
-  /* 2) Category grid ΓÇö full product photo visible (contain, centered; no top crop) */
+  /* 2) Category grid — full product photo visible (contain, centered; no top crop) */
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product a.v-product__img,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
@@ -18255,7 +18281,7 @@ window.addEventListener('mcMemberPricingReady', function () {
     row-gap: 0 !important;
   }
 
-  /* 3) PDP ΓÇö stop price / ΓÇ£price with optionsΓÇ¥ overlapping alt thumbnails */
+  /* 3) PDP — stop price / “price with options” overlapping alt thumbnails */
   html body.productdetails #content_area #v65-product-parent [itemprop="offers"],
   html body.mc-product-page #content_area #v65-product-parent [itemprop="offers"],
   html body.productdetails #content_area [itemprop="offers"],
@@ -18321,7 +18347,7 @@ window.addEventListener('mcMemberPricingReady', function () {
   }
 }
 
-/* Category PLP thumbs: white stage + contain ΓÇö see mc-category-grid-critical, custom-safe --mc-plp-*, ~15666 */
+/* Category PLP thumbs: white stage + contain — see mc-category-grid-critical, custom-safe --mc-plp-*, ~15666 */
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
 :is(html.category, body.category) .v-product-grid .v-product .productnamecolor,
@@ -20701,7 +20727,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function mcSyncArmlessLoveseatDiscount(form) {
-    /* Legacy discount dropdown: keep neutral ($0 / No) ΓÇö 4L is fulfilled via armless-love-hts cart line. */
+    /* Legacy discount dropdown: keep neutral ($0 / No) — 4L is fulfilled via armless-love-hts cart line. */
     var sel = mcFindArmlessDiscountSelect(form);
     if (sel) {
       sel.disabled = false;
@@ -21426,7 +21452,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <!-- MC removed duplicate static mc-sectional-pdp-emergency.js; dynamic loader may still load one copy when needed -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260623sarrepair1"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260625sarrepair2"></script>
 <script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260626-top-price-panel-v31"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";

@@ -1,8 +1,8 @@
-﻿/* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 ΓÇö Saranoni layout perf + column order */
-/* MC_PDP_LAYOUT_20260616pdp32 ΓÇö stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
-/* MC_DEPLOY_VERIFY ΓÇö PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260625sarrepair2 — Saranoni native PDP + variant swatches */
+/* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
+/* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
-/* Loads after template.css; cache-bust via mcCssBust() in template ΓÇö not the static ?v= on mccabe-overrides */
+/* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
 /* Global typography aligned with category member-price amount (Inter; body text 400 / 0.02em). */
 body {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
@@ -46,7 +46,7 @@ body {
   overflow-x: hidden !important;
 }
 
-/* Fluid media + main columns ΓÇö keeps PDP/category content inside the viewport */
+/* Fluid media + main columns — keeps PDP/category content inside the viewport */
 #if_homepage,
 #content_area,
 #content_area_home {
@@ -65,7 +65,7 @@ iframe {
 }
 
 /* ======================================
-   HEADER + HERO SEARCH ΓÇö underline, hover, pop-out (strip may live in header or #mcHeroSearchOverlay)
+   HEADER + HERO SEARCH — underline, hover, pop-out (strip may live in header or #mcHeroSearchOverlay)
 ====================================== */
 header.header .header__section--middle,
 #mcHeroSearchOverlay .header__section--middle {
@@ -80,7 +80,7 @@ header.header .header__section--middle,
   overflow: visible !important;
 }
 
-/* Interior: search lives in .mc-header-desktop-bar (beside nav ΓåÆ cart); full width on mobile */
+/* Interior: search lives in .mc-header-desktop-bar (beside nav → cart); full width on mobile */
 body:not(.is-home) header.header > .header__section--middle,
 body:not(.is-home) header.header .mc-header-search-below-nav {
   position: relative !important;
@@ -115,7 +115,7 @@ header.header #collapsingSearch {
   border: none !important;
   border-radius: 0 !important;
   padding: 8px 20px 12px !important;
-  /* Underline is only on .collapsing-search__form .row ΓÇö a wrapper border stacked into a double line */
+  /* Underline is only on .collapsing-search__form .row — a wrapper border stacked into a double line */
   border-bottom: none !important;
   transition:
     background 0.22s ease,
@@ -222,7 +222,7 @@ header.header .collapsing-search__form .row,
   margin: 0 !important;
 }
 
-/* Non-home header search underline: mobile/tablet only ΓÇö desktop rules live in last-win blocks (avoid double line with .container/.row) */
+/* Non-home header search underline: mobile/tablet only — desktop rules live in last-win blocks (avoid double line with .container/.row) */
 @media (max-width: 991px) {
   body:not(.is-home) header.header .collapsing-search__form .row {
     border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
@@ -400,7 +400,7 @@ body.mc-search-open #mcHeroSearchOverlay #toggle1 .toggle__icon--open {
   opacity: 0.85 !important;
 }
 
-/* Hero: underline on the input row (outer .collapsing-search has no border ΓÇö see template critical) */
+/* Hero: underline on the input row (outer .collapsing-search has no border — see template critical) */
 html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within) .collapsing-search__form .row {
   border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
 }
@@ -469,7 +469,7 @@ body:not(.is-home) #if_homepage {
   pointer-events: none !important;
 }
 
-/* Full-bleed: homepage hero only (never on category ΓÇö avoids black bar when body.is-home is wrong) */
+/* Full-bleed: homepage hero only (never on category — avoids black bar when body.is-home is wrong) */
 hthtml.mc-allow-home-hero body.is-home #if_homepage,
 html.mc-allow-home-hero body.is-home #slideshow-container {
   width: 100vw !important;
@@ -496,7 +496,7 @@ html.mc-allow-home-hero body.is-home #slideshow-container {
   box-sizing: border-box !important;
 }
 
-/* Homepage hero video only ΓÇö do not style .mc-hero-video on category/PLP pages */
+/* Homepage hero video only — do not style .mc-hero-video on category/PLP pages */
 html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
   position: relative;
   z-index: 1 !important;
@@ -602,7 +602,7 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   line-height: 0 !important;
 }
 
-/* Hero menu: homepage only ΓÇö above search + video layers */
+/* Hero menu: homepage only — above search + video layers */
 html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu {
   position: absolute;
   top: 18px !important;
@@ -661,7 +661,7 @@ meta[itemprop="name"] {
   display: none !important;
 }
 
-/* Volusion injects "McCabe's Theater & Living" text into #display_homepage_title on every page ΓÇö never show in header */
+/* Volusion injects "McCabe's Theater & Living" text into #display_homepage_title on every page — never show in header */
 header.header #display_homepage_title,
 header.header #display_homepage_title *,
 #display_homepage_title,
@@ -790,7 +790,7 @@ body.category:not(.is-home) #slideshow-container .hero-nav {
   }
 }
 
-/* Homepage hero: ΓÇ£SearchΓÇ¥ label above the underline (RH-style), right-aligned with module */
+/* Homepage hero: “Search” label above the underline (RH-style), right-aligned with module */
 @media (min-width: 992px) {
   #slideshow-container .mc-hero-search-inner::before {
     content: "Search" !important;
@@ -860,7 +860,7 @@ body.is-home #slideshow-container {
     display: none !important;
   }
 
-  /* hero container: shorter than desktop; video still fills the box (cover) ΓÇö home only */
+  /* hero container: shorter than desktop; video still fills the box (cover) — home only */
   html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
     min-height: max(280px, 52vh) !important;
     min-height: max(280px, 52svh) !important;
@@ -875,7 +875,7 @@ body.is-home #slideshow-container {
     object-position: center center !important;
   }
 
-  /* overlay: centered stack ΓÇö logo + tagline sit together over video */
+  /* overlay: centered stack — logo + tagline sit together over video */
   #slideshow-container .mc-hero-overlay {
     position: absolute !important;
     inset: 0 !important;
@@ -888,7 +888,7 @@ body.is-home #slideshow-container {
     pointer-events: none !important;
   }
 
-  /* Do not use bare `p` here ΓÇö !important beats inline styles and blocked the 36px tagline */
+  /* Do not use bare `p` here — !important beats inline styles and blocked the 36px tagline */
   #mc-hero-copy-tagline,
   #slideshow-container #mc-hero-copy-tagline {
     font-size: clamp(11px, 2.85vw, 36px) !important;
@@ -918,7 +918,7 @@ body.is-home #slideshow-container {
   }
 }
 
-/* Homepage: hero supplies nav + search; hide duplicate desktop strip ΓÇö only when URL allows home hero */
+/* Homepage: hero supplies nav + search; hide duplicate desktop strip — only when URL allows home hero */
 html.mc-allow-home-hero body.is-home header.header > .mc-header-desktop-bar,
 html.mc-allow-home-hero body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar],
 html.mc-allow-home-hero body.is-home .mc-header-desktop-bar {
@@ -990,7 +990,7 @@ body.mc-product-page #if_homepage {
   border-top: 0 !important;
 }
 
-/* PDP from URL only: template sets html.mc-url-looks-like-pdp before <body> (Volusion default.asp?ProductCode=ΓÇª).
+/* PDP from URL only: template sets html.mc-url-looks-like-pdp before <body> (Volusion default.asp?ProductCode=…).
    Replicate here so hero stays hidden even if template critical CSS is stale in cache. */
 html.mc-url-looks-like-pdp #if_homepage,
 html.mc-url-looks-like-pdp body #if_homepage,
@@ -1069,7 +1069,7 @@ body:not(.is-home) header.header .main-menu {
 
 /* ===== NON-HOME MENU: MATCH HOMEPAGE HERO MENU EXACTLY (DESKTOP/TABLET) ===== */
 
-/* LI: same as hero ΓÇô no fixed widths, no extra margin (centering via flex on ul) */
+/* LI: same as hero – no fixed widths, no extra margin (centering via flex on ul) */
 body:not(.is-home) #display_menu_1 .vnav--level1 > li,
 body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li {
   width: auto !important;
@@ -1106,7 +1106,7 @@ body:not(.is-home) #display_menu_1 .vnav__label {
 
 /* ======================================
    PRODUCT GRID: FIX IMAGE BOX HEIGHT
-   (scoped off category pages ΓÇö category PLP uses fixed tiles + object-fit: contain)
+   (scoped off category pages — category PLP uses fixed tiles + object-fit: contain)
 ====================================== */
 html:not(.category) body:not(.category) .v-product-grid .v-product__img {
   display: block;
@@ -1169,7 +1169,7 @@ html:not(.category) body:not(.category) .v-product-grid .v-product__img img {
 
 /* =========================================================
    PRODUCT LISTINGS: ALIGN IMAGES TO THE TOP OF THE IMAGE BOX
-   (not on category ΓÇö category uses uniform center-crop tiles)
+   (not on category — category uses uniform center-crop tiles)
 ========================================================= */
 html:not(.category) body:not(.is-home) #content_area .v-product__img,
 html:not(.category) body:not(.is-home) #content_area_home .v-product__img {
@@ -1200,11 +1200,11 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
   flex-wrap: nowrap !important;
   align-items: stretch !important;
   visibility: visible !important;
-  /* Was -45px ΓÇö pulled the nav row under the viewport top (menu looked clipped) */
+  /* Was -45px — pulled the nav row under the viewport top (menu looked clipped) */
   margin-top: 0 !important;
 }
 
-/* Interior: logo row first, main menu (#display_menu_1) second, search strip last ΓÇö beats theme float/order */
+/* Interior: logo row first, main menu (#display_menu_1) second, search strip last — beats theme float/order */
 :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
   header.header
   > .header__section:not(.header__section--middle) {
@@ -1552,7 +1552,7 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li:focus-within > a {
 }
 
 /* =====================================================
-   FIX MENU SHIFT AT 992pxΓÇô1199px (product/category pages)
+   FIX MENU SHIFT AT 992px–1199px (product/category pages)
    Bootstrap col-lg-* only applies at 1200px+, so at 1199px the
    menu column loses width and can shift right. Lock layout here.
 ===================================================== */
@@ -1938,7 +1938,7 @@ a.hero-cart-link {
 }
 
 @media (max-width: 991px) {
-  /* 1) STOP the hero from being full-page on mobile ΓÇö home only */
+  /* 1) STOP the hero from being full-page on mobile — home only */
   html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
     min-height: max(280px, 52vh) !important;
     min-height: max(280px, 52svh) !important;
@@ -2102,7 +2102,7 @@ a.hero-cart-link {
 }
 
 @media (max-width: 991px) {
-  /* Hero: video behind, overlay + copy ABOVE (was z-index:1 on both ΓåÆ text hidden under video) */
+  /* Hero: video behind, overlay + copy ABOVE (was z-index:1 on both → text hidden under video) */
   #slideshow-container,
   #slideshow-container .mc-hero-video {
     position: relative !important;
@@ -2325,7 +2325,7 @@ nav.push-menu .push-menu__close-btn::before {
   }
 }
 
-/* MOBILE: category ΓÇö title centered; member + list price left */
+/* MOBILE: category — title centered; member + list price left */
 @media (max-width: 991px) {
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
@@ -2452,7 +2452,7 @@ body.mc-product-page #content_area .main-image img {
   }
 }
 
-/* Match homepage hero menu: flex (not inline-flex) so ul doesnΓÇÖt shrink and overlap items */
+/* Match homepage hero menu: flex (not inline-flex) so ul doesn’t shrink and overlap items */
 body:not(.is-home) #display_menu_1 > ul.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul {
@@ -2623,7 +2623,7 @@ body.mc-product-page select.mc-native-leather {
     background: #fff !important;
   }
 
-  /* Stop cut-off on the left ΓÇö never use bare `td *` here: it sets overflow:visible on
+  /* Stop cut-off on the left — never use bare `td *` here: it sets overflow:visible on
      #mcLeatherSwatchStrip and lets swatches paint over #mcPlannerRow. */
   body.mc-product-page #content_area td.mc-pdp-options-td #mcLeatherSwatchStrip,
   body.productdetails #content_area td.mc-pdp-options-td #mcLeatherSwatchStrip {
@@ -2871,7 +2871,7 @@ body.mc-product-page select.mc-native-leather {
       padding: 0 0.85em !important;
     }
 
-    /* Unlocked: mirror main price block ΓÇö label above, price below (same sizes as .option_pricing / #priceWithOptions) */
+    /* Unlocked: mirror main price block — label above, price below (same sizes as .option_pricing / #priceWithOptions) */
     .mc-member-price-caption[data-mc-member-state="unlocked"],
     .mc-member-price-caption[data-mc-member-state="unlocked-no-price"] {
       text-align: left !important;
@@ -2933,7 +2933,7 @@ body.mc-product-page select.mc-native-leather {
       line-height: 1 !important;
     }
 
-    /* Logo / top strip only ΓÇö not .header__section--middle (duplicate search row) */
+    /* Logo / top strip only — not .header__section--middle (duplicate search row) */
     :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
       .header__section:not(.header__section--middle) {
       display: flex !important;
@@ -3575,7 +3575,7 @@ margin-left: 0 !important;
     box-shadow: none !important;
   }
 
-  /* Use unified icon sizing (same as base block above) ΓÇô do not override size/position */
+  /* Use unified icon sizing (same as base block above) – do not override size/position */
 }
 }
 
@@ -4013,7 +4013,7 @@ body.mc-product-page #v65-product-parent #options_table select {
   max-width: 100% !important;
   box-sizing: border-box !important;
 }
-/* Leather select hidden ΓÇô selection shown in "Selected leather" box instead */
+/* Leather select hidden – selection shown in "Selected leather" box instead */
 body.mc-product-page #content_area select.mc-native-leather,
 body.mc-product-page #v65-product-parent select.mc-native-leather,
 select.mc-native-leather {
@@ -4058,7 +4058,7 @@ select.mc-native-leather {
     flex-shrink: 0 !important;
   }
 
-  /* Make sure LIs donΓÇÖt introduce layout weirdness */
+  /* Make sure LIs don’t introduce layout weirdness */
   body:not(.is-home) #display_menu_1 > ul > li {
     float: none !important;
     clear: none !important;
@@ -4140,7 +4140,7 @@ select.mc-native-leather {
 
 
 /* ============================================================
-   FIX 2: Home icon size ΓÇö match cart icon behavior.
+   FIX 2: Home icon size — match cart icon behavior.
    Replaces fixed 20px size with responsive clamp().
    Targets ONLY .mc-home-float__icon
    ============================================================ */
@@ -5457,7 +5457,7 @@ body.mc-bean-bag-pdp [class*="memberpricing"] {
   display: none !important;
 }
 
-/* Beat template inline accordion rules that clip #options_table selects (body.mc-product-page ΓÇª .mc-option-accordion select). */
+/* Beat template inline accordion rules that clip #options_table selects (body.mc-product-page … .mc-option-accordion select). */
 body.mc-bean-bag-pdp.mc-product-page #content_area .mc-option-accordion select,
 body.mc-bean-bag-pdp.mc-product-page #content_area .mc-option-accordion .mc-option-accordion-native,
 body.mc-bean-bag-pdp.productdetails #content_area .mc-option-accordion select,
@@ -5652,7 +5652,7 @@ body.mc-product-page:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_
 body.productdetails:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_productprice {
   display: none !important;
 }
-/* Price under "Price with selected options" ΓÇô larger font (not when McCabe retail/member stack is active) */
+/* Price under "Price with selected options" – larger font (not when McCabe retail/member stack is active) */
 body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_sale_price,
 body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_sale_price b,
 body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_sale_price span {
@@ -5826,8 +5826,8 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
 
 /* Add to Cart: unified layout styles `.mc-unified-purchase-controls` (see MC_UNIFIED_PDP_LAYOUT at EOF). */
 
-/* DonΓÇÖt clip the Add to Cart button in the options column */
-/* Single Add to Cart: no second container/color ΓÇô wrapper matches button */
+/* Don’t clip the Add to Cart button in the options column */
+/* Single Add to Cart: no second container/color – wrapper matches button */
 body.mc-product-page #content_area .v65-product-addtocart,
 body.mc-product-page #v65-product-parent .v65-product-addtocart,
 body.mc-product-page #content_area .v65-product-addtocart div,
@@ -5973,7 +5973,7 @@ body.mc-product-page #content_area .mc-option-accordion__panel {
   body.mc-product-page #content_area #mcLeatherRow,
   body.mc-product-page #content_area #mc-inline-config,
   body.mc-product-page #content_area #mcPlannerRow {
-    max-width: 520px !important; /* matches your ΓÇ£wide tableΓÇ¥ look, but still responsive */
+    max-width: 520px !important; /* matches your “wide table” look, but still responsive */
   }
 
   /* Sectional PDP: selected configuration (#mc-inline-config) same measure as options / accordion (440px). */
@@ -6304,7 +6304,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   margin-top: 4px;
 }
 
-/* Mobile: full login modal visible ΓÇö scroll inside panel, safe areas, shorter iframe floor */
+/* Mobile: full login modal visible — scroll inside panel, safe areas, shorter iframe floor */
 @media (max-width: 991px) {
   .mc-login-modal.mc-login-modal--open {
     align-items: flex-start !important;
@@ -6459,7 +6459,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   color: #111;
 }
 
-/* Category listing: same visual order on every card (image ΓåÆ title ΓåÆ price) + full-width images */
+/* Category listing: same visual order on every card (image → title → price) + full-width images */
 :is(html.category, body.category) .v-product-grid .v-product,
 :is(html.category, body.category) ul.v-product-grid > li.v-product {
   display: flex;
@@ -6470,7 +6470,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   height: 100%;
 }
 
-/* Flex default order is 0 ΓÇö lower than our image (1), so sale/member nodes sat above the image. */
+/* Flex default order is 0 — lower than our image (1), so sale/member nodes sat above the image. */
 :is(html.category, body.category) .v-product-grid .v-product > *,
 :is(html.category, body.category) ul.v-product-grid > li.v-product > * {
   order: 5;
@@ -6734,7 +6734,7 @@ body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area .v-pro
   display: none !important;
 }
 
-/* PDP: guests never see ΓÇ£Sale priceΓÇ¥ row ΓÇö caption prompts login */
+/* PDP: guests never see “Sale price” row — caption prompts login */
 body:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox font.product_sale_price,
 body:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox .product_sale_price,
 body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
@@ -6850,7 +6850,7 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   }
 }
 
-/* Category: subcategory nav (sidebar + in-content vnav) ΓÇö left, RH-style caps */
+/* Category: subcategory nav (sidebar + in-content vnav) — left, RH-style caps */
 :is(html.category, body.category) .sidebar-wrapper .sidebar,
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] {
   text-align: left !important;
@@ -6930,7 +6930,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   line-height: 1.35 !important;
 }
 
-/* Category ΓÇ£Sort byΓÇ¥ / ΓÇ£Products per pageΓÇ¥ (Volusion listing controls): member-price stack, streamlined */
+/* Category “Sort by” / “Products per page” (Volusion listing controls): member-price stack, streamlined */
 :is(html.category, body.category):not(.productdetails) #content_area select:not(#options_table select):not(.mc-native-leather):not(.mc-option-accordion-native),
 html.vol-list.category:not(.productdetails) #content_area select:not(#options_table select):not(.mc-native-leather):not(.mc-option-accordion-native) {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif !important;
@@ -6988,7 +6988,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   color: #1a1a1a !important;
 }
 
-/* Category cards: ΓÇ£RetailΓÇ¥ before list / regular price ΓÇö same label style as member line */
+/* Category cards: “Retail” before list / regular price — same label style as member line */
 :is(html.category, body.category) #content_area .v-product .product_list_price::before,
 :is(html.category, body.category) #content_area ul.v-product-grid > li .product_list_price::before,
 :is(html.category, body.category) #content_area .v-product font.product_list_price::before,
@@ -7063,7 +7063,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   color: #fff !important;
 }
 
-/* Next beside ΓÇ£Page N ΓÇªΓÇ¥ above the grid (injected #mc-category-pager-top; re-parented before product grid in JS) */
+/* Next beside “Page N …” above the grid (injected #mc-category-pager-top; re-parented before product grid in JS) */
 .mc-category-pager-page-row {
   display: flex !important;
   flex-direction: row !important;
@@ -7167,7 +7167,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
-   PDP: main row ΓÇö image left, options right (desktop); stacked on mobile
+   PDP: main row — image left, options right (desktop); stacked on mobile
    (tagged row: tr.mc-pdp-main-row from template_266.html)
    ========================================================= */
 @media (min-width: 992px) {
@@ -7203,7 +7203,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
-   PDP: related products ΓÇö 4 across (PLP-like), horizontal scroll fallback + arrows
+   PDP: related products — 4 across (PLP-like), horizontal scroll fallback + arrows
    ========================================================= */
 .mc-related-carousel {
   position: relative;
@@ -7400,7 +7400,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
  Related / "More from this collection":
  Volusion uses table.v65-productDisplay with separate rows for images | names | prices.
  Native (non-carousel) blocks need real table layout at every viewport.
- IMPORTANT: Never target tables inside `.mc-related-carousel__viewport` ΓÇö that wrapper's CSS
+ IMPORTANT: Never target tables inside `.mc-related-carousel__viewport` — that wrapper's CSS
  deliberately uses display:block/flex on the table/tbody (.mc-related-carousel__viewport table {})
  and a high-specificity `display:table !important` on #v65-product-related was overriding it,
  collapsing image/title rows (titles row vs images stacked in column + huge gaps).
@@ -7578,7 +7578,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
-   PDP: main product row ΓÇö side-by-side on desktop (overlap fix: min-width: 0)
+   PDP: main product row — side-by-side on desktop (overlap fix: min-width: 0)
    Applies to standard Volusion row 2 and tagged mc-pdp-main-row.
    ========================================================= */
 @media (min-width: 992px) {
@@ -7665,7 +7665,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   }
 
   /*
-   PDP hero image ΓÇö unified for all PDPs.
+   PDP hero image — unified for all PDPs.
    Older rule used min-width:600px + margin-left:70px inside a ~55%/58% flex column:
    overflow / shrink left the hero looking like a tiny thumb (esp. sectionals + split-rows).
    */
@@ -7689,7 +7689,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
    PDP desktop: thumbnails below main image
    The live Volusion DOM puts span#altviews inside the same outer TD as the
    main image, after the inner image <table>. Making that outer TD a flex
-   column naturally stacks image above thumbnails ΓÇö no JS DOM-moving needed.
+   column naturally stacks image above thumbnails — no JS DOM-moving needed.
    Selector confirmed from live HTML inspection.
    ========================================================= */
 @media (min-width: 992px) {
@@ -7861,7 +7861,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   }
 }
 
-/* Keep homepage content below the hero ΓÇö not sliding up over a shrunken slideshow */
+/* Keep homepage content below the hero — not sliding up over a shrunken slideshow */
 html.mc-allow-home-hero body.is-home #if_homepage {
   position: relative !important;
   z-index: 2 !important;
@@ -8285,7 +8285,7 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
   flex-direction: column !important;
 }
 
-/* Category: 3 / 2 / 1 ΓÇö grid containers only; card flex/width lives in one block below (no duplicate @media nesting) */
+/* Category: 3 / 2 / 1 — grid containers only; card flex/width lives in one block below (no duplicate @media nesting) */
 @media (min-width: 992px) {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
   :is(html.category, body.category) #content_area ul.v-product-grid,
@@ -8346,7 +8346,7 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
   }
 }
 
-/* --- Category cards ΓÇö single block (grid cells: flex + 100% width; vol-list + grid-item kept for markup variants) --- */
+/* --- Category cards — single block (grid cells: flex + 100% width; vol-list + grid-item kept for markup variants) --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product,
 :is(html.category, body.category) #content_area .v-product-grid > div.v-product,
@@ -8374,7 +8374,7 @@ html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
   background: #ffffff !important;
 }
 
-/* Sale / list price nodes default to flex order 0 ΓÇö push behind image (order 1) on category cards */
+/* Sale / list price nodes default to flex order 0 — push behind image (order 1) on category cards */
 :is(html.category, body.category) #content_area .v-product-grid > div.v-product > *,
 :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product > *,
 :is(html.category, body.category) #content_area ul.v-product-grid > li > *,
@@ -8509,7 +8509,7 @@ html.vol-list.category #content_area .v-product-grid > .v-product {
   height: 100%;
 }
 
-/* Image tile ΓÇö same fixed height home + category (category: letterbox; home: crop) */
+/* Image tile — same fixed height home + category (category: letterbox; home: crop) */
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__img,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__image,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__image-wrap,
@@ -8565,7 +8565,7 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-produc
   margin: 0 !important;
 }
 
-/* Title band ΓÇö left-aligned with member pricing below */
+/* Title band — left-aligned with member pricing below */
 body.is-home:not(.productdetails) #content_area_home .v-product__name,
 body.is-home:not(.productdetails) #content_area_home .productnamecolor,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid h2,
@@ -8817,7 +8817,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     min-width: 0 !important;
     max-width: 800px !important;
     box-sizing: border-box !important;
-    /* Default: align with cell edge (single-image PDPs have no #altviews ΓÇö 250px was empty gutter). */
+    /* Default: align with cell edge (single-image PDPs have no #altviews — 250px was empty gutter). */
     margin-left: 10px !important;
   }
 
@@ -8837,7 +8837,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin-left: 250px !important;
   }
 
-  /* Hero table beside thumbs ΓÇö second+ tables */
+  /* Hero table beside thumbs — second+ tables */
   body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo):not(:first-of-type),
   body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo):not(:first-of-type),
   body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > table:has(img#product_photo):not(:first-of-type),
@@ -9004,7 +9004,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 }
 
-/* Last-win: PDP row cells without .mc-pdp-* ΓÇö match 58/42 split; clip media so hero cannot paint over options */
+/* Last-win: PDP row cells without .mc-pdp-* — match 58/42 split; clip media so hero cannot paint over options */
 @media (min-width: 992px) {
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
@@ -9056,7 +9056,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* #altviews is a *direct* child of #product_photo_td / media td: pull up (legacy Volusion).
-   When #altviews is nested *inside* the same td/table as the hero, do NOT use margin hacks ΓÇö use nested flex block below. */
+   When #altviews is nested *inside* the same td/table as the hero, do NOT use margin hacks — use nested flex block below. */
 @media (min-width: 992px) {
   body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
   body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
@@ -9070,7 +9070,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 }
 
-/* Nested #altviews (same td/table as hero): flex row ΓÇö thumbs left, hero flexes; no independent margin-top. */
+/* Nested #altviews (same td/table as hero): flex row — thumbs left, hero flexes; no independent margin-top. */
 @media (min-width: 992px) {
   body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews),
   body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews),
@@ -9180,7 +9180,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   FINAL FIX ΓÇö HIDE DESKTOP SEARCH LABEL + LIFT PDP ALTVIEWS
+   FINAL FIX — HIDE DESKTOP SEARCH LABEL + LIFT PDP ALTVIEWS
    ========================================================= */
 
 @media (min-width: 992px) {
@@ -9349,7 +9349,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   FINAL FORCE FIX ΓÇö DESKTOP NON-HOME SEARCH + PDP ALT THUMBS
+   FINAL FORCE FIX — DESKTOP NON-HOME SEARCH + PDP ALT THUMBS
    ========================================================= */
 
 /* A. NON-HOME DESKTOP: hide duplicate search UI and keep only one search rail */
@@ -9432,7 +9432,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   FINAL FORCE FIX ΓÇö REMOVE EXTRA SEARCH LABEL + MOVE PDP IMAGE LEFT
+   FINAL FORCE FIX — REMOVE EXTRA SEARCH LABEL + MOVE PDP IMAGE LEFT
    ========================================================= */
 @media (min-width: 992px) {
   /* 1) Remove the extra uppercase SEARCH label everywhere on desktop */
@@ -9520,7 +9520,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     object-fit: contain !important;
   }
 
-  /* Main image clears alt column (margin-left); do not negative-shift ΓÇö it overlapped thumbs */
+  /* Main image clears alt column (margin-left); do not negative-shift — it overlapped thumbs */
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
   body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
@@ -9549,7 +9549,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   LAST-WIN ΓÇö uppercase SEARCH was from ::before, not .search__toggle
+   LAST-WIN — uppercase SEARCH was from ::before, not .search__toggle
    (see .mc-header-search-cart-wrap::before + .mc-hero-search-inner::before earlier in file)
    ========================================================= */
 @media (min-width: 992px) {
@@ -9582,7 +9582,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   FINAL SEARCH FIX ΓÇö HERO ALIGNMENT + REMOVE EXTRA LABEL/LINE
+   FINAL SEARCH FIX — HERO ALIGNMENT + REMOVE EXTRA LABEL/LINE
    ========================================================= */
 @media (min-width: 992px) {
   /* ---------------------------------------------------------
@@ -9764,7 +9764,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   MAIN SHELL ΓÇö keep Volusion outer wrappers centered when max-width caps width
+   MAIN SHELL — keep Volusion outer wrappers centered when max-width caps width
    ========================================================= */
 @media (min-width: 992px) {
   article.vol-container,
@@ -9784,7 +9784,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   PDP WIDER LAYOUT ΓÇö only on real product detail (has #v65-product-parent)
+   PDP WIDER LAYOUT — only on real product detail (has #v65-product-parent)
    ========================================================= */
 @media (min-width: 992px) {
   body.productdetails:has(#v65-product-parent) .vol-container,
@@ -9992,7 +9992,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   HERO SEARCH ΓÇö single underline (form/container must not add a second line)
+   HERO SEARCH — single underline (form/container must not add a second line)
    ========================================================= */
 @media (min-width: 992px) {
   #mcHeroSearchOverlay .collapsing-search__form {
@@ -10012,7 +10012,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     content: none !important;
   }
 
-  /* Placeholder-only cue on hero ΓÇö hide label (same as header bar; clip still leaked duplicate text in some builds). */
+  /* Placeholder-only cue on hero — hide label (same as header bar; clip still leaked duplicate text in some builds). */
   #mcHeroSearchOverlay .collapsing-search__label,
   #mcHeroSearchOverlay .collapsing-search__label__text {
     display: none !important;
@@ -10030,7 +10030,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   PDP ΓÇö layout sync (992px+); matches live Volusion custom CSS (flat @media, no nesting)
+   PDP — layout sync (992px+); matches live Volusion custom CSS (flat @media, no nesting)
    ========================================================= */
 @media (min-width: 992px) {
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
@@ -10102,7 +10102,7 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   display: none !important;
 }
 
-/* Revert / last-win: duplicate "Search" (label + placeholder) ΓÇö high specificity + strip row pseudo text */
+/* Revert / last-win: duplicate "Search" (label + placeholder) — high specificity + strip row pseudo text */
 @media (min-width: 992px) {
   html body:not(.is-home) header.header .mc-header-desktop-bar .collapsing-search__form .row::before,
   html body:not(.is-home) header.header .mc-header-desktop-bar .collapsing-search__form .row::after {
@@ -10165,7 +10165,7 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
 }
 
 
-/* Category PLP: nested table.v65-productDisplay (live DOM ΓÇö separate rows for images vs title/price; per <td>, not .v-product) */
+/* Category PLP: nested table.v65-productDisplay (live DOM — separate rows for images vs title/price; per <td>, not .v-product) */
 html.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td {
   text-align: center !important;
   vertical-align: top !important;
@@ -10191,7 +10191,7 @@ html.category body:not(.productdetails):not(.is-home) #content_area table.v65-pr
   text-align: center !important;
 }
 
-/* Category PLP: ul/div .v-product-grid cards (e.g. bean bags) ΓÇö center stack per card only */
+/* Category PLP: ul/div .v-product-grid cards (e.g. bean bags) — center stack per card only */
 html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product,
 html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item,
 html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product,
@@ -10252,7 +10252,7 @@ html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product
   text-align: center !important;
 }
 
-/* Bean bag category (103) PLP ΓÇö last-win: real sale/list price nodes stay visible on product cards (overrides any stray hides) */
+/* Bean bag category (103) PLP — last-win: real sale/list price nodes stay visible on product cards (overrides any stray hides) */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .product_saleprice,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid .product_saleprice,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid font.product_sale_price,
@@ -10267,7 +10267,7 @@ html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #cont
   opacity: 1 !important;
 }
 
-/* Loveseat cat 157 PLP ΓÇö guests only: hide Volusion sale rows (nested table + grid); member/login row is the public price UX */
+/* Loveseat cat 157 PLP — guests only: hide Volusion sale rows (nested table + grid); member/login row is the public price UX */
 html.mc-cat157-plp-guest.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_saleprice,
 html.mc-cat157-plp-guest.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_sale_price,
 html.mc-cat157-plp-guest.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_sale_price,
@@ -10283,7 +10283,7 @@ html.mc-cat157-plp-guest.category body:not(.productdetails):not(.is-home) #conte
 }
 
 
-/* Bean bag (103) PLP ΓÇö per-list-item card column only; does not target ul.v-product-grid wrapper */
+/* Bean bag (103) PLP — per-list-item card column only; does not target ul.v-product-grid wrapper */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item {
   box-sizing: border-box !important;
@@ -10295,7 +10295,7 @@ html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #cont
   max-width: 100% !important;
 }
 
-/* Bean bag (103) PLP ΓÇö nested Volusion product table inside grid cell */
+/* Bean bag (103) PLP — nested Volusion product table inside grid cell */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td {
   vertical-align: top !important;
   text-align: center !important;
@@ -10329,7 +10329,7 @@ html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #cont
   text-align: center !important;
 }
 
-/* Bean bag 103 PLP: image tiles must stay display:flex (custom-safe centers img via flex). Do not set image box to display:block here ΓÇö it overrides flex and images look off-center. */
+/* Bean bag 103 PLP: image tiles must stay display:flex (custom-safe centers img via flex). Do not set image box to display:block here — it overrides flex and images look off-center. */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__img,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__image,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__image-wrap,
@@ -10347,7 +10347,7 @@ html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #cont
 }
 
 
-/* Member PLP ΓÇö hide only the resolved price mount until mcMarkCardPriceWrapperReady (per card, under #content_area) */
+/* Member PLP — hide only the resolved price mount until mcMarkCardPriceWrapperReady (per card, under #content_area) */
 body.category:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li .mc-pricing-pending,
 body.category:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .mc-pricing-pending,
 body.category:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .mc-pricing-pending {
@@ -10603,7 +10603,7 @@ body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td
   color: #444 !important;
 }
 
-/* Theater / WM panel: configuration summary ΓÇö RH typography (Inter, caps label, clean body). */
+/* Theater / WM panel: configuration summary — RH typography (Inter, caps label, clean body). */
 body.productdetails .mc-configuration-rh,
 body.mc-product-page .mc-configuration-rh,
 body.mc-theater-seating-pdp .mc-configuration-rh {
@@ -10720,7 +10720,7 @@ body.mc-saranoni-pdp table[id*="options_table"][data-mc-hide-native-options="1"]
   z-index: auto !important;
 }
 
-/* Final 992ΓÇô1199 desktop header clamp: center menu; search is off-flow (.mc-search-float). */
+/* Final 992–1199 desktop header clamp: center menu; search is off-flow (.mc-search-float). */
 @media (min-width: 992px) and (max-width: 1199px) {
   body:not(.is-home) header.header .mc-header-desktop-bar .microblock.main-menu {
     min-width: 0 !important;
@@ -11662,7 +11662,7 @@ body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartbutton 
   max-width: 100% !important;
 }
 /* =========================================================
-   MCCABE FIXES ΓÇö DO NOT ADD NEW UI
+   MCCABE FIXES — DO NOT ADD NEW UI
    ========================================================= */
 
 /* --- Keep the existing desktop menu aligned sitewide --- */
@@ -11811,7 +11811,7 @@ html.is-sectional-product #mc-inline-config {
   opacity: 1 !important;
 }
 
-/* Sectional: leather UI lives only inside the accordion ΓÇö hide duplicate row near Add To Cart. */
+/* Sectional: leather UI lives only inside the accordion — hide duplicate row near Add To Cart. */
 html.is-sectional-product #mc-inline-config #mcLeatherRow {
   display: none !important;
   visibility: hidden !important;
@@ -11884,7 +11884,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   }
 }
 
-/* MTL sectional PDP ΓÇö Popular Configurations + Product Summary (20260519sectional) */
+/* MTL sectional PDP — Popular Configurations + Product Summary (20260519sectional) */
 #mtl-sectional-configurations {
   clear: both;
   display: block !important;
@@ -11919,7 +11919,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   gap: 18px;
 }
 
-/* Popular Configurations inside PDP accordion ΓÇö tighter grid gap */
+/* Popular Configurations inside PDP accordion — tighter grid gap */
 #mc-acc-row-popularconfig #mtl-sectional-configurations .mtl-sectional-grid {
   grid-template-columns: 1fr !important;
   justify-items: stretch !important;
@@ -11932,7 +11932,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   }
 }
 
-/* Popular Configurations accordion ΓÇö use full grid cell width for diagram + copy */
+/* Popular Configurations accordion — use full grid cell width for diagram + copy */
 #mc-acc-row-popularconfig #mtl-sectional-configurations.mtl-sectional-configurations .mtl-sectional-card {
   box-sizing: border-box !important;
   width: 100% !important;
@@ -12015,7 +12015,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   outline-offset: 2px !important;
 }
 
-/* Full width/height from intrinsic PNG ΓÇö do not cap height (avoids squashing the PDF layout). */
+/* Full width/height from intrinsic PNG — do not cap height (avoids squashing the PDF layout). */
 #mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-figure img.mtl-sectional-image {
   display: block !important;
   width: 100% !important;
@@ -12237,7 +12237,7 @@ html.is-sectional-product #mcLeatherSwatchStrip img {
   overflow: visible !important;
 }
 
-/* Sectional mini leather chips (native selectΓÇôdriven); wins over legacy .mc-mini-swatch strip rules. */
+/* Sectional mini leather chips (native select–driven); wins over legacy .mc-mini-swatch strip rules. */
 html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches {
   display: flex !important;
   flex-wrap: wrap !important;
@@ -12291,7 +12291,7 @@ html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches .mc-lea
   border-color: #111 !important;
 }
 
-/* Force the modal body and active tab panel to be visible ΓÇö
+/* Force the modal body and active tab panel to be visible —
    Volusion site-wide CSS may set display:none on these. */
 html.is-sectional-product .wm-overlay .wm-modal-body {
   display: block !important;
@@ -12494,7 +12494,7 @@ body.mc-product-page #v65-product-parent [itemprop="offers"] {
   }
 }
 
-/* PDP: Add to Cart column alignment (matches flush-left 440px stack ΓÇö was sectional-centered only). */
+/* PDP: Add to Cart column alignment (matches flush-left 440px stack — was sectional-centered only). */
 body.productdetails #v65-product-parent .v65-product-addtocart,
 body.mc-product-page #v65-product-parent .v65-product-addtocart {
   display: flex !important;
@@ -12535,7 +12535,7 @@ html.is-sectional-product #wmOpen {
   pointer-events: auto !important;
 }
 
-/* In-box Product Summary link ΓÇö match template_266 #mcPlannerRow #mcProductSummaryBtn (~3436ΓÇô3446, ~7465ΓÇô7499): flex sibling sizing + pill metrics. */
+/* In-box Product Summary link — match template_266 #mcPlannerRow #mcProductSummaryBtn (~3436–3446, ~7465–7499): flex sibling sizing + pill metrics. */
 html.is-sectional-product #mtl-product-summary #mtl-sum-palliser-summary,
 html.is-sectional-product body.productdetails #mtl-product-summary #mtl-sum-palliser-summary,
 html.is-sectional-product body.productdetails #content_area #mtl-product-summary #mtl-sum-palliser-summary,
@@ -12569,7 +12569,7 @@ html.is-sectional-product body.productdetails #v65-product-parent #mtl-product-s
   appearance: none !important;
 }
 
-/* Narrow PDP column ΓÇö same tightening as body.productdetails #mcProductSummaryBtn (custom-safe ~10585ΓÇô10598). */
+/* Narrow PDP column — same tightening as body.productdetails #mcProductSummaryBtn (custom-safe ~10585–10598). */
 html.is-sectional-product body.productdetails #mtl-product-summary #mtl-sum-palliser-summary,
 html.is-sectional-product body.productdetails #content_area #mtl-product-summary #mtl-sum-palliser-summary,
 html.is-sectional-product body.productdetails #v65-product-parent #mtl-product-summary #mtl-sum-palliser-summary {
@@ -13046,7 +13046,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     display: inline-block !important;
   }
 
-  /* PDP Add to Cart button ΓÇö black, uppercase, no border-radius. */
+  /* PDP Add to Cart button — black, uppercase, no border-radius. */
   body.mc-product-page #content_area input[name="btnaddtocart"],
   body.productdetails #content_area input[name="btnaddtocart"],
   body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
@@ -13309,7 +13309,7 @@ div.product_productprice:nth-child(2) {
   font-weight: 300 !important;
 }
 
-/* Deeply-nested Volusion price span ΓÇö nudge top margin to align with surrounding price chrome.
+/* Deeply-nested Volusion price span — nudge top margin to align with surrounding price chrome.
    Selector kept verbatim from the live override; brittle but matches the live tree exactly. */
 table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > b:nth-child(2) > font:nth-child(1) > div:nth-child(1) > span:nth-child(1) {
   margin-top: 5px !important;
@@ -13317,7 +13317,7 @@ width: 400px !important;
 }
 
 /* =========================================================
-   PDP Firefox DevTools session ΓÇö round 2 (20260513-acc-v4 typography refresh)
+   PDP Firefox DevTools session — round 2 (20260513-acc-v4 typography refresh)
    - Global Inter, base color #444, 0.14em letter-spacing on PDPs.
    - Pull config block up 35px on desktop.
    - Larger leather swatch strip.
@@ -13325,12 +13325,12 @@ width: 400px !important;
    - Retail-row price font size 13px / line-height 1.5.
    - Larger heading hierarchy for retail/member labels.
    - Reset altviews so the thumbnails sit directly under the main product image
-     (the position:absolute / 846px-margin experiments are NOT applied ΓÇö those broke
+     (the position:absolute / 846px-margin experiments are NOT applied — those broke
      the layout. Use the DOM move from template_266.html accordion script + this CSS.).
    ========================================================= */
 
 /* Inline <style> baseline copied from the Firefox session into the persisted CSS.
-   NEVER put font-size on `body *` ΓÇö it beats every PDP option rule (see DevTools cascade). */
+   NEVER put font-size on `body *` — it beats every PDP option rule (see DevTools cascade). */
 body {
   font-weight: 400;
   color: #444 !important;
@@ -13411,7 +13411,7 @@ body.productdetails #content_area .mc-atc-button-wrap {
 }
 
 .mc-atc-button-wrap {
-  /* Black rectangular Add to Cart ΓÇö superseded by MC_UNIFIED_PDP_LAYOUT when .mc-pdp-unified-ready */
+  /* Black rectangular Add to Cart — superseded by MC_UNIFIED_PDP_LAYOUT when .mc-pdp-unified-ready */
   background: #000 !important;
   background-color: #000 !important;
   border: 1px solid #000 !important;
@@ -13452,7 +13452,7 @@ html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice
   line-height: 1.2 !important;
 }
 
-/* Retail / member labels + locked-member link ΓÇö 13px, match product title. */
+/* Retail / member labels + locked-member link — 13px, match product title. */
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
@@ -13512,7 +13512,7 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
   color: #444 !important;
 }
 
-/* Sale price size override ΓÇö equivalent of the 26620230411140605.css DevTools edit. */
+/* Sale price size override — equivalent of the 26620230411140605.css DevTools edit. */
 .home table.v65-productDisplay .product_saleprice,
 .home table.v65-productDisplay .product_saleprice b,
 .home #fpslider .item .sale,
@@ -13532,7 +13532,7 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
   font-size: 14px;
 }
 
-/* Configuration block ΓÇö pull up 35px on desktop so it stacks tight against the accordion. */
+/* Configuration block — pull up 35px on desktop so it stacks tight against the accordion. */
 @media (min-width: 992px) {
   body.mc-product-page #mcConfigurationBlock,
   body.productdetails #mcConfigurationBlock {
@@ -13583,7 +13583,7 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
     clear: both !important;
   }
 
-  /* Individual thumbnail links inside altviews: ~64px square, 3ΓÇô4 per row. */
+  /* Individual thumbnail links inside altviews: ~64px square, 3–4 per row. */
   body.mc-product-page :is(#content_area, #v65-product-parent) #altviews a,
   body.mc-product-page :is(#content_area, #v65-product-parent) #altviews > div,
   body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews a,
@@ -13644,17 +13644,17 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
 
 /* Element-rule remnant: prevent #altviews from being styled as ruby text. */
 #altviews {
-  /* display: block ruby !important; ΓÇö invalid layout for thumbnails. */
+  /* display: block ruby !important; — invalid layout for thumbnails. */
   display: flex !important;
 }
 
 /* =========================================================
-   Late overrides ΓÇö keep these AT THE END so they win over the
+   Late overrides — keep these AT THE END so they win over the
    higher-specificity black-ATC rule (~line 5779) and the #333
    color stamps that ship earlier in this file.
    ========================================================= */
 
-/* Add to Cart ΓÇö lighter shell (#f9f9f9 / #d4d4d4). Full selector list wins over Black ATC (~5779). */
+/* Add to Cart — lighter shell (#f9f9f9 / #d4d4d4). Full selector list wins over Black ATC (~5779). */
 html body.mc-product-page #content_area input[name="btnaddtocart"],
 html body.mc-product-page #content_area input[id*="btnaddtocart"],
 html body.mc-product-page #content_area button[name="btnaddtocart"],
@@ -13733,10 +13733,10 @@ html body.productdetails #content_area .mc-pdp-accordion .mc-acc-content {
   color: #444 !important;
 }
 
-/* ATC button text stays #444 with the rest of the body text ΓÇö no override needed. */
+/* ATC button text stays #444 with the rest of the body text — no override needed. */
 
 /* =========================================================
-   PDP Firefox DevTools session ΓÇö round 3 (20260513-acc-v6)
+   PDP Firefox DevTools session — round 3 (20260513-acc-v6)
    - Retail / member labels uppercase + semibold weight.
    - Retail / member prices semibold weight.
    - Broad PDP text weight 300 (final pasted selector).
@@ -13755,7 +13755,7 @@ body * {
   letter-spacing: 1.14px;
 }
 
-/* PDP description text ΓÇö match #mc-pdp-features body/list (14px / 400). */
+/* PDP description text — match #mc-pdp-features body/list (14px / 400). */
 html body.productdetails span[itemprop="description"],
 html body.mc-product-page span[itemprop="description"],
 html body.productdetails #content_area span[itemprop="description"],
@@ -13854,7 +13854,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-row {
 }
 
 /* Configuration heading line-height (line-height: 1.5; was written as "1.5 inherit"
-   in the DevTools session, which is invalid CSS ΓÇö applying just 1.5). */
+   in the DevTools session, which is invalid CSS — applying just 1.5). */
 body.productdetails .mc-configuration-rh__heading,
 body.mc-product-page .mc-configuration-rh__heading,
 body.mc-theater-seating-pdp .mc-configuration-rh__heading {
@@ -13862,7 +13862,7 @@ body.mc-theater-seating-pdp .mc-configuration-rh__heading {
   line-height: 1.5 !important;
 }
 
-/* Product Info / TechSpecs / ExtInfo TAB CELLS only ΓÇö MUST NOT hide the parent <table>:
+/* Product Info / TechSpecs / ExtInfo TAB CELLS only — MUST NOT hide the parent <table>:
    Volusion nests the Product Details description (#ProductDetail_ProductDetails_div2) in that same table.
    Older `table:has(td.vCSS_tab) { display:none }` removed the entire description block (May 2026). */
 body.productdetails tr:has(> td[class*="vCSS_tab"]),
@@ -14010,7 +14010,7 @@ a.productnamecolor {
    PDP button borders + divider lines = #e2dfd8 (sitewide brand line color).
    Late, broad sweep so every visible button border / horizontal rule on a PDP
    uses the same warm-grey line color regardless of which earlier rule painted it.
-   Add to Cart excluded ΓÇö MC_PDP_ATC_BLACK_LOCK at EOF.
+   Add to Cart excluded — MC_PDP_ATC_BLACK_LOCK at EOF.
    ========================================================= */
 
 /* Accordion shell + rows + panels */
@@ -14093,9 +14093,9 @@ html body.productdetails #v65-product-parent hr {
 }
 
 /* =========================================================
-   Display serif ΓÇö Cormorant Garamond (headings / editorial titles ONLY).
+   Display serif — Cormorant Garamond (headings / editorial titles ONLY).
    No font-size, color, spacing, line-height, or transform changes.
-   Overrides sitewide `body * ΓÇª font-family: inherit` + Inter resets.
+   Overrides sitewide `body * … font-family: inherit` + Inter resets.
    `html.mc-commerce-surface`: cart/checkout/account/login route (see template_266.html).
    ========================================================= */
 :root {
@@ -14150,7 +14150,7 @@ html body #content_area .wm-info-card h4 {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 
-/* PDP accordion + RH config headings: sans only ΓÇö do not inherit display serif. */
+/* PDP accordion + RH config headings: sans only — do not inherit display serif. */
 html body .mc-pdp-accordion .mc-acc-header,
 html body .mc-pdp-accordion .mc-acc-label,
 html body .mc-pdp-accordion .mc-acc-header * {
@@ -14165,7 +14165,7 @@ html body #v65-product-parent #mc-inline-config * {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 
-/* Related PDP rails: Volusion may place #v65-product-related OUTSIDE #content_area ΓÇö duplicate selectors cover both roots. Table / list only (carousel uses .mc-related-carousel__viewport rules above). */
+/* Related PDP rails: Volusion may place #v65-product-related OUTSIDE #content_area — duplicate selectors cover both roots. Table / list only (carousel uses .mc-related-carousel__viewport rules above). */
 :is(body.productdetails, body.mc-product-page) #content_area #v65-product-related table.v65-productDisplay img,
 :is(body.productdetails, body.mc-product-page) #v65-product-related table.v65-productDisplay img,
 :is(body.productdetails, body.mc-product-page) #content_area #related_products_content table.v65-productDisplay img,
@@ -14202,7 +14202,7 @@ html body #v65-product-parent #mc-inline-config * {
   height: auto !important;
 }
 
-/* MTL PDP: custom retail/member block ΓÇö final font-size override after earlier .mc-pdp-* rules (e.g. 14px ~9967ΓÇô10027). */
+/* MTL PDP: custom retail/member block — final font-size override after earlier .mc-pdp-* rules (e.g. 14px ~9967–10027). */
 html body #v65-product-parent .mtl-product-price-block,
 html body #v65-product-parent .mtl-product-price-block *,
 html body #v65-product-parent .mtl-retail-label,
@@ -14212,7 +14212,7 @@ html body #v65-product-parent .mtl-member-price {
   font-size: 16px !important;
 }
 
-/* Category PLP: final lock ΓÇö white thumb bg, fixed stage */
+/* Category PLP: final lock — white thumb bg, fixed stage */
 html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
 html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
 :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product > a.v-product__img,
@@ -14303,7 +14303,7 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img
   }
 }
 
-/* Site-wide: hide hero shell by default (category pages often keep body.is-home ΓÇö beats body:not(.is-home) rules) */
+/* Site-wide: hide hero shell by default (category pages often keep body.is-home — beats body:not(.is-home) rules) */
 body:not(.is-home) #if_homepage,
 body:not(.is-home) #slideshow-container,
 body:not(.is-home) #slideshow-container .mc-hero-video,
@@ -14380,7 +14380,7 @@ html.is-category-or-listing-page .v-product-grid a.v-product__img > img {
   background: transparent !important;
 }
 
-/* C_BAKED_TEMPLATE_OVERRIDE_20260518live ΓÇö live pages use Volusion-compiled template (not SFTP file); mcCssBust loads this file */
+/* C_BAKED_TEMPLATE_OVERRIDE_20260518live — live pages use Volusion-compiled template (not SFTP file); mcCssBust loads this file */
 header.header #display_homepage_title,
 header.header #display_homepage_title *,
 #display_homepage_title,
@@ -14495,7 +14495,7 @@ body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img {
   }
 }
 
-/* MC PLP THUMBNAIL CLEANUP 20260518 ΓÇö 280px mat / 220px stage (canonical) */
+/* MC PLP THUMBNAIL CLEANUP 20260518 — 280px mat / 220px stage (canonical) */
 html[data-mc-category-plp="1"] #content_area > table > tbody > tr > td.colors_lines_light,
 html[data-mc-category-plp="1"] #content_area > table > tr > td.colors_lines_light,
 html.category #content_area > table > tbody > tr > td.colors_lines_light {
@@ -14526,7 +14526,7 @@ html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box > 
   clip-path: none !important;
 }
 
-/* MC PLP THUMB ΓÇö all white, no gray mat */
+/* MC PLP THUMB — all white, no gray mat */
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos/"],
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/product/"],
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos"],
@@ -14562,7 +14562,7 @@ html.category #content_area .v-product-grid .v65-productPhoto a {
   border: 0 !important;
 }
 
-/* MC_PDP_TYPE_13PX_STACK ΓÇö last; title, options, retail/member unified at 13px */
+/* MC_PDP_TYPE_13PX_STACK — last; title, options, retail/member unified at 13px */
 html body.productdetails #content_area span[itemprop="name"],
 html body.mc-product-page #content_area span[itemprop="name"],
 html body.productdetails #v65-product-parent span[itemprop="name"],
@@ -14632,7 +14632,7 @@ html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces {
   text-transform: uppercase !important;
   color: #777 !important;
 }
-/* Retail / member amounts + option dropdown values ΓÇö 13px, no caps */
+/* Retail / member amounts + option dropdown values — 13px, no caps */
 html body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
 html body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
@@ -14705,7 +14705,7 @@ html body.mc-product-page #content_area .mc-configuration-rh__total {
   color: #444 !important;
   white-space: pre-line !important;
 }
-/* Retail/member dollar amounts ΓÇö normal tracking (0.16em on prices looked jumbled) */
+/* Retail/member dollar amounts — normal tracking (0.16em on prices looked jumbled) */
 html body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
 html body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
@@ -14746,7 +14746,7 @@ html body.productdetails #content_area .mc-option-accordion__toggle {
   letter-spacing: 0 !important;
   text-transform: none !important;
 }
-/* Accordion + config buttons ΓÇö brand line #e2dfd8 (ATC uses black lock at EOF) */
+/* Accordion + config buttons — brand line #e2dfd8 (ATC uses black lock at EOF) */
 html body.mc-product-page #mcPlannerBtn,
 html body.productdetails #mcPlannerBtn,
 html body.mc-product-page #mcProductSummaryBtn,
@@ -14755,7 +14755,7 @@ html body.mc-product-page .mc-config-btn,
 html body.productdetails .mc-config-btn {
   border-color: #e2dfd8 !important;
 }
-/* MC_PDP_PRICE_STACK ΓÇö kill native Volusion sale row overlapping McCabe member lines */
+/* MC_PDP_PRICE_STACK — kill native Volusion sale row overlapping McCabe member lines */
 html body.productdetails:has(.mc-pdp-member-pricing) #content_area .product_sale_price,
 html body.mc-product-page:has(.mc-pdp-member-pricing) #content_area .product_sale_price,
 html body.productdetails:has(.mc-pdp-member-pricing) #content_area .product_saleprice,
@@ -14811,7 +14811,7 @@ html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line {
   position: static !important;
   margin: 0 0 2px 0 !important;
 }
-/* No :has() ΓÇö template sets body.mc-pdp-price-stack when retail/member block mounts */
+/* No :has() — template sets body.mc-pdp-price-stack when retail/member block mounts */
 html body.mc-pdp-price-stack #v65-product-parent .product_sale_price,
 html body.mc-pdp-price-stack #v65-product-parent .product_saleprice,
 html body.mc-pdp-price-stack #v65-product-parent font.product_sale_price,
@@ -14870,7 +14870,7 @@ html body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-prod
   gap: 6px !important;
   width: 100% !important;
 }
-/* MC_PDP_STACK_VISIBLE_20260528b ΓÇö regression fix: McCabe stack must stay visible on PDP */
+/* MC_PDP_STACK_VISIBLE_20260528b — regression fix: McCabe stack must stay visible on PDP */
 html body.productdetails .mc-pdp-retail-row,
 html body.mc-product-page .mc-pdp-retail-row,
 html body.productdetails #v65-product-parent .mc-pdp-retail-row,
@@ -14964,7 +14964,7 @@ html body.mc-theater-seating-pdp #mc-pdp-price-stack-host .mc-pdp-member-pricing
   overflow: hidden !important;
   opacity: 0 !important;
 }
-/* Sectional PDP: McCabe stack owns retail/member/sale ΓÇö hide duplicate MTL summary + caption prices */
+/* Sectional PDP: McCabe stack owns retail/member/sale — hide duplicate MTL summary + caption prices */
 html body.productdetails:has(.mc-pdp-retail-row) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),
 html body.mc-product-page:has(.mc-pdp-retail-row) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),
 html body.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price) {
@@ -15013,7 +15013,7 @@ html body.productdetails:has(.mc-pdp-member-pricing) #v65-product-parent .colors
 html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-pdp-member-line {
   display: none !important;
 }
-/* Sectional PDP: MTL top price panel ΓÇö html.is-sectional-product (class is on documentElement) */
+/* Sectional PDP: MTL top price panel — html.is-sectional-product (class is on documentElement) */
 html.is-sectional-product #mc-pdp-top-price-panel,
 html.is-sectional-product body #mc-pdp-top-price-panel,
 html body.is-sectional-product #mc-pdp-top-price-panel,
@@ -15424,7 +15424,7 @@ html body.productdetails:has(#mc-pdp-top-price-panel) #mtl-pdp-top-price {
   margin: 0 !important;
   padding: 0 !important;
 }
-/* MC HOME HERO SAFETY OVERRIDE ΓÇö show homepage video hero even if category class leaks */
+/* MC HOME HERO SAFETY OVERRIDE — show homepage video hero even if category class leaks */
 html.mc-allow-home-hero body.is-home #if_homepage,
 html.category body.is-home #if_homepage,
 body.category.is-home #if_homepage {
@@ -15622,7 +15622,7 @@ body.category.is-home #slideshow-container .hero-nav {
   pointer-events: auto !important;
   z-index: 50 !important;
 }
-/* MC FINAL FIX ΓÇö keep PDP top price panel visible and separated */
+/* MC FINAL FIX — keep PDP top price panel visible and separated */
 body.productdetails #v65-product-parent #mc-pdp-top-price-panel,
 body.mc-product-page #v65-product-parent #mc-pdp-top-price-panel,
 html.is-sectional-product #v65-product-parent #mc-pdp-top-price-panel {
@@ -15647,7 +15647,7 @@ html.is-sectional-product #v65-product-parent #mc-pdp-top-price-panel * {
   position: static !important;
   transform: none !important;
 }
-/* MC FIX ΓÇö hide duplicate selected-configuration summary card on sectional PDPs */
+/* MC FIX — hide duplicate selected-configuration summary card on sectional PDPs */
 body.productdetails #v65-product-parent .mtl-selected-configuration-card,
 body.mc-product-page #v65-product-parent .mtl-selected-configuration-card,
 body.productdetails #v65-product-parent .mtl-selected-config-card,
@@ -15750,7 +15750,7 @@ body.mc-palliser-pdp .mc-pdp-member-line__amount {
 }
 /* =====================================================
    FINAL LOCK: CATEGORY PRODUCT IMAGE UNIFORMITY
-   0609 ΓÇö Steve Silver / PLP image fix
+   0609 — Steve Silver / PLP image fix
    Purpose: same visual box, no crop, no weird image heights
 ===================================================== */
 
@@ -15805,8 +15805,8 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product
 }
 
 /* =====================================================
-   MC PDP HERO COLUMN ΓÇö logo, title, price, Klarna/Affirm, Features
-   Order: logo ΓåÆ title ΓåÆ price ΓåÆ BNPL ΓåÆ Features (TechSpecs)
+   MC PDP HERO COLUMN — logo, title, price, Klarna/Affirm, Features
+   Order: logo → title → price → BNPL → Features (TechSpecs)
 ===================================================== */
 html body.productdetails #mc-pdp-brand-logo,
 html body.mc-product-page #mc-pdp-brand-logo,
@@ -16077,7 +16077,7 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li::before {
 }
 
 /* =====================================================
-   MC PDP FINAL LAYOUT ΓÇö logo, hero indent, qty, description, image cap
+   MC PDP FINAL LAYOUT — logo, hero indent, qty, description, image cap
    SFTP-deployed; wins over template inline styles where possible.
 ===================================================== */
 html body.productdetails #mc-pdp-title-right,
@@ -16215,7 +16215,7 @@ html body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="b
   max-width: none !important;
 }
 
-/* Hide duplicate Volusion qty labels ΓÇö single label lives in #mc-pdp-qty-row */
+/* Hide duplicate Volusion qty labels — single label lives in #mc-pdp-qty-row */
 html body.productdetails .vol-cartqty__wrap:not(#mc-pdp-qty-row .vol-cartqty__wrap) label,
 html body.mc-product-page .vol-cartqty__wrap:not(#mc-pdp-qty-row .vol-cartqty__wrap) label,
 html body.productdetails [itemprop="offers"] .vol-cartqty__wrap label,
@@ -16281,7 +16281,7 @@ html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host {
 }
 
 /* =====================================================
-   MC PDP LOCK 20260614pdp8 ΓÇö title, price, qty/atc stack, anti-flicker
+   MC PDP LOCK 20260614pdp8 — title, price, qty/atc stack, anti-flicker
 ===================================================== */
 html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
 html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
@@ -16371,7 +16371,7 @@ html body.mc-product-page .colors_pricebox td[aria-hidden="true"] {
   overflow: hidden !important;
 }
 
-/* MC PDP LOCK pdp9 ΓÇö main image cap + description border off */
+/* MC PDP LOCK pdp9 — main image cap + description border off */
 html body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
 html body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo,
 html body.productdetails #content_area img#product_photo,
@@ -16396,7 +16396,7 @@ html body.mc-product-page #v65-product-parent img#product_photo {
   }
 }
 
-/* MC PDP LOCK pdp10 ΓÇö centered purchase stack, description typography, anti-flicker */
+/* MC PDP LOCK pdp10 — centered purchase stack, description typography, anti-flicker */
 html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-features,
 html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-features,
 html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack,
@@ -16525,7 +16525,7 @@ html body.mc-product-page .mc-pdp-purchase-controls #mc-pdp-qty-row {
   margin: 0 auto 10px auto !important;
 }
 
-/* MC PDP LOCK pdp11 ΓÇö loose description li + ATC wrap in purchase stack */
+/* MC PDP LOCK pdp11 — loose description li + ATC wrap in purchase stack */
 html body.productdetails #content_area span[itemprop="description"] > li,
 html body.mc-product-page #content_area span[itemprop="description"] > li,
 html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"] > li,
@@ -16548,7 +16548,7 @@ html body.mc-product-page .mc-pdp-purchase-controls > .mc-atc-button-wrap {
   margin: 0 !important;
 }
 
-/* MC PDP LOCK pdp12 ΓÇö bean bag cover swatches above Features in hero column */
+/* MC PDP LOCK pdp12 — bean bag cover swatches above Features in hero column */
 html body.productdetails #beanbag-swatch-wrapper,
 html body.mc-product-page #beanbag-swatch-wrapper,
 html body.mc-bean-bag-pdp #beanbag-swatch-wrapper {
@@ -16594,7 +16594,7 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 #beanbag-swatch-wra
   display: none !important;
 }
 
-/* MC PDP LOCK pdp13 ΓÇö description under media + responsive image cap */
+/* MC PDP LOCK pdp13 — description under media + responsive image cap */
 html body.mc-bean-bag-pdp #mc-pdp-description-under-media,
 html body.mc-bean-bag-pdp .mc-pdp-description-under-media {
   display: block !important;
@@ -16778,7 +16778,7 @@ html body.mc-saranoni-pdp #mc-pdp-features {
   margin-top: 8px !important;
 }
 
-/* Legacy duplicate picker ΓÇö removed in saranoni9; keep hidden if stale markup exists */
+/* Legacy duplicate picker — removed in saranoni9; keep hidden if stale markup exists */
 html body.mc-saranoni-pdp #mc-saranoni-color-picker,
 html body.mc-saranoni-pdp .mc-saranoni-color-picker {
   display: none !important;
@@ -17164,7 +17164,7 @@ html body.mc-bean-bag-pdp .mc-unified-altviews img {
   }
 }
 
-/* Soft-goods thumbnails under main image (not column layout) ΓÇö unified + ruched fallback */
+/* Soft-goods thumbnails under main image (not column layout) — unified + ruched fallback */
 @media (min-width: 992px) {
   html body.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
   html body.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
@@ -17209,7 +17209,7 @@ html body.mc-ruched-blanket-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-hos
   opacity: 0 !important;
 }
 /* =========================================================
-   MC_UNIFIED_PDP_LAYOUT_20260616 ΓÇö one global PDP layout system.
+   MC_UNIFIED_PDP_LAYOUT_20260616 — one global PDP layout system.
    Replaces product-specific layout patches (bean bag, Saranoni,
    Gatlin, MC_PDP_ATC_BLACK_LOCK wrapper styling, mc-pdp-purchase-controls).
    ========================================================= */
@@ -18363,7 +18363,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   }
 }
 
-/* MC_SS_MEDIA_LEFT_ALIGN_20260619 ΓÇö Steve Silver: hero, alt thumbs, description stack left in media column (desktop). */
+/* MC_SS_MEDIA_LEFT_ALIGN_20260619 — Steve Silver: hero, alt thumbs, description stack left in media column (desktop). */
 @media (min-width: 992px) {
   html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #altviews,
   html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) span#altviews,
@@ -18400,7 +18400,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   }
 }
 
-/* MC_SS_UNIFIED_NATIVE_PANEL_HIDE_20260620 ΓÇö hide duplicate Care/tech specs and orphaned description tables. */
+/* MC_SS_UNIFIED_NATIVE_PANEL_HIDE_20260620 — hide duplicate Care/tech specs and orphaned description tables. */
 html body.productdetails:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
 html body.mc-product-page:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
 html body.mc-pdp-unified-ready:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
@@ -18423,7 +18423,7 @@ html body.mc-product-page table.colors_descriptionbox[data-mc-native-panel-hidde
   overflow: hidden !important;
 }
 
-/* MC_NATIVE_EMPTY_DESC_SHELL_HIDE_20260621 ΓÇö orphan Volusion Care/description boxes after McCabe mount. */
+/* MC_NATIVE_EMPTY_DESC_SHELL_HIDE_20260621 — orphan Volusion Care/description boxes after McCabe mount. */
 html body.productdetails table.colors_descriptionbox[data-mc-empty-desc="1"],
 html body.mc-product-page table.colors_descriptionbox[data-mc-empty-desc="1"],
 html body.productdetails [data-mc-empty-desc="1"],
@@ -18448,7 +18448,7 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2[data-mc-native-pane
   border: 0 !important;
 }
 
-/* MC_SS_UNIFIED_HERO_OFFSET_20260620 ΓÇö match Saranoni vertical breathing room on Steve Silver unified PDPs. */
+/* MC_SS_UNIFIED_HERO_OFFSET_20260620 — match Saranoni vertical breathing room on Steve Silver unified PDPs. */
 @media (min-width: 992px) {
   html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
   html body.mc-steve-silver-altview-pdp.mc-pdp-unified-ready td.mc-pdp-media-td img#product_photo,
@@ -18458,7 +18458,7 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2[data-mc-native-pane
   }
 }
 
-/* MC_SS_INFO_COLUMN_DESC_20260620 ΓÇö Steve Silver description in info column above qty (Saranoni-style). */
+/* MC_SS_INFO_COLUMN_DESC_20260620 — Steve Silver description in info column above qty (Saranoni-style). */
 html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info #mc-pdp-description-below-features,
 html body.mc-steve-silver-altview-pdp td.mc-pdp-options-td #mc-pdp-description-below-features {
   display: block !important;
@@ -18522,7 +18522,7 @@ html body.mc-product-page .mc-pdp-description-view-more {
   cursor: pointer !important;
 }
 
-/* MC_PLP_CONTAIN_NO_CROP_20260619layout4 ΓÇö tall PLP photos (beds, etc.) must not clip at the top */
+/* MC_PLP_CONTAIN_NO_CROP_20260619layout4 — tall PLP photos (beds, etc.) must not clip at the top */
 html.category #content_area .v-product-grid a.v-product__img,
 html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
 html.is-category-or-listing-page #content_area .v-product-grid a.v-product__img,
@@ -18570,7 +18570,7 @@ html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-
 }
 
 /* =========================================================
-   MOBILE: "SELECT A CATEGORY" ΓÇö always viewport-centered
+   MOBILE: "SELECT A CATEGORY" — always viewport-centered
    (same top band as home/cart floats; beats header flex space-between)
    ========================================================= */
 @media (max-width: 991px) {
@@ -18823,7 +18823,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
   }
 }
 
-/* === MC_MOBILE_FULL_VIEW_20260620 ΓÇö keep storefront content fully visible on phones === */
+/* === MC_MOBILE_FULL_VIEW_20260620 — keep storefront content fully visible on phones === */
 @media (max-width: 991px) {
   html,
   body {
@@ -18945,7 +18945,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
   }
 }
 
-/* MC_SARANONI_PDP_LAYOUT_20260621sarlayout8 ΓÇö full-width hero row; table-cell nested columns. */
+/* MC_SARANONI_PDP_LAYOUT_20260621sarlayout8 — full-width hero row; table-cell nested columns. */
 @media (min-width: 992px) {
   html body.mc-saranoni-pdp #v65-product-parent,
   html body.mc-saranoni-pdp #content_area #v65-product-parent {
@@ -18978,7 +18978,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     box-sizing: border-box !important;
   }
 
-  /* Volusion wraps each hero cell in a direct <td> inside mc-pdp-main-row ΓÇö flex those wrappers. */
+  /* Volusion wraps each hero cell in a direct <td> inside mc-pdp-main-row — flex those wrappers. */
   html body.mc-saranoni-pdp tr.mc-pdp-main-row > td {
     display: block !important;
     flex: 1 1 0% !important;
@@ -19157,5 +19157,146 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     padding-top: 0 !important;
     top: auto !important;
     transform: none !important;
+  }
+}
+
+/* MC_SARANONI_NATIVE_REPAIR2_20260623 — force native Volusion PDP; hide mc-pdp inject nodes */
+html body.mc-saranoni-product #v65-product-parent,
+html body.mc-saranoni-product #v65-product-parent table,
+html body.mc-saranoni-product #v65-product-parent tbody,
+html body.mc-saranoni-product #v65-product-parent tr,
+html body.mc-saranoni-product #v65-product-parent td,
+html body.mc-saranoni-product #v65-product-parent .colors_pricebox,
+html body.mc-saranoni-product #v65-product-parent #options_table,
+html body.mc-saranoni-product #v65-product-parent [itemprop="offers"],
+html body.mc-saranoni-product #v65-product-parent .v65-productdetail-cartqty,
+html body.mc-saranoni-product #v65-product-parent .v65-product-addtocart,
+html body.mc-saranoni-product #v65-product-parent input[name="btnaddtocart"],
+html body.mc-saranoni-product #v65-product-parent button[name="btnaddtocart"],
+html body.mc-saranoni-product #v65-product-parent input[name^="QTY."],
+html body.mc-saranoni-product #v65-product-parent select,
+html body.mc-saranoni-product #v65-product-parent h1,
+html body.mc-saranoni-product #v65-product-parent .productnamecolor,
+html body.mc-saranoni-product #v65-product-parent .productnamecolorLARGE,
+html body.mc-saranoni-product #v65-product-parent img#product_photo,
+html body.mc-saranoni-product #v65-product-parent a#product_photo_zoom_url,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent table,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tbody,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent td,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .colors_pricebox,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent #options_table,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent [itemprop="offers"],
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .v65-productdetail-cartqty,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .v65-product-addtocart,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent input[name="btnaddtocart"],
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent button[name="btnaddtocart"],
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent input[name^="QTY."],
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent select,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent h1,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .productnamecolor,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent .productnamecolorLARGE,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent img#product_photo,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent a#product_photo_zoom_url {
+  display: revert !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+
+html body.mc-saranoni-product #v65-product-parent img#product_photo,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent img#product_photo {
+  display: block !important;
+  width: auto !important;
+  max-width: 650px !important;
+  height: auto !important;
+}
+
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-brand-logo,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-title-right,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-price-stack-host,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-accordion,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-option-block,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-purchase-stack,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-features,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-description-below-features,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) .mc-saranoni-color-picker,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) .mc-unified-purchase-controls,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-brand-logo,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-title-right,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-price-stack-host,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-accordion,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-option-block,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-purchase-stack,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-features,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-pdp-description-below-features,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) .mc-saranoni-color-picker,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) .mc-unified-purchase-controls {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* MC_SARANONI_NATIVE_VARIANT_IMAGES_20260625 — color/size swatches on native SAR PDPs */
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-saranoni-size-thumbs,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-saranoni-size-thumbs {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  width: 100% !important;
+  max-width: 460px !important;
+  margin: 12px 0 8px !important;
+  padding: 0 !important;
+}
+
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-configured-color-swatch-wrapper .mc-configured-color-swatches,
+html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #mc-saranoni-size-thumbs,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-configured-color-swatch-wrapper .mc-configured-color-swatches,
+html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #mc-saranoni-size-thumbs {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) #v65-product-parent tr.mc-pdp-main-row {
+    display: table-row !important;
+    flex: none !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) tr.mc-pdp-main-row > td,
+  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) tr.mc-pdp-main-row > td,
+  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-media-td,
+  html body.mc-saranoni-product:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp:not(.mc-saranoni-pdp-custom-layout) td.mc-pdp-options-td {
+    display: table-cell !important;
+    flex: none !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    vertical-align: top !important;
   }
 }

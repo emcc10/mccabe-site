@@ -1,6 +1,6 @@
-﻿/**
- * PLP fixes ΓÇö DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260628e ΓÇö site-wide strip .00 from prices (full content sweep); PLP thumbnails
+/**
+ * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
+ * MC_PLP_ENFORCER_20260628e — site-wide strip .00 from prices (full content sweep); PLP thumbnails
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
@@ -304,7 +304,7 @@
     });
   }
 
-  /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP ΓÇö probe and swap. */
+  /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP — probe and swap. */
   function fixNoPhotoThumbnails() {
     if (isCloseoutSalePlp()) return;
     var root = document.getElementById("content_area");
@@ -722,7 +722,7 @@
     }
   }
 
-  var PDP_AUTH_WANT = "20260623sarrepair1";
+  var PDP_AUTH_WANT = "20260625sarrepair2";
 
   function isSaranoniPdpPage() {
     try {
@@ -776,7 +776,7 @@
     global.setTimeout(loadPdpAuthCtaFix, ms);
   });
 
-  /* MC_CAT142_BEDROOM_LANDING ΓÇö inject Steve Silver bedroom PLP hero (template rebake lags). */
+  /* MC_CAT142_BEDROOM_LANDING — inject Steve Silver bedroom PLP hero (template rebake lags). */
   (function cat142BedroomLanding(doc, win) {
     var FRAG_URL = "/v/vspfiles/category-landings/cat142-bedroom.html?v=20260620";
     var guard = "__MC_CAT142_BEDROOM__";

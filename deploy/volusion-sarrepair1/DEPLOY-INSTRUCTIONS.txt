@@ -1,20 +1,22 @@
 McCabe Saranoni PDP fix — manual Volusion deploy
-Version: 20260623sarrepair1
+Version: 20260625sarrepair2 (supersedes sarrepair1 — includes variant image fix)
 Bundle folder: deploy/volusion-sarrepair1/
+
+NOTE: This folder now mirrors the sarrepair2 variant-image fix. Use either
+deploy/volusion-sarrepair1/ or deploy/volusion-sarrepair2/ — same file versions.
 
 ================================================================================
 1. FILE MAP (local bundle → Volusion destination)
 ================================================================================
 
-Upload each file to the matching path under your store's /v/ root (File Manager
-or SFTP). Preserve filenames exactly.
+  deploy/volusion-sarrepair1/vspfiles/css/custom-safe.css
+    → /v/vspfiles/css/custom-safe.css
 
   deploy/volusion-sarrepair1/vspfiles/js/mc-pdp-auth-cta-fix.js
     → /v/vspfiles/js/mc-pdp-auth-cta-fix.js
 
   deploy/volusion-sarrepair1/vspfiles/js/mc-unified-pdp-layout.js
     → /v/vspfiles/js/mc-unified-pdp-layout.js
-    (loaded dynamically by mc-pdp-auth-cta-fix.js on PDPs)
 
   deploy/volusion-sarrepair1/vspfiles/js/sectional-configs.js
     → /v/vspfiles/js/sectional-configs.js
@@ -22,91 +24,17 @@ or SFTP). Preserve filenames exactly.
   deploy/volusion-sarrepair1/vspfiles/js/mc-plp-enforcer.js
     → /v/vspfiles/js/mc-plp-enforcer.js
 
-  deploy/volusion-sarrepair1/vspfiles/css/custom-safe.css
-    → /v/vspfiles/css/custom-safe.css
-
   deploy/volusion-sarrepair1/template_266.html
     → Volusion Design → Site Content → Template Manager → Template #266
-    (paste/replace full template HTML, then Save)
 
 ================================================================================
-2. POST-UPLOAD Ctrl+F VERIFY (must find 20260623sarrepair1)
+2. POST-UPLOAD Ctrl+F VERIFY (must find 20260625sarrepair2)
 ================================================================================
 
-After uploading, open each live file in Volusion editor and search for:
-  20260623sarrepair1
-
-Expected hits:
-
-  /v/vspfiles/css/custom-safe.css
-    Line 1: C_CSS_DEPLOY_VERIFY_20260623sarrepair1
-
-  /v/vspfiles/js/mc-pdp-auth-cta-fix.js
-    MC_PDP_AUTH_DEPLOY_VERIFY_20260623sarrepair1
-    var VERSION = "20260623sarrepair1"
-
-  /v/vspfiles/js/sectional-configs.js
-    MC_SECTIONAL_PDP_AUTH_INLINE_20260623sarrepair1
-
-  /v/vspfiles/js/mc-plp-enforcer.js
-    var PDP_AUTH_WANT = "20260623sarrepair1"
-
-  Template #266 (after rebake — see section 3)
-    mc-pdp-auth-cta-fix.js?v=20260623sarrepair1
-    MC_TEMPLATE_DEPLOY_VERIFY_20260623sarrepair1
-    SS_HERO_VER = "20260623sarrepair1"
-    sectional-configs.js?v=20260623sarrepair1
+See deploy/volusion-sarrepair2/DEPLOY-INSTRUCTIONS.txt for full verify list.
 
 ================================================================================
-3. REBAKE TEMPLATE 266 + ONE SAR PRODUCT
-================================================================================
-
-A. Template rebake
-   1. Design → Site Content → Template Manager → open Template #266
-   2. Replace entire template source with deploy/volusion-sarrepair1/template_266.html
-   3. Save template
-   4. Ctrl+F in saved template: confirm 20260623sarrepair1 (not sarstable*)
-
-B. Rebake one Saranoni (SAR-*) product page
-   1. Products → find any SAR product (e.g. SAR-PTR-MSLN-02 or similar)
-   2. Open product → Regenerate / Rebake product page (Volusion "Rebuild" or
-      save product to trigger HTML regen — use your usual rebake workflow)
-   3. View live PDP in incognito; hard-refresh (Ctrl+Shift+R)
-
-C. Live page checks (Saranoni PDP)
-   - Hero image and title visible (not blank white page)
-   - Price / Add to Cart column renders
-   - Sign In / Create Account opens modal (no redirect to /login.asp)
-   - DevTools → Network: mc-pdp-auth-cta-fix.js loads with ?v=20260623sarrepair1
-   - DevTools → Network: mc-unified-pdp-layout.js may load (same version query)
-
-================================================================================
-4. WHAT NOT TO SEARCH FOR (stale / wrong builds)
-================================================================================
-
-Do NOT expect or deploy these tokens — they are older Saranoni experiments:
-
-  sarstable4
-  sarstable5
-  sarstable6
-  20260622sarstable4
-  20260622sarstable5
-  20260622sarstable6
-
-If any of the above appear in live custom-safe.css, mc-pdp-auth-cta-fix.js,
-or Template 266 after upload, the wrong file was pasted or an old bundle was used.
-Re-upload from this deploy/volusion-sarrepair1/ folder.
-
-Note: mc-unified-pdp-layout.js uses internal LAYOUT_VER "20260622sarfix2" —
-that is OK. Cache busting for that file uses the sarrepair1 query string from
-mc-pdp-auth-cta-fix.js, not the internal constant.
-
-Note: mc-plp-enforcer.js has its own VERSION "20260628e" for PLP grid work.
-That is separate from the PDP sarrepair1 token. Only PDP_AUTH_WANT must be
-20260623sarrepair1 in that file.
-
-================================================================================
-5. DEPLOY ORDER (recommended)
+3. DEPLOY ORDER
 ================================================================================
 
   1. custom-safe.css
@@ -115,7 +43,8 @@ That is separate from the PDP sarrepair1 token. Only PDP_AUTH_WANT must be
   4. sectional-configs.js
   5. mc-plp-enforcer.js
   6. Template #266 (full replace + save)
-  7. Rebake one SAR product
-  8. Verify live SAR PDP
+  7. Hard-refresh SAR PDP incognito
 
-================================================================================
+Test URLs:
+  https://www.mccabestheaterandliving.com/product-p/sar-bmb-snuggler.htm
+  https://www.mccabestheaterandliving.com/product-p/sar-hp-hp-icons-mnky-lush.htm
