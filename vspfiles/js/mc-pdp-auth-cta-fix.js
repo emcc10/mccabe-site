@@ -3343,7 +3343,6 @@
       "mc-saranoni-size-thumbs",
       "mc-pdp-option-block",
       "mc-pdp-purchase-stack",
-      "messaging-element",
       "mc-pdp-accordion",
     ].forEach(function (id) {
       var el = global.document.getElementById(id);
