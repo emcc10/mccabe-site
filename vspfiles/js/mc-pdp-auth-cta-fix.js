@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair12
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair13
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260624sarrepair12";
+  var VERSION = "20260624sarrepair13";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -3529,7 +3529,12 @@
     }
     if (row.parentNode !== infoColumn) {
       try {
-        infoColumn.appendChild(row);
+        var atc = global.document.getElementById("mc-pdp-purchase-stack");
+        if (atc && atc.parentNode === infoColumn) {
+          infoColumn.insertBefore(row, atc);
+        } else {
+          infoColumn.appendChild(row);
+        }
       } catch (eHoist) {}
     }
   }
@@ -4992,7 +4997,14 @@
       if (mountAnchor && mountAnchor.parentNode === infoColumn) {
         insertNodeAfter(infoColumn, mountAnchor, row);
       } else {
-        infoColumn.appendChild(row);
+        // Never mount below the ATC button — that causes a visible flash of a
+        // second thumb set under the cart button before reorder hoists it up.
+        var atcStack = global.document.getElementById("mc-pdp-purchase-stack");
+        if (atcStack && atcStack.parentNode === infoColumn) {
+          infoColumn.insertBefore(row, atcStack);
+        } else {
+          infoColumn.appendChild(row);
+        }
       }
     }
     var signature =
