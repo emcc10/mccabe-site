@@ -1,0 +1,221 @@
+/* MC_LIVE_PATCH_DEPLOY_20260521type — PDP title/options/retail/member 13px stack */
+
+/* 1) Hide Volusion text logo in header (all pages) */
+header.header #display_homepage_title,
+header.header #display_homepage_title *,
+#display_homepage_title,
+#display_homepage_title *,
+#display_homepage_title .vol-logo,
+#display_homepage_title .vol-logo__link,
+#display_homepage_title a {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  max-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  border: 0 !important;
+}
+
+header.header .header__section > .col-xs-6.col-sm-8.col-md-9.col-lg-3:first-child {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  flex: 0 0 0 !important;
+}
+
+/* 2) Category / PLP: kill homepage hero shell (black bar) */
+html[data-mc-category-plp="1"] #if_homepage,
+html[data-mc-category-plp="1"] #slideshow-container,
+html[data-mc-category-plp="1"] #slideshow-container .mc-hero-video,
+html.category #if_homepage,
+html.category #slideshow-container,
+html.category #slideshow-container .mc-hero-video,
+body.category #if_homepage,
+body.category #slideshow-container,
+body.category #slideshow-container .mc-hero-video,
+html.category body.is-home #if_homepage,
+html.category body.is-home #slideshow-container,
+html.category body.is-home #slideshow-container .mc-hero-video {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+/* 3) Category PLP thumbnails: gray mat + uniform scale */
+html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
+html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
+html.category .v-product-grid .v-product > a.v-product__img,
+html.category .v-product-grid .v-product a.v-product__img,
+body.category .v-product-grid .v-product > a.v-product__img,
+body.category .v-product-grid .v-product a.v-product__img {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 280px !important;
+  min-height: 280px !important;
+  max-height: 280px !important;
+  margin: 0 !important;
+  padding: 14px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  line-height: 0 !important;
+  text-decoration: none !important;
+}
+
+html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img > img,
+html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img,
+html.category .v-product-grid .v-product > a.v-product__img > img,
+html.category .v-product-grid .v-product a.v-product__img > img,
+body.category .v-product-grid .v-product > a.v-product__img > img,
+body.category .v-product-grid .v-product a.v-product__img > img {
+  width: 100% !important;
+  height: 220px !important;
+  max-width: 100% !important;
+  max-height: 220px !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  margin: 0 auto !important;
+  border: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+}
+
+@media (max-width: 991px) {
+  html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
+  html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
+  html.category .v-product-grid .v-product > a.v-product__img,
+  html.category .v-product-grid .v-product a.v-product__img {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+    padding: 12px !important;
+  }
+
+  html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img > img,
+  html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img,
+  html.category .v-product-grid .v-product > a.v-product__img > img,
+  html.category .v-product-grid .v-product a.v-product__img > img {
+    height: 172px !important;
+    max-height: 172px !important;
+  }
+}
+
+html.is-category-or-listing-page #if_homepage,
+html.is-category-or-listing-page #slideshow-container,
+html.is-category-or-listing-page #slideshow-container .mc-hero-video {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  background: transparent !important;
+}
+
+html.is-category-or-listing-page .v-product-grid .v-product > a.v-product__img,
+html.is-category-or-listing-page .v-product-grid .v-product a.v-product__img {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  background: #ffffff !important;
+  padding: 14px !important;
+  height: 280px !important;
+  min-height: 280px !important;
+  max-height: 280px !important;
+}
+
+html.is-category-or-listing-page .v-product-grid .v-product > a.v-product__img > img,
+html.is-category-or-listing-page .v-product-grid .v-product a.v-product__img > img,
+html.is-category-or-listing-page .v-product-grid .v-product .v-product__img img {
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  height: 220px !important;
+  max-height: 220px !important;
+  width: 100% !important;
+  border: 0 !important;
+}
+
+/* PDP type stack — match product title (13px, caps, 0.16em, #777) */
+html body.productdetails span[itemprop="name"],
+html body.mc-product-page span[itemprop="name"],
+html body.productdetails #content_area .productnamecolorLARGE.colors_productname,
+html body.mc-product-page #content_area .productnamecolorLARGE.colors_productname,
+html body.productdetails #options_table td[align="right"],
+html body.mc-product-page #options_table td[align="right"],
+html body.productdetails #options_table .productoptionname,
+html body.mc-product-page #options_table .productoptionname,
+html body.productdetails #options_table td[align="right"] font,
+html body.mc-product-page #options_table td[align="right"] font,
+html body.productdetails #options_table label,
+html body.mc-product-page #options_table label,
+html body.productdetails #content_area #mcLeatherHeader,
+html body.mc-product-page #content_area #mcLeatherHeader,
+html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #content_area .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-line__label {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+}
+html body.productdetails #options_table select:not(.mc-native-leather),
+html body.mc-product-page #options_table select:not(.mc-native-leather),
+html body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
+html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice,
+html body.productdetails #content_area .mc-pdp-member-line__amount,
+html body.mc-product-page #content_area .mc-pdp-member-line__amount {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
+  white-space: normal !important;
+}
+html body.productdetails #content_area .mc-pdp-retail-row .product_sale_price,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_sale_price,
+html body.productdetails #content_area .mc-pdp-retail-row .product_saleprice,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_saleprice,
+html body.productdetails #v65-product-parent .mtl-product-price-block > .product_sale_price,
+html body.mc-product-page #v65-product-parent .mtl-product-price-block > .product_saleprice {
+  display: none !important;
+  visibility: hidden !important;
+}
+html body.productdetails #content_area .mc-pdp-member-pricing .mc-pdp-sale-preview,
+html body.mc-product-page #content_area .mc-pdp-member-pricing .mc-pdp-sale-preview {
+  display: block !important;
+  margin-top: 4px !important;
+}
