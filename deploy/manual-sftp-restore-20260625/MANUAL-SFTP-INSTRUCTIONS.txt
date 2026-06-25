@@ -1,0 +1,134 @@
+Emergency manual SFTP restore — 2026-06-25
+============================================
+
+Context
+-------
+Git rollback commit dd51fd5 uploaded template_266.html via CI but FAILED before
+uploading dependent JS/CSS. Live site currently 404s on files the template loads.
+
+This bundle restores those missing assets WITHOUT re-deploying broken code:
+  - 10 files from backup/broken-production-20260625 (430fca1) — were on server
+    when 4521e93 was last known-good but never tracked in that commit
+  - 3 files from rescue/production-4521e93 (4521e93) — known-good versions
+
+Bundle folder (local):
+  deploy/manual-sftp-restore-20260625/vspfiles/...
+
+SFTP connection (same as GitHub Actions / FileZilla)
+----------------------------------------------------
+  Host:     (Volusion SFTP host from your FTP_SERVER secret)
+  Port:     2222
+  Protocol: SFTP
+  User:     (FTP_USERNAME secret)
+
+After login, open the folder that contains vspfiles/ (usually chrooted at /v).
+
+Upload map — local → remote
+---------------------------
+Upload each file to /v/<path> below. If your client shows no /v prefix, upload
+to vspfiles/... at the SFTP root (same relative path).
+
+  PRIORITY (404 on live right now — upload these first)
+  -----------------------------------------------------
+  vspfiles/js/mc-plp-enforcer.js
+    → /v/vspfiles/js/mc-plp-enforcer.js
+
+  vspfiles/templates/266/css/mccabe-overrides.css
+    → /v/vspfiles/templates/266/css/mccabe-overrides.css
+
+  vspfiles/js/mc-unified-pdp-layout.js          [from 4521e93]
+    → /v/vspfiles/js/mc-unified-pdp-layout.js
+
+  vspfiles/js/mc-pdp-price-stack.js
+    → /v/vspfiles/js/mc-pdp-price-stack.js
+
+  vspfiles/js/sectional-configs.js
+    → /v/vspfiles/js/sectional-configs.js
+
+  vspfiles/js/mtl-sectional-renderer.js
+    → /v/vspfiles/js/mtl-sectional-renderer.js
+
+  vspfiles/css/mc-live-patch.css
+    → /v/vspfiles/css/mc-live-patch.css
+
+  vspfiles/css/mc-plp-body-last.css
+    → /v/vspfiles/css/mc-plp-body-last.css
+
+  SITE-WIDE HELPERS
+  -----------------
+  vspfiles/js/mc-cart-checkout-fix.js
+    → /v/vspfiles/js/mc-cart-checkout-fix.js
+
+  vspfiles/js/mc-windsor-hero-fix.js
+    → /v/vspfiles/js/mc-windsor-hero-fix.js
+
+  vspfiles/js/mc-bedroom-collection-section.js
+    → /v/vspfiles/js/mc-bedroom-collection-section.js
+
+  CONFIRM KNOWN-GOOD (already 200 on live; re-upload if unsure)
+  -------------------------------------------------------------
+  vspfiles/js/mc-pdp-auth-cta-fix.js              [from 4521e93]
+    → /v/vspfiles/js/mc-pdp-auth-cta-fix.js
+
+  vspfiles/css/custom-safe.css                    [from 4521e93]
+    → /v/vspfiles/css/custom-safe.css
+
+Recommended upload order
+------------------------
+  1. CSS (mccabe-overrides, mc-live-patch, mc-plp-body-last, custom-safe)
+  2. mc-unified-pdp-layout.js
+  3. mc-pdp-auth-cta-fix.js
+  4. mc-plp-enforcer.js
+  5. mc-pdp-price-stack.js, sectional-configs.js, mtl-sectional-renderer.js
+  6. mc-cart-checkout-fix.js, mc-windsor-hero-fix.js, mc-bedroom-collection-section.js
+
+Template note
+-------------
+template_266.html was already pushed to SFTP by failed run #2392. You do NOT
+need to re-upload it unless pages still look wrong after assets are up.
+
+If category/PDP .htm pages are stale after asset upload:
+  Volusion admin → Design → File Editor → template_266.html → Save (rebake)
+
+Post-upload verification (browser console)
+------------------------------------------
+Replace TS with Date.now() for cache busting.
+
+  // All should return 200
+  fetch('/v/vspfiles/js/mc-plp-enforcer.js?'+Date.now()).then(r=>console.log('enforcer',r.status))
+  fetch('/v/vspfiles/templates/266/css/mccabe-overrides.css?'+Date.now()).then(r=>console.log('overrides',r.status))
+  fetch('/v/vspfiles/js/mc-unified-pdp-layout.js?'+Date.now()).then(r=>console.log('unified',r.status))
+  fetch('/v/vspfiles/js/mc-pdp-auth-cta-fix.js?'+Date.now()).then(r=>console.log('pdp-auth',r.status))
+
+  // custom-safe first line should contain sarrepair1
+  fetch('/v/vspfiles/css/custom-safe.css?'+Date.now()).then(r=>r.text()).then(t=>console.log(t.slice(0,120)))
+
+Page smoke tests (hard refresh / incognito)
+-------------------------------------------
+  https://www.mccabestheaterandliving.com/
+  https://www.mccabestheaterandliving.com/Luxe-Comforts-s/205.htm
+  https://www.mccabestheaterandliving.com/product-p/sar-boy-who-lived-dbl-layer.htm
+  https://www.mccabestheaterandliving.com/product-p/sar-lush-mini.htm
+  One non-Saranoni PDP (e.g. a sofa product you know is live)
+
+Check: nav, images, thumbnails, color/size options, Add to Cart, accordion, no
+console SyntaxError / 404 on /v/vspfiles/ assets.
+
+File manifest (byte sizes must match after upload)
+--------------------------------------------------
+  30350  vspfiles/js/mc-plp-enforcer.js                    (430fca1)
+  52777  vspfiles/templates/266/css/mccabe-overrides.css   (430fca1)
+  10787  vspfiles/js/mc-pdp-price-stack.js                 (430fca1)
+   9168  vspfiles/js/mc-bedroom-collection-section.js     (430fca1)
+  10352  vspfiles/js/mc-cart-checkout-fix.js               (430fca1)
+   2228  vspfiles/js/mc-windsor-hero-fix.js                (430fca1)
+ 190874  vspfiles/js/mtl-sectional-renderer.js             (430fca1)
+  30511  vspfiles/js/sectional-configs.js                  (430fca1)
+   8959  vspfiles/css/mc-live-patch.css                    (430fca1)
+   3307  vspfiles/css/mc-plp-body-last.css                 (430fca1)
+  64630  vspfiles/js/mc-unified-pdp-layout.js              (4521e93)
+ 410536  vspfiles/js/mc-pdp-auth-cta-fix.js                (4521e93)
+ 788691  vspfiles/css/custom-safe.css                      (4521e93)
+
+Do NOT run GitHub Actions deploy until a follow-up commit fixes the
+repo/workflow mismatch (missing files at 4521e93 tree).

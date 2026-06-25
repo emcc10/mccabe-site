@@ -75,6 +75,9 @@ _ALWAYS_DEPLOY = frozenset(
     {
         "vspfiles/css/custom-safe.css",
         "vspfiles/templates/266/css/mccabe-overrides.css",
+        "vspfiles/js/mc-pdp-auth-cta-fix.js",
+        "vspfiles/js/mc-pdp-price-stack.js",
+        "vspfiles/js/mc-unified-pdp-layout.js",
     }
 )
 

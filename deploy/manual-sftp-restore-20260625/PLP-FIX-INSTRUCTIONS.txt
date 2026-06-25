@@ -1,0 +1,62 @@
+Luxe Comforts PLP still broken — phase 2 manual uploads
+======================================================
+
+Your CSS/JS bundle is live (enforcer + overrides = 200). The category page is
+still broken for TWO other reasons:
+
+1) CORRUPT template.min.js (breaks jQuery → grid layout collapses)
+   Live file has a SyntaxError in the jquery-sticky module.
+   Fixed copy is in this bundle (287,496 bytes — NOT the 269,556 live copy).
+
+2) MISSING Saranoni PLP catalog photos (broken tiny thumbnails)
+   Category pages request photos like SAR-MNKY-LUSH-1.jpg — all 404 on CDN.
+   51 SAR-*-1.jpg files are in:
+     deploy/manual-sftp-restore-20260625/vspfiles/photos/
+
+Optional: hero image on Luxe Comforts also 404:
+  /v/vspfiles/landing/mc-luxe-comforts-saranoni-hero.jpg
+  (not in this bundle — lower priority than items 1–2)
+
+----------------------------------------------------------------------
+A. Upload FIXED template.min.js (CRITICAL)
+----------------------------------------------------------------------
+Local:
+  deploy/manual-sftp-restore-20260625/vspfiles/templates/266/js/min/template.min.js
+Remote (exact):
+  /v/vspfiles/templates/266/js/min/template.min.js
+
+IMPORTANT: File is ~281 KiB. Volusion may TRUNCATE uploads over 128 KiB if you
+use a simple drag-drop. After upload, remote size MUST be exactly 287,496 bytes.
+
+If FileZilla shows a smaller size, use the chunked upload script instead:
+  python scripts/manual_emergency_upload.py
+  (with FTP_SERVER, FTP_USERNAME, FTP_PASSWORD set)
+
+Browser verify (no SyntaxError after hard refresh):
+  fetch('/v/vspfiles/templates/266/js/min/template.min.js?'+Date.now())
+    .then(r=>r.text()).then(t=>console.log(t.includes('a.topSpacing=0};q=q')?'STILL BROKEN':'FIXED'))
+
+----------------------------------------------------------------------
+B. Upload 51 SAR catalog photos
+----------------------------------------------------------------------
+Local folder:
+  deploy/manual-sftp-restore-20260625/vspfiles/photos/
+  (all files matching SAR-*-1.jpg)
+
+Remote folder:
+  /v/vspfiles/photos/
+
+Upload every SAR-*-1.jpg into the SAME photos folder where other product
+images live (sibling of paths like SAR-LUSH-MINI-1048-T.jpg if present).
+
+Verify one thumb:
+  fetch('https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/SAR-MNKY-LUSH-1.jpg?'+Date.now())
+    .then(r=>console.log('SAR-MNKY-LUSH-1', r.status))
+
+----------------------------------------------------------------------
+C. Re-test Luxe Comforts
+----------------------------------------------------------------------
+Hard refresh / incognito:
+  https://www.mccabestheaterandliving.com/Luxe-Comforts-s/205.htm
+
+Expect: product grid in columns, product photos visible, prices under titles.

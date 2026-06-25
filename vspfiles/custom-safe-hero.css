@@ -36,26 +36,11 @@
   margin:0 0 12px;
 }
 
-#mc-hero-copy-tagline{
-  font-size:36px !important;
-  line-height:1.2 !important;
-  letter-spacing:.12em !important;
-  color:#d8d6d3 !important;
-  -webkit-text-fill-color:#d8d6d3 !important;
-  text-transform:none !important;
-  margin:0.35em auto 0.5em !important;
-  text-align:center !important;
-}
-
-#mc-hero-copy-subline{
-  display:none !important;
-  visibility:hidden !important;
-  height:0 !important;
-  margin:0 !important;
-  padding:0 !important;
-  overflow:hidden !important;
-  font-size:0 !important;
-  line-height:0 !important;
+.mc-hero-overlay p{
+  font-size:14px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  margin:0 0 26px;
 }
 
 .mc-hero-btn{
