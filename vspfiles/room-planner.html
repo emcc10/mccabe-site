@@ -134,11 +134,9 @@ min-width: 300px;
   #toolbar{
     display:flex;
     justify-content:center;
-    flex-wrap:wrap;
     gap:16px;
     margin-top:14px;
   }
-  #toolbar #addConfigBtn{ flex-shrink:0; }
   button{
     padding:8px 16px;
     border:1px solid #ccc;
@@ -175,8 +173,9 @@ min-width: 300px;
       <button id="rotateL">Rotate ⟲</button>
       <button id="rotateR">Rotate ⟳</button>
       <button id="deleteBtn">Delete</button>
-      <button id="saveLayout">Save Layout</button>
-      <button id="addConfigBtn">Add configuration</button>
+<button id="saveLayout">Save Layout</button>
+
+
     </div>
 
   </div>
@@ -265,14 +264,6 @@ function calculateSeatCount(){
   return seats;
 }
 
-function getNon4LCount(){
-  let n = 0;
-  document.querySelectorAll(".seat").forEach(seat => {
-    if (seat.dataset.pieceId !== "4L") n++;
-  });
-  return n;
-}
-
 function makeDraggable(el){
   el.addEventListener("mousedown", e=>{
     setActive(el);
@@ -291,14 +282,7 @@ function makeDraggable(el){
   });
 }
 
-function addSeat(piece, skip4LCheck){
-  if (!skip4LCheck && piece.id === "4L") {
-    var non4L = getNon4LCount();
-    if (non4L < 2) {
-      alert("A 4L Armless Loveseat can only be added when at least two other pieces (e.g. 1L, 2L, 3L) are already in the room.");
-      return;
-    }
-  }
+function addSeat(piece){
   const seat = document.createElement("div");
   seat.className = "seat";
 seat.dataset.rot = "0";
@@ -388,15 +372,9 @@ function serializeLayout(){
 }
 
 document.getElementById("saveLayout").onclick = () => {
-  const counts = getCounts();
-  const layout = serializeLayout();
-  const seatCount = calculateSeatCount();
   const payload = {
-    options: counts,
-    counts: counts,
+    counts: getCounts(),
     room: { width: roomW.value, depth: roomD.value },
-    layout: layout,
-    seatCount: seatCount,
     ts: Date.now()
   };
 
@@ -409,84 +387,8 @@ document.getElementById("saveLayout").onclick = () => {
     );
   }
 
-  var blob = new Blob([JSON.stringify({
-    room: payload.room,
-    layout: layout,
-    pieces: counts,
-    seatCount: seatCount,
-    savedAt: new Date().toISOString()
-  }, null, 2)], { type: "application/json" });
-  var a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "room-layout-" + new Date().toISOString().slice(0,19).replace(/[-:]/g,"").replace("T","-") + ".json";
-  a.click();
-  URL.revokeObjectURL(a.href);
-
-  alert("Layout saved and file downloaded.");
+  alert("Layout saved");
 };
-
-var addConfigBtn = document.getElementById("addConfigBtn");
-if (!addConfigBtn) {
-  var toolbarEl = document.getElementById("toolbar");
-  if (toolbarEl) {
-    addConfigBtn = document.createElement("button");
-    addConfigBtn.id = "addConfigBtn";
-    addConfigBtn.textContent = "Add configuration";
-    toolbarEl.appendChild(addConfigBtn);
-  }
-}
-if (addConfigBtn) {
-  addConfigBtn.onclick = function(){
-    const counts = getCounts();
-    const layout = serializeLayout();
-    const seatCount = calculateSeatCount();
-    if (Object.keys(counts).length === 0) {
-      alert("Add at least one piece to the room before adding configuration.");
-      return;
-    }
-    const payload = {
-      options: counts,
-      counts: counts,
-      room: { width: roomW.value, depth: roomD.value },
-      layout: layout,
-      seatCount: seatCount,
-      ts: Date.now()
-    };
-    localStorage.setItem("roomPlannerData", JSON.stringify(payload));
-    if (window.opener && window.opener.postMessage) {
-      window.opener.postMessage({ type: "ROOM_PLANNER_APPLY", payload: payload }, location.origin);
-      alert("Configuration sent to product page. Number of seats and price will update there.");
-    } else {
-      alert("Open the planner from the product page to add configuration there.");
-    }
-  };
-}
-
-function restoreLayoutFromStorage(){
-  try {
-    const raw = localStorage.getItem("roomPlannerData");
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    const layout = data.layout;
-    if (!layout || !Array.isArray(layout) || layout.length === 0) return;
-    const pieceMap = {};
-    PIECES.forEach(p => { pieceMap[p.id] = p; });
-    document.querySelectorAll(".seat").forEach(seat => seat.remove());
-    layout.forEach(function(item){
-      const piece = pieceMap[item.id];
-      if (!piece) return;
-      addSeat(piece, true);
-      const seat = room.querySelector(".seat:last-of-type");
-      if (seat) {
-        seat.style.left = (item.x != null ? item.x : 40) + "px";
-        seat.style.top = (item.y != null ? item.y : 40) + "px";
-        if (item.rot != null) { seat.dataset.rot = item.rot; seat.style.transform = "rotate(" + item.rot + "deg)"; }
-      }
-    });
-  } catch (e) {}
-}
-if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", restoreLayoutFromStorage);
-else restoreLayoutFromStorage();
 
 function buildPlannerOptions(){
   const counts = {};

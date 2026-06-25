@@ -1,4 +1,0 @@
-file 'C:/Users/erink/OneDrive/Documents/GitHub/mccabe-site/vspfiles/home-hero-clips/living-room-sofa-cut.mp4'
-file 'C:/Users/erink/OneDrive/Documents/GitHub/mccabe-site/vspfiles/home-hero-clips/blanket-on-sofa-cut.mp4'
-file 'C:/Users/erink/OneDrive/Documents/GitHub/mccabe-site/vspfiles/home-hero-clips/dining-table-gathering-cut.mp4'
-file 'C:/Users/erink/OneDrive/Documents/GitHub/mccabe-site/vspfiles/home-hero-clips/home-living-room-cut.mp4'
