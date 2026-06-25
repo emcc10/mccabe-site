@@ -217,6 +217,10 @@ maybe_put_primary() {
   local local_path="$1"
   local label="$2"
   shift 2
+  if [[ ! -f "$local_path" ]]; then
+    echo "=== skip ${label}: ${local_path} not in repo ==="
+    return 0
+  fi
   if ! deploy_file_changed "$local_path"; then
     echo "=== skip ${label}: ${local_path} unchanged ==="
     return 0
@@ -400,6 +404,10 @@ for f in \
   vspfiles/boards/_auth.php; do
   if ! deploy_file_changed "$f"; then
     echo "=== skip boards: ${f} unchanged ==="
+    continue
+  fi
+  if [[ ! -f "$f" ]]; then
+    echo "=== skip boards: ${f} not in repo ==="
     continue
   fi
   base=$(basename "$f")
