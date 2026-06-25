@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260629c — legacy grid convert + unwrap table shells; PLP/footer layout fix
+ * MC_PLP_ENFORCER_20260629d — legacy grid convert; keep grid inside content_area; repair footer shell
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260629c";
+  var VERSION = "20260629d";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -380,14 +380,21 @@
     if (!tbl || tbl.tagName !== "TABLE") return false;
     if (!tbl.querySelector(".v-product-grid")) return false;
     if (tbl.querySelector("table.v65-productDisplay .v-product-grid")) return false;
+    if (tbl.querySelector("form.search_results_section, #mc-cat-luxe-comforts, footer.footer")) {
+      return false;
+    }
     return tbl.rows.length <= 1;
   }
 
+  /** Only unwrap single-cell product-list tables — never hoist grid out of #content_area. */
   function unwrapProductGridShell(grid) {
     var node = grid;
+    var contentArea = document.getElementById("content_area");
     var guard = 0;
-    while (node && guard < 8) {
+    while (node && guard < 2) {
       guard += 1;
+      if (contentArea && (node.parentElement === contentArea || !contentArea.contains(node))) break;
+
       var parent = node.parentElement;
       if (!parent || parent.tagName !== "TD" || parent.childElementCount !== 1) break;
 
@@ -402,11 +409,98 @@
       ) {
         break;
       }
+      if (contentArea && !contentArea.contains(tbl)) break;
 
       var outer = tbl.parentElement;
       if (!outer) break;
       outer.replaceChild(node, tbl);
     }
+  }
+
+  function getCategoryPageWrap() {
+    return (
+      document.querySelector("article.vol-container .page-wrap") ||
+      document.querySelector(".page-wrap")
+    );
+  }
+
+  function repairOrphanProductGrid() {
+    var contentArea = document.getElementById("content_area");
+    var grid =
+      document.getElementById("mc-products-start") ||
+      document.querySelector("#content_area .v-product-grid");
+    if (!contentArea || !grid || contentArea.contains(grid)) return;
+
+    var form = contentArea.querySelector("form.search_results_section");
+    if (form) {
+      form.appendChild(grid);
+      return;
+    }
+    contentArea.appendChild(grid);
+  }
+
+  /** Baked cat HTML can pop footer out of .page-wrap; re-home it for theme CSS. */
+  function repairCategoryPageShell() {
+    if (!isCategoryPlp()) return false;
+    var pageWrap = getCategoryPageWrap();
+    var volInner = document.querySelector("article.vol-container > section.vol-inner");
+    var footer =
+      document.querySelector("footer.footer[data-ui-block='footer-1']") ||
+      document.querySelector("footer.footer");
+    var container = document.querySelector(".container.container--content");
+    var contentArea = document.getElementById("content_area");
+    if (!pageWrap || !footer) return false;
+
+    var changed = false;
+
+    repairOrphanProductGrid();
+
+    contentArea
+      .querySelectorAll("footer.footer")
+      .forEach(function (dup) {
+        if (dup !== footer && dup.parentNode) {
+          dup.parentNode.removeChild(dup);
+          changed = true;
+        }
+      });
+
+    if (volInner && pageWrap.parentElement !== volInner) {
+      volInner.appendChild(pageWrap);
+      changed = true;
+    }
+
+    if (footer.parentElement !== pageWrap) {
+      pageWrap.appendChild(footer);
+      changed = true;
+    }
+
+    if (container && container.parentElement !== pageWrap) {
+      pageWrap.insertBefore(container, footer);
+      changed = true;
+    } else if (!container && contentArea) {
+      container = document.createElement("div");
+      container.className = "container container--content";
+      var row = document.createElement("div");
+      row.className = "row";
+      var wrap = document.querySelector("section.content_area-wrapper");
+      if (!wrap || !wrap.contains(contentArea)) {
+        wrap = document.createElement("section");
+        wrap.className = "content_area-wrapper col-xs-12 col-md-9";
+        wrap.setAttribute("role", "main");
+        wrap.appendChild(contentArea);
+      }
+      row.appendChild(wrap);
+      container.appendChild(row);
+      pageWrap.insertBefore(container, footer);
+      changed = true;
+    }
+
+    if (container && footer.parentElement === pageWrap && container.nextSibling !== footer) {
+      pageWrap.insertBefore(footer, container.nextSibling);
+      changed = true;
+    }
+
+    return changed;
   }
 
   function injectLegacyPlpLayoutFixCss() {
@@ -436,10 +530,13 @@
       "html.category .footer," +
       "html[data-mc-category-plp='1'] .footer," +
       "html.category footer.footer," +
-      "html[data-mc-category-plp='1'] footer.footer{" +
+      "html[data-mc-category-plp='1'] footer.footer," +
+      "html.category .page-wrap > footer.footer," +
+      "html[data-mc-category-plp='1'] .page-wrap > footer.footer{" +
       "width:100%!important;max-width:100%!important;clear:both!important;" +
       "margin-left:0!important;margin-right:0!important;position:relative!important;" +
-      "left:auto!important;right:auto!important;float:none!important}";
+      "left:auto!important;right:auto!important;float:none!important;" +
+      "display:block!important}";
     (document.head || document.documentElement).appendChild(s);
   }
 
@@ -957,6 +1054,7 @@
   function run() {
     if (!isCategoryPlp()) return;
     markCategory();
+    repairCategoryPageShell();
     injectCriticalThumbCss();
     removeLegacyCategoryBars();
     convertLegacyGridSingleToProductGrid();
@@ -966,6 +1064,7 @@
     normalizePLPImages();
     injectLegacyPlpLayoutFixCss();
     collapsePlpGridGap(document.getElementById("content_area") || document);
+    repairCategoryPageShell();
     hideHero();
     if (!global.__MC_PLP_NORM_RETRIES__) {
       global.__MC_PLP_NORM_RETRIES__ = 1;
@@ -978,6 +1077,7 @@
           normalizePLPImages();
           injectLegacyPlpLayoutFixCss();
           collapsePlpGridGap(document.getElementById("content_area") || document);
+          repairCategoryPageShell();
         }, ms);
       });
     }
@@ -1018,6 +1118,7 @@
           normalizePLPImages();
           injectLegacyPlpLayoutFixCss();
           collapsePlpGridGap(document.getElementById("content_area") || document);
+          repairCategoryPageShell();
         }
       });
     });
