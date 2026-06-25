@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair14
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair15
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260624sarrepair14";
+  var VERSION = "20260624sarrepair15";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -9147,6 +9147,30 @@
       if (isUnifiedPdpReady()) return;
       installPdpStackApiGuards();
       runPatch();
+    }, ms);
+  });
+
+  // FAILSAFE: the anti-flicker CSS hides the title/price/ATC/features until the
+  // page is flagged hero-ready. If the normal ready path doesn't fire for some
+  // product type, never leave those elements permanently hidden — reveal them.
+  [1200, 2500, 4000].forEach(function (ms) {
+    global.setTimeout(function () {
+      var b = global.document.body;
+      if (!b) return;
+      if (
+        b.classList.contains("mc-pdp-hero-ready") ||
+        b.classList.contains("mc-pdp-unified-ready")
+      ) {
+        return;
+      }
+      if (
+        !b.classList.contains("productdetails") &&
+        !b.classList.contains("mc-product-page")
+      ) {
+        return;
+      }
+      if (!global.document.getElementById("v65-product-parent")) return;
+      markPdpHeroReady();
     }, ms);
   });
 
