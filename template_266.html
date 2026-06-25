@@ -5669,10 +5669,6 @@ function mcReadCurrentVisibleMemberUnitPrice() {
 
   if (variablePrice >= 500) return variablePrice;
 
-  console.warn("MC member unit price not found safely. Refusing to use option/upcharge/hidden fallback.", {
-    variablePrice: variablePrice
-  });
-
   return 0;
 }
 if (typeof window !== "undefined") {
