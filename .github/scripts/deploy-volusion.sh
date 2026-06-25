@@ -142,6 +142,7 @@ TEMPLATE_ENFORCER_TAG=$(grep -oE 'mc-plp-enforcer\.js\?v=[0-9]+' template_266.ht
 if [[ -z "$TEMPLATE_ENFORCER_TAG" ]]; then
   TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260625"
 fi
+ENFORCER_VERIFY_TAG=$(grep -oE 'MC_PLP_ENFORCER_[0-9a-z]+' vspfiles/js/mc-plp-enforcer.js 2>/dev/null | head -1 || echo "MC_PLP_ENFORCER_20260629d")
 
 python3 scripts/announce_deploy_markers.py || true
 
@@ -157,8 +158,9 @@ CRITICAL_ALWAYS=(
   "template_266.html"
   "vspfiles/css/custom-safe.css"
   "vspfiles/templates/266/css/mccabe-overrides.css"
-  # Always upload when CI runs: verify_mc_pdp_js_sftp gates on /v/vspfiles/ MD5 even if only template/CSS changed.
+  # verify_mc_pdp_js_sftp.py gates on these every run — must upload even on changed-only pushes.
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
+  "vspfiles/js/mc-pdp-price-stack.js"
   "vspfiles/js/mc-unified-pdp-layout.js"
 )
 
@@ -324,15 +326,12 @@ maybe_put_primary "vspfiles/js/mc-unified-pdp-layout.js" "mc-unified-pdp-layout"
   "/vspfiles/js/mc-unified-pdp-layout.js" \
   "vspfiles/js/mc-unified-pdp-layout.js"
 
-maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-boot.js" "mc-pdp-auth-cta-boot" \
-  "/v/vspfiles/js/mc-pdp-auth-cta-boot.js" \
-  "/vspfiles/js/mc-pdp-auth-cta-boot.js" \
-  "vspfiles/js/mc-pdp-auth-cta-boot.js"
-
 maybe_put_primary "vspfiles/js/mc-pdp-price-stack.js" "mc-pdp-price-stack" \
   "/v/vspfiles/js/mc-pdp-price-stack.js" \
   "/vspfiles/js/mc-pdp-price-stack.js" \
   "vspfiles/js/mc-pdp-price-stack.js"
+
+# Boot logic is inline in template_266.html (<script id="mc-pdp-auth-cta-boot">) — no standalone file.
 
 maybe_put_primary "vspfiles/js/mc-bedroom-collection-section.js" "mc-bedroom-collection-section" \
   "/v/vspfiles/js/mc-bedroom-collection-section.js" \
@@ -520,10 +519,10 @@ verify_url() {
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "$CSS_VERIFY_NEEDLE"
 OVERRIDES_VERIFY_NEEDLE=$(grep -oE 'MC_OVERRIDES_VERIFY_[0-9A-Za-z]+' vspfiles/templates/266/css/mccabe-overrides.css 2>/dev/null | head -1 || echo "MC_OVERRIDES_VERIFY_20260430dom")
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css?v=$(date +%s)" "$OVERRIDES_VERIFY_NEEDLE"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260625" "MC_PLP_ENFORCER_20260625"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260625" "PDP_AUTH_WANT"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=$(date +%s)" "$ENFORCER_VERIFY_TAG"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=$(date +%s)" "PDP_AUTH_WANT"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/sectional-configs.js?v=$(date +%s)" "MC_SECTIONAL_PDP_AUTH_INLINE_20260528"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260625" "MC_PLP_ENFORCER_20260625"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=$(date +%s)" "$ENFORCER_VERIFY_TAG"
 
 echo "=== mc-pdp JS gates (SFTP MD5 on /v/vspfiles = source of truth; HTTP curl confirms browser path) ==="
 set +e
