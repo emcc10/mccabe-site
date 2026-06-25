@@ -1526,13 +1526,35 @@ document.addEventListener("DOMContentLoaded", function () {
  
   <!-- DESIGN TOOLKIT -->
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
-  <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
+  <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
+  <script>
+(function (g, d) {
+  var FP = "20260624A";
+  function bootFreshCta() {
+    if (!d.getElementById("v65-product-parent")) return;
+    if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
+    if (d.documentElement.getAttribute("data-mc-pdp-auth-head-boot")) return;
+    d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", "1");
+    d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+      try { old.remove(); } catch (eRm) {}
+    });
+    var s = d.createElement("script");
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+    s.async = false;
+    (d.head || d.documentElement).appendChild(s);
+  }
+  bootFreshCta();
+  d.addEventListener("DOMContentLoaded", bootFreshCta);
+})(window, document);
+  </script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260625sarrepair2"></script><!-- MC_TEMPLATE_DEPLOY_VERIFY_20260625sarrepair2 -->
+  <!-- mc-pdp-auth-cta-fix.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
+       A second static ?mcrd=live tag used to live here; it cached an old copy whose stabilizer
+       fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260624B -->
   <script id="mc-ss-piece-hero-boot">
 (function (g, d) {
-  var SS_HERO_VER = "20260625sarrepair2";
+  var SS_HERO_VER = "20260623sarrepair3";
   function productCode() {
     var input = d.querySelector('input[name="ProductCode"]');
     return String(
@@ -1590,7 +1612,7 @@ document.addEventListener("DOMContentLoaded", function () {
 })(window, document);
   </script>
   <script id="mc-plp-enforcer-bridge">
-(function(g,d){var W="20260628g",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
+(function(g,d){var W="20260628e",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
 function cat(){try{var p=String(g.location.pathname||"").toLowerCase();
 var isHome =
@@ -1615,31 +1637,6 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 ========================================= -->
 
 <body>
-<script><!-- MC_SARANONI_NATIVE_INLINE_20260625sarrepair2 -->
-(function () {
-  try {
-    var p = String(location.pathname || "").toLowerCase();
-    if (p.indexOf("/product-p/sar-") === -1 && p.indexOf("-p/sar-") === -1) return;
-    window.__MC_SARANONI_NATIVE_BYPASS__ = true;
-    var b = document.body;
-    if (!b) return;
-    b.classList.add("mc-saranoni-product", "mc-saranoni-pdp");
-    b.classList.remove(
-      "mc-saranoni-pdp-init",
-      "mc-saranoni-pdp-custom-layout",
-      "mc-saranoni-pdp-ready",
-      "mc-pdp-unified-ready"
-    );
-    if (!document.getElementById("mc-saranoni-native-unblock-css")) {
-      var st = document.createElement("style");
-      st.id = "mc-saranoni-native-unblock-css";
-      st.textContent =
-        "html body.mc-saranoni-product #v65-product-parent,html body.mc-saranoni-product #v65-product-parent table,html body.mc-saranoni-product #v65-product-parent tbody,html body.mc-saranoni-product #v65-product-parent tr,html body.mc-saranoni-product #v65-product-parent td,html body.mc-saranoni-product #v65-product-parent .colors_pricebox,html body.mc-saranoni-product #v65-product-parent #options_table,html body.mc-saranoni-product #v65-product-parent [itemprop='offers'],html body.mc-saranoni-product #v65-product-parent img#product_photo,html body.mc-saranoni-product #v65-product-parent h1{display:revert!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important;overflow:visible!important;pointer-events:auto!important}html body.mc-saranoni-product #v65-product-parent img#product_photo{display:block!important}html body.mc-saranoni-product [id^='mc-pdp-'],html body.mc-saranoni-product #mc-configured-color-swatch-wrapper,html body.mc-saranoni-product #mc-saranoni-size-thumbs,html body.mc-saranoni-product .mc-saranoni-color-picker,html body.mc-saranoni-product .mc-unified-purchase-controls{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}";
-      (document.head || document.documentElement).appendChild(st);
-    }
-  } catch (e) {}
-})();
-</script>
  
 <script>
 (function () {
@@ -1751,9 +1748,8 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     // Saranoni product pages: tag the body from the real ProductCode (not URL/title)
     // so layout + the configured-color swatch system can scope to them.
     var pcUpper = pc.toUpperCase();
-    if (/^SAR/.test(pcUpper) || /\/product-p\/sar-/.test(p) || /-p\/sar-/.test(p)) {
-      b.classList.add("mc-saranoni-product", "mc-saranoni-pdp");
-      window.__MC_SARANONI_NATIVE_BYPASS__ = true;
+    if (/^SAR/.test(pcUpper)) {
+      b.classList.add("mc-saranoni-pdp");
       if (pcUpper === "SAR-RUCHED-MINKY-THROW-BLANKET") {
         b.classList.add("mc-ruched-blanket-pdp");
       }
@@ -2530,7 +2526,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <!-- IE9 FIX - CATEGORY GRID LAYOUT -->
   <!--[if IE 9]><script>"searchresults.asp"===PageName()&&!function(e){e(document).ready(function(){var r,t=0,n=0,i=new Array,h=0;e(".v-product").each(function(){if(r=e(this),h=r.position().top,n!=h){for(currentDiv=0;currentDiv<i.length;currentDiv++)i[currentDiv].height(t);i.length=0,n=h,t=r.height(),i.push(r)}else i.push(r),t=t<r.height()?r.height():t;for(currentDiv=0;currentDiv<i.length;currentDiv++)i[currentDiv].height(t)})})}($jQueryModern);</script><![endif]-->
 
-  <script src="v/vspfiles/templates/266/js/min/template.min.js"></script>
+  <script src="v/vspfiles/templates/266/js/min/template.min.js?v=20260625plp"></script>
 
 
 <!-- Westmere / Palliser Leather Modal (theme-level) -->
@@ -4319,15 +4315,18 @@ try {
 </script>
  <script>
 (function(){
-  var expected = "20260625sarrepair2";
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== expected) {
-    if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
-      document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
-      var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" + expected + "&mcrd=" + Date.now();
-      s.async = false;
-      (document.head || document.documentElement).appendChild(s);
-    }
+  var FP = "20260624A";
+  if (String(window.__MC_DEPLOY_FP__ || "") === FP) {
+    /* current bundle loaded */
+  } else if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
+    document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
+    document.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+      try { old.remove(); } catch (eRm) {}
+    });
+    var s = document.createElement("script");
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+    s.async = false;
+    (document.head || document.documentElement).appendChild(s);
   }
 
   if (window.__MC_INLINE_FINAL__) return;
@@ -5669,10 +5668,6 @@ function mcReadCurrentVisibleMemberUnitPrice() {
     0;
 
   if (variablePrice >= 500) return variablePrice;
-
-  console.warn("MC member unit price not found safely. Refusing to use option/upcharge/hidden fallback.", {
-    variablePrice: variablePrice
-  });
 
   return 0;
 }
@@ -21452,7 +21447,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <!-- MC removed duplicate static mc-sectional-pdp-emergency.js; dynamic loader may still load one copy when needed -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260625sarrepair2"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260622sarstable6"></script>
 <script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260626-top-price-panel-v31"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
@@ -21472,7 +21467,7 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260628g"></script>
+  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260628e"></script>
  
   <script id="mc-my-boards-template-boot">
 (function () {
