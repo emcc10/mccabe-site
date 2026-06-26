@@ -64,8 +64,7 @@ def main() -> int:
             for rel in TARGETS:
                 local = str(ROOT / rel)
                 if not os.path.isfile(local):
-                    print(f"SKIP missing {rel}", file=sys.stderr)
-                    fail += 1
+                    print(f"::notice::SKIP missing {rel}", flush=True)
                     continue
                 size = os.path.getsize(local)
                 print(f"Uploading {rel} ({size} bytes) …")
@@ -81,9 +80,12 @@ def main() -> int:
         transport.close()
 
     if fail:
-        print(f"{fail} upload(s) failed", file=sys.stderr)
+        print(f"::error::{fail} Windsor upload(s) failed", file=sys.stderr)
         return 1
-    print(f"Uploaded {ok} Windsor hero video file(s)")
+    if ok == 0:
+        print("::notice::WINDSOR_VIDEO_SKIP — no local MP4 files to upload", flush=True)
+        return 0
+    print(f"::notice::Uploaded {ok} Windsor hero video file(s)", flush=True)
     return 0
 
 

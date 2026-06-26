@@ -9,19 +9,27 @@ import sys
 VOLUSION_JS_CAP = 131072
 
 CRITICAL = (
-    "vspfiles/js/mc-sectional-pdp-emergency.js",
-    "vspfiles/js/mtl-sectional-renderer.js",
     "vspfiles/css/custom-safe.css",
     "vspfiles/templates/266/css/mccabe-overrides.css",
-    "vspfiles/css/mc-live-patch.css",
     "vspfiles/templates/266/js/min/design-toolkit.min.js",
     "vspfiles/templates/266/js/min/template.min.js",
     "vspfiles/js/mc-plp-enforcer.js",
-    "vspfiles/templates/266/js/mc-plp-enforcer.js",
     "vspfiles/js/mc-pdp-auth-cta-fix.js",
-    "vspfiles/js/mc-windsor-hero-fix.js",
     "vspfiles/js/mc-unified-pdp-layout.js",
     "vspfiles/js/mc-pdp-price-stack.js",
+    "vspfiles/css/mc-plp-body-last.css",
+)
+
+# Upload when present in repo; failures are warnings (not deploy-blocking).
+OPTIONAL = (
+    "vspfiles/js/mc-sectional-pdp-emergency.js",
+    "vspfiles/js/mtl-sectional-renderer.js",
+    "vspfiles/css/mc-live-patch.css",
+    "vspfiles/templates/266/js/mc-plp-enforcer.js",
+    "vspfiles/js/mc-windsor-hero-fix.js",
+    "vspfiles/js/mc-plp-sofa-bounds.json",
+    "vspfiles/js/mc-site-fix.js",
+    "vspfiles/js/sectional-configs.js",
     "vspfiles/my-boards.html",
     "vspfiles/boards/my-boards-boot.js",
     "vspfiles/boards/my-boards-page.js",
@@ -39,13 +47,6 @@ CRITICAL = (
     "vspfiles/windsor-home.mp4",
     "vspfiles/windsor.mp4",
     "vspfiles/category-landings/cat142-bedroom.html",
-)
-
-OPTIONAL = (
-    "vspfiles/css/mc-plp-body-last.css",
-    "vspfiles/js/mc-plp-sofa-bounds.json",
-    "vspfiles/js/mc-site-fix.js",
-    "vspfiles/js/sectional-configs.js",
 )
 
 CHUNKED_JS_OVER_CAP = (
@@ -78,8 +79,13 @@ _ALWAYS_DEPLOY = frozenset(
         "vspfiles/js/mc-pdp-auth-cta-fix.js",
         "vspfiles/js/mc-pdp-price-stack.js",
         "vspfiles/js/mc-unified-pdp-layout.js",
+        "vspfiles/js/mc-plp-enforcer.js",
+        "vspfiles/css/mc-plp-body-last.css",
     }
 )
+
+# Chunked SFTP for template.min.js can fail on Volusion locks — warn only (manual upload fallback).
+_SOFT_CRITICAL = frozenset({"vspfiles/templates/266/js/min/template.min.js"})
 
 
 def _filter_changed(paths: tuple[str, ...], changed: set[str]) -> tuple[str, ...]:
@@ -353,8 +359,15 @@ def main() -> int:
                     continue
                 ok = _upload_one(sftp, local)
                 if not ok:
-                    if local in critical:
-                        critical_fail += 1
+                    local_n = _norm(local)
+                    if local in critical or local_n in CRITICAL:
+                        if local_n in _SOFT_CRITICAL:
+                            print(
+                                f"::warning::SOFT_FAIL {local!r} — use manual chunked upload if PLP layout breaks",
+                                flush=True,
+                            )
+                        else:
+                            critical_fail += 1
                     elif local not in skip_over_cap:
                         optional_fail += 1
 

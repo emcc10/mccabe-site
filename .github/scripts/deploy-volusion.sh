@@ -162,6 +162,8 @@ CRITICAL_ALWAYS=(
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
   "vspfiles/js/mc-pdp-price-stack.js"
   "vspfiles/js/mc-unified-pdp-layout.js"
+  "vspfiles/js/mc-plp-enforcer.js"
+  "vspfiles/css/mc-plp-body-last.css"
 )
 
 deploy_file_changed() {

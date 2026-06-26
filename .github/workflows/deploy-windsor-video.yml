@@ -4,14 +4,11 @@ on:
   push:
     branches:
       - main
+    # Only when Windsor video assets change — NOT template.min.js (PLP deploys use deploy.yml).
     paths:
       - "vspfiles/windsor-home.mp4"
       - "vspfiles/windsor.mp4"
       - "scripts/upload_windsor_home_video.py"
-      - "vspfiles/js/mc-pdp-auth-cta-fix.js"
-      - "vspfiles/js/mc-windsor-hero-fix.js"
-      - "vspfiles/templates/266/js/min/template.min.js"
-      - "template_266.html"
       - ".github/workflows/deploy-windsor-video.yml"
   workflow_dispatch:
 
@@ -35,12 +32,20 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_PORT: "2222"
-        run: python3 scripts/upload_windsor_home_video.py
+        run: |
+          if [[ ! -f vspfiles/windsor-home.mp4 && ! -f vspfiles/windsor.mp4 ]]; then
+            echo "::notice::No Windsor MP4 in repo — skip (use workflow_dispatch after adding vspfiles/windsor-home.mp4)"
+            exit 0
+          fi
+          python3 scripts/upload_windsor_home_video.py
 
       - name: Verify live Windsor MP4 sizes
+        if: hashFiles('vspfiles/windsor-home.mp4', 'vspfiles/windsor.mp4') != ''
         run: |
-          want=$(wc -c < vspfiles/windsor-home.mp4 | tr -d ' ')
-          for name in windsor-home.mp4 windsor.mp4; do
+          for rel in vspfiles/windsor-home.mp4 vspfiles/windsor.mp4; do
+            [[ -f "$rel" ]] || continue
+            name=$(basename "$rel")
+            want=$(wc -c < "$rel" | tr -d ' ')
             live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/${name}?v=$(date +%s)" | wc -c | tr -d ' ')
             echo "${name}: local=${want} live=${live}"
             test "$live" = "$want"
