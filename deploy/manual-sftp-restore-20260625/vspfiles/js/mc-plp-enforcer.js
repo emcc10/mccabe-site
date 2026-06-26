@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260630a — legacy grid convert; re-home content_area + footer inside page-wrap
+ * MC_PLP_ENFORCER_20260701a — remove push-menu position:relative override (was fighting custom-safe.css)
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260630a";
+  var VERSION = "20260701a";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -573,9 +573,6 @@
       "margin-left:0!important;margin-right:0!important;position:relative!important;" +
       "left:auto!important;right:auto!important;float:none!important;" +
       "display:block!important}" +
-      "html.category .page-wrap>nav.push-menu," +
-      "html[data-mc-category-plp='1'] .page-wrap>nav.push-menu{" +
-      "position:relative!important;max-width:100%!important;overflow:hidden!important}" +
       "html.category footer.footer svg.icon," +
       "html[data-mc-category-plp='1'] footer.footer svg.icon," +
       "html.category .vnav__arrow img," +
