@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260624sarrepair14
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260624sarrepair14";
+  var VERSION = "20260626sarrepair15";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -3305,6 +3305,7 @@
         if (element.parentNode === infoColumn) anchor = element;
       } catch (eOrd) {}
     });
+    dedupeSaranoniConfiguredColorSwatchWrappers();
   }
 
   function reorderSaranoniInfoColumnChildren(infoColumn, skipEnsure) {
@@ -3369,8 +3370,57 @@
     });
   }
 
+  function dedupeSaranoniConfiguredColorSwatchWrappers() {
+    if (!isSaranoniPdpPage()) return null;
+    var wraps = global.document.querySelectorAll('[id="mc-configured-color-swatch-wrapper"]');
+    if (!wraps.length) return null;
+    if (wraps.length === 1) return wraps[0];
+    var infoColumn = resolveSaranoniInfoColumn();
+    var purchase = global.document.getElementById("mc-pdp-purchase-stack");
+    var keep = wraps[0];
+    var best = -1;
+    Array.prototype.forEach.call(wraps, function (wrap) {
+      var score = wrap.querySelectorAll(".mc-configured-color-swatch").length * 5;
+      if (infoColumn && infoColumn.contains(wrap)) score += 100;
+      if (
+        purchase &&
+        purchase.parentNode === infoColumn &&
+        wrap.compareDocumentPosition(purchase) & Node.DOCUMENT_POSITION_FOLLOWING
+      ) {
+        score += 50;
+      }
+      if (
+        purchase &&
+        purchase.parentNode === infoColumn &&
+        purchase.compareDocumentPosition(wrap) & Node.DOCUMENT_POSITION_FOLLOWING
+      ) {
+        score -= 80;
+      }
+      if (score > best) {
+        best = score;
+        keep = wrap;
+      }
+    });
+    Array.prototype.forEach.call(wraps, function (wrap) {
+      if (wrap === keep || !wrap.parentNode) return;
+      try {
+        wrap.parentNode.removeChild(wrap);
+      } catch (eRmDupWrap) {}
+    });
+    return keep;
+  }
+
+  function getConfiguredColorSwatchWrapper() {
+    if (isSaranoniPdpPage()) {
+      var deduped = dedupeSaranoniConfiguredColorSwatchWrappers();
+      if (deduped) return deduped;
+    }
+    return global.document.getElementById("mc-configured-color-swatch-wrapper");
+  }
+
   function removeSaranoniDuplicateColorPicker() {
     if (!isSaranoniPdpPage()) return;
+    dedupeSaranoniConfiguredColorSwatchWrappers();
     global.document.querySelectorAll("#mc-saranoni-color-picker, .mc-saranoni-color-picker").forEach(function (picker) {
       if (!picker || !picker.parentNode) return;
       try {
@@ -4842,15 +4892,7 @@
         } catch (eRm) {}
       }
     });
-    try {
-      global.document.body.classList.remove("mc-saranoni-swatches-ready");
-    } catch (eCls) {}
-    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
-    if (wrap && wrap.parentNode) {
-      try {
-        wrap.parentNode.removeChild(wrap);
-      } catch (eRmWrap) {}
-    }
+    dedupeSaranoniConfiguredColorSwatchWrappers();
   }
 
   function expandSaranoniHeroNestedTables() {
@@ -5954,7 +5996,8 @@
       hideConfiguredColorNativeSelect(ctx.select);
       hideConfiguredColorLegacyRows(ctx.select);
     }
-    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    if (isSar) dedupeSaranoniConfiguredColorSwatchWrappers();
+    var wrap = isSar ? getConfiguredColorSwatchWrapper() : global.document.getElementById("mc-configured-color-swatch-wrapper");
     if (!wrap) {
       wrap = global.document.createElement("div");
       wrap.id = "mc-configured-color-swatch-wrapper";
@@ -6206,7 +6249,8 @@
 
   function ensureConfiguredColorSwatches() {
     var ctx = findConfiguredColorSwatchContext();
-    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    if (isSaranoniPdpPage()) dedupeSaranoniConfiguredColorSwatchWrappers();
+    var wrap = getConfiguredColorSwatchWrapper();
     if (!ctx) {
       if (wrap && wrap.parentNode) {
         try {
@@ -8315,7 +8359,9 @@
       if (!body) return;
       if (isSaranoniPdpPage()) {
         body.classList.add("mc-saranoni-pdp");
-        body.classList.add("mc-saranoni-pdp-init");
+        if (!body.classList.contains("mc-saranoni-pdp-ready")) {
+          body.classList.add("mc-saranoni-pdp-init");
+        }
         body.classList.remove("mc-bean-bag-pdp");
         return;
       }
