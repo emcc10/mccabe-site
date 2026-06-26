@@ -9,6 +9,7 @@ import hashlib
 import os
 import re
 import sys
+import time
 
 from verify_template_sftp import connect_paramiko_transport, md5_hex
 
@@ -70,38 +71,50 @@ def main() -> int:
         return 1
 
     matched: list[str] = []
+    max_attempts = 4
+    delays = [0, 20, 30, 45]  # seconds before each attempt (Volusion SFTP write-lag)
     try:
         import paramiko  # noqa: PLC0415
 
-        sftp = paramiko.SFTPClient.from_transport(transport)
-        try:
-            print(
-                f"::notice::Local custom-safe md5={local_md5} size={want_size} needle={needle!r}",
-                flush=True,
-            )
-            for remote in css_remote_paths():
-                try:
-                    with sftp.open(remote, "rb") as handle:
-                        remote_data = handle.read()
-                except Exception as exc:  # noqa: BLE001
-                    print(f"::warning::SKIP {remote!r}: {exc}", flush=True)
-                    continue
-                md5_ok = md5_hex(remote_data) == local_md5
-                text = remote_data.decode("utf-8", errors="replace")
-                needle_ok = needle in text
-                ok = md5_ok or (len(remote_data) == want_size and needle_ok)
+        for attempt in range(max_attempts):
+            wait = delays[attempt] if attempt < len(delays) else delays[-1]
+            if wait:
+                print(f"::notice::SFTP verify attempt {attempt + 1}/{max_attempts} — waiting {wait}s for Volusion write-flush", flush=True)
+                time.sleep(wait)
+
+            matched = []
+            sftp = paramiko.SFTPClient.from_transport(transport)
+            try:
                 print(
-                    f"::notice::CHECK {remote!r} size={len(remote_data)} want={want_size} "
-                    f"md5={'yes' if md5_ok else 'no'} needle={'yes' if needle_ok else 'no'}",
+                    f"::notice::Local custom-safe md5={local_md5} size={want_size} needle={needle!r}",
                     flush=True,
                 )
-                if ok:
-                    matched.append(remote)
-        finally:
-            try:
-                sftp.close()
-            except Exception:
-                pass
+                for remote in css_remote_paths():
+                    try:
+                        with sftp.open(remote, "rb") as handle:
+                            remote_data = handle.read()
+                    except Exception as exc:  # noqa: BLE001
+                        print(f"::warning::SKIP {remote!r}: {exc}", flush=True)
+                        continue
+                    md5_ok = md5_hex(remote_data) == local_md5
+                    text = remote_data.decode("utf-8", errors="replace")
+                    needle_ok = needle in text
+                    ok = md5_ok or (len(remote_data) == want_size and needle_ok)
+                    print(
+                        f"::notice::CHECK {remote!r} size={len(remote_data)} want={want_size} "
+                        f"md5={'yes' if md5_ok else 'no'} needle={'yes' if needle_ok else 'no'}",
+                        flush=True,
+                    )
+                    if ok:
+                        matched.append(remote)
+            finally:
+                try:
+                    sftp.close()
+                except Exception:
+                    pass
+
+            if matched:
+                break
     finally:
         transport.close()
 
