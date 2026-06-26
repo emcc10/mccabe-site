@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260629d — legacy grid convert; keep grid inside content_area; repair footer shell
+ * MC_PLP_ENFORCER_20260630a — legacy grid convert; re-home content_area + footer inside page-wrap
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260629d";
+  var VERSION = "20260630a";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -500,6 +500,42 @@
       changed = true;
     }
 
+    /* Stray </section></div> in baked cat HTML pops #content_area out of .container — footer loses theme CSS. */
+    if (container && contentArea && !container.contains(contentArea)) {
+      var row = container.querySelector(":scope > .row");
+      if (!row) {
+        row = container.querySelector(".row");
+      }
+      if (!row) {
+        row = document.createElement("div");
+        row.className = "row";
+        container.appendChild(row);
+      }
+      var areaWrap = container.querySelector("section.content_area-wrapper");
+      if (!areaWrap) {
+        areaWrap = document.querySelector("section.content_area-wrapper");
+      }
+      if (!areaWrap || areaWrap.contains(footer)) {
+        areaWrap = document.createElement("section");
+        areaWrap.className = "content_area-wrapper col-xs-12 col-md-9";
+        areaWrap.setAttribute("role", "main");
+      }
+      if (!areaWrap.contains(contentArea)) {
+        areaWrap.appendChild(contentArea);
+      }
+      if (!row.contains(areaWrap)) {
+        row.appendChild(areaWrap);
+      }
+      changed = true;
+    }
+
+    pageWrap.querySelectorAll(":scope > nav.push-menu").forEach(function (strayNav) {
+      if (strayNav.parentElement === pageWrap && footer && strayNav !== footer) {
+        pageWrap.insertBefore(strayNav, footer);
+        changed = true;
+      }
+    });
+
     return changed;
   }
 
@@ -536,7 +572,15 @@
       "width:100%!important;max-width:100%!important;clear:both!important;" +
       "margin-left:0!important;margin-right:0!important;position:relative!important;" +
       "left:auto!important;right:auto!important;float:none!important;" +
-      "display:block!important}";
+      "display:block!important}" +
+      "html.category .page-wrap>nav.push-menu," +
+      "html[data-mc-category-plp='1'] .page-wrap>nav.push-menu{" +
+      "position:relative!important;max-width:100%!important;overflow:hidden!important}" +
+      "html.category footer.footer svg.icon," +
+      "html[data-mc-category-plp='1'] footer.footer svg.icon," +
+      "html.category .vnav__arrow img," +
+      "html[data-mc-category-plp='1'] .vnav__arrow img{" +
+      "max-width:28px!important;max-height:28px!important;width:auto!important;height:auto!important}";
     (document.head || document.documentElement).appendChild(s);
   }
 
@@ -1068,8 +1112,9 @@
     hideHero();
     if (!global.__MC_PLP_NORM_RETRIES__) {
       global.__MC_PLP_NORM_RETRIES__ = 1;
-      [200, 800, 2500].forEach(function (ms) {
+      [200, 800, 2500, 5000].forEach(function (ms) {
         global.setTimeout(function () {
+          repairCategoryPageShell();
           convertLegacyGridSingleToProductGrid();
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();
