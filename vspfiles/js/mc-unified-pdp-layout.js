@@ -504,6 +504,15 @@
   function isUnifiedStable() {
     var body = global.document.body;
     var info = qs("td.mc-unified-pdp-info");
+    var features = info && qs("#mc-pdp-features", info);
+    var description = info && qs("#mc-pdp-description-below-features", info);
+    var accordion = info && qs("#mc-pdp-accordion", info);
+    // If features/description live inside the accordion, the accordion is the
+    // single direct child to order — not the loose blocks.
+    var contentNodes =
+      accordion && (accordion.contains(features) || accordion.contains(description))
+        ? [accordion]
+        : [features, description];
     var orderedOk = !info || childrenInOrder(
       info,
       [
@@ -511,10 +520,9 @@
         qs("#mc-pdp-title-right", info),
         qs("#mc-pdp-price-stack-host", info) || qs("#mc-pdp-price-atc-row", info),
         collectFinanceBlock(info),
-        qs("#mc-pdp-features", info),
-        qs("#mc-pdp-description-below-features", info),
+      ].concat(contentNodes).concat([
         qs(".mc-unified-purchase-controls", info),
-      ].filter(Boolean)
+      ]).filter(Boolean)
     );
     return !!(
       global.__MC_UNIFIED_PDP_STABLE__ &&
@@ -1001,11 +1009,18 @@
     var options = collectOptionBlocks(infoTd);
     var features = qs("#mc-pdp-features", infoTd);
     var description = qs("#mc-pdp-description-below-features", infoTd);
+    var accordion = qs("#mc-pdp-accordion", infoTd);
     var purchase =
       qs("#mc-pdp-purchase-stack", infoTd) ||
       qs(".mc-unified-purchase-controls", infoTd);
 
     scoopLooseQtyIntoPurchase(infoTd, purchase);
+
+    // When features/description have been folded into the accordion (Saranoni
+    // and Steve Silver PDPs), order the accordion as a single unit instead of
+    // pulling its contents back out as loose info-column children.
+    var accordionOwnsContent =
+      accordion && (accordion.contains(features) || accordion.contains(description));
 
     var ordered = [];
     [logo, title, price, klarna].forEach(function (el) {
@@ -1014,8 +1029,12 @@
     options.forEach(function (el) {
       if (ordered.indexOf(el) === -1) ordered.push(el);
     });
-    if (features && ordered.indexOf(features) === -1) ordered.push(features);
-    if (description && ordered.indexOf(description) === -1) ordered.push(description);
+    if (accordionOwnsContent) {
+      if (ordered.indexOf(accordion) === -1) ordered.push(accordion);
+    } else {
+      if (features && ordered.indexOf(features) === -1) ordered.push(features);
+      if (description && ordered.indexOf(description) === -1) ordered.push(description);
+    }
     if (purchase && ordered.indexOf(purchase) === -1) ordered.push(purchase);
 
     appendInOrder(infoTd, ordered);

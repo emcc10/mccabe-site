@@ -3054,7 +3054,7 @@
   }
 
   function ensureSaranoniPdpAccordion() {
-    if (!isSaranoniPdpPage()) return null;
+    if (!isSaranoniPdpPage() && !isSteveSilverPdpPage()) return null;
     var infoColumn = resolveSaranoniInfoColumn();
     if (!infoColumn) return null;
     var acc = global.document.getElementById("mc-pdp-accordion");
@@ -3160,7 +3160,9 @@
       });
     }
 
-    var purchaseStack = global.document.getElementById("mc-pdp-purchase-stack");
+    var purchaseStack =
+      global.document.getElementById("mc-pdp-purchase-stack") ||
+      global.document.querySelector(".mc-unified-purchase-controls");
     try {
       if (purchaseStack && purchaseStack.parentNode === infoColumn) {
         infoColumn.insertBefore(acc, purchaseStack);
@@ -3648,14 +3650,23 @@
       global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
       findPdpHeroColumnTd();
     if (!infoColumn) return;
+    // Bundle product details / features into the same accordion the Saranoni
+    // PDP uses. Mount both source blocks first so the accordion has content to
+    // fold in (mirrors the Saranoni layout pass). When it builds, features +
+    // description live inside it, so they must NOT also be appended loose below.
+    try {
+      mountPdpFeaturesBlock();
+      mountDescriptionBelowFeatures();
+    } catch (eSsBlocks) {}
+    var accordion = ensureSaranoniPdpAccordion();
     var ordered = [
       global.document.getElementById("mc-pdp-brand-logo"),
       global.document.getElementById("mc-pdp-title-right"),
       global.document.getElementById("mc-pdp-price-stack-host"),
       global.document.getElementById("messaging-element"),
       global.document.getElementById("mc-pdp-option-block"),
-      global.document.getElementById("mc-pdp-features"),
-      global.document.getElementById("mc-pdp-description-below-features"),
+      accordion || global.document.getElementById("mc-pdp-features"),
+      accordion ? null : global.document.getElementById("mc-pdp-description-below-features"),
       global.document.querySelector(".mc-unified-purchase-controls") ||
         global.document.getElementById("mc-pdp-purchase-stack"),
     ];
@@ -8903,7 +8914,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260624sarrepair4&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260625ssaccordion1&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
