@@ -59,15 +59,17 @@ jobs:
           if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
             BEFORE=$(git rev-parse HEAD~1 2>/dev/null || true)
           fi
+          changed_files=""
+          if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            changed_files="$(git diff --name-only "$BEFORE" "${{ github.sha }}" -- 'vspfiles/photos/' || true)"
+          fi
           {
             echo "DEPLOY_CHANGED_ONLY=1"
             echo "DEPLOY_CHANGED_FILES<<EOF"
-            if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-              git diff --name-only "$BEFORE" "${{ github.sha }}" -- 'vspfiles/photos/'
-            fi
+            printf '%s\n' "$changed_files"
             echo "EOF"
           } >> "$GITHUB_ENV"
-          if grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|\.tmh-mat-fullsize)' <<< "${DEPLOY_CHANGED_FILES:-}"; then
+          if grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|\.tmh-mat-fullsize)' <<< "$changed_files"; then
             echo "UPLOAD_TMH_MATS=1" >> "$GITHUB_ENV"
           fi
 

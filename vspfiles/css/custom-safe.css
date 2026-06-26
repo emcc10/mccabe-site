@@ -18964,6 +18964,10 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     box-sizing: border-box !important;
   }
 
+  html body.mc-saranoni-pdp #v65-product-parent tbody:has(> tr.mc-pdp-main-row) {
+    display: block !important;
+  }
+
   html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
   html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row,
   html body.mc-saranoni-pdp #v65-product-parent > tbody > tr.mc-pdp-main-row {
