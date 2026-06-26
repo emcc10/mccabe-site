@@ -19198,7 +19198,8 @@ body.push-menu-open nav.push-menu {
    layouts are not affected. */
 html body footer.footer {
   display: block !important;
-  width: 100% !important;
+  width: calc(100vw - 16px) !important;
+  max-width: calc(100vw - 16px) !important;
   clear: both !important;
   margin: 46px 0 0 !important;
   padding: 0 !important;
@@ -19208,6 +19209,7 @@ html body footer.footer {
   line-height: 1.45 !important;
   letter-spacing: 0.02em !important;
   box-sizing: border-box !important;
+  overflow-x: hidden !important;
 }
 
 html body footer.footer .footer__section {
