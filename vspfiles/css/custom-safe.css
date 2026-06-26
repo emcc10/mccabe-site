@@ -19159,3 +19159,31 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     transform: none !important;
   }
 }
+
+/* MC_PUSH_MENU_OFFCANVAS_HIDE_20260626
+   The slide-top mobile push menu (nav.push-menu) gets relocated to <body> at
+   runtime. On initial load setOpen(false) hasn't run yet and the theme's
+   off-canvas CSS no longer matches, so it rendered visibly at the page bottom
+   (a "duplicate" category menu with giant chevron "v" icons). Keep it parked
+   off-canvas until body/html.push-menu-open is set — this mirrors exactly what
+   setOpen() applies inline, so the mobile hamburger still opens it. We avoid
+   touching `display` so the JS toggle's inline display:block is unaffected. */
+nav.push-menu {
+  position: fixed !important;
+  top: -120vh !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: 999999;
+}
+
+html.push-menu-open nav.push-menu,
+body.push-menu-open nav.push-menu {
+  top: 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
