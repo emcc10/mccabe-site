@@ -1,3 +1,4 @@
+/* C_CSS_DEPLOY_VERIFY_20260628navfooter */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -11468,32 +11469,7 @@ html.mc-paragon-pdp body #mcProductSummaryBtn {
    Add to very bottom of custom-safe.css
    ========================================================= */
 
-/* ---------- MAIN MENU: LOCK VERTICAL POSITION SITEWIDE ---------- */
-
-body:not(.homepage) .vnav--horizontal,
-body:not(.homepage) ul.vnav--horizontal,
-body:not(.homepage) .vnav,
-body:not(.homepage) #vnav,
-body:not(.homepage) #display_menu_1,
-body:not(.homepage) #display_menu_2 {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  top: 0 !important;
-  transform: none !important;
-}
-
-/* Product pages specifically were dropping the menu lower */
-body:has(#v65-product-parent) .vnav--horizontal,
-body:has(#v65-product-parent) ul.vnav--horizontal,
-body:has(#v65-product-parent) .vnav,
-body:has(#v65-product-parent) #vnav,
-body:has(#v65-product-parent) #display_menu_1,
-body:has(#v65-product-parent) #display_menu_2 {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  top: 0 !important;
-  transform: none !important;
-}
+/* ---------- MAIN MENU: desktop dropdown positioning (level-1 only; never generic .vnav) ---------- */
 
 /* If the menu is inside the hero/header wrapper, prevent product page offset */
 body:has(#v65-product-parent) header,
@@ -11666,30 +11642,6 @@ body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartbutton 
    ========================================================= */
 
 /* --- Keep the existing desktop menu aligned sitewide --- */
-
-@media (min-width: 768px) {
-  body #display_menu_1,
-  body #display_menu_2,
-  body .vnav--horizontal,
-  body ul.vnav--horizontal,
-  body .vnav {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    top: 0 !important;
-    transform: none !important;
-  }
-
-  body:has(#v65-product-parent) #display_menu_1,
-  body:has(#v65-product-parent) #display_menu_2,
-  body:has(#v65-product-parent) .vnav--horizontal,
-  body:has(#v65-product-parent) ul.vnav--horizontal,
-  body:has(#v65-product-parent) .vnav {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    top: 0 !important;
-    transform: none !important;
-  }
-}
 
 /* --- Configuration caption: show full text, no ellipsis --- */
 
@@ -19252,27 +19204,6 @@ html body footer.footer [class*="col-"] {
   padding-right: 14px !important;
 }
 
-html body footer.footer .footer__logo,
-html body footer.footer .footer__logo + div {
-  flex: 0 0 16.6667% !important;
-  max-width: 16.6667% !important;
-  min-height: 1px !important;
-  text-align: left !important;
-}
-
-html body footer.footer .col-md-6.col-lg-4 {
-  flex: 0 0 33.3333% !important;
-  max-width: 33.3333% !important;
-  text-align: left !important;
-}
-
-html body footer.footer .elist__wrapper {
-  flex: 0 0 33.3333% !important;
-  max-width: 33.3333% !important;
-  margin-left: auto !important;
-  text-align: right !important;
-}
-
 html body footer.footer .elist__wrapper > div {
   width: 100% !important;
   max-width: 100% !important;
@@ -19470,5 +19401,100 @@ html body footer.footer .icon {
   html body footer.footer .ssl {
     justify-content: center !important;
     text-align: center !important;
+  }
+}
+
+/* MC_NAV_DROPDOWN_CANONICAL_20260628 — level-1 only; never generic .vnav */
+@media (min-width: 992px) {
+  body:not(.homepage) #display_menu_1 > ul.vnav--level1,
+  body:has(#v65-product-parent) #display_menu_1 > ul.vnav--level1 {
+    position: relative !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    transform: none !important;
+  }
+
+  #display_menu_1 > ul.vnav--level1 > li.vnav__item {
+    position: relative !important;
+  }
+
+  #display_menu_1 > ul.vnav--level1 > li.vnav__item > ul.vnav__subnav {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    z-index: 10050 !important;
+  }
+
+  #display_menu_1 ul.vnav__subnav li.vnav__item {
+    position: relative !important;
+  }
+
+  #display_menu_1 ul.vnav__subnav ul.vnav__subnav {
+    position: absolute !important;
+    top: 0 !important;
+    left: 100% !important;
+    margin-top: 0 !important;
+    transform: none !important;
+  }
+}
+
+/* MC_FOOTER_CENTER_CANONICAL_20260628 — sitewide; hidden logo/social take zero width */
+footer.footer .footer__section.pt--base .flex-sm-and-up {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+footer.footer .footer__section.pt--base .flex-sm-and-up > .footer__logo,
+footer.footer .footer__section.pt--base .flex-sm-and-up > div:has(> section.social) {
+  display: none !important;
+  width: 0 !important;
+  max-width: 0 !important;
+  flex: 0 0 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+footer.footer .footer__section.pt--base .flex-sm-and-up > .col-md-6.col-lg-4,
+footer.footer .footer__section.pt--base .flex-sm-and-up > .elist__wrapper.col-lg-4 {
+  float: none !important;
+  flex: 0 1 420px !important;
+  width: auto !important;
+  max-width: 420px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  text-align: center !important;
+}
+
+footer.footer .link-column {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 10px 22px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  text-align: center !important;
+}
+
+footer.footer .elist__wrapper > div {
+  float: none !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+@media (max-width: 991px) {
+  footer.footer .footer__section.pt--base .flex-sm-and-up > .col-md-6.col-lg-4,
+  footer.footer .footer__section.pt--base .flex-sm-and-up > .elist__wrapper.col-lg-4 {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }

@@ -630,7 +630,6 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260620mobile1" rel="stylesheet" id="mc-custom-safe-css-static">
   <script src="/v/vspfiles/js/mc-windsor-hero-fix.js?v=20260620windsor1"></script><!-- MC_WINDSOR_HERO_FIX -->
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
@@ -1910,12 +1909,11 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     <!-- HERO VIDEO -->
 <section class="mc-hero-video">
  <video class="mc-hero-video-el" autoplay muted loop playsinline preload="auto">
-  <source src="https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1" type="video/mp4">
+ <source src="/v/vspfiles/windsor-home.mp4" type="video/mp4">
 </video>
 <script>
 (function () {
-  window.MC_WINDSOR_HERO_SRC =
-    "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1";
+  window.MC_WINDSOR_HERO_SRC = "/v/vspfiles/windsor-home.mp4";
 
   window.mcEnsureWindsorHeroSrc = function (v) {
     if (!v) return false;
@@ -21707,8 +21705,7 @@ s0.parentNode.insertBefore(s1,s0);
       if (typeof window.mcPlayWindsorHeroAtSeven === "function") {
         window.mcPlayWindsorHeroAtSeven(v);
       } else {
-        var wantSrc =
-          "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1";
+        var wantSrc = "/v/vspfiles/windsor-home.mp4";
         var srcEl = v.querySelector("source");
         var cur = srcEl
           ? String(srcEl.getAttribute("src") || srcEl.src || "")
