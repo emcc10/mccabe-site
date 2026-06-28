@@ -19472,3 +19472,65 @@ html body footer.footer .icon {
     text-align: center !important;
   }
 }
+
+/* ---- MC_20260627d: footer centering + float circle fixes ----
+   Applied after MC_FOOTER_STATIC_RESCUE_20260626 so these targeted
+   overrides win without touching any product/category layout. */
+
+/* Hide footer logo (empty) and social column wrapper from the flex row.
+   The social wrapper was holding its 16.67% Bootstrap width as a flex item
+   even with content hidden, pushing the link column off-center. */
+html body footer.footer .footer__logo,
+html body footer.footer .footer__logo + div {
+  display: none !important;
+}
+
+/* Center the two remaining col-lg-4 columns (links + newsletter = 66.67%)
+   in the 100%-wide footer. Override margin-left:auto on elist__wrapper
+   which was pushing it to the far right. */
+html body footer.footer .flex-sm-and-up,
+html body footer.footer .row {
+  justify-content: center !important;
+}
+html body footer.footer .elist__wrapper {
+  margin-left: 0 !important;
+  text-align: left !important;
+}
+
+/* Center link items within their column */
+html body footer.footer .link-column {
+  justify-content: center !important;
+}
+
+/* Center newsletter email form within its column */
+html body footer.footer .col-md-6.col-lg-4 + .elist__wrapper .input-group,
+html body footer.footer .elist__wrapper .input-group {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Cart float: fix oval shape — max-height:48px at line ~4524 makes it 52×48.
+   Same selector spec (0,1,3), later in file wins. */
+html body a.mc-cart-float,
+html body .mc-cart-float,
+body a.mc-cart-float,
+body .mc-cart-float {
+  height: 52px !important;
+  max-height: 52px !important;
+  min-height: 52px !important;
+  width: 52px !important;
+  max-width: 52px !important;
+}
+
+/* Account float: fix oval shape inside @media 992px.
+   max-height:48px is set in the @media 992px block; same spec, later wins. */
+@media (min-width: 992px) {
+  html body a.mc-account-float,
+  html body .mc-account-float,
+  body a.mc-account-float,
+  body .mc-account-float {
+    height: 52px !important;
+    max-height: 52px !important;
+    min-height: 52px !important;
+  }
+}
