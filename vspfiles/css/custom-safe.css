@@ -19404,6 +19404,8 @@ html body footer.footer .icon {
   }
 }
 
+}
+
 /* MC_NAV_DROPDOWN_CANONICAL_20260628 — level-1 only; never generic .vnav */
 @media (min-width: 992px) {
   body:not(.homepage) #display_menu_1 > ul.vnav--level1,
@@ -19496,5 +19498,28 @@ footer.footer .elist__wrapper > div {
     flex: 0 0 100% !important;
     width: 100% !important;
     max-width: 100% !important;
+  }
+}
+
+/* ---- MC_20260627d: cart/account float circle fixes (from remote main) ---- */
+html body a.mc-cart-float,
+html body .mc-cart-float,
+body a.mc-cart-float,
+body .mc-cart-float {
+  height: 52px !important;
+  max-height: 52px !important;
+  min-height: 52px !important;
+  width: 52px !important;
+  max-width: 52px !important;
+}
+
+@media (min-width: 992px) {
+  html body a.mc-account-float,
+  html body .mc-account-float,
+  body a.mc-account-float,
+  body .mc-account-float {
+    height: 52px !important;
+    max-height: 52px !important;
+    min-height: 52px !important;
   }
 }
