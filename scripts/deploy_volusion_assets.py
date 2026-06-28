@@ -47,6 +47,7 @@ OPTIONAL = (
     "vspfiles/windsor-home.mp4",
     "vspfiles/windsor.mp4",
     "vspfiles/category-landings/cat142-bedroom.html",
+    "vspfiles/landing/mc-luxe-comforts-saranoni-hero.jpg",
 )
 
 CHUNKED_JS_OVER_CAP = (

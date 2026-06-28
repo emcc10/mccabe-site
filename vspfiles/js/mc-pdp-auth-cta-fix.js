@@ -3132,8 +3132,8 @@
     function addRow(id, label, host) {
       if (hostHasContent(host)) rows.push({ id: id, label: label, host: host });
     }
-    addRow("saranoni-product-details", "PRODUCT DETAILS", detailsHost);
     addRow("saranoni-features", "FEATURES", featuresHost);
+    addRow("saranoni-product-details", "PRODUCT DETAILS", detailsHost);
     addRow("saranoni-shipping-returns", "SHIPPING & RETURNS", shippingHost);
     addRow("saranoni-faq", "FAQ", faqHost);
 
@@ -3206,7 +3206,7 @@
       !mainImg.complete || (mainImg.naturalWidth && mainImg.naturalWidth > 0);
     var hasGoodHero =
       cur &&
-      cur.indexOf("/manufacturers/") === -1 &&
+      !isSaranoniBadHeroSrc(cur) &&
       hasLoadedHero &&
       (!pc || configuredColorImageBelongsToProduct(cur, pc));
     if (hasGoodHero) {
@@ -3240,10 +3240,12 @@
     }
     loadConfiguredColorImage(
       [
-        "https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/" + pc + "-2T.jpg",
-        "/v/vspfiles/photos/" + pc + "-2T.jpg",
-        "/v/vspfiles/photos/" + pc + "-1T.jpg",
         "/v/vspfiles/photos/" + pc + "-1.jpg",
+        "/v/vspfiles/photos/" + pc + "-1T.jpg",
+        "/v/vspfiles/photos/" + pc + "-2T.jpg",
+        "https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/" + pc + "-1.jpg",
+        "https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/" + pc + "-1T.jpg",
+        "https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/" + pc + "-2T.jpg",
       ],
       function (resolved) {
         if (!resolved || !configuredColorImageBelongsToProduct(resolved, pc)) return;
@@ -4237,6 +4239,14 @@
     return hay.indexOf(pc.replace(/-/g, "%2D")) !== -1;
   }
 
+  function isSaranoniBadHeroSrc(src) {
+    var s = String(src || "");
+    if (!s) return true;
+    if (/nophoto\.gif/i.test(s)) return true;
+    if (/\/manufacturers\//i.test(s)) return true;
+    return false;
+  }
+
   function configuredColorImageMatchesOption(src, productCode, optionId) {
     if (!configuredColorImageBelongsToProduct(src, productCode)) return false;
     var id = String(optionId || "").trim();
@@ -4311,7 +4321,7 @@
       new global.MutationObserver(function () {
         if (!isSaranoniPdpPage()) return;
         var cur = img.getAttribute("src") || "";
-        if (!cur || cur.indexOf("/manufacturers/") !== -1) return;
+        if (isSaranoniBadHeroSrc(cur)) return;
         if (configuredColorActiveSrc && cur === configuredColorActiveSrc) return;
         if (configuredColorImageBelongsToProduct(cur, pc)) return;
         if (configuredColorActiveSrc) {
@@ -4503,7 +4513,7 @@
     if (getConfiguredVariantAxis(ctx) === "size") {
       return isSar ? "Choose size: " : "Selected size: ";
     }
-    return isSar ? "Choose color: " : "Selected color: ";
+    return isSar ? "Selected color: " : "Selected color: ";
   }
 
   function configuredVariantPickerHeading(ctx) {
@@ -5204,11 +5214,13 @@
       }
       var probe = new global.Image();
       var candidate = candidates[idx++];
+      var bust =
+        candidate.indexOf("?") >= 0 ? "&mcimg=" + Date.now() : "?mcimg=" + Date.now();
       probe.onload = function () {
         done(candidate);
       };
       probe.onerror = tryNext;
-      probe.src = candidate;
+      probe.src = candidate + bust;
     }
     tryNext();
   }
@@ -5923,13 +5935,13 @@
     }
     st.textContent =
       ".mc-configured-color-swatch-wrapper{display:block!important;width:100%!important;max-width:460px!important;margin:12px 0 0!important}" +
-      ".mc-configured-color-swatch-label{display:block!important;margin-bottom:8px!important;font:700 12px/1.4 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#444!important}" +
+      ".mc-configured-color-swatch-label{display:block!important;margin-bottom:8px!important;font:700 12px/1.4 Inter,Arial,sans-serif!important;letter-spacing:.03em!important;text-transform:none!important;color:#444!important}" +
       ".mc-configured-color-swatch-label span{font-weight:600!important;letter-spacing:.03em!important;text-transform:none!important}" +
       ".mc-configured-color-swatches,.mc-saranoni-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
       ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important}" +
       ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}" +
       ".mc-configured-color-swatch.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
-      ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:56px!important;min-height:36px!important;border-radius:4px!important;padding:6px 10px!important}" +
+      ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:72px!important;min-height:36px!important;border-radius:4px!important;padding:6px 12px!important}" +
       ".mc-configured-color-swatch__text{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;white-space:normal!important;text-align:center!important}" +
       ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}";
   }

@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260701a — remove push-menu position:relative override (was fighting custom-safe.css)
+ * MC_PLP_ENFORCER_20260701b — category meta wrapper, grid gap, footer copy class
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260701a";
+  var VERSION = "20260701b";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -595,6 +595,102 @@
       }
       node = node.parentElement;
     }
+
+    root.querySelectorAll("table[cellpadding='8'], table.v65-productDisplay").forEach(function (tbl) {
+      if (!tbl.querySelector(".v-product-grid, .v-product")) return;
+      if (tbl.style) {
+        tbl.style.setProperty("margin-top", "32px", "important");
+        tbl.style.setProperty("padding-top", "0", "important");
+      }
+      tbl.querySelectorAll("td").forEach(function (td) {
+        if (td.style) {
+          td.style.setProperty("padding-top", "0", "important");
+          td.style.setProperty("height", "auto", "important");
+        }
+      });
+    });
+
+    root.querySelectorAll("tr").forEach(function (tr) {
+      if (tr.querySelector(".v-product-grid, .v-product, .v65-productDisplay")) return;
+      var text = String(tr.textContent || "").replace(/\s+/g, "").trim();
+      if (text) return;
+      if (!tr.querySelector('img[src*="clear1x1"]')) return;
+      if (tr.style) tr.style.setProperty("display", "none", "important");
+    });
+  }
+
+  function findCategoryBreadcrumb(root) {
+    var nodes = root.querySelectorAll("td > b, td b");
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var b = nodes[i];
+      if (b.closest(".mc-category-meta, .v-product-grid, #mc-cat-luxe-comforts")) continue;
+      var homeLink = b.querySelector('a[href="/"], a[href*="mccabestheaterandliving.com/"]');
+      if (!homeLink) continue;
+      if (!/home/i.test(homeLink.textContent || "")) continue;
+      return b;
+    }
+    return null;
+  }
+
+  function findCategorySubcategoryCell(root) {
+    var cells = root.querySelectorAll("td.colors_backgroundneutral");
+    var i;
+    for (i = 0; i < cells.length; i++) {
+      if (cells[i].querySelector(".subcategory_link")) return cells[i];
+    }
+    return null;
+  }
+
+  function organizeCategoryMeta(root) {
+    root = root || document.getElementById("content_area");
+    if (!root) return false;
+    if (root.querySelector(".mc-category-meta")) return false;
+
+    var hero = root.querySelector("#mc-cat-luxe-comforts");
+    if (!hero || !hero.parentNode) return false;
+
+    var crumb = findCategoryBreadcrumb(root);
+    var subCell = findCategorySubcategoryCell(root);
+    if (!crumb && !subCell) return false;
+
+    var meta = document.createElement("div");
+    meta.className = "mc-category-meta";
+
+    if (crumb) {
+      var crumbWrap = document.createElement("div");
+      crumbWrap.className = "mc-category-meta__breadcrumb";
+      crumbWrap.appendChild(crumb);
+      meta.appendChild(crumbWrap);
+    }
+
+    if (subCell) {
+      var subWrap = document.createElement("div");
+      subWrap.className = "mc-category-meta__subcats";
+      var links = subCell.querySelectorAll(".subcategory_link");
+      var j;
+      for (j = 0; j < links.length; j++) {
+        subWrap.appendChild(links[j]);
+      }
+      if (subWrap.childNodes.length) meta.appendChild(subWrap);
+      if (!subCell.textContent.replace(/\s+/g, "").length && subCell.parentNode) {
+        try {
+          subCell.parentNode.removeChild(subCell);
+        } catch (eSub) {}
+      }
+    }
+
+    hero.parentNode.insertBefore(meta, hero);
+    return true;
+  }
+
+  function tagCategoryFooterCopy(root) {
+    root = root || document.getElementById("content_area") || document;
+    root.querySelectorAll(".mc-seo-footer p").forEach(function (p) {
+      if (!p.classList.contains("mc-category-footer-copy")) {
+        p.classList.add("mc-category-footer-copy");
+      }
+    });
   }
 
   function tagProductGridAnchor(grid) {
@@ -1098,6 +1194,7 @@
     repairCategoryPageShell();
     injectCriticalThumbCss();
     removeLegacyCategoryBars();
+    organizeCategoryMeta();
     convertLegacyGridSingleToProductGrid();
     fixStalePhotoUrls();
     fixNoPhotoThumbnails();
@@ -1105,6 +1202,7 @@
     normalizePLPImages();
     injectLegacyPlpLayoutFixCss();
     collapsePlpGridGap(document.getElementById("content_area") || document);
+    tagCategoryFooterCopy();
     repairCategoryPageShell();
     hideHero();
     if (!global.__MC_PLP_NORM_RETRIES__) {
@@ -1112,6 +1210,7 @@
       [200, 800, 2500, 5000].forEach(function (ms) {
         global.setTimeout(function () {
           repairCategoryPageShell();
+          organizeCategoryMeta();
           convertLegacyGridSingleToProductGrid();
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();
@@ -1119,6 +1218,7 @@
           normalizePLPImages();
           injectLegacyPlpLayoutFixCss();
           collapsePlpGridGap(document.getElementById("content_area") || document);
+          tagCategoryFooterCopy();
           repairCategoryPageShell();
         }, ms);
       });
@@ -1154,12 +1254,14 @@
         if (!isCategoryPlp()) return;
         if (needsBar) removeLegacyCategoryBars();
         if (needsThumb) {
+          organizeCategoryMeta();
           convertLegacyGridSingleToProductGrid();
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();
           normalizePLPImages();
           injectLegacyPlpLayoutFixCss();
           collapsePlpGridGap(document.getElementById("content_area") || document);
+          tagCategoryFooterCopy();
           repairCategoryPageShell();
         }
       });

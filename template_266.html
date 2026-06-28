@@ -2502,15 +2502,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     <i class="vol-theme-icon vol-theme-icon--mastercard"></i>
                     <i class="vol-theme-icon vol-theme-icon--amex"></i>
                   </div>
-
-                  <section class="ssl microblock">
-                    <div class="microblock__body">
-                      <a id="ssl__link" href="javascript:void(0);" rel="nofollow">
-                        <p class="sr-only">View SSL Certificate</p>
-                        <svg class="icon"><use xlink:href="#svg-ssl-simple"></use></svg>
-                      </a>
-                    </div>
-                  </section>
                 </div>
               </div>
             </div>
@@ -9127,41 +9118,12 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
   }
 
   function updateCategoryStickyPager(prevHref, nextHref) {
-    if (!isCategoryListing()) return;
-    var hasPrev = !!prevHref;
-    var hasNext = !!nextHref;
-    if (!hasPrev && !hasNext) {
-      var gone = document.getElementById(STICKY_ID);
-      if (gone && gone.parentNode) {
-        try {
-          gone.parentNode.removeChild(gone);
-        } catch (eRm) {}
-      }
-      return;
-    }
-    var root = document.getElementById(STICKY_ID);
-    if (!root) {
-      root = document.createElement('div');
-      root.id = STICKY_ID;
-      root.className = 'mc-category-pager-sticky';
-      root.setAttribute('aria-label', 'Category paging');
-      document.body.appendChild(root);
-    }
-    root.innerHTML = '';
-    if (hasPrev) {
-      var pa = document.createElement('a');
-      pa.className = 'mc-category-pager-sticky__prev';
-      pa.href = prevHref;
-      pa.textContent = 'Previous';
-      root.appendChild(pa);
-    }
-    if (hasNext) {
-      var na = document.createElement('a');
-      na.className = 'mc-category-pager-sticky__next';
-      na.href = nextHref;
-      na.setAttribute('aria-label', 'Next page');
-      na.textContent = '\u2192';
-      root.appendChild(na);
+    /* Disabled — canonical bottom pager only; sticky tiny Next removed at source. */
+    var gone = document.getElementById(STICKY_ID);
+    if (gone && gone.parentNode) {
+      try {
+        gone.parentNode.removeChild(gone);
+      } catch (eRmSticky) {}
     }
   }
 
@@ -9848,6 +9810,21 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     lastPagerSig = null;
   }
 
+  function mountPoint() {
+    var ca =
+      document.getElementById('content_area') ||
+      document.querySelector('.content_area-wrapper') ||
+      document.body;
+    if (!ca) return null;
+    var grid = ca.querySelector('#mc-products-start') || ca.querySelector('.v-product-grid');
+    if (grid && grid.parentNode) return { el: grid, parent: grid.parentNode };
+    var table = ca.querySelector('table.v65-productDisplay');
+    if (table && table.parentNode) return { el: table, parent: table.parentNode };
+    var seo = ca.querySelector('.mc-seo-footer');
+    if (seo && seo.parentNode) return { el: seo, parent: seo.parentNode };
+    return { el: ca, parent: ca };
+  }
+
   function renderPager() {
     try {
       if (!isCategoryListing()) return;
@@ -10003,7 +9980,51 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
         } catch (eOldTop) {}
       }
 
-      updateCategoryStickyPager(prevHref, nextHref);
+      updateCategoryStickyPager(null, null);
+
+      if (!hasNext && !prevHref) {
+        lastPagerSig = sig;
+        return;
+      }
+
+      var m = mountPoint();
+      if (!m || !m.parent) {
+        lastPagerSig = sig;
+        return;
+      }
+
+      var wrap = document.createElement('nav');
+      wrap.id = PAGER_ID;
+      wrap.className = 'mc-category-pager';
+      wrap.setAttribute('aria-label', 'Category pages');
+
+      if (prevHref) {
+        var pa = document.createElement('a');
+        pa.className = 'mc-category-pager__btn mc-category-pager__btn--prev';
+        pa.href = prevHref;
+        pa.textContent = 'Previous';
+        wrap.appendChild(pa);
+      }
+      if (hasNext) {
+        var na = document.createElement('a');
+        na.className = 'mc-category-pager__btn mc-category-pager__btn--next';
+        na.href = nextHref;
+        na.textContent = 'Next';
+        wrap.appendChild(na);
+      }
+
+      if (!wrap.querySelector('a')) {
+        lastPagerSig = sig;
+        return;
+      }
+
+      if (m.el === m.parent || m.el.id === 'content_area') {
+        m.parent.appendChild(wrap);
+      } else if (m.el.nextSibling) {
+        m.parent.insertBefore(wrap, m.el.nextSibling);
+      } else {
+        m.parent.appendChild(wrap);
+      }
 
       lastPagerSig = sig;
     } catch (err) {}

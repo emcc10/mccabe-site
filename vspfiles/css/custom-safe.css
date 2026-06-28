@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260628navfooter */
+/* C_CSS_DEPLOY_VERIFY_20260625sarrepair2 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -7167,6 +7167,140 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   border-color: #333 !important;
 }
 
+/* MC_CATEGORY_PLP_CANONICAL_20260625 — meta, grid gap, native pager hide, footer copy */
+:is(html.category, body.category, html[data-mc-category-plp="1"]) input.next_page_img,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) input.prev_page_img,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) img.next_page_img,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) img.prev_page_img {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  pointer-events: none !important;
+}
+
+#mc-category-pager-top,
+#mc-category-pager-sticky {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta {
+  position: static !important;
+  clear: both !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 18px 0 12px !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  z-index: auto !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__breadcrumb {
+  display: block !important;
+  margin: 0 0 10px !important;
+  padding: 0 !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: #444 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__breadcrumb a {
+  color: #444 !important;
+  text-decoration: none !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__breadcrumb a:hover {
+  text-decoration: underline !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__subcats {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__subcats .subcategory_link {
+  display: inline-block !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: #333 !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__subcats .subcategory_link:hover {
+  text-decoration: underline !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #mc-cat-luxe-comforts .mc-cat-hero {
+  min-height: 320px !important;
+  margin-bottom: 28px !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #mc-cat-luxe-comforts .mc-cat-hero__media,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #mc-cat-luxe-comforts .mc-cat-hero__media img {
+  min-height: 320px !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table[cellpadding="8"]:has(.v-product-grid),
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay:has(.v-product-grid) {
+  margin-top: 32px !important;
+  padding-top: 0 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table[cellpadding="8"]:has(.v-product-grid) > tbody > tr > td,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay:has(.v-product-grid) > tbody > tr > td {
+  padding-top: 0 !important;
+  vertical-align: top !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-footer-copy {
+  display: block !important;
+  max-width: 900px !important;
+  margin: 30px auto !important;
+  padding: 0 20px !important;
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+  color: #5a5a5a !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-footer-copy a {
+  color: #333 !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-footer-copy a:hover {
+  text-decoration: underline !important;
+}
+
+footer.footer section.ssl.microblock,
+footer.footer #ssl__link {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
 /* =========================================================
    PDP: main row — image left, options right (desktop); stacked on mobile
    (tagged row: tr.mc-pdp-main-row from template_266.html)
@@ -9780,6 +9914,13 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   .content_area-wrapper {
     margin-left: auto !important;
     margin-right: auto !important;
+  }
+
+  /* Pull main column up on non-category pages only — category breadcrumb must stay below nav */
+  html:not(.category):not([data-mc-category-plp="1"]) .container--content,
+  html:not(.category):not([data-mc-category-plp="1"]) .content_area-wrapper,
+  body:not(.category):not([data-mc-category-plp="1"]) .container--content,
+  body:not([data-mc-category-plp="1"]) .content_area-wrapper {
     margin-top: -40px !important;
   }
 }
@@ -16624,8 +16765,8 @@ html body.mc-saranoni-pdp .mc-configured-color-swatch-label {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+  text-transform: none !important;
   color: #444 !important;
   line-height: 1.4 !important;
   white-space: normal !important;
@@ -16714,14 +16855,14 @@ html body.mc-saranoni-pdp .mc-saranoni-purchase-stack {
 
 html body.mc-saranoni-pdp #mc-pdp-option-block #options_table,
 html body.mc-saranoni-pdp #mc-pdp-option-block table[id*="options_table"] {
-  display: table !important;
-  visibility: visible !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 12px 0 0 0 !important;
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
 }
 
 html body.mc-saranoni-pdp #mc-pdp-features {
@@ -16876,19 +17017,6 @@ html body.mc-saranoni-pdp .mc-pdp-return-link:hover {
   color: #111 !important;
 }
 
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__heading,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__heading {
-  display: block !important;
-  margin: 0 0 8px 0 !important;
-  padding: 0 0 0 1.1em !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-  color: #444 !important;
-}
-
 html body.mc-saranoni-pdp #mc-saranoni-selected-color-name,
 html body.mc-saranoni-pdp .mc-saranoni-color-picker__heading #mc-saranoni-selected-color-name {
   font-weight: 600 !important;
@@ -16896,50 +17024,28 @@ html body.mc-saranoni-pdp .mc-saranoni-color-picker__heading #mc-saranoni-select
   text-transform: none !important;
 }
 
-html body.mc-saranoni-pdp .mc-saranoni-color-picker,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 0 16px 0 !important;
+/* Duplicate configured swatch mounts — keep only the info-column instance */
+html body.mc-saranoni-pdp #mc-pdp-features #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp .mc-acc-content #mc-configured-color-swatch-wrapper {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
   padding: 0 !important;
 }
 
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 0 0 1.1em !important;
-  box-sizing: border-box !important;
+html body.mc-saranoni-pdp .mc-configured-color-swatch.mc-saranoni-text-swatch {
+  min-width: 72px !important;
 }
 
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs a,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a {
-  display: block !important;
-  width: 72px !important;
-  max-width: 72px !important;
-  margin: 0 !important;
-  border: 2px solid transparent !important;
-  border-radius: 4px !important;
-  box-sizing: border-box !important;
-}
-
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active {
-  border-color: #111 !important;
-}
-
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs img,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs img {
-  display: block !important;
-  width: 100% !important;
-  height: auto !important;
-  object-fit: cover !important;
+html body.mc-saranoni-pdp #mc-pdp-price-stack-host,
+html body.mc-saranoni-pdp #messaging-element,
+html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper {
+  border: 0 !important;
+  border-top: 0 !important;
+  box-shadow: none !important;
 }
 
 /* Bean bag color thumbnails under hero at all breakpoints */
@@ -19511,6 +19617,33 @@ body .mc-cart-float {
   min-height: 52px !important;
   width: 52px !important;
   max-width: 52px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
+  text-indent: 0 !important;
+}
+
+html body a.mc-cart-float > svg.mc-cart-float__icon,
+body a.mc-cart-float > svg.mc-cart-float__icon {
+  position: static !important;
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  flex: none !important;
+}
+
+html body a.mc-cart-float > svg.mc-cart-float__icon path,
+body a.mc-cart-float > svg.mc-cart-float__icon path {
+  transform: none !important;
 }
 
 @media (min-width: 992px) {
