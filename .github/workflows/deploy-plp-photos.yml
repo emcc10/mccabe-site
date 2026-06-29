@@ -10,6 +10,8 @@ on:
       - "scripts/upload_recliner_plp_photos.py"
       - "scripts/fetch_recliner_plp_photos.py"
       - "scripts/upload_tmh_mat_photos.py"
+      - "scripts/fetch_tmh_tile_photos.py"
+      - "scripts/audit_tmh_photos.py"
       - "scripts/upload_steve_silver_bedroom_photos.py"
       - "scripts/fetch_steve_silver_dresser_photos.py"
       - "scripts/fetch_steve_silver_nightstand_photos.py"
@@ -69,12 +71,12 @@ jobs:
             printf '%s\n' "$changed_files"
             echo "EOF"
           } >> "$GITHUB_ENV"
-          if grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|\.tmh-mat-fullsize)' <<< "$changed_files"; then
+          if grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|TMH-TILE-|TMH-RACK-|\.tmh-mat-fullsize)' <<< "$changed_files"; then
             echo "UPLOAD_TMH_MATS=1" >> "$GITHUB_ENV"
           fi
 
       - name: Sync TMH-TRV travel mat photo aliases
-        if: github.event_name == 'push' || inputs.scope == 'full'
+        if: env.UPLOAD_TMH_MATS == '1' || (github.event_name == 'workflow_dispatch' && inputs.scope == 'full')
         run: python3 scripts/sync_tmh_trv_mat_photos.py
 
       - name: Upload Steve Silver bedroom photos (explicit sync — first)

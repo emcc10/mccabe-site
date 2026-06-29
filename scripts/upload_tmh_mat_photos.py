@@ -13,7 +13,12 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 def targets() -> list[str]:
     names: set[str] = set()
-    for pattern in ("TMH-MAT-*-1.jpg", "TMH-TRV-*-1.jpg"):
+    for pattern in (
+        "TMH-MAT-*-1.jpg",
+        "TMH-TRV-*-1.jpg",
+        "TMH-TILE-*-1.jpg",
+        "TMH-RACK-*-1.jpg",
+    ):
         for path in PHOTOS.glob(pattern):
             code = path.name[:-6]
             names.add(f"{code}-1.jpg")
