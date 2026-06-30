@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260630sarrepair33
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260630sarrepair34
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260630sarrepair33";
+  var VERSION = "20260630sarrepair34";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -10488,7 +10488,7 @@ try {
   var doc = global.document;
   function injectCenteringCSS() {
     var style = doc.createElement('style');
-    style.textContent = 'input[name="btnaddtocart"], button[name="btnaddtocart"] { text-align: center !important; }';
+    style.textContent = 'input[name="btnaddtocart"], button[name="btnaddtocart"] { width: auto !important; min-width: 100% !important; display: flex !important; justify-content: center !important; align-items: center !important; }';
     (doc.head || doc.documentElement).appendChild(style);
   }
   if (doc.readyState === 'loading') {
