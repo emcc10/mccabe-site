@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260701b — category meta wrapper, grid gap, footer copy class
+ * MC_PLP_ENFORCER_20260706b — Luxe PLP gap: editorial collapse, sort toolbar, SEO footer
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260701b";
+  var VERSION = "20260706b";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -681,7 +681,127 @@
     }
 
     hero.parentNode.insertBefore(meta, hero);
+    pruneLegacyCategoryChromeBeforeHero(hero);
     return true;
+  }
+
+  function pruneLegacyCategoryChromeBeforeHero(hero) {
+    if (!hero || !hero.parentNode) return;
+    var parent = hero.parentNode;
+    var node = hero.previousElementSibling;
+    var guard = 0;
+    while (node && guard < 12) {
+      guard += 1;
+      if (node.classList && node.classList.contains("mc-category-meta")) {
+        node = node.previousElementSibling;
+        continue;
+      }
+      if (node.tagName === "TABLE") {
+        var text = String(node.textContent || "").replace(/\s+/g, "").trim();
+        var hasLinks =
+          node.querySelector("td > b, .subcategory_link, a[href*='-p/'], .v-product-grid");
+        if (!hasLinks && text.length < 16) {
+          var remove = node;
+          node = node.previousElementSibling;
+          try {
+            remove.parentNode.removeChild(remove);
+          } catch (ePrune) {}
+          continue;
+        }
+      }
+      break;
+    }
+
+    parent.querySelectorAll("table").forEach(function (tbl) {
+      if (tbl === hero || tbl.contains(hero)) return;
+      if (!(tbl.compareDocumentPosition(hero) & Node.DOCUMENT_POSITION_FOLLOWING)) return;
+      if (tbl.querySelector(".subcategory_link, td > b, .v-product-grid, form.search_results_section")) {
+        return;
+      }
+      var t = String(tbl.textContent || "").replace(/\s+/g, "").trim();
+      if (t.length < 16) {
+        try {
+          tbl.parentNode.removeChild(tbl);
+        } catch (eTbl) {}
+      }
+    });
+  }
+
+  function injectLuxeComfortsPlpGapCss() {
+    if (document.getElementById("mc-luxe-plp-gap-css")) return;
+    var s = document.createElement("style");
+    s.id = "mc-luxe-plp-gap-css";
+    s.textContent =
+      "#mc-cat-luxe-comforts details.mc-cat-editorial-toggle:not([open])>.mc-cat-editorial-body{display:none!important;height:0!important;overflow:hidden!important;padding:0!important;margin:0!important;visibility:hidden!important}" +
+      "html.category form.search_results_section aside.vol-list-grid,html[data-mc-category-plp='1'] form.search_results_section aside.vol-list-grid{display:none!important;height:0!important;overflow:hidden!important;visibility:hidden!important}" +
+      "html.category:has(#mc-cat-luxe-comforts) .mc-seo-footer,html[data-mc-category-plp='1']:has(#mc-cat-luxe-comforts) .mc-seo-footer{display:none!important;height:0!important;overflow:hidden!important}";
+    (document.head || document.documentElement).appendChild(s);
+  }
+
+  function syncLuxeComfortsEditorialToggle(det) {
+    if (!det) return;
+    var body = det.querySelector(":scope > .mc-cat-editorial-body");
+    if (!body) return;
+    if (det.open) {
+      body.style.removeProperty("display");
+      body.style.removeProperty("visibility");
+      body.style.removeProperty("height");
+    } else {
+      body.style.setProperty("display", "none", "important");
+      body.style.setProperty("visibility", "hidden", "important");
+      body.style.setProperty("height", "0", "important");
+      body.style.setProperty("overflow", "hidden", "important");
+    }
+  }
+
+  function repairLuxeComfortsListingChrome(root) {
+    root = root || document.getElementById("content_area");
+    if (!root || !root.querySelector("#mc-cat-luxe-comforts")) return false;
+
+    injectLuxeComfortsPlpGapCss();
+
+    var changed = false;
+
+    root.querySelectorAll("form.search_results_section aside.vol-list-grid").forEach(function (aside) {
+      if (aside.parentNode) {
+        aside.parentNode.removeChild(aside);
+        changed = true;
+      }
+    });
+
+    root.querySelectorAll(".mc-seo-footer").forEach(function (footer) {
+      footer.style.setProperty("display", "none", "important");
+      footer.setAttribute("data-mc-luxe-hidden", "1");
+      changed = true;
+    });
+
+    var det = root.querySelector("#mc-cat-luxe-comforts details.mc-cat-editorial-toggle");
+    if (det) {
+      if (!det.dataset.mcEditorialBound) {
+        det.dataset.mcEditorialBound = "1";
+        det.addEventListener("toggle", function () {
+          syncLuxeComfortsEditorialToggle(det);
+        });
+      }
+      syncLuxeComfortsEditorialToggle(det);
+      changed = true;
+    }
+
+    root.querySelectorAll("form.search_results_section td[rowspan]").forEach(function (td) {
+      if (td.getAttribute("rowspan") !== "1") {
+        td.removeAttribute("rowspan");
+        changed = true;
+      }
+    });
+
+    root.querySelectorAll("form.search_results_section > table").forEach(function (tbl) {
+      if (tbl.style) {
+        tbl.style.setProperty("margin-top", "0", "important");
+        tbl.style.setProperty("margin-bottom", "8px", "important");
+      }
+    });
+
+    return changed;
   }
 
   function tagCategoryFooterCopy(root) {
@@ -1195,6 +1315,7 @@
     injectCriticalThumbCss();
     removeLegacyCategoryBars();
     organizeCategoryMeta();
+    repairLuxeComfortsListingChrome();
     convertLegacyGridSingleToProductGrid();
     fixStalePhotoUrls();
     fixNoPhotoThumbnails();
@@ -1211,6 +1332,7 @@
         global.setTimeout(function () {
           repairCategoryPageShell();
           organizeCategoryMeta();
+          repairLuxeComfortsListingChrome();
           convertLegacyGridSingleToProductGrid();
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();
@@ -1255,6 +1377,7 @@
         if (needsBar) removeLegacyCategoryBars();
         if (needsThumb) {
           organizeCategoryMeta();
+          repairLuxeComfortsListingChrome();
           convertLegacyGridSingleToProductGrid();
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();

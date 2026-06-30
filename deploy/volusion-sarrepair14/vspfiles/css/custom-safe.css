@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260701sshero2 */
+/* C_CSS_DEPLOY_VERIFY_20260701sarplp2 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -7290,6 +7290,69 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 
 :is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-footer-copy a:hover {
   text-decoration: underline !important;
+}
+
+/* Luxe Comforts PLP: collapsed buying guide must not reserve ~1400px (beats div{display:block} leaks) */
+#mc-cat-luxe-comforts details.mc-cat-editorial-toggle:not([open]) > .mc-cat-editorial-body {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  visibility: hidden !important;
+}
+
+#mc-cat-luxe-comforts details.mc-cat-editorial-toggle[open] > .mc-cat-editorial-body {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Stray list/grid toggle Volusion merges into the sort toolbar */
+:is(html.category, body.category, html[data-mc-category-plp="1"]) form.search_results_section aside.vol-list-grid,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area form.search_results_section .vol-list-grid {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) form.search_results_section > table:first-of-type,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) form.search_results_section > table:first-of-type table {
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) form.search_results_section > table:first-of-type td {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  vertical-align: middle !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]):has(#mc-cat-luxe-comforts) .mc-seo-footer,
+:is(html.category, body.category, html[data-mc-category-plp="1"]):has(#mc-cat-luxe-comforts) .mc-category-footer-copy {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta {
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #mc-cat-luxe-comforts + form.search_results_section,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #mc-cat-luxe-comforts ~ form.search_results_section {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 footer.footer section.ssl.microblock,
@@ -16926,6 +16989,24 @@ html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-saranoni-size-thumbs {
+  display: block !important;
+  visibility: visible !important;
+}
+
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion,
+html body.mc-steve-silver-altview-pdp .mc-pdp-accordion,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion,
+html body.mc-pdp-accordion-pdp #mc-pdp-accordion,
+html body.mc-pdp-accordion-pdp .mc-pdp-accordion,
+html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #mc-pdp-accordion,
+html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) .mc-pdp-accordion,
+html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #mc-pdp-accordion,
+html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) .mc-pdp-accordion,
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-acc-row,
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-acc-header,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-row,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-header {
   display: block !important;
   visibility: visible !important;
 }
