@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260625sarrepair2 */
+/* C_CSS_DEPLOY_VERIFY_20260630sar2 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -8957,18 +8957,18 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 
   /* Thumbnail strip present: legacy offset aligns full-width rows with hero column */
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2) {
+  body.productdetails:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page:not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2) {
     margin-left: 250px !important;
   }
 
@@ -9256,12 +9256,12 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 
   /* Same as above but #altviews + hero live inside a wrapper div inside td */
-  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
-  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(a#product_photo_zoom_url),
-  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
-  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
-  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(a#product_photo_zoom_url),
-  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo) {
+  body.productdetails:not(.mc-bean-bag-pdp):not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
+  body.productdetails:not(.mc-bean-bag-pdp):not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(a#product_photo_zoom_url),
+  body.productdetails:not(.mc-bean-bag-pdp):not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
+  body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
+  body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(a#product_photo_zoom_url),
+  body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-steve-silver-altview-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo) {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -16810,7 +16810,7 @@ html body.mc-saranoni-pdp .mc-configured-color-swatch__text {
 
 html body.mc-saranoni-pdp td.mc-pdp-options-td,
 html body.mc-saranoni-pdp td.mc-unified-pdp-info {
-  padding-left: 1.1em !important;
+  padding-left: 0 !important;
   padding-right: 0 !important;
   text-align: left !important;
   box-sizing: border-box !important;
@@ -17890,6 +17890,14 @@ html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-features .mc-pdp-features
   max-width: 425px !important;
 }
 
+html body.productdetails.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__body,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__body,
+html body.productdetails.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 html body.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
 html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description {
   display: block !important;
@@ -18243,7 +18251,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
     order: 1 !important;
     display: block !important;
-    width: auto !important;
+    width: 650px !important;
     max-width: 650px !important;
     height: auto !important;
     margin-left: 0 !important;
@@ -19079,9 +19087,15 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     box-sizing: border-box !important;
   }
 
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:last-child table.colors_pricebox {
-    display: table !important;
-    table-layout: fixed !important;
+  html body.mc-saranoni-pdp.mc-saranoni-pdp-ready tr.mc-pdp-main-row > td:last-child table.colors_pricebox:not(:has(#mc-pdp-option-block)) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
   }
 
   html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
@@ -19173,6 +19187,19 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     width: 100% !important;
     max-width: 460px !important;
     margin: 12px 0 16px !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-header {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-panel {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content--saranoni-options #mc-pdp-option-block,
@@ -19817,4 +19844,235 @@ body a.mc-cart-float > svg.mc-cart-float__icon {
   margin: auto !important;
   align-self: center !important;
   justify-self: center !important;
+}
+
+/* ---- MC_20260630b: Steve Silver unified PDP — 650px hero + 400px info column ---- */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready tr.mc-unified-pdp-row,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    gap: 28px !important;
+    width: 1128px !important;
+    max-width: 1128px !important;
+    grid-template-columns: none !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media {
+    flex: 0 0 650px !important;
+    width: 650px !important;
+    min-width: 650px !important;
+    max-width: 650px !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    flex: 0 0 400px !important;
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+    padding: 30px 0 0 0 !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media img#product_photo,
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-media-td img#product_photo,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media a#product_photo_zoom_url,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media a#product_photo_zoom_url2,
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-media-td a#product_photo_zoom_url,
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-media-td a#product_photo_zoom_url2 {
+    width: 650px !important;
+    max-width: 650px !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media div:has(#altviews):not(.mc-bean-bag-media-stack),
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack),
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media table:has(#altviews),
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-media-td table:has(#altviews) {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    margin-left: 0 !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info > #mc-pdp-brand-logo,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info > #mc-pdp-title-right,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info > #mc-pdp-price-stack-host,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info > #messaging-element,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info > #mc-pdp-accordion,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info > #mc-pdp-option-block,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info > #mc-pdp-purchase-stack,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info > .mc-unified-purchase-controls,
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-options-td > #mc-pdp-accordion {
+    width: 100% !important;
+    max-width: 400px !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info #messaging-element,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info #messaging-element iframe,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info #messaging-element img,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info #messaging-element svg {
+    display: block !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 44px !important;
+    object-fit: contain !important;
+  }
+}
+
+/* ---- MC_20260630c: accordion panel content must fit inside grey box ---- */
+html body.mc-pdp-unified-ready #mc-pdp-accordion,
+html body.mc-pdp-unified-ready #mc-pdp-accordion .mc-acc-row,
+html body.mc-pdp-unified-ready #mc-pdp-accordion .mc-acc-panel,
+html body.mc-pdp-unified-ready #mc-pdp-accordion .mc-acc-content,
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-pdp-unified-ready #mc-pdp-accordion .mc-acc-panel,
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-acc-panel,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-panel {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-features,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__body,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list,
+html body.mc-pdp-unified-ready #mc-pdp-accordion .mc-acc-content--saranoni-features,
+html body.mc-pdp-unified-ready #mc-pdp-accordion .mc-acc-content--saranoni-description,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-pdp-features__body,
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-pdp-features__list,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-content,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-pdp-description-below-features {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+  letter-spacing: 0.02em !important;
+}
+
+html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list li,
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list li {
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+}
+
+/* MC_SARANONI_LEGACY_PICKER_KILL_20260630 — template.min.js hotfixes re-injected duplicate pickers */
+html body.mc-saranoni-pdp .mc-sar-live-picker,
+html body.mc-saranoni-pdp .mc-sar-hotfix-picker,
+html body.mc-saranoni-pdp #mc-sar-hotfix-return,
+html body.mc-saranoni-pdp .mc-saranoni-color-picker:not(#mc-configured-color-swatch-wrapper) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  border: 0 !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-option-block #options_table tr,
+html body.mc-saranoni-pdp #mc-pdp-option-block #options_table td,
+html body.mc-saranoni-pdp #mc-pdp-option-block .productoptionname {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+
+/* MC_SARANONI_PBOX_BORDER_KILL_20260630 — Volusion pricebox chrome lines under ATC */
+html body.mc-saranoni-pdp td.mc-pdp-options-td img[src*="PBox_Border"],
+html body.mc-saranoni-pdp td.mc-unified-pdp-info img[src*="PBox_Border"],
+html body.mc-saranoni-pdp td.mc-pdp-options-td td[background*="PBox_Border"],
+html body.mc-saranoni-pdp td.mc-unified-pdp-info td[background*="PBox_Border"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+}
+
+html body.mc-saranoni-pdp td.mc-pdp-options-td tr:has(img[src*="PBox_Border"]),
+html body.mc-saranoni-pdp td.mc-unified-pdp-info tr:has(img[src*="PBox_Border"]),
+html body.mc-saranoni-pdp td.mc-pdp-options-td tr:has(td[background*="PBox_Border"]),
+html body.mc-saranoni-pdp td.mc-unified-pdp-info tr:has(td[background*="PBox_Border"]) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  line-height: 0 !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-accordion,
+html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-header,
+html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-label {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+  text-align: left !important;
+}
+
+html body.mc-saranoni-pdp:has(#mc-saranoni-size-thumbs .mc-saranoni-size-thumb) #mc-configured-color-swatch-wrapper.mc-saranoni-swatch-wrapper {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+}
+
+/* MC_REMOVED_FEATURES_20260630 — inactive planner / Palliser swatch / member login gate */
+#mcPlannerLoginGate,
+.mc-planner-login-gate,
+#mcPlannerMemberPriceAboveAtc,
+#mcLeatherSwatchStrip,
+#mcLeatherPicker,
+#mcLeatherRow,
+#mcPlannerRow,
+#mcPlannerRow2,
+#mcPlannerBtn,
+#mc-inline-config,
+#mcConfigurationBlock,
+.wm-overlay,
+#wmOpen,
+.mc-pdp-room-planner-box,
+.mc-configuration-rh,
+.mc-pdp-member-pricing--planner,
+#mccabe-room-planner-pricing-summary {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
