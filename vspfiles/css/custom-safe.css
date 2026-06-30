@@ -20676,3 +20676,158 @@ html body.mc-mahjong-house-pdp #mc-pdp-purchase-stack button[name="btnaddtocart"
   display: block !important;
   box-sizing: border-box !important;
 }
+
+/* MC_EMERGENCY_LAYOUT_STABILIZER_20260706 */
+html body a.mc-cart-float,
+html body .mc-cart-float {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  line-height: 0 !important;
+  text-indent: 0 !important;
+}
+
+html body a.mc-cart-float > svg.mc-cart-float__icon,
+html body .mc-cart-float > svg.mc-cart-float__icon {
+  position: static !important;
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
+  min-height: 20px !important;
+  max-height: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"], body[data-mc-category-plp="1"])
+  #content_area
+  :is(.v-product__title, .v-product__name, .productnamecolor, .productnamecolorLARGE, .productnamecolorSMALL, .productnamecolor a, .v-product__title a) {
+  text-align: center !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.02em !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"], body[data-mc-category-plp="1"])
+  #content_area
+  :is(.v-product__price, .product_price, .product_productprice, .product_sale_price, .product_saleprice, .product_list_price, .colors_productprice, .mc-member-grid-price, .mc-member-grid-price__amount, [itemprop="price"]) {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+  justify-content: center !important;
+  align-items: center !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.02em !important;
+  font-weight: 400 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"], body[data-mc-category-plp="1"])
+  #content_area
+  .mc-member-grid-price {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+@media (min-width: 992px) {
+  :is(html.category, body.category, html[data-mc-category-plp="1"], body[data-mc-category-plp="1"], html.mc-url-looks-like-pdp, body.productdetails, body.mc-product-page)
+    :is(.container--content, .content_area-wrapper, #content_area) {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  :is(body.mc-closeout-pdp, body.mc-steve-silver-altview-pdp, body.mc-mahjong-house-pdp)
+    #v65-product-parent
+    tr.mc-unified-pdp-row {
+    align-items: flex-start !important;
+    gap: 28px !important;
+    max-width: 1128px !important;
+    width: 1128px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  :is(body.mc-closeout-pdp, body.mc-steve-silver-altview-pdp, body.mc-mahjong-house-pdp)
+    td.mc-unified-pdp-media {
+    flex: 0 0 650px !important;
+    width: 650px !important;
+    min-width: 650px !important;
+    max-width: 650px !important;
+    padding-top: 0 !important;
+    align-self: flex-start !important;
+  }
+
+  :is(body.mc-closeout-pdp, body.mc-steve-silver-altview-pdp, body.mc-mahjong-house-pdp)
+    td.mc-unified-pdp-info {
+    flex: 0 0 400px !important;
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+    padding: 30px 0 0 0 !important;
+    align-self: flex-start !important;
+  }
+
+  :is(body.mc-closeout-pdp, body.mc-steve-silver-altview-pdp, body.mc-mahjong-house-pdp)
+    td.mc-unified-pdp-media
+    :is(img#product_photo, a#product_photo_zoom_url, a#product_photo_zoom_url2) {
+    width: 650px !important;
+    max-width: 650px !important;
+    height: auto !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    object-fit: contain !important;
+  }
+
+  html body.mc-pdp-accordion-pdp #mc-pdp-accordion,
+  html body.mc-pdp-accordion-pdp .mc-pdp-accordion {
+    width: 100% !important;
+    max-width: 400px !important;
+    margin-top: 16px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-brand-logo,
+html body.mc-mahjong-house-pdp .mc-pdp-brand-logo {
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-brand-logo img,
+html body.mc-mahjong-house-pdp .mc-pdp-brand-logo img,
+html body.mc-mahjong-house-pdp img.vCSS_img_mfg_logo[src*="mahjong" i] {
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+html body.mc-pdp-accordion-pdp #mc-pdp-accordion .mc-acc-row[data-open="0"] > .mc-acc-panel {
+  display: none !important;
+}
+
+html body.mc-pdp-accordion-pdp #mc-pdp-accordion .mc-acc-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}

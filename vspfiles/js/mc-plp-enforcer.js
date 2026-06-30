@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260706b — Luxe PLP gap: editorial collapse, sort toolbar, SEO footer
+ * MC_PLP_ENFORCER_20260706c — all-category meta wrapper, cart float repair
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260630a";
+  var VERSION = "20260706c";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -126,9 +126,38 @@
     document.documentElement.setAttribute("data-mc-category-plp", "1");
     if (document.body) {
       document.body.classList.add("category");
+      document.body.setAttribute("data-mc-category-plp", "1");
       document.body.classList.remove("is-home");
     }
     document.documentElement.classList.remove("mc-allow-home-hero");
+  }
+
+  function repairCartFloatIcon() {
+    var cart = document.querySelector("a.mc-cart-float");
+    if (!cart) return;
+    cart.style.setProperty("display", "flex", "important");
+    cart.style.setProperty("align-items", "center", "important");
+    cart.style.setProperty("justify-content", "center", "important");
+    cart.style.setProperty("width", "52px", "important");
+    cart.style.setProperty("height", "52px", "important");
+    cart.style.setProperty("min-width", "52px", "important");
+    cart.style.setProperty("max-width", "52px", "important");
+    cart.style.setProperty("min-height", "52px", "important");
+    cart.style.setProperty("max-height", "52px", "important");
+    cart.style.setProperty("padding", "0", "important");
+    cart.style.setProperty("overflow", "hidden", "important");
+    var svg = cart.querySelector("svg.mc-cart-float__icon");
+    if (!svg) return;
+    svg.style.setProperty("position", "static", "important");
+    svg.style.setProperty("display", "block", "important");
+    svg.style.setProperty("width", "20px", "important");
+    svg.style.setProperty("height", "20px", "important");
+    svg.style.setProperty("min-width", "20px", "important");
+    svg.style.setProperty("max-width", "20px", "important");
+    svg.style.setProperty("min-height", "20px", "important");
+    svg.style.setProperty("max-height", "20px", "important");
+    svg.style.setProperty("margin", "0 auto", "important");
+    svg.style.setProperty("transform", "none", "important");
   }
 
   function isLegacySubcatChromeTable(tbl) {
@@ -642,13 +671,23 @@
     return null;
   }
 
+  function findCategoryMetaAnchor(root) {
+    return (
+      root.querySelector("#mc-cat-luxe-comforts") ||
+      root.querySelector(".mc-cat-page") ||
+      root.querySelector("form.search_results_section") ||
+      root.querySelector(".v-product-grid") ||
+      root.querySelector("table.v65-productDisplay")
+    );
+  }
+
   function organizeCategoryMeta(root) {
     root = root || document.getElementById("content_area");
     if (!root) return false;
     if (root.querySelector(".mc-category-meta")) return false;
 
-    var hero = root.querySelector("#mc-cat-luxe-comforts");
-    if (!hero || !hero.parentNode) return false;
+    var anchor = findCategoryMetaAnchor(root);
+    if (!anchor || !anchor.parentNode) return false;
 
     var crumb = findCategoryBreadcrumb(root);
     var subCell = findCategorySubcategoryCell(root);
@@ -680,8 +719,8 @@
       }
     }
 
-    hero.parentNode.insertBefore(meta, hero);
-    pruneLegacyCategoryChromeBeforeHero(hero);
+    anchor.parentNode.insertBefore(meta, anchor);
+    pruneLegacyCategoryChromeBeforeHero(anchor);
     return true;
   }
 
@@ -1336,6 +1375,7 @@
     injectCriticalThumbCss();
     removeLegacyCategoryBars();
     organizeCategoryMeta();
+    repairCartFloatIcon();
     repairLuxeComfortsListingChrome();
     convertLegacyGridSingleToProductGrid();
     fixStalePhotoUrls();
@@ -1633,4 +1673,11 @@
     }
     win.addEventListener("load", tryLoad);
   })(global.document, global);
+
+  global.document.addEventListener("DOMContentLoaded", repairCartFloatIcon);
+  global.addEventListener("load", repairCartFloatIcon);
+  [200, 1000, 3000].forEach(function (ms) {
+    global.setTimeout(repairCartFloatIcon, ms);
+  });
+  repairCartFloatIcon();
 })(window);

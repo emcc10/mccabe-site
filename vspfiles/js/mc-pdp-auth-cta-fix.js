@@ -8651,6 +8651,7 @@
           hideNativeVolusionTabPanels();
           mountPdpFeaturesBlock();
           mountDescriptionBelowFeatures();
+          ensureSaranoniPdpAccordion();
           appendSteveSilverInfoColumnOrder();
           ensurePdpAccordionVisible();
           syncPdpDescriptionViewMore();
@@ -9775,6 +9776,7 @@
           markCloseoutPdpPage();
           mountPdpFeaturesBlock();
           mountDescriptionBelowFeatures();
+          ensureSaranoniPdpAccordion();
           appendSteveSilverInfoColumnOrder();
           ensurePdpAccordionVisible();
         } catch (eSsFinal) {}

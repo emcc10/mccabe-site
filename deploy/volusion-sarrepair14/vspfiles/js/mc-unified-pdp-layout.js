@@ -510,7 +510,11 @@
     // If features/description live inside the accordion, the accordion is the
     // single direct child to order — not the loose blocks.
     var contentNodes =
-      accordion && (accordion.contains(features) || accordion.contains(description))
+      accordion &&
+      (accordion.contains(features) ||
+        accordion.contains(description) ||
+        (body && body.classList.contains("mc-mahjong-house-pdp")) ||
+        !!qs("#mc-acc-saranoni-product-details-host", accordion))
         ? [accordion]
         : [features, description];
     var orderedOk = !info || childrenInOrder(
@@ -947,7 +951,8 @@
         if (
           global.document.body &&
           (global.document.body.classList.contains("mc-bean-bag-pdp") ||
-            global.document.body.classList.contains("mc-saranoni-pdp"))
+            global.document.body.classList.contains("mc-saranoni-pdp") ||
+            global.document.body.classList.contains("mc-mahjong-house-pdp"))
         ) {
           return;
         }
@@ -998,6 +1003,10 @@
   }
 
   function orderInfoColumn(infoTd) {
+    if (isMahjongHousePdp()) {
+      finalizeMahjongHouseInfoColumn();
+      return;
+    }
     var title =
       qs("#mc-pdp-title-right", infoTd) ||
       qs('h1[itemprop="name"]', infoTd) ||
@@ -1020,7 +1029,11 @@
     // and Steve Silver PDPs), order the accordion as a single unit instead of
     // pulling its contents back out as loose info-column children.
     var accordionOwnsContent =
-      accordion && (accordion.contains(features) || accordion.contains(description));
+      accordion &&
+      (accordion.contains(features) ||
+        accordion.contains(description) ||
+        !!qs("#mc-acc-saranoni-product-details-host", accordion) ||
+        !!qs("#mc-acc-saranoni-features-host", accordion));
 
     var ordered = [];
     [logo, title, price, klarna].forEach(function (el) {
@@ -1084,6 +1097,32 @@
     }
   }
 
+  function isMahjongHousePdp() {
+    try {
+      if (global.document.body && global.document.body.classList.contains("mc-mahjong-house-pdp")) {
+        return true;
+      }
+      var input = global.document.querySelector('input[name="ProductCode"]');
+      var code = String(
+        (global.global_Current_ProductCode || "") || (input && input.value) || ""
+      ).toUpperCase();
+      return /^TMH-/.test(code);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function finalizeMahjongHouseInfoColumn() {
+    if (!isMahjongHousePdp()) return;
+    try {
+      if (typeof global.mcAppendMahjongHouseInfoColumnOrder === "function") {
+        global.mcAppendMahjongHouseInfoColumnOrder();
+      } else if (typeof global.mcEnsureMahjongHousePdpCorrections === "function") {
+        global.mcEnsureMahjongHousePdpCorrections();
+      }
+    } catch (eTmhFin) {}
+  }
+
   function normalizeMediaColumn(mediaTd) {
     if (!mediaTd) return;
     var isBeanBag =
@@ -1104,8 +1143,8 @@
         img.style.setProperty("max-height", "none", "important");
         img.style.setProperty("object-fit", "contain", "important");
         if (isSteveSilver) {
+          img.style.setProperty("width", isDesktop ? "650px" : "100%", "important");
           img.style.setProperty("max-width", imgMaxW, "important");
-          img.style.removeProperty("width");
           img.style.setProperty("margin", isDesktop ? "0" : "0 auto", "important");
         } else {
           img.style.setProperty("width", "100%", "important");
@@ -1252,6 +1291,29 @@
   }
 
   function ensureDescriptionRow(mainRow, table, descNode, mediaTd) {
+    if (isMahjongHousePdp()) {
+      qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
+        if (!stray) return;
+        try {
+          stray.style.setProperty("display", "none", "important");
+          stray.setAttribute("aria-hidden", "true");
+        } catch (eTmhStray) {}
+      });
+      hideLegacyVolusionTabPanels(mediaTd);
+      try {
+        if (typeof global.mcMountDescriptionBelowFeatures === "function") {
+          global.mcMountDescriptionBelowFeatures();
+        }
+        if (typeof global.mcHideNativeVolusionTabPanels === "function") {
+          global.mcHideNativeVolusionTabPanels();
+        }
+        if (typeof global.mcSyncPdpDescriptionViewMore === "function") {
+          global.mcSyncPdpDescriptionViewMore();
+        }
+      } catch (eTmhDesc) {}
+      finalizeMahjongHouseInfoColumn();
+      return;
+    }
     if (isSteveSilverPdp()) {
       qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
         if (!stray) return;
@@ -1563,6 +1625,8 @@
         global.mcAppendBeanBagInfoColumnOrder();
       }
     } catch (eBbOrder) {}
+
+    finalizeMahjongHouseInfoColumn();
 
     global.__MC_PDP_HERO_READY_LOCKED__ = true;
     markUnifiedStable();

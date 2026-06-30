@@ -3328,8 +3328,43 @@
     } catch (eMount) {}
   }
 
+  function isCloseoutPdpPage() {
+    if (!isProductPdp()) return false;
+    try {
+      if (global.document.body && global.document.body.classList.contains("mc-closeout-pdp")) {
+        return true;
+      }
+      if (
+        global.document.querySelector(
+          '#v65-product-parent a[href*="/category-s/181"], #content_area a[href*="/category-s/181"], a[href*="cat=181"]'
+        )
+      ) {
+        return true;
+      }
+      var ret = global.document.querySelector(".mc-pdp-return-link, #mc-pdp-return-link-static a");
+      if (ret && /closeout/i.test(String(ret.textContent || ""))) return true;
+    } catch (eCo) {}
+    return false;
+  }
+
+  function markCloseoutPdpPage() {
+    if (!isCloseoutPdpPage()) return;
+    try {
+      if (global.document.body) {
+        global.document.body.classList.add("mc-closeout-pdp", "mc-pdp-accordion-pdp");
+      }
+    } catch (eMarkCo) {}
+  }
+
   function ensureSaranoniPdpAccordion() {
-    if (!isSaranoniPdpPage() && !isSteveSilverPdpPage() && !isMahjongHousePdpPage()) return null;
+    if (
+      !isSaranoniPdpPage() &&
+      !isSteveSilverPdpPage() &&
+      !isMahjongHousePdpPage() &&
+      !isCloseoutPdpPage()
+    ) {
+      return null;
+    }
     var infoColumn = resolveSaranoniInfoColumn();
     if (!infoColumn) return null;
     var acc = global.document.getElementById("mc-pdp-accordion");
@@ -3400,6 +3435,15 @@
       detailsHost,
       global.document.getElementById("mc-pdp-description-below-features")
     );
+    if (isCloseoutPdpPage() && !hostHasContent(detailsHost)) {
+      var closeoutDesc =
+        global.document.getElementById("ProductDetail_ProductDetails_div2") ||
+        global.document.getElementById("ProductDetail_ProductDetails_div") ||
+        global.document.getElementById("ProductDetail_ExtInfo_div");
+      if (closeoutDesc && !closeoutDesc.closest("#mc-pdp-accordion")) {
+        mountNodeInSaranoniAccordionHost(detailsHost, closeoutDesc);
+      }
+    }
     mountExistingTextPanel(shippingHost, /\b(shipping|returns?|return policy)\b/i);
     mountExistingTextPanel(faqHost, /\b(faq|frequently asked questions?)\b/i);
 
@@ -3449,6 +3493,9 @@
     } catch (eAccVis) {}
     if (isMahjongHousePdpPage()) {
       applyMahjongHouseInfoColumnOrder(infoColumn);
+    }
+    if (isCloseoutPdpPage() && global.document.body) {
+      global.document.body.classList.add("mc-closeout-pdp", "mc-pdp-accordion-pdp");
     }
     return acc;
   }
@@ -4110,7 +4157,7 @@
   }
 
   function appendSteveSilverInfoColumnOrder() {
-    if (!isSteveSilverPdpPage()) return;
+    if (!isSteveSilverPdpPage() && !isCloseoutPdpPage()) return;
     var infoColumn =
       global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
       findPdpHeroColumnTd();
@@ -8313,17 +8360,20 @@
   }
 
   function scheduleSteveSilverLayoutRepair() {
-    if (!isSteveSilverPdpPage()) return;
-    if (!shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
+    if (!isSteveSilverPdpPage() && !isCloseoutPdpPage()) return;
+    if (!isCloseoutPdpPage() && !shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
     if (global.__MC_SS_LAYOUT_REPAIR_VER__ === VERSION) return;
     global.__MC_SS_LAYOUT_REPAIR_VER__ = VERSION;
     [120, 700].forEach(function (ms) {
       global.setTimeout(function () {
         try {
+          markCloseoutPdpPage();
           prepareDeferredUnifiedPdpHero();
           hideNativeVolusionTabPanels();
+          mountPdpFeaturesBlock();
           mountDescriptionBelowFeatures();
-          if (isSteveSilverPdpPage()) {
+          ensureSaranoniPdpAccordion();
+          if (isSteveSilverPdpPage() || isCloseoutPdpPage()) {
             appendSteveSilverInfoColumnOrder();
           }
           syncPdpDescriptionViewMore();
@@ -9422,6 +9472,7 @@
       scheduleAtcBlackLock();
       scheduleBeanBagOptionRepair();
       scheduleSaranoniColorRepair();
+      markCloseoutPdpPage();
       scheduleSteveSilverLayoutRepair();
       scheduleMahjongHouseLayoutRepair();
       installDescriptionViewMoreResize();
@@ -9436,6 +9487,15 @@
           ensureMahjongHousePdpCorrections();
           appendMahjongHouseInfoColumnOrder();
         } catch (eTmhFinal) {}
+      }
+      if (isSteveSilverPdpPage() || isCloseoutPdpPage()) {
+        try {
+          markCloseoutPdpPage();
+          mountPdpFeaturesBlock();
+          mountDescriptionBelowFeatures();
+          ensureSaranoniPdpAccordion();
+          appendSteveSilverInfoColumnOrder();
+        } catch (eSsFinal) {}
       }
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
         prepareDeferredUnifiedPdpHero();
