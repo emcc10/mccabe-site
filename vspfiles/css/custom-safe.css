@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260701tmhaf1 */
+/* C_CSS_DEPLOY_VERIFY_20260702tmhaf2 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -20449,7 +20449,7 @@ html body.mc-mahjong-house-pdp .mc-pdp-accordion .mc-acc-chevron {
   justify-content: center !important;
 }
 
-/* MC_MAHJONG_PDP_ANTIFLICKER_20260701 — hide native description + accordion until JS layout is ready */
+/* MC_MAHJONG_PDP_ANTIFLICKER_20260702 — collapse native description + accordion until JS layout is ready */
 html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #ProductDetail_ProductDetails_div,
 html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #product_description,
 html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) span[itemprop="description"],
@@ -20458,10 +20458,10 @@ html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion,
 html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-description-below-features,
 html body.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion,
 html body.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-description-below-features {
-  visibility: hidden !important;
+  display: none !important;
 }
 
 html.mc-mahjong-pdp-ready #mc-pdp-accordion,
 html body.mc-mahjong-pdp-ready #mc-pdp-accordion {
-  visibility: visible !important;
+  display: block !important;
 }

@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260630sarlayout1";
-  var AUTH_LAYOUT_VER = "20260630sarlayout1";
+  var LAYOUT_VER = "20260702tmhlayout1";
+  var AUTH_LAYOUT_VER = "20260702tmhlayout1";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -501,7 +501,12 @@
     return !!(purchase && purchase.contains(qty));
   }
 
+  function isMahjongPdpReady() {
+    return !!global.__MC_MAHJONG_PDP_READY__;
+  }
+
   function isUnifiedStable() {
+    if (isMahjongPdpReady()) return true;
     var body = global.document.body;
     var info = qs("td.mc-unified-pdp-info");
     var features = info && qs("#mc-pdp-features", info);
@@ -1113,7 +1118,7 @@
   }
 
   function finalizeMahjongHouseInfoColumn() {
-    if (!isMahjongHousePdp()) return;
+    if (!isMahjongHousePdp() || isMahjongPdpReady()) return;
     try {
       if (typeof global.mcAppendMahjongHouseInfoColumnOrder === "function") {
         global.mcAppendMahjongHouseInfoColumnOrder();
@@ -1294,6 +1299,7 @@
 
   function ensureDescriptionRow(mainRow, table, descNode, mediaTd) {
     if (isMahjongHousePdp()) {
+      if (isMahjongPdpReady()) return;
       qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
         if (!stray) return;
         try {
@@ -1451,7 +1457,7 @@
   function mcNormalizePdpLayout() {
     if (!isPDP()) return false;
     if (isSectionalConfigurator()) return false;
-    if (isUnifiedStable()) return true;
+    if (isMahjongPdpReady() || isUnifiedStable()) return true;
 
     unwrapBadWrapper();
     tagProductBodyClasses();
@@ -1672,6 +1678,7 @@
   }
 
   function forceNormalizePass() {
+    if (isMahjongPdpReady()) return;
     global.__MC_UNIFIED_PDP_STABLE__ = false;
     mcNormalizePdpLayout();
   }

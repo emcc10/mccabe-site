@@ -37,7 +37,7 @@
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260701tmhaf1";
+  var VERSION = "20260702tmhaf2";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -205,7 +205,7 @@
         "html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-description-below-features," +
         "html body.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion," +
         "html body.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-description-below-features{" +
-        "visibility:hidden!important}" +
+        "display:none!important}" +
         "html.mc-mahjong-pdp-init #mc-pdp-accordion .mc-acc-row[data-open='0']>.mc-acc-panel," +
         "html body.mc-mahjong-pdp-init #mc-pdp-accordion .mc-acc-row[data-open='0']>.mc-acc-panel{" +
         "display:none!important}";
@@ -2206,20 +2206,38 @@
     ensureMahjongAccordionClosed();
     ensureMahjongDescriptionVisible();
     global.__MC_MAHJONG_PDP_READY__ = true;
+    global.__MC_PDP_MO_PAUSE__ = true;
+    global.__MC_UNIFIED_PDP_STABLE__ = true;
     try {
-      if (global.document.documentElement) {
-        global.document.documentElement.classList.add("mc-mahjong-pdp-ready");
-        global.document.documentElement.classList.remove("mc-mahjong-pdp-init");
-      }
       if (global.document.body) {
-        global.document.body.classList.add("mc-mahjong-pdp-ready");
-        global.document.body.classList.remove("mc-mahjong-pdp-init");
+        global.document.body.classList.add("mc-pdp-unified-ready");
+        global.document.body.dataset.mcPdpLayoutMounted = "1";
       }
-      if (acc && acc.style) {
-        acc.style.setProperty("visibility", "visible", "important");
-      }
-    } catch (eReady) {}
-    scheduleMarkPdpHeroReady();
+    } catch (eStable) {}
+    function revealMahjongPdp() {
+      try {
+        if (global.document.documentElement) {
+          global.document.documentElement.classList.add("mc-mahjong-pdp-ready");
+          global.document.documentElement.classList.remove("mc-mahjong-pdp-init");
+        }
+        if (global.document.body) {
+          global.document.body.classList.add("mc-mahjong-pdp-ready");
+          global.document.body.classList.remove("mc-mahjong-pdp-init");
+        }
+        if (acc && acc.style) {
+          acc.style.removeProperty("visibility");
+          acc.style.setProperty("display", "block", "important");
+        }
+      } catch (eReady) {}
+      scheduleMarkPdpHeroReady();
+    }
+    if (global.requestAnimationFrame) {
+      global.requestAnimationFrame(function () {
+        global.requestAnimationFrame(revealMahjongPdp);
+      });
+    } else {
+      revealMahjongPdp();
+    }
   }
 
   function ensureMahjongHousePdpCorrections() {
@@ -3599,11 +3617,11 @@
         infoColumn.appendChild(acc);
       }
       acc.style.setProperty("display", "block", "important");
-      acc.style.setProperty(
-        "visibility",
-        isMahjongHousePdpPage() && !global.__MC_MAHJONG_PDP_READY__ ? "hidden" : "visible",
-        "important"
-      );
+      if (isMahjongHousePdpPage() && !global.__MC_MAHJONG_PDP_READY__) {
+        acc.style.setProperty("visibility", "hidden", "important");
+      } else {
+        acc.style.removeProperty("visibility");
+      }
     } catch (eAccVis) {}
     if (isMahjongHousePdpPage()) {
       applyMahjongHouseInfoColumnOrder(infoColumn);
@@ -3632,7 +3650,11 @@
     var tmhPending = isMahjongHousePdpPage() && !global.__MC_MAHJONG_PDP_READY__;
     try {
       acc.style.setProperty("display", "block", "important");
-      acc.style.setProperty("visibility", tmhPending ? "hidden" : "visible", "important");
+      if (tmhPending) {
+        acc.style.setProperty("visibility", "hidden", "important");
+      } else {
+        acc.style.removeProperty("visibility");
+      }
       acc.classList.add("mc-pdp-accordion");
     } catch (eAcc) {}
     acc.querySelectorAll(".mc-acc-row").forEach(function (node) {
