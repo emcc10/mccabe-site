@@ -416,12 +416,76 @@
     });
   }
 
+  function ensureSteveSilverHeroImageSize() {
+    if (!isProductPdp() || !isSteveSilverPdpPage()) return;
+    var isDesktop =
+      global.matchMedia && global.matchMedia("(min-width: 992px)").matches;
+    var maxW = isDesktop ? "650px" : "min(650px, 100%)";
+    var mediaCell = global.document.querySelector(
+      "td.mc-unified-pdp-media, td.mc-pdp-media-td, #product_photo_td"
+    );
+    if (mediaCell) {
+      try {
+        mediaCell.style.setProperty("display", "flex", "important");
+        mediaCell.style.setProperty("flex-direction", "column", "important");
+        mediaCell.style.setProperty("align-items", "flex-start", "important");
+        mediaCell.style.setProperty("grid-template-columns", "none", "important");
+        mediaCell.style.setProperty("grid-template-rows", "none", "important");
+        mediaCell.style.setProperty("max-width", isDesktop ? "650px" : "100%", "important");
+        mediaCell.style.setProperty("width", isDesktop ? "650px" : "100%", "important");
+      } catch (eCell) {}
+    }
+    var img = global.document.getElementById("product_photo");
+    if (img) {
+      try {
+        img.style.setProperty("width", isDesktop ? "650px" : "100%", "important");
+        img.style.setProperty("max-width", maxW, "important");
+        img.style.setProperty("min-width", "0", "important");
+        img.style.setProperty("height", "auto", "important");
+        img.style.setProperty("display", "block", "important");
+        img.style.setProperty("margin-left", "0", "important");
+        img.style.setProperty("margin-right", isDesktop ? "auto" : "auto", "important");
+        img.style.setProperty("object-fit", "contain", "important");
+        img.style.setProperty("box-sizing", "border-box", "important");
+      } catch (eImg) {}
+    }
+    global.document
+      .querySelectorAll("a#product_photo_zoom_url, a#product_photo_zoom_url2")
+      .forEach(function (link) {
+        try {
+          link.style.setProperty("display", "block", "important");
+          link.style.setProperty("width", isDesktop ? "650px" : "100%", "important");
+          link.style.setProperty("max-width", maxW, "important");
+          link.style.setProperty("grid-column", "auto", "important");
+          link.style.setProperty("grid-row", "auto", "important");
+          link.style.setProperty("margin-left", "0", "important");
+          link.style.setProperty("box-sizing", "border-box", "important");
+        } catch (eLink) {}
+      });
+    if (mediaCell) {
+      mediaCell.querySelectorAll("table").forEach(function (tbl) {
+        if (!tbl.querySelector("img#product_photo")) return;
+        try {
+          tbl.style.setProperty("width", "100%", "important");
+          tbl.style.setProperty("max-width", isDesktop ? "650px" : "100%", "important");
+          tbl.style.setProperty("grid-column", "auto", "important");
+          tbl.style.setProperty("grid-row", "auto", "important");
+          tbl.style.setProperty("margin-left", "0", "important");
+        } catch (eTbl) {}
+      });
+    }
+  }
+
   function applyPdpMainImageCap() {
     if (!isProductPdp()) return;
-    if (isSteveSilverPdpPage()) return;
-    if (global.__MC_PDP_MAIN_IMAGE_CAP_VER__ === VERSION) return;
-    global.__MC_PDP_MAIN_IMAGE_CAP_VER__ = VERSION;
+    var isSs = isSteveSilverPdpPage();
+    if (!isSs && global.__MC_PDP_MAIN_IMAGE_CAP_VER__ === VERSION) return;
+    if (!isSs) global.__MC_PDP_MAIN_IMAGE_CAP_VER__ = VERSION;
     fixTmhMatPhotoUrls(global.document);
+    if (isSs) {
+      ensureSteveSilverHeroImageSize();
+      return;
+    }
     var img = global.document.getElementById("product_photo");
     var maxW = isBeanBagPdpPage() ? "600px" : "650px";
     if (img) {
@@ -7326,6 +7390,7 @@
     });
   }
 
+  global.ensureSteveSilverHeroImageSize = ensureSteveSilverHeroImageSize;
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcHideNativeVolusionTabPanels = hideNativeVolusionTabPanels;
   global.mcMountDescriptionBelowFeatures = mountDescriptionBelowFeatures;
@@ -9496,7 +9561,7 @@
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
 (function (g, d) {
-  var SS_ALT_VER = "20260624sarrepair4";
+  var SS_ALT_VER = "20260701sshero1";
 
   function normalizePhotoUrl(url) {
     if (typeof g.mcNormalizePhotoUrl === "function") return g.mcNormalizePhotoUrl(url);
@@ -9692,6 +9757,11 @@
       }
       zoom.title = n === 1 ? "Product image" : "Room scene";
     }
+    if (typeof g.ensureSteveSilverHeroImageSize === "function") {
+      try {
+        g.ensureSteveSilverHeroImageSize();
+      } catch (eHeroSize) {}
+    }
   }
 
   function normalizeMediaLayout(mediaCell) {
@@ -9705,6 +9775,11 @@
         child.style.setProperty("margin-right", "0", "important");
       }
     });
+    if (typeof g.ensureSteveSilverHeroImageSize === "function") {
+      try {
+        g.ensureSteveSilverHeroImageSize();
+      } catch (eHeroSize) {}
+    }
   }
 
   function run() {

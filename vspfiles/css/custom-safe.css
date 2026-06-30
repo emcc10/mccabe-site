@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260630sar3 */
+/* C_CSS_DEPLOY_VERIFY_20260701sshero1 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -20079,4 +20079,65 @@ html body.mc-saranoni-pdp:has(#mc-saranoni-size-thumbs .mc-saranoni-size-thumb) 
   overflow: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+}
+
+/* MC_SS_HERO_FULL_WIDTH_20260701 — break 72px+1fr grid squeeze on Steve Silver PDP hero */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #product_photo_td,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    align-items: flex-start !important;
+    width: 650px !important;
+    max-width: min(650px, 100%) !important;
+    min-width: 0 !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #product_photo_td > *,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > *,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media > * {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    margin-left: 0 !important;
+    max-width: 650px !important;
+    width: 100% !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) table:has(img#product_photo),
+  html body.mc-steve-silver-altview-pdp img#product_photo {
+    width: 650px !important;
+    max-width: min(650px, 100%) !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    object-fit: contain !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #altviews,
+  html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) span#altviews,
+  html body.mc-steve-silver-altview-pdp #mc-steve-silver-altviews-wrap,
+  html body.mc-steve-silver-altview-pdp .mc-steve-silver-altviews-wrap {
+    width: auto !important;
+    max-width: 650px !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
+
+@media (max-width: 991px) {
+  html body.mc-steve-silver-altview-pdp img#product_photo,
+  html body.mc-steve-silver-altview-pdp a#product_photo_zoom_url,
+  html body.mc-steve-silver-altview-pdp a#product_photo_zoom_url2 {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
 }
