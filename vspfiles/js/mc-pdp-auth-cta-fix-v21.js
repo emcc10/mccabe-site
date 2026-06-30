@@ -37,7 +37,7 @@
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260626sarrepair15";
+  var VERSION = "20260701tmhdesc1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -2091,7 +2091,55 @@
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion,html body.mc-mahjong-house-pdp .mc-pdp-accordion{width:100%!important;max-width:100%!important;box-sizing:border-box!important;overflow:visible!important;padding-right:0!important}" +
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion *,html body.mc-mahjong-house-pdp .mc-pdp-accordion *{box-sizing:border-box!important;max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important}" +
       "html body.mc-mahjong-house-pdp .mc-acc-panel,html body.mc-mahjong-house-pdp .mc-acc-content{width:100%!important;max-width:100%!important;overflow:visible!important;padding-right:0!important}" +
+      "html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-pdp-description-below-features,html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-acc-saranoni-product-details-host,html body.mc-mahjong-house-pdp #mc-pdp-accordion #ProductDetail_ProductDetails_div,html body.mc-mahjong-house-pdp #mc-pdp-accordion #product_description{display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important;overflow:visible!important}" +
       "@media (min-width:992px){html body.mc-mahjong-house-pdp #content_area tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #content_area tr.mc-unified-pdp-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{column-gap:24px!important;gap:24px!important;justify-content:center!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{max-width:620px!important;padding-right:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{width:440px!important;max-width:440px!important;min-width:420px!important;padding-left:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td img#product_photo,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media img#product_photo{max-width:min(620px,100%)!important;margin-right:0!important}}";
+  }
+
+  function findMahjongDescriptionSource() {
+    var candidates = [
+      global.document.getElementById("ProductDetail_ProductDetails_div"),
+      global.document.querySelector(
+        "#product_description[itemprop='description'], span[itemprop='description'], #product_description"
+      ),
+      global.document.getElementById("ProductDetail_ProductDetails_div2"),
+    ];
+    var i;
+    for (i = 0; i < candidates.length; i++) {
+      var node = candidates[i];
+      if (!node || node.closest("#mc-pdp-accordion")) continue;
+      var txt = String(node.textContent || "").replace(/\s+/g, " ").trim();
+      if (txt.length > 10) return node;
+    }
+    return null;
+  }
+
+  function ensureMahjongDescriptionVisible() {
+    if (!isMahjongHousePdpPage()) return;
+    var nodes = global.document.querySelectorAll(
+      "#mc-pdp-accordion #mc-pdp-description-below-features, #mc-pdp-accordion #mc-acc-saranoni-product-details-host, #mc-pdp-accordion #ProductDetail_ProductDetails_div, #mc-pdp-accordion #product_description, #mc-pdp-accordion .mc-pdp-description-below-features__inner"
+    );
+    Array.prototype.forEach.call(nodes, function (node) {
+      if (!node) return;
+      try {
+        node.style.setProperty("display", "block", "important");
+        node.style.setProperty("visibility", "visible", "important");
+        node.style.setProperty("opacity", "1", "important");
+        node.style.setProperty("height", "auto", "important");
+        node.style.setProperty("max-height", "none", "important");
+        node.style.setProperty("overflow", "visible", "important");
+      } catch (eVis) {}
+    });
+  }
+
+  function openMahjongProductDetailsAccordionRow() {
+    if (!isMahjongHousePdpPage()) return;
+    var row = global.document.getElementById("mc-acc-row-saranoni-product-details");
+    if (!row) return;
+    var header = row.querySelector(".mc-acc-header");
+    var panel = row.querySelector(".mc-acc-panel");
+    row.dataset.open = "1";
+    if (header) header.setAttribute("aria-expanded", "true");
+    if (panel) panel.setAttribute("aria-hidden", "false");
   }
 
   function ensureMahjongHousePdpCorrections() {
@@ -2120,6 +2168,8 @@
       }
       hideMahjongHeroManufacturerLogo();
       syncPdpDescriptionViewMore();
+      ensureMahjongDescriptionVisible();
+      openMahjongProductDetailsAccordionRow();
     } catch (eTmh) {}
   }
   var placeBrandLogoAboveTitle = placeBrandLogoBelowTitle;
@@ -3400,6 +3450,12 @@
       detailsHost,
       global.document.getElementById("mc-pdp-description-below-features")
     );
+    if (isMahjongHousePdpPage() && !hostHasContent(detailsHost)) {
+      var tmhDesc = findMahjongDescriptionSource();
+      if (tmhDesc) {
+        mountNodeInSaranoniAccordionHost(detailsHost, tmhDesc);
+      }
+    }
     mountExistingTextPanel(shippingHost, /\b(shipping|returns?|return policy)\b/i);
     mountExistingTextPanel(faqHost, /\b(faq|frequently asked questions?)\b/i);
 
@@ -3457,6 +3513,10 @@
         }
       } catch (eAccBody) {}
       ensurePdpAccordionVisible();
+      if (isMahjongHousePdpPage()) {
+        ensureMahjongDescriptionVisible();
+        openMahjongProductDetailsAccordionRow();
+      }
     }
     return acc;
   }
@@ -4198,6 +4258,8 @@
     });
     applyMahjongHouseInfoColumnOrder(infoColumn);
     hideMahjongHeroManufacturerLogo();
+    ensureMahjongDescriptionVisible();
+    openMahjongProductDetailsAccordionRow();
   }
 
   function ensurePdpInfoColumnOrder() {
@@ -7024,6 +7086,9 @@
     var descDiv =
       global.document.getElementById("ProductDetail_ProductDetails_div") ||
       global.document.getElementById("ProductDetail_ProductDetails_div2");
+    if (isMahjongHousePdpPage() && !descDiv) {
+      descDiv = findMahjongDescriptionSource();
+    }
     if (!descDiv) return;
     var host = global.document.getElementById("mc-pdp-description-below-features");
     if (!host) {
@@ -7080,6 +7145,9 @@
       try {
         hideNativeVolusionTabPanels();
       } catch (eSarHide) {}
+      ensureDescriptionBelowFeaturesInner(host);
+      syncPdpDescriptionViewMore();
+      ensureMahjongDescriptionVisible();
       if (isMahjongHousePdpPage()) {
         applyMahjongHouseInfoColumnOrder(col);
       }

@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260630sarpdp1 */
+/* C_CSS_DEPLOY_VERIFY_20260701tmhdesc1 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -7194,6 +7194,10 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 :is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta {
   position: static !important;
   clear: both !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
   width: 100% !important;
   max-width: 100% !important;
   margin: 18px 0 12px !important;
@@ -7205,7 +7209,10 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 
 :is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__breadcrumb {
   display: block !important;
-  margin: 0 0 10px !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
   padding: 0 !important;
   font-family: Inter, system-ui, sans-serif !important;
   font-size: 13px !important;
@@ -7224,9 +7231,12 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 
 :is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__subcats {
   display: flex !important;
+  flex: 0 0 auto !important;
   flex-wrap: wrap !important;
   align-items: center !important;
   gap: 8px 18px !important;
+  width: 100% !important;
+  max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
 }
@@ -9983,8 +9993,14 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   html:not(.category):not([data-mc-category-plp="1"]) .container--content,
   html:not(.category):not([data-mc-category-plp="1"]) .content_area-wrapper,
   body:not(.category):not([data-mc-category-plp="1"]) .container--content,
-  body:not([data-mc-category-plp="1"]) .content_area-wrapper {
+  body:not(.category):not([data-mc-category-plp="1"]) .content_area-wrapper {
     margin-top: -40px !important;
+  }
+
+  :is(html.category, body.category, html[data-mc-category-plp="1"], body[data-mc-category-plp="1"]) .container--content,
+  :is(html.category, body.category, html[data-mc-category-plp="1"], body[data-mc-category-plp="1"]) .content_area-wrapper {
+    margin-top: 0 !important;
+    padding-top: 8px !important;
   }
 }
 
@@ -16569,7 +16585,14 @@ html body.mc-saranoni-pdp .mc-pdp-accordion,
 html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-header,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
-html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper {
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-header,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-acc-saranoni-product-details-host,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion #ProductDetail_ProductDetails_div,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion #product_description {
   display: block !important;
   visibility: visible !important;
 }
@@ -17588,7 +17611,9 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description li {
   text-transform: none !important;
 }
 
-html body.mc-pdp-unified-ready #mc-pdp-description-below-features:not(:empty),
+/* Hide loose description in info column only — keep copies nested inside #mc-pdp-accordion visible */
+html body.mc-pdp-unified-ready td.mc-unified-pdp-info > #mc-pdp-description-below-features:not(:empty),
+html body.mc-pdp-unified-ready td.mc-pdp-options-td > #mc-pdp-description-below-features:not(:empty),
 html body.mc-pdp-unified-ready #mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-gatlin-description-below,
@@ -19907,11 +19932,13 @@ html body .mc-header-cart__link {
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
+  overflow: hidden !important;
+  line-height: 0 !important;
 }
 
 html body a.mc-cart-float,
 html body .mc-cart-float {
-  display: grid !important;
+  display: flex !important;
   place-items: center !important;
   box-sizing: border-box !important;
 }
@@ -20046,13 +20073,23 @@ html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-description-below-featu
 html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-pdp-features__body,
 html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-pdp-features__list,
 html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-content,
-html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-pdp-description-below-features {
+html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-acc-saranoni-product-details-host,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion #ProductDetail_ProductDetails_div,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion #product_description,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-pdp-description-below-features__inner {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
   overflow-wrap: break-word !important;
   word-break: normal !important;
   letter-spacing: 0.02em !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list li,
@@ -20328,4 +20365,53 @@ body.productdetails #content_area .mc-related-plp-card__price font.pricecolorsma
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
   }
+}
+
+/* MC_CART_FLOAT_CENTER_20260701catmeta1 — beat template inline 42px cart sizing */
+html body a.mc-cart-float,
+html body .mc-cart-float {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  line-height: 0 !important;
+}
+
+html body a.mc-cart-float > svg.mc-cart-float__icon,
+html body .mc-cart-float > svg.mc-cart-float__icon {
+  position: static !important;
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
+  min-height: 20px !important;
+  max-height: 20px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  flex: none !important;
+  transform: none !important;
+  left: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+
+html body a.mc-cart-float > svg.mc-cart-float__icon path,
+html body .mc-cart-float > svg.mc-cart-float__icon path {
+  transform: none !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area > table td > b,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table td.colors_backgroundneutral {
+  position: static !important;
+  float: none !important;
 }
