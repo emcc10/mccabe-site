@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260701sshero1 */
+/* C_CSS_DEPLOY_VERIFY_20260701sshero2 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -8925,10 +8925,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     box-sizing: border-box !important;
   }
 
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td,
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
+  body.productdetails:not(.mc-steve-silver-altview-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])):is(#content_area, #v65-product-parent) #product_photo_td,
+  body.mc-product-page:not(.mc-steve-silver-altview-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])):is(#content_area, #v65-product-parent) #product_photo_td,
+  body.productdetails:not(.mc-steve-silver-altview-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])):is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  body.mc-product-page:not(.mc-steve-silver-altview-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])):is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
     display: grid !important;
     grid-template-columns: 72px minmax(0, 1fr) !important;
     column-gap: 12px !important;
@@ -20085,7 +20085,9 @@ html body.mc-saranoni-pdp:has(#mc-saranoni-size-thumbs .mc-saranoni-size-thumb) 
 @media (min-width: 992px) {
   html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #product_photo_td,
   html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
-  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media {
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media,
+  html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child {
     display: flex !important;
     flex-direction: column !important;
     grid-template-columns: none !important;
@@ -20109,7 +20111,9 @@ html body.mc-saranoni-pdp:has(#mc-saranoni-size-thumbs .mc-saranoni-size-thumb) 
   html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
   html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
   html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) table:has(img#product_photo),
-  html body.mc-steve-silver-altview-pdp img#product_photo {
+  html body.mc-steve-silver-altview-pdp img#product_photo,
+  html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) img#product_photo,
+  html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) img#product_photo {
     width: 650px !important;
     max-width: min(650px, 100%) !important;
     min-width: 0 !important;

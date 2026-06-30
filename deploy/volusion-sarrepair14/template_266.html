@@ -1495,9 +1495,27 @@ document.addEventListener("DOMContentLoaded", function () {
   <!-- mc-pdp-auth-cta-fix-v21.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
        A second static ?mcrd=live tag used to live here; it cached an old copy whose stabilizer
        fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260624B -->
+  <style id="mc-ss-hero-critical-20260701">
+@media (min-width:992px){
+  html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #v65-product-parent>tbody>tr:nth-of-type(2)>td:first-child,
+  html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #v65-product-parent>tbody>tr:nth-of-type(2)>td:first-child,
+  html body.mc-steve-silver-altview-pdp :is(#content_area,#v65-product-parent) td.mc-pdp-media-td,
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media{
+    display:flex!important;flex-direction:column!important;grid-template-columns:none!important;
+    align-items:flex-start!important;width:650px!important;max-width:min(650px,100%)!important;min-width:0!important}
+  html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) img#product_photo,
+  html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) img#product_photo,
+  html body.mc-steve-silver-altview-pdp img#product_photo{
+    width:650px!important;max-width:min(650px,100%)!important;height:auto!important;display:block!important;
+    margin-left:0!important;margin-right:auto!important;object-fit:contain!important}
+  html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) table:has(img#product_photo),
+  html body.mc-steve-silver-altview-pdp table:has(img#product_photo){
+    width:100%!important;max-width:650px!important;grid-column:auto!important;margin-left:0!important}
+}
+</style>
   <script id="mc-ss-piece-hero-boot">
 (function (g, d) {
-  var SS_HERO_VER = "20260623sarrepair3";
+  var SS_HERO_VER = "20260701sshero2";
   function productCode() {
     var input = d.querySelector('input[name="ProductCode"]');
     return String(
@@ -1512,17 +1530,60 @@ document.addEventListener("DOMContentLoaded", function () {
   function normalizePhotoUrl(url) {
     return String(url || "").replace(/\?.*$/, "").split("#")[0];
   }
+  function isDesktop() {
+    return !!(g.matchMedia && g.matchMedia("(min-width: 992px)").matches);
+  }
+  function applyPieceHeroLayout(img) {
+    if (!img) return;
+    try {
+      d.body.classList.add("mc-steve-silver-altview-pdp");
+    } catch (eBody) {}
+    var desktop = isDesktop();
+    var maxW = desktop ? "650px" : "100%";
+    var mediaCell =
+      img.closest("td.mc-unified-pdp-media, td.mc-pdp-media-td, #product_photo_td") ||
+      img.closest("td");
+    if (mediaCell) {
+      mediaCell.style.setProperty("display", "flex", "important");
+      mediaCell.style.setProperty("flex-direction", "column", "important");
+      mediaCell.style.setProperty("grid-template-columns", "none", "important");
+      mediaCell.style.setProperty("align-items", "flex-start", "important");
+      mediaCell.style.setProperty("width", desktop ? "650px" : "100%", "important");
+      mediaCell.style.setProperty("max-width", desktop ? "650px" : "100%", "important");
+    }
+    img.style.setProperty("width", desktop ? "650px" : "100%", "important");
+    img.style.setProperty("max-width", maxW, "important");
+    img.style.setProperty("height", "auto", "important");
+    img.style.setProperty("display", "block", "important");
+    img.style.setProperty("margin-left", "0", "important");
+    img.style.setProperty("object-fit", "contain", "important");
+    if (mediaCell) {
+      mediaCell.querySelectorAll("table").forEach(function (tbl) {
+        if (!tbl.querySelector("img#product_photo")) return;
+        tbl.style.setProperty("width", "100%", "important");
+        tbl.style.setProperty("max-width", desktop ? "650px" : "100%", "important");
+        tbl.style.setProperty("grid-column", "auto", "important");
+        tbl.style.setProperty("margin-left", "0", "important");
+      });
+    }
+    if (typeof g.ensureSteveSilverHeroImageSize === "function") {
+      try {
+        g.ensureSteveSilverHeroImageSize();
+      } catch (eExt) {}
+    }
+  }
   function applyPieceHero() {
     var code = productCode();
     if (!/^SS-/.test(code)) return;
     var img = d.getElementById("product_photo");
-    if (!img) return;
+    if (!img) return false;
     var full = photo(code, 1, false);
     var cur = String(img.getAttribute("src") || img.src || "");
-    if (!/-2T\.|-2\.jpg/i.test(cur) && normalizePhotoUrl(cur) === normalizePhotoUrl(full)) return;
-    img.setAttribute("src", full);
-    img.src = full;
-    img.removeAttribute("srcset");
+    if (/-2T\.|-2\.jpg/i.test(cur) || normalizePhotoUrl(cur) !== normalizePhotoUrl(full)) {
+      img.setAttribute("src", full);
+      img.src = full;
+      img.removeAttribute("srcset");
+    }
     var zoom = d.querySelector("a#product_photo_zoom_url, a#product_photo_zoom_url2");
     if (zoom && normalizePhotoUrl(zoom.getAttribute("href") || "") !== normalizePhotoUrl(full)) {
       zoom.setAttribute("href", full);
@@ -1536,22 +1597,26 @@ document.addEventListener("DOMContentLoaded", function () {
             img.setAttribute("src", full);
             img.src = full;
           }
+          applyPieceHeroLayout(img);
         }).observe(img, { attributes: true, attributeFilter: ["src"] });
       } catch (eLock) {}
     }
+    applyPieceHeroLayout(img);
+    return true;
   }
-  function runOnce() {
-    if (g.__MC_SS_TEMPLATE_HERO_VER__ === SS_HERO_VER) return;
+  function boot() {
+    if (!applyPieceHero()) return;
     g.__MC_SS_TEMPLATE_HERO_VER__ = SS_HERO_VER;
-    applyPieceHero();
   }
-  runOnce();
-  [500, 2000].forEach(function (ms) {
-    g.setTimeout(applyPieceHero, ms);
+  [0, 120, 500, 1200, 2500, 5000].forEach(function (ms) {
+    g.setTimeout(boot, ms);
   });
   if (d.readyState === "loading") {
-    d.addEventListener("DOMContentLoaded", runOnce);
+    d.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
   }
+  g.addEventListener("load", boot);
 })(window, document);
   </script>
   <script id="mc-plp-enforcer-bridge">

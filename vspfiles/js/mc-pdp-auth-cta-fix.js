@@ -416,14 +416,78 @@
     });
   }
 
+  function ensureSteveSilverHeroPhotoSrc() {
+    if (!isProductPdp()) return false;
+    var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var pc = String(
+      (global.global_Current_ProductCode || "") ||
+        (pcEl && pcEl.value) ||
+        ""
+    )
+      .trim()
+      .toUpperCase();
+    if (!/^SS-/.test(pc)) return false;
+    var img = global.document.getElementById("product_photo");
+    if (!img) return false;
+    var full = "/v/vspfiles/photos/" + pc + "-1.jpg";
+    var cur = String(img.getAttribute("src") || img.src || "");
+    var normalizedCur = cur.replace(/\?.*$/, "").split("#")[0];
+    var normalizedFull = full.replace(/\?.*$/, "").split("#")[0];
+    var needsSwap =
+      /-2T\.|-2\.jpg/i.test(cur) ||
+      (normalizedCur.indexOf(pc) !== -1 && normalizedCur.indexOf("-1.") === -1);
+    if (needsSwap || normalizedCur !== normalizedFull) {
+      try {
+        img.setAttribute("src", full);
+        img.src = full;
+        img.removeAttribute("srcset");
+      } catch (eSwap) {}
+    }
+    global.document
+      .querySelectorAll("a#product_photo_zoom_url, a#product_photo_zoom_url2")
+      .forEach(function (link) {
+        var href = String(link.getAttribute("href") || "");
+        if (!href || /-2T\.|-2\.jpg/i.test(href)) {
+          try {
+            link.setAttribute("href", full);
+          } catch (eHref) {}
+        }
+      });
+    return true;
+  }
+
   function ensureSteveSilverHeroImageSize() {
-    if (!isProductPdp() || !isSteveSilverPdpPage()) return;
+    if (!isProductPdp()) return;
+    ensureSteveSilverHeroPhotoSrc();
+    var isSs =
+      isSteveSilverPdpPage() ||
+      (function () {
+        var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+        var pc = String(
+          (global.global_Current_ProductCode || "") ||
+            (pcEl && pcEl.value) ||
+            ""
+        )
+          .trim()
+          .toUpperCase();
+        return /^SS-/.test(pc);
+      })();
+    if (!isSs) return;
+    try {
+      if (global.document.body) {
+        global.document.body.classList.add("mc-steve-silver-altview-pdp");
+      }
+    } catch (eBody) {}
     var isDesktop =
       global.matchMedia && global.matchMedia("(min-width: 992px)").matches;
     var maxW = isDesktop ? "650px" : "min(650px, 100%)";
+    var img = global.document.getElementById("product_photo");
     var mediaCell = global.document.querySelector(
       "td.mc-unified-pdp-media, td.mc-pdp-media-td, #product_photo_td"
     );
+    if (!mediaCell && img && img.closest) {
+      mediaCell = img.closest("td");
+    }
     if (mediaCell) {
       try {
         mediaCell.style.setProperty("display", "flex", "important");
@@ -435,7 +499,6 @@
         mediaCell.style.setProperty("width", isDesktop ? "650px" : "100%", "important");
       } catch (eCell) {}
     }
-    var img = global.document.getElementById("product_photo");
     if (img) {
       try {
         img.style.setProperty("width", isDesktop ? "650px" : "100%", "important");
@@ -4432,6 +4495,8 @@
       ) {
         return true;
       }
+      var pcEarly = String(global.global_Current_ProductCode || "").trim().toUpperCase();
+      if (/^SS-/.test(pcEarly)) return true;
       var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
       var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
       return /^SS-/.test(pc);
@@ -7391,6 +7456,7 @@
   }
 
   global.ensureSteveSilverHeroImageSize = ensureSteveSilverHeroImageSize;
+  global.ensureSteveSilverHeroPhotoSrc = ensureSteveSilverHeroPhotoSrc;
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcHideNativeVolusionTabPanels = hideNativeVolusionTabPanels;
   global.mcMountDescriptionBelowFeatures = mountDescriptionBelowFeatures;
@@ -9561,7 +9627,7 @@
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
 (function (g, d) {
-  var SS_ALT_VER = "20260701sshero1";
+  var SS_ALT_VER = "20260701sshero2";
 
   function normalizePhotoUrl(url) {
     if (typeof g.mcNormalizePhotoUrl === "function") return g.mcNormalizePhotoUrl(url);
