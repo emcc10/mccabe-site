@@ -3450,7 +3450,31 @@
     if (isMahjongHousePdpPage()) {
       applyMahjongHouseInfoColumnOrder(infoColumn);
     }
+    if (isSteveSilverPdpPage() || isMahjongHousePdpPage()) {
+      try {
+        if (global.document.body) {
+          global.document.body.classList.add("mc-pdp-accordion-pdp");
+        }
+      } catch (eAccBody) {}
+      ensurePdpAccordionVisible();
+    }
     return acc;
+  }
+
+  function ensurePdpAccordionVisible() {
+    var acc = global.document.getElementById("mc-pdp-accordion");
+    if (!acc) return;
+    try {
+      acc.style.setProperty("display", "block", "important");
+      acc.style.setProperty("visibility", "visible", "important");
+      acc.classList.add("mc-pdp-accordion");
+    } catch (eAcc) {}
+    acc.querySelectorAll(".mc-acc-row, .mc-acc-header").forEach(function (node) {
+      try {
+        node.style.setProperty("display", "block", "important");
+        node.style.setProperty("visibility", "visible", "important");
+      } catch (eRow) {}
+    });
   }
 
   function ensureSaranoniHeroImage() {
@@ -7457,6 +7481,7 @@
 
   global.ensureSteveSilverHeroImageSize = ensureSteveSilverHeroImageSize;
   global.ensureSteveSilverHeroPhotoSrc = ensureSteveSilverHeroPhotoSrc;
+  global.ensurePdpAccordionVisible = ensurePdpAccordionVisible;
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcHideNativeVolusionTabPanels = hideNativeVolusionTabPanels;
   global.mcMountDescriptionBelowFeatures = mountDescriptionBelowFeatures;
@@ -8314,18 +8339,17 @@
 
   function scheduleSteveSilverLayoutRepair() {
     if (!isSteveSilverPdpPage()) return;
-    if (!shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
     if (global.__MC_SS_LAYOUT_REPAIR_VER__ === VERSION) return;
     global.__MC_SS_LAYOUT_REPAIR_VER__ = VERSION;
-    [120, 700].forEach(function (ms) {
+    [120, 700, 1800, 3500].forEach(function (ms) {
       global.setTimeout(function () {
         try {
           prepareDeferredUnifiedPdpHero();
           hideNativeVolusionTabPanels();
+          mountPdpFeaturesBlock();
           mountDescriptionBelowFeatures();
-          if (isSteveSilverPdpPage()) {
-            appendSteveSilverInfoColumnOrder();
-          }
+          appendSteveSilverInfoColumnOrder();
+          ensurePdpAccordionVisible();
           syncPdpDescriptionViewMore();
           ensureUnifiedPdpLayout();
           if (typeof global.mcNormalizePdpLayout === "function") {
@@ -9436,6 +9460,14 @@
           ensureMahjongHousePdpCorrections();
           appendMahjongHouseInfoColumnOrder();
         } catch (eTmhFinal) {}
+      }
+      if (isSteveSilverPdpPage()) {
+        try {
+          mountPdpFeaturesBlock();
+          mountDescriptionBelowFeatures();
+          appendSteveSilverInfoColumnOrder();
+          ensurePdpAccordionVisible();
+        } catch (eSsFinal) {}
       }
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
         prepareDeferredUnifiedPdpHero();

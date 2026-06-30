@@ -15041,11 +15041,26 @@ body.mc-product-page .mc-pdp-top-retail-row--regular-only {
   visibility: hidden !important;
 }
 
-/* Hide accordion on non-Saranoni PDPs (Saranoni uses #mc-pdp-accordion for FEATURES / PRODUCT DETAILS) */
-body:not(.mc-saranoni-pdp) #mc-pdp-accordion,
-body:not(.mc-saranoni-pdp) .mc-pdp-accordion {
+/* Hide accordion on PDPs that don't use the McCabe accordion layout */
+body:not(.mc-saranoni-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-mahjong-house-pdp):not(.mc-pdp-accordion-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])) #mc-pdp-accordion,
+body:not(.mc-saranoni-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-mahjong-house-pdp):not(.mc-pdp-accordion-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])) .mc-pdp-accordion {
   display: none !important;
   visibility: hidden !important;
+}
+
+/* Steve Silver / Mahjong: keep accordion visible (beats legacy unscoped hide rules) */
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion,
+html body.mc-steve-silver-altview-pdp .mc-pdp-accordion,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion,
+html body.mc-pdp-accordion-pdp #mc-pdp-accordion,
+html body.mc-pdp-accordion-pdp .mc-pdp-accordion,
+html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #mc-pdp-accordion,
+html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) .mc-pdp-accordion,
+html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #mc-pdp-accordion,
+html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) .mc-pdp-accordion {
+  display: block !important;
+  visibility: visible !important;
 }
 </style>
 <script id="mc-pdp-regular-price-only-kill-switch">

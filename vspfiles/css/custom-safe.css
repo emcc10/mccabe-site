@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260701sshero2 */
+/* C_CSS_DEPLOY_VERIFY_20260701ssacc1 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -16926,6 +16926,24 @@ html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-saranoni-size-thumbs {
+  display: block !important;
+  visibility: visible !important;
+}
+
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion,
+html body.mc-steve-silver-altview-pdp .mc-pdp-accordion,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion,
+html body.mc-pdp-accordion-pdp #mc-pdp-accordion,
+html body.mc-pdp-accordion-pdp .mc-pdp-accordion,
+html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #mc-pdp-accordion,
+html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) .mc-pdp-accordion,
+html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #mc-pdp-accordion,
+html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) .mc-pdp-accordion,
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-acc-row,
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-acc-header,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-row,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-header {
   display: block !important;
   visibility: visible !important;
 }
