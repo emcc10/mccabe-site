@@ -7324,14 +7324,21 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   /** Volusion sometimes omits the photo in a related photo cell (e.g. Juno). Build PLP thumb from name link. */
+  function mcRelatedIsPlaceholderImgSrc(src) {
+    var s = String(src || '').trim();
+    if (!s || /^data:/i.test(s)) return true;
+    if (/clear1x1\.gif/i.test(s)) return true;
+    if (/nophoto/i.test(s)) return true;
+    if (/\/no[-_]?image|image[_-]?not[_-]?available|\/comingsoon|\/blank\.(gif|png|jpg)|^about:blank$/i.test(s))
+      return true;
+    return false;
+  }
+
   function mcRelatedPlpMediaNeedsFallback(mediaEl) {
     if (!mediaEl || !mediaEl.querySelector) return true;
     var img = mediaEl.querySelector('img');
     if (!img) return true;
-    var src = String(img.getAttribute('src') || '').trim();
-    if (!src || /^data:/i.test(src)) return true;
-    if (/clear1x1\.gif/i.test(src)) return true;
-    return false;
+    return mcRelatedIsPlaceholderImgSrc(img.getAttribute('src') || '');
   }
 
   function mcRelatedEnsurePlpCardMedia(mediaEl, nameA, phTd) {
@@ -7682,9 +7689,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
         chosen = chosen.replace(/^\s+|\s+$/g, '').replace(/^https?:\/\/[^/]+/i, '');
         if (
-          /\/no[-_]?image|image[_-]?not[_-]?available|\/comingsoon|\/blank\.(gif|png|jpg)|^about:blank$/i.test(
-            chosen
-          ) ||
+          mcRelatedIsPlaceholderImgSrc(chosen) ||
           /-0\.(png|jpg|jpeg|webp)(\?|$)/i.test(chosen) ||
           /(?:transparent|spacer|clear|pixel|blank)[^/]*\.(gif|png)(\?|$)/i.test(chosen)
         ) {

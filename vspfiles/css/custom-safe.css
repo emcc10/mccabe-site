@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260701sarplp2 */
+/* C_CSS_DEPLOY_VERIFY_20260630sarpdp1 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -20224,5 +20224,108 @@ html body.mc-saranoni-pdp:has(#mc-saranoni-size-thumbs .mc-saranoni-size-thumb) 
     height: auto !important;
     margin-left: auto !important;
     margin-right: auto !important;
+  }
+}
+
+/* MC_SARANONI_PDP_WHITESPACE_FIX_20260630 — tighter hero, larger image, related prices visible */
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area #v65-product-related .product_productprice,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #content_area #v65-product-related .product_productprice,
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area #related_products_content .product_productprice,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #content_area #related_products_content .product_productprice,
+body.mc-product-page #content_area .mc-related-plp-card__price,
+body.productdetails #content_area .mc-related-plp-card__price,
+body.mc-product-page #content_area .mc-related-plp-card__price .product_productprice,
+body.productdetails #content_area .mc-related-plp-card__price .product_productprice,
+body.mc-product-page #content_area .mc-related-plp-card__price font.pricecolorsmall,
+body.productdetails #content_area .mc-related-plp-card__price font.pricecolorsmall {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp #v65-product-parent .vCSS_breadcrumb_td,
+  html body.mc-saranoni-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td {
+    padding-top: 0 !important;
+    padding-bottom: 6px !important;
+    padding-left: 0 !important;
+    margin: 0 !important;
+  }
+
+  html body.mc-saranoni-pdp #v65-product-parent > tbody > tr:first-child img[src*="clear1x1"],
+  html body.mc-saranoni-pdp #v65-product-parent > tbody > tr:first-child br + img[src*="clear1x1"] {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #v65-product-parent > tbody > tr:nth-of-type(2) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 28px !important;
+    max-width: 1180px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td.mc-unified-pdp-media,
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:first-child {
+    flex: 1 1 0 !important;
+    flex-basis: auto !important;
+    width: auto !important;
+    max-width: min(720px, 58%) !important;
+    min-width: 0 !important;
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td.mc-unified-pdp-info,
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:last-child {
+    flex: 0 0 400px !important;
+    flex-basis: 400px !important;
+    width: 400px !important;
+    max-width: 400px !important;
+    min-width: 320px !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  html body.mc-saranoni-pdp img#product_photo,
+  html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media img#product_photo,
+  html body.mc-saranoni-pdp #product_photo_td img#product_photo,
+  html body.mc-saranoni-pdp a#product_photo_zoom_url,
+  html body.mc-saranoni-pdp a#product_photo_zoom_url2 {
+    width: 100% !important;
+    max-width: min(720px, 100%) !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    display: block !important;
+    object-fit: contain !important;
+  }
+
+  html body.mc-saranoni-pdp #v65-product-related,
+  html body.mc-saranoni-pdp #related_products_content {
+    margin-top: 20px !important;
+    margin-bottom: 16px !important;
+    padding-bottom: 0 !important;
+  }
+
+  html body.mc-saranoni-pdp #content_area,
+  html body.mc-saranoni-pdp #v65-product-parent {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
   }
 }

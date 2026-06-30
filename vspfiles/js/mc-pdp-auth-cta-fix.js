@@ -2966,13 +2966,13 @@
       "body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop='description'],body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop='description']{" +
       "font-family:Inter,Arial,sans-serif!important;font-size:14px!important;line-height:1.55!important;letter-spacing:0.02em!important;color:#444!important}" +
       "body.productdetails img#product_photo,body.mc-product-page img#product_photo{" +
-      "max-width:min(650px,100%)!important;width:100%!important;height:auto!important}" +
+      "max-width:min(720px,100%)!important;width:100%!important;height:auto!important}" +
       "body.productdetails a#product_photo_zoom_url,body.mc-product-page a#product_photo_zoom_url{" +
       "max-width:min(650px,100%)!important;width:100%!important;display:block!important}" +
       "html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row{" +
       "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:32px!important}" +
       "html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{" +
-      "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:0!important;column-gap:0!important}" +
+      "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:28px!important;column-gap:28px!important;justify-content:center!important;max-width:1180px!important;margin:0 auto!important}" +
       "html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-media-td{" +
       "padding-right:0!important;margin-right:0!important}" +
       "html body.mc-bean-bag-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-ruched-blanket-pdp #mc-pdp-title-right," +
@@ -10568,6 +10568,134 @@ try {
   });
   if (g.document && g.document.addEventListener) {
     g.document.addEventListener("DOMContentLoaded", killLegacyStabilizer);
+  }
+})(window);
+
+/* MC_PDP_RELATED_FIX_20260630 — NoPhoto thumbs + visible prices when template rail is still native table */
+(function (g) {
+  function volusionCodeFromHref(href) {
+    var h = String(href || "");
+    var m =
+      h.match(/\/-p\/([^.\/?#]+)/i) ||
+      h.match(/\/product-p\/([^.\/?#]+)/i) ||
+      h.match(/[?&]ProductCode=([^&]+)/i) ||
+      h.match(/[?&]productcode=([^&]+)/i);
+    if (!m || !m[1]) return "";
+    var raw = String(m[1]);
+    try {
+      raw = decodeURIComponent(raw.replace(/\+/g, " ")).trim();
+    } catch (eDec) {}
+    return raw.replace(/\.htm.*/i, "").toUpperCase();
+  }
+
+  function isPlaceholderSrc(src) {
+    var s = String(src || "").trim();
+    if (!s || /^data:/i.test(s)) return true;
+    if (/clear1x1\.gif/i.test(s)) return true;
+    if (/nophoto/i.test(s)) return true;
+    return false;
+  }
+
+  function bindThumbSwap(img, code) {
+    if (!img || !code) return;
+    img.onerror = function () {
+      var cur = img.getAttribute("src") || "";
+      if (/-1\.(jpg|jpeg|png|webp)(\?|$)/i.test(cur)) {
+        img.onerror = null;
+        img.setAttribute("src", "/v/vspfiles/photos/" + code + "-2T.jpg");
+        return;
+      }
+      if (/-2T\.(jpg|jpeg|png|webp)(\?|$)/i.test(cur)) {
+        img.onerror = null;
+        img.setAttribute("src", "/v/vspfiles/photos/" + code + "-1.jpg");
+      }
+    };
+  }
+
+  function fixRelatedNoPhotoImages(root) {
+    var scope = root || g.document;
+    scope
+      .querySelectorAll(
+        "#v65-product-related img, #related_products_content img, .mc-related-plp-card__media img"
+      )
+      .forEach(function (img) {
+        try {
+          if (!img || img.id === "product_photo" || img.id === "main-image") return;
+          var link =
+            (img.closest &&
+              img.closest(
+                'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="], a[href*="productcode="]'
+              )) ||
+            null;
+          if (!link) return;
+          var code = volusionCodeFromHref(link.getAttribute("href") || link.href || "");
+          if (!code) return;
+          if (!isPlaceholderSrc(img.getAttribute("src") || img.src)) return;
+          img.setAttribute("src", "/v/vspfiles/photos/" + code + "-1.jpg");
+          bindThumbSwap(img, code);
+        } catch (eImg) {}
+      });
+  }
+
+  function showRelatedPrices(root) {
+    var scope = root || g.document;
+    scope
+      .querySelectorAll(
+        "#v65-product-related .product_productprice, #related_products_content .product_productprice, " +
+          ".mc-related-plp-card__price, .mc-related-plp-card__price .product_productprice, " +
+          ".mc-related-plp-card__price .product_price, .mc-related-plp-card__price font.pricecolorsmall"
+      )
+      .forEach(function (node) {
+        try {
+          node.style.setProperty("display", "block", "important");
+          node.style.setProperty("visibility", "visible", "important");
+          node.style.setProperty("opacity", "1", "important");
+          node.style.setProperty("height", "auto", "important");
+          node.style.setProperty("max-height", "none", "important");
+        } catch (eShow) {}
+      });
+  }
+
+  function runRelatedFix() {
+    if (
+      !g.document.body ||
+      (!g.document.body.classList.contains("productdetails") &&
+        !g.document.body.classList.contains("mc-product-page"))
+    ) {
+      return;
+    }
+    try {
+      if (typeof g.mcRunRelatedFix === "function") g.mcRunRelatedFix();
+    } catch (eTpl) {}
+    fixRelatedNoPhotoImages(g.document);
+    showRelatedPrices(g.document);
+  }
+
+  g.mcFixPdpRelatedSection = runRelatedFix;
+
+  function bootRelated() {
+    runRelatedFix();
+    g.setTimeout(runRelatedFix, 400);
+    g.setTimeout(runRelatedFix, 1200);
+    g.setTimeout(runRelatedFix, 2800);
+  }
+
+  if (g.document.readyState === "loading") {
+    g.document.addEventListener("DOMContentLoaded", bootRelated);
+  } else {
+    bootRelated();
+  }
+  g.addEventListener("load", bootRelated);
+
+  if (g.MutationObserver && g.document.body) {
+    var t;
+    var mo = new g.MutationObserver(function () {
+      g.clearTimeout(t);
+      t = g.setTimeout(runRelatedFix, 150);
+    });
+    try {
+      mo.observe(g.document.body, { childList: true, subtree: true });
+    } catch (eMo) {}
   }
 })(window);
 

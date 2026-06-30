@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260706b";
+  var VERSION = "20260630a";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -245,7 +245,7 @@
   }
 
   function isNoPhotoPlaceholder(src) {
-    return /nophoto\.gif/i.test(String(src || ""));
+    return /nophoto/i.test(String(src || ""));
   }
 
   function injectVolusionProductGridStyle() {
@@ -1065,6 +1065,27 @@
       applyNoPhotoSwap(img, sku);
     });
 
+    root
+      .querySelectorAll(
+        "#v65-product-related a.productnamecolorsmall, #v65-product-related a.productnamecolor, " +
+          "#related_products_content a.productnamecolorsmall, #related_products_content a.productnamecolor, " +
+          ".mc-related-plp-card__title a"
+      )
+      .forEach(function (titleEl) {
+        var sku = skuFromProductTitle(
+          titleEl && (titleEl.getAttribute("title") || titleEl.textContent)
+        );
+        if (!sku || !/^[0-9A-Za-z][0-9A-Za-z-]*$/.test(sku)) return;
+        var card =
+          (titleEl.closest && titleEl.closest(".mc-related-plp-card")) ||
+          titleEl.closest("td") ||
+          titleEl.parentElement;
+        if (!card || !card.querySelector) return;
+        var img = card.querySelector("img");
+        if (!img || !isNoPhotoPlaceholder(img.currentSrc || img.src)) return;
+        applyNoPhotoSwap(img, sku);
+      });
+
     var legacyTable = root.querySelector("table.v65-productDisplay");
     if (
       legacyTable &&
@@ -1269,7 +1290,7 @@
 
     root.querySelectorAll("img").forEach(function (img) {
       if (!isProductPhoto(img)) return;
-      if (img.closest("#v65-product-related")) return;
+      if (img.closest("#v65-product-related, #related_products_content, .mc-related-plp-grid")) return;
 
       var parent = thumbBox(img);
       if (!parent) return;
