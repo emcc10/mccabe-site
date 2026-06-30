@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260630sar2 */
+/* C_CSS_DEPLOY_VERIFY_20260630sar3 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -16502,10 +16502,12 @@ html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-description-below-feat
 }
 
 html body.mc-saranoni-pdp #mc-pdp-accordion,
+html body.mc-saranoni-pdp .mc-pdp-accordion,
 html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-header,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper {
+  display: block !important;
   visibility: visible !important;
 }
 
@@ -16918,11 +16920,13 @@ html body.mc-saranoni-pdp-init:not(.mc-saranoni-pdp-ready) #mc-pdp-purchase-stac
 }
 
 html body.mc-saranoni-pdp #mc-pdp-accordion,
+html body.mc-saranoni-pdp .mc-pdp-accordion,
 html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-header,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-saranoni-size-thumbs {
+  display: block !important;
   visibility: visible !important;
 }
 
@@ -19087,7 +19091,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     box-sizing: border-box !important;
   }
 
-  html body.mc-saranoni-pdp.mc-saranoni-pdp-ready tr.mc-pdp-main-row > td:last-child table.colors_pricebox:not(:has(#mc-pdp-option-block)) {
+  html body.mc-saranoni-pdp.mc-saranoni-pdp-ready tr.mc-pdp-main-row > td:last-child table.colors_pricebox:not(:has(#mc-pdp-option-block)):not(:has(#mc-pdp-accordion)):not(:has(#mc-pdp-features)):not(:has(#mc-pdp-purchase-stack)):not(:has(#mc-pdp-price-stack-host)):not(:has(#mc-pdp-title-right)):not(:has(#messaging-element)) {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
