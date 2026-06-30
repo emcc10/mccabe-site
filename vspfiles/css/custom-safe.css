@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260702tmhaf2 */
+/* C_CSS_DEPLOY_VERIFY_20260630catnav1 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -20464,4 +20464,69 @@ html body.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-description-bel
 html.mc-mahjong-pdp-ready #mc-pdp-accordion,
 html body.mc-mahjong-pdp-ready #mc-pdp-accordion {
   display: block !important;
+}
+
+/* MC_CAT_NAV_OVERLAP_FIX_20260630 — Volusion often leaves body.is-home on category/PDP */
+html.category #slideshow-container .hero-menu,
+html.category #slideshow-container .hero-nav,
+html[data-mc-category-plp="1"] #slideshow-container .hero-menu,
+html[data-mc-category-plp="1"] #slideshow-container .hero-nav,
+body.category #slideshow-container .hero-menu,
+body.category #slideshow-container .hero-nav,
+html.mc-url-looks-like-pdp #slideshow-container .hero-menu,
+html.mc-url-looks-like-pdp #slideshow-container .hero-nav,
+body.productdetails #slideshow-container .hero-menu,
+body.mc-product-page #slideshow-container .hero-menu {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"], html.mc-url-looks-like-pdp, body.productdetails, body.mc-product-page)
+  #display_menu_1 > ul > li > ul,
+:is(html.category, body.category, html[data-mc-category-plp="1"], html.mc-url-looks-like-pdp, body.productdetails, body.mc-product-page)
+  #display_menu_1 .vnav--level1 > li > ul {
+  display: none !important;
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  z-index: 99999 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"], html.mc-url-looks-like-pdp, body.productdetails, body.mc-product-page)
+  #display_menu_1 > ul > li:hover > ul,
+:is(html.category, body.category, html[data-mc-category-plp="1"], html.mc-url-looks-like-pdp, body.productdetails, body.mc-product-page)
+  #display_menu_1 .vnav--level1 > li:hover > ul,
+:is(html.category, body.category, html[data-mc-category-plp="1"], html.mc-url-looks-like-pdp, body.productdetails, body.mc-product-page)
+  #display_menu_1 > ul > li:focus-within > ul,
+:is(html.category, body.category, html[data-mc-category-plp="1"], html.mc-url-looks-like-pdp, body.productdetails, body.mc-product-page)
+  #display_menu_1 .vnav--level1 > li:focus-within > ul {
+  display: block !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area nav.menu,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area .menu,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.vCSS_breadcrumb {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  float: none !important;
+  margin-top: 0 !important;
+  z-index: 1 !important;
+}
+
+@media (min-width: 992px) {
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) .container--content,
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) .content_area-wrapper,
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area {
+    margin-top: 0 !important;
+    padding-top: 12px !important;
+  }
+
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) header.header {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
 }
