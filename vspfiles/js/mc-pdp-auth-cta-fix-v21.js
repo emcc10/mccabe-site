@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260630sarrepair30
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260630sarrepair31
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260630sarrepair30";
+  var VERSION = "20260630sarrepair31";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -10489,9 +10489,9 @@ try {
   function centerAtcText() {
     var atc = doc.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]');
     if (atc) {
-      var currentStyle = atc.getAttribute('style') || '';
-      var newStyles = 'display: flex !important; justify-content: center !important; align-items: center !important;';
-      atc.setAttribute('style', currentStyle + ' ' + newStyles);
+      atc.style.setProperty('display', 'flex', 'important');
+      atc.style.setProperty('justify-content', 'center', 'important');
+      atc.style.setProperty('align-items', 'center', 'important');
     }
   }
   if (doc.readyState === 'loading') {
