@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260630sarrepair35
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260630sarrepair36
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260630sarrepair35";
+  var VERSION = "20260630sarrepair36";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -2372,6 +2372,7 @@
       btn.style.setProperty("opacity", "1", "important");
       btn.style.setProperty("width", "100%", "important");
       btn.style.setProperty("display", "block", "important");
+      btn.style.setProperty("text-align", "center", "important");
       btn.style.setProperty("box-sizing", "border-box", "important");
       btn.style.setProperty("-webkit-appearance", "none", "important");
       btn.style.setProperty("appearance", "none", "important");
