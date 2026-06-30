@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260630sarrepair28
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260630sarrepair29
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260630sarrepair28";
+  var VERSION = "20260630sarrepair29";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -10489,7 +10489,9 @@ try {
   function centerAtcText() {
     var atc = doc.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]');
     if (atc) {
-      atc.style.textAlign = 'center';
+      atc.style.display = 'flex';
+      atc.style.justifyContent = 'center';
+      atc.style.alignItems = 'center';
     }
   }
   if (doc.readyState === 'loading') {
