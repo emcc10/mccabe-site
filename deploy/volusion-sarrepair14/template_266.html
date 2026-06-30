@@ -629,7 +629,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
- 
+  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
   <script src="/v/vspfiles/js/mc-windsor-hero-fix.js?v=20260620windsor1"></script><!-- MC_WINDSOR_HERO_FIX -->
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
@@ -1525,7 +1525,7 @@ document.addEventListener("DOMContentLoaded", function () {
  
   <!-- DESIGN TOOLKIT -->
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
-  <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
+  <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix-v21.js */</script>
   <script>
 (function (g, d) {
   var FP = "20260624A";
@@ -1534,11 +1534,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
     if (d.documentElement.getAttribute("data-mc-pdp-auth-head-boot")) return;
     d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", "1");
-    d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+    d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix-v21.js"]').forEach(function (old) {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix-v21.js?mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -1548,7 +1548,7 @@ document.addEventListener("DOMContentLoaded", function () {
   </script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
-  <!-- mc-pdp-auth-cta-fix.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
+  <!-- mc-pdp-auth-cta-fix-v21.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
        A second static ?mcrd=live tag used to live here; it cached an old copy whose stabilizer
        fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260624B -->
   <script id="mc-ss-piece-hero-boot">
@@ -1611,7 +1611,7 @@ document.addEventListener("DOMContentLoaded", function () {
 })(window, document);
   </script>
   <script id="mc-plp-enforcer-bridge">
-(function(g,d){var W="20260701a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
+(function(g,d){var W="20260706a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
 function cat(){try{var p=String(g.location.pathname||"").toLowerCase();
 var isHome =
@@ -1909,12 +1909,11 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     <!-- HERO VIDEO -->
 <section class="mc-hero-video">
  <video class="mc-hero-video-el" autoplay muted loop playsinline preload="auto">
-  <source src="https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1" type="video/mp4">
+ <source src="/v/vspfiles/windsor-home.mp4" type="video/mp4">
 </video>
 <script>
 (function () {
-  window.MC_WINDSOR_HERO_SRC =
-    "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1";
+  window.MC_WINDSOR_HERO_SRC = "/v/vspfiles/windsor-home.mp4";
 
   window.mcEnsureWindsorHeroSrc = function (v) {
     if (!v) return false;
@@ -2503,15 +2502,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     <i class="vol-theme-icon vol-theme-icon--mastercard"></i>
                     <i class="vol-theme-icon vol-theme-icon--amex"></i>
                   </div>
-
-                  <section class="ssl microblock">
-                    <div class="microblock__body">
-                      <a id="ssl__link" href="javascript:void(0);" rel="nofollow">
-                        <p class="sr-only">View SSL Certificate</p>
-                        <svg class="icon"><use xlink:href="#svg-ssl-simple"></use></svg>
-                      </a>
-                    </div>
-                  </section>
                 </div>
               </div>
             </div>
@@ -4319,11 +4309,11 @@ try {
     /* current bundle loaded */
   } else if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
     document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
-    document.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+    document.querySelectorAll('script[src*="mc-pdp-auth-cta-fix-v21.js"]').forEach(function (old) {
       try { old.remove(); } catch (eRm) {}
     });
     var s = document.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix-v21.js?mcrd=" + Date.now();
     s.async = false;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -9128,41 +9118,12 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
   }
 
   function updateCategoryStickyPager(prevHref, nextHref) {
-    if (!isCategoryListing()) return;
-    var hasPrev = !!prevHref;
-    var hasNext = !!nextHref;
-    if (!hasPrev && !hasNext) {
-      var gone = document.getElementById(STICKY_ID);
-      if (gone && gone.parentNode) {
-        try {
-          gone.parentNode.removeChild(gone);
-        } catch (eRm) {}
-      }
-      return;
-    }
-    var root = document.getElementById(STICKY_ID);
-    if (!root) {
-      root = document.createElement('div');
-      root.id = STICKY_ID;
-      root.className = 'mc-category-pager-sticky';
-      root.setAttribute('aria-label', 'Category paging');
-      document.body.appendChild(root);
-    }
-    root.innerHTML = '';
-    if (hasPrev) {
-      var pa = document.createElement('a');
-      pa.className = 'mc-category-pager-sticky__prev';
-      pa.href = prevHref;
-      pa.textContent = 'Previous';
-      root.appendChild(pa);
-    }
-    if (hasNext) {
-      var na = document.createElement('a');
-      na.className = 'mc-category-pager-sticky__next';
-      na.href = nextHref;
-      na.setAttribute('aria-label', 'Next page');
-      na.textContent = '\u2192';
-      root.appendChild(na);
+    /* Disabled — canonical bottom pager only; sticky tiny Next removed at source. */
+    var gone = document.getElementById(STICKY_ID);
+    if (gone && gone.parentNode) {
+      try {
+        gone.parentNode.removeChild(gone);
+      } catch (eRmSticky) {}
     }
   }
 
@@ -9849,6 +9810,21 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     lastPagerSig = null;
   }
 
+  function mountPoint() {
+    var ca =
+      document.getElementById('content_area') ||
+      document.querySelector('.content_area-wrapper') ||
+      document.body;
+    if (!ca) return null;
+    var grid = ca.querySelector('#mc-products-start') || ca.querySelector('.v-product-grid');
+    if (grid && grid.parentNode) return { el: grid, parent: grid.parentNode };
+    var table = ca.querySelector('table.v65-productDisplay');
+    if (table && table.parentNode) return { el: table, parent: table.parentNode };
+    var seo = ca.querySelector('.mc-seo-footer');
+    if (seo && seo.parentNode) return { el: seo, parent: seo.parentNode };
+    return { el: ca, parent: ca };
+  }
+
   function renderPager() {
     try {
       if (!isCategoryListing()) return;
@@ -10004,7 +9980,51 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
         } catch (eOldTop) {}
       }
 
-      updateCategoryStickyPager(prevHref, nextHref);
+      updateCategoryStickyPager(null, null);
+
+      if (!hasNext && !prevHref) {
+        lastPagerSig = sig;
+        return;
+      }
+
+      var m = mountPoint();
+      if (!m || !m.parent) {
+        lastPagerSig = sig;
+        return;
+      }
+
+      var wrap = document.createElement('nav');
+      wrap.id = PAGER_ID;
+      wrap.className = 'mc-category-pager';
+      wrap.setAttribute('aria-label', 'Category pages');
+
+      if (prevHref) {
+        var pa = document.createElement('a');
+        pa.className = 'mc-category-pager__btn mc-category-pager__btn--prev';
+        pa.href = prevHref;
+        pa.textContent = 'Previous';
+        wrap.appendChild(pa);
+      }
+      if (hasNext) {
+        var na = document.createElement('a');
+        na.className = 'mc-category-pager__btn mc-category-pager__btn--next';
+        na.href = nextHref;
+        na.textContent = 'Next';
+        wrap.appendChild(na);
+      }
+
+      if (!wrap.querySelector('a')) {
+        lastPagerSig = sig;
+        return;
+      }
+
+      if (m.el === m.parent || m.el.id === 'content_area') {
+        m.parent.appendChild(wrap);
+      } else if (m.el.nextSibling) {
+        m.parent.insertBefore(wrap, m.el.nextSibling);
+      } else {
+        m.parent.appendChild(wrap);
+      }
 
       lastPagerSig = sig;
     } catch (err) {}
@@ -12294,7 +12314,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 </style>
 
-<!-- MC unified PDP normalizer: external mc-unified-pdp-layout.js (via mc-pdp-auth-cta-fix.js) -->
+<!-- MC unified PDP normalizer: external mc-unified-pdp-layout.js (via mc-pdp-auth-cta-fix-v21.js) -->
 
 
 <!-- MC removed legacy PDP accordion script: replaced by unified PDP normalizer 20260616unified12 -->
@@ -19012,7 +19032,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
 <link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260520plp-mat" id="mc-mccabe-overrides-body-last" />
-<link rel="stylesheet" href="/v/vspfiles/css/mc-plp-body-last.css?v=20260701a" id="mc-plp-body-last-css" />
+<link rel="stylesheet" href="/v/vspfiles/css/mc-plp-body-last.css?v=20260706a" id="mc-plp-body-last-css" />
 <link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521type" id="mc-live-patch-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
@@ -21466,7 +21486,7 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260701a"></script>
+  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260706a"></script>
  
   <script id="mc-my-boards-template-boot">
 (function () {
@@ -21706,8 +21726,7 @@ s0.parentNode.insertBefore(s1,s0);
       if (typeof window.mcPlayWindsorHeroAtSeven === "function") {
         window.mcPlayWindsorHeroAtSeven(v);
       } else {
-        var wantSrc =
-          "https://www.mccabestheaterandliving.com/v/vspfiles/windsor-home.mp4?v=20260620windsor1";
+        var wantSrc = "/v/vspfiles/windsor-home.mp4";
         var srcEl = v.querySelector("source");
         var cur = srcEl
           ? String(srcEl.getAttribute("src") || srcEl.src || "")

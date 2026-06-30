@@ -1,3 +1,4 @@
+/* C_CSS_DEPLOY_VERIFY_20260625sarrepair2 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -7166,6 +7167,140 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   border-color: #333 !important;
 }
 
+/* MC_CATEGORY_PLP_CANONICAL_20260625 — meta, grid gap, native pager hide, footer copy */
+:is(html.category, body.category, html[data-mc-category-plp="1"]) input.next_page_img,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) input.prev_page_img,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) img.next_page_img,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) img.prev_page_img {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  pointer-events: none !important;
+}
+
+#mc-category-pager-top,
+#mc-category-pager-sticky {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta {
+  position: static !important;
+  clear: both !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 18px 0 12px !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  z-index: auto !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__breadcrumb {
+  display: block !important;
+  margin: 0 0 10px !important;
+  padding: 0 !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: #444 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__breadcrumb a {
+  color: #444 !important;
+  text-decoration: none !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__breadcrumb a:hover {
+  text-decoration: underline !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__subcats {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__subcats .subcategory_link {
+  display: inline-block !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: #333 !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__subcats .subcategory_link:hover {
+  text-decoration: underline !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #mc-cat-luxe-comforts .mc-cat-hero {
+  min-height: 320px !important;
+  margin-bottom: 28px !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #mc-cat-luxe-comforts .mc-cat-hero__media,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #mc-cat-luxe-comforts .mc-cat-hero__media img {
+  min-height: 320px !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table[cellpadding="8"]:has(.v-product-grid),
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay:has(.v-product-grid) {
+  margin-top: 32px !important;
+  padding-top: 0 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table[cellpadding="8"]:has(.v-product-grid) > tbody > tr > td,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay:has(.v-product-grid) > tbody > tr > td {
+  padding-top: 0 !important;
+  vertical-align: top !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-footer-copy {
+  display: block !important;
+  max-width: 900px !important;
+  margin: 30px auto !important;
+  padding: 0 20px !important;
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+  color: #5a5a5a !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-footer-copy a {
+  color: #333 !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-footer-copy a:hover {
+  text-decoration: underline !important;
+}
+
+footer.footer section.ssl.microblock,
+footer.footer #ssl__link {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
 /* =========================================================
    PDP: main row — image left, options right (desktop); stacked on mobile
    (tagged row: tr.mc-pdp-main-row from template_266.html)
@@ -9779,6 +9914,13 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   .content_area-wrapper {
     margin-left: auto !important;
     margin-right: auto !important;
+  }
+
+  /* Pull main column up on non-category pages only — category breadcrumb must stay below nav */
+  html:not(.category):not([data-mc-category-plp="1"]) .container--content,
+  html:not(.category):not([data-mc-category-plp="1"]) .content_area-wrapper,
+  body:not(.category):not([data-mc-category-plp="1"]) .container--content,
+  body:not([data-mc-category-plp="1"]) .content_area-wrapper {
     margin-top: -40px !important;
   }
 }
@@ -11468,32 +11610,7 @@ html.mc-paragon-pdp body #mcProductSummaryBtn {
    Add to very bottom of custom-safe.css
    ========================================================= */
 
-/* ---------- MAIN MENU: LOCK VERTICAL POSITION SITEWIDE ---------- */
-
-body:not(.homepage) .vnav--horizontal,
-body:not(.homepage) ul.vnav--horizontal,
-body:not(.homepage) .vnav,
-body:not(.homepage) #vnav,
-body:not(.homepage) #display_menu_1,
-body:not(.homepage) #display_menu_2 {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  top: 0 !important;
-  transform: none !important;
-}
-
-/* Product pages specifically were dropping the menu lower */
-body:has(#v65-product-parent) .vnav--horizontal,
-body:has(#v65-product-parent) ul.vnav--horizontal,
-body:has(#v65-product-parent) .vnav,
-body:has(#v65-product-parent) #vnav,
-body:has(#v65-product-parent) #display_menu_1,
-body:has(#v65-product-parent) #display_menu_2 {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  top: 0 !important;
-  transform: none !important;
-}
+/* ---------- MAIN MENU: desktop dropdown positioning (level-1 only; never generic .vnav) ---------- */
 
 /* If the menu is inside the hero/header wrapper, prevent product page offset */
 body:has(#v65-product-parent) header,
@@ -11666,30 +11783,6 @@ body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartbutton 
    ========================================================= */
 
 /* --- Keep the existing desktop menu aligned sitewide --- */
-
-@media (min-width: 768px) {
-  body #display_menu_1,
-  body #display_menu_2,
-  body .vnav--horizontal,
-  body ul.vnav--horizontal,
-  body .vnav {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    top: 0 !important;
-    transform: none !important;
-  }
-
-  body:has(#v65-product-parent) #display_menu_1,
-  body:has(#v65-product-parent) #display_menu_2,
-  body:has(#v65-product-parent) .vnav--horizontal,
-  body:has(#v65-product-parent) ul.vnav--horizontal,
-  body:has(#v65-product-parent) .vnav {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    top: 0 !important;
-    transform: none !important;
-  }
-}
 
 /* --- Configuration caption: show full text, no ellipsis --- */
 
@@ -16672,8 +16765,8 @@ html body.mc-saranoni-pdp .mc-configured-color-swatch-label {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+  text-transform: none !important;
   color: #444 !important;
   line-height: 1.4 !important;
   white-space: normal !important;
@@ -16762,14 +16855,14 @@ html body.mc-saranoni-pdp .mc-saranoni-purchase-stack {
 
 html body.mc-saranoni-pdp #mc-pdp-option-block #options_table,
 html body.mc-saranoni-pdp #mc-pdp-option-block table[id*="options_table"] {
-  display: table !important;
-  visibility: visible !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 12px 0 0 0 !important;
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
 }
 
 html body.mc-saranoni-pdp #mc-pdp-features {
@@ -16924,19 +17017,6 @@ html body.mc-saranoni-pdp .mc-pdp-return-link:hover {
   color: #111 !important;
 }
 
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__heading,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__heading {
-  display: block !important;
-  margin: 0 0 8px 0 !important;
-  padding: 0 0 0 1.1em !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-  color: #444 !important;
-}
-
 html body.mc-saranoni-pdp #mc-saranoni-selected-color-name,
 html body.mc-saranoni-pdp .mc-saranoni-color-picker__heading #mc-saranoni-selected-color-name {
   font-weight: 600 !important;
@@ -16944,50 +17024,28 @@ html body.mc-saranoni-pdp .mc-saranoni-color-picker__heading #mc-saranoni-select
   text-transform: none !important;
 }
 
-html body.mc-saranoni-pdp .mc-saranoni-color-picker,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 0 16px 0 !important;
+/* Duplicate configured swatch mounts — keep only the info-column instance */
+html body.mc-saranoni-pdp #mc-pdp-features #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp .mc-acc-content #mc-configured-color-swatch-wrapper {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
   padding: 0 !important;
 }
 
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 0 0 1.1em !important;
-  box-sizing: border-box !important;
+html body.mc-saranoni-pdp .mc-configured-color-swatch.mc-saranoni-text-swatch {
+  min-width: 72px !important;
 }
 
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs a,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a {
-  display: block !important;
-  width: 72px !important;
-  max-width: 72px !important;
-  margin: 0 !important;
-  border: 2px solid transparent !important;
-  border-radius: 4px !important;
-  box-sizing: border-box !important;
-}
-
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active {
-  border-color: #111 !important;
-}
-
-html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs img,
-html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs img {
-  display: block !important;
-  width: 100% !important;
-  height: auto !important;
-  object-fit: cover !important;
+html body.mc-saranoni-pdp #mc-pdp-price-stack-host,
+html body.mc-saranoni-pdp #messaging-element,
+html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper {
+  border: 0 !important;
+  border-top: 0 !important;
+  box-shadow: none !important;
 }
 
 /* Bean bag color thumbnails under hero at all breakpoints */
@@ -19252,27 +19310,6 @@ html body footer.footer [class*="col-"] {
   padding-right: 14px !important;
 }
 
-html body footer.footer .footer__logo,
-html body footer.footer .footer__logo + div {
-  flex: 0 0 16.6667% !important;
-  max-width: 16.6667% !important;
-  min-height: 1px !important;
-  text-align: left !important;
-}
-
-html body footer.footer .col-md-6.col-lg-4 {
-  flex: 0 0 33.3333% !important;
-  max-width: 33.3333% !important;
-  text-align: left !important;
-}
-
-html body footer.footer .elist__wrapper {
-  flex: 0 0 33.3333% !important;
-  max-width: 33.3333% !important;
-  margin-left: auto !important;
-  text-align: right !important;
-}
-
 html body footer.footer .elist__wrapper > div {
   width: 100% !important;
   max-width: 100% !important;
@@ -19471,4 +19508,313 @@ html body footer.footer .icon {
     justify-content: center !important;
     text-align: center !important;
   }
+}
+
+}
+
+/* MC_NAV_DROPDOWN_CANONICAL_20260628 — level-1 only; never generic .vnav */
+@media (min-width: 992px) {
+  body:not(.homepage) #display_menu_1 > ul.vnav--level1,
+  body:has(#v65-product-parent) #display_menu_1 > ul.vnav--level1 {
+    position: relative !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    transform: none !important;
+  }
+
+  #display_menu_1 > ul.vnav--level1 > li.vnav__item {
+    position: relative !important;
+  }
+
+  #display_menu_1 > ul.vnav--level1 > li.vnav__item > ul.vnav__subnav {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    z-index: 10050 !important;
+  }
+
+  #display_menu_1 ul.vnav__subnav li.vnav__item {
+    position: relative !important;
+  }
+
+  #display_menu_1 ul.vnav__subnav ul.vnav__subnav {
+    position: absolute !important;
+    top: 0 !important;
+    left: 100% !important;
+    margin-top: 0 !important;
+    transform: none !important;
+  }
+}
+
+/* MC_FOOTER_CENTER_CANONICAL_20260628 — sitewide; hidden logo/social take zero width */
+footer.footer .footer__section.pt--base .flex-sm-and-up {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+footer.footer .footer__section.pt--base .flex-sm-and-up > .footer__logo,
+footer.footer .footer__section.pt--base .flex-sm-and-up > div:has(> section.social) {
+  display: none !important;
+  width: 0 !important;
+  max-width: 0 !important;
+  flex: 0 0 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+footer.footer .footer__section.pt--base .flex-sm-and-up > .col-md-6.col-lg-4,
+footer.footer .footer__section.pt--base .flex-sm-and-up > .elist__wrapper.col-lg-4 {
+  float: none !important;
+  flex: 0 1 420px !important;
+  width: auto !important;
+  max-width: 420px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  text-align: center !important;
+}
+
+footer.footer .link-column {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 10px 22px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  text-align: center !important;
+}
+
+footer.footer .elist__wrapper > div {
+  float: none !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+@media (max-width: 991px) {
+  footer.footer .footer__section.pt--base .flex-sm-and-up > .col-md-6.col-lg-4,
+  footer.footer .footer__section.pt--base .flex-sm-and-up > .elist__wrapper.col-lg-4 {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ---- MC_20260627d: cart/account float circle fixes (from remote main) ---- */
+html body a.mc-cart-float,
+html body .mc-cart-float,
+html body a.mc-account-float,
+html body .mc-account-float,
+body a.mc-cart-float,
+body .mc-cart-float,
+body a.mc-account-float,
+body .mc-account-float {
+  height: 52px !important;
+  max-height: 52px !important;
+  min-height: 52px !important;
+  width: 52px !important;
+  max-width: 52px !important;
+  min-width: 52px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
+  text-indent: 0 !important;
+}
+
+html body a.mc-cart-float > svg.mc-cart-float__icon,
+html body a.mc-account-float > svg.mc-account-float__icon,
+body a.mc-cart-float > svg.mc-cart-float__icon,
+body a.mc-account-float > svg.mc-account-float__icon {
+  position: static !important;
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  flex: none !important;
+}
+
+html body a.mc-cart-float > svg.mc-cart-float__icon path,
+html body a.mc-account-float > svg.mc-account-float__icon path,
+body a.mc-cart-float > svg.mc-cart-float__icon path,
+body a.mc-account-float > svg.mc-account-float__icon path {
+  transform: none !important;
+}
+
+@media (min-width: 992px) {
+  html body a.mc-account-float,
+  html body .mc-account-float,
+  body a.mc-account-float,
+  body .mc-account-float {
+    height: 52px !important;
+    max-height: 52px !important;
+    min-height: 52px !important;
+    width: 52px !important;
+    max-width: 52px !important;
+    min-width: 52px !important;
+  }
+}
+
+/* ---- MC_20260630a: Mahjong PDP/header/category layout locks ---- */
+html body.mc-mahjong-house-pdp #mc-pdp-brand-logo,
+html body.mc-mahjong-house-pdp .mc-pdp-brand-logo {
+  display: block !important;
+  margin: 0 0 10px !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-brand-logo img,
+html body.mc-mahjong-house-pdp .mc-pdp-brand-logo img,
+html body.mc-mahjong-house-pdp img.vCSS_img_mfg_logo[src*="mahjong" i] {
+  display: block !important;
+  width: auto !important;
+  max-width: 230px !important;
+  max-height: 82px !important;
+  height: auto !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+}
+
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-brand-logo,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-title-right,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-price-stack-host,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #messaging-element,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-option-block,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-purchase-stack,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-brand-logo,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-title-right,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-price-stack-host,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #messaging-element,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-option-block,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-purchase-stack {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion,
+html body.mc-mahjong-house-pdp .mc-acc-panel,
+html body.mc-mahjong-house-pdp .mc-acc-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  padding-right: 0 !important;
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-accordion *,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion * {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-mahjong-house-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-mahjong-house-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row {
+    gap: 24px !important;
+    column-gap: 24px !important;
+    justify-content: center !important;
+  }
+
+  html body.mc-mahjong-house-pdp td.mc-pdp-media-td,
+  html body.mc-mahjong-house-pdp td.mc-unified-pdp-media {
+    max-width: 620px !important;
+    padding-right: 0 !important;
+  }
+
+  html body.mc-mahjong-house-pdp td.mc-pdp-options-td,
+  html body.mc-mahjong-house-pdp td.mc-unified-pdp-info {
+    width: 440px !important;
+    min-width: 420px !important;
+    max-width: 440px !important;
+    padding-left: 0 !important;
+  }
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__subcats,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area nav.menu,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area .menu {
+  position: relative !important;
+  z-index: 1 !important;
+  clear: both !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) header.header .hero-menu,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) header.header nav.menu,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .hero-menu {
+  position: relative !important;
+  z-index: 20 !important;
+}
+
+@media (min-width: 992px) {
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area {
+    padding-top: 18px !important;
+  }
+
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta {
+    margin-top: 24px !important;
+  }
+}
+
+html body .mc-header-cart,
+html body .mc-header-cart__link {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+html body a.mc-cart-float,
+html body .mc-cart-float {
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+}
+
+html body .mc-header-cart__link::before,
+html body .mc-header-cart__link::after {
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+html body a.mc-cart-float > svg.mc-cart-float__icon,
+body a.mc-cart-float > svg.mc-cart-float__icon {
+  display: block !important;
+  margin: auto !important;
+  align-self: center !important;
+  justify-self: center !important;
 }
