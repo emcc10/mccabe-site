@@ -160,6 +160,7 @@ CRITICAL_ALWAYS=(
   "vspfiles/templates/266/css/mccabe-overrides.css"
   # verify_mc_pdp_js_sftp.py gates on these every run — must upload even on changed-only pushes.
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
+  "vspfiles/js/mc-pdp-auth-cta-fix-v21.js"
   "vspfiles/js/mc-pdp-price-stack.js"
   "vspfiles/js/mc-unified-pdp-layout.js"
   "vspfiles/js/mc-plp-enforcer.js"
@@ -322,6 +323,11 @@ maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-fix.js" "mc-pdp-auth-cta-fix" \
   "/v/vspfiles/js/mc-pdp-auth-cta-fix.js" \
   "/vspfiles/js/mc-pdp-auth-cta-fix.js" \
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
+
+maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-fix-v21.js" "mc-pdp-auth-cta-fix-v21" \
+  "/v/vspfiles/js/mc-pdp-auth-cta-fix-v21.js" \
+  "/vspfiles/js/mc-pdp-auth-cta-fix-v21.js" \
+  "vspfiles/js/mc-pdp-auth-cta-fix-v21.js"
 
 maybe_put_primary "vspfiles/js/mc-unified-pdp-layout.js" "mc-unified-pdp-layout" \
   "/v/vspfiles/js/mc-unified-pdp-layout.js" \

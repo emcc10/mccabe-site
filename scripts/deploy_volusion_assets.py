@@ -15,6 +15,7 @@ CRITICAL = (
     "vspfiles/templates/266/js/min/template.min.js",
     "vspfiles/js/mc-plp-enforcer.js",
     "vspfiles/js/mc-pdp-auth-cta-fix.js",
+    "vspfiles/js/mc-pdp-auth-cta-fix-v21.js",
     "vspfiles/js/mc-unified-pdp-layout.js",
     "vspfiles/js/mc-pdp-price-stack.js",
     "vspfiles/css/mc-plp-body-last.css",
@@ -54,6 +55,7 @@ CHUNKED_JS_OVER_CAP = (
     "vspfiles/templates/266/js/min/template.min.js",
     "vspfiles/js/mtl-sectional-renderer.js",
     "vspfiles/js/mc-pdp-auth-cta-fix.js",
+    "vspfiles/js/mc-pdp-auth-cta-fix-v21.js",
 )
 
 SKIP_OVER_CAP = ()
@@ -78,6 +80,7 @@ _ALWAYS_DEPLOY = frozenset(
         "vspfiles/css/custom-safe.css",
         "vspfiles/templates/266/css/mccabe-overrides.css",
         "vspfiles/js/mc-pdp-auth-cta-fix.js",
+        "vspfiles/js/mc-pdp-auth-cta-fix-v21.js",
         "vspfiles/js/mc-pdp-price-stack.js",
         "vspfiles/js/mc-unified-pdp-layout.js",
         "vspfiles/js/mc-plp-enforcer.js",

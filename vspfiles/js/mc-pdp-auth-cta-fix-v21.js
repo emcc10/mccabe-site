@@ -2157,8 +2157,8 @@
       (global.document.head || global.document.documentElement).appendChild(st);
     }
     st.textContent =
-      "html body.mc-mahjong-house-pdp #mc-pdp-brand-logo{display:block!important;margin:0 0 10px!important;padding:0!important;text-align:left!important}" +
-      "html body.mc-mahjong-house-pdp #mc-pdp-brand-logo img{display:block!important;width:auto!important;max-width:230px!important;max-height:82px!important;height:auto!important;margin:0!important;object-fit:contain!important}" +
+      "html body.mc-mahjong-house-pdp #mc-pdp-brand-logo{display:block!important;margin:0 auto 10px!important;padding:0!important;text-align:center!important}" +
+      "html body.mc-mahjong-house-pdp #mc-pdp-brand-logo img{display:block!important;width:auto!important;max-width:230px!important;max-height:82px!important;height:auto!important;margin:0 auto!important;object-fit:contain!important}" +
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion,html body.mc-mahjong-house-pdp .mc-pdp-accordion{width:100%!important;max-width:100%!important;box-sizing:border-box!important;overflow:visible!important;padding-right:0!important}" +
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion *,html body.mc-mahjong-house-pdp .mc-pdp-accordion *{box-sizing:border-box!important;max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important}" +
       "html body.mc-mahjong-house-pdp .mc-acc-panel,html body.mc-mahjong-house-pdp .mc-acc-content{width:100%!important;max-width:100%!important;overflow:visible!important;padding-right:0!important}" +
@@ -8651,6 +8651,7 @@
           hideNativeVolusionTabPanels();
           mountPdpFeaturesBlock();
           mountDescriptionBelowFeatures();
+          ensureSaranoniPdpAccordion();
           appendSteveSilverInfoColumnOrder();
           ensurePdpAccordionVisible();
           syncPdpDescriptionViewMore();
@@ -9775,6 +9776,7 @@
           markCloseoutPdpPage();
           mountPdpFeaturesBlock();
           mountDescriptionBelowFeatures();
+          ensureSaranoniPdpAccordion();
           appendSteveSilverInfoColumnOrder();
           ensurePdpAccordionVisible();
         } catch (eSsFinal) {}
