@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260702tmhlayout1";
-  var AUTH_LAYOUT_VER = "20260702tmhlayout1";
+  var LAYOUT_VER = "20260702tmhlayout2";
+  var AUTH_LAYOUT_VER = "20260702tmhlayout2";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -506,7 +506,6 @@
   }
 
   function isUnifiedStable() {
-    if (isMahjongPdpReady()) return true;
     var body = global.document.body;
     var info = qs("td.mc-unified-pdp-info");
     var features = info && qs("#mc-pdp-features", info);
@@ -1457,7 +1456,7 @@
   function mcNormalizePdpLayout() {
     if (!isPDP()) return false;
     if (isSectionalConfigurator()) return false;
-    if (isMahjongPdpReady() || isUnifiedStable()) return true;
+    if (isUnifiedStable()) return true;
 
     unwrapBadWrapper();
     tagProductBodyClasses();
@@ -1678,7 +1677,7 @@
   }
 
   function forceNormalizePass() {
-    if (isMahjongPdpReady()) return;
+    if (isUnifiedStable()) return;
     global.__MC_UNIFIED_PDP_STABLE__ = false;
     mcNormalizePdpLayout();
   }
