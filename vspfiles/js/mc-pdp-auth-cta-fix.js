@@ -37,7 +37,7 @@
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260701tmhdesc1";
+  var VERSION = "20260701tmhacc1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -2131,15 +2131,23 @@
     });
   }
 
-  function openMahjongProductDetailsAccordionRow() {
+  function ensureMahjongAccordionClosed() {
     if (!isMahjongHousePdpPage()) return;
-    var row = global.document.getElementById("mc-acc-row-saranoni-product-details");
-    if (!row) return;
-    var header = row.querySelector(".mc-acc-header");
-    var panel = row.querySelector(".mc-acc-panel");
-    row.dataset.open = "1";
-    if (header) header.setAttribute("aria-expanded", "true");
-    if (panel) panel.setAttribute("aria-hidden", "false");
+    global.document.querySelectorAll("#mc-pdp-accordion .mc-acc-row").forEach(function (row) {
+      row.dataset.open = "0";
+      var header = row.querySelector(".mc-acc-header");
+      var panel = row.querySelector(".mc-acc-panel");
+      if (header) {
+        header.setAttribute("aria-expanded", "false");
+        try {
+          header.style.setProperty("display", "flex", "important");
+          header.style.setProperty("align-items", "center", "important");
+          header.style.setProperty("justify-content", "space-between", "important");
+          header.style.setProperty("width", "100%", "important");
+        } catch (eHdr) {}
+      }
+      if (panel) panel.setAttribute("aria-hidden", "true");
+    });
   }
 
   function ensureMahjongHousePdpCorrections() {
@@ -2169,7 +2177,7 @@
       hideMahjongHeroManufacturerLogo();
       syncPdpDescriptionViewMore();
       ensureMahjongDescriptionVisible();
-      openMahjongProductDetailsAccordionRow();
+      ensureMahjongAccordionClosed();
     } catch (eTmh) {}
   }
   var placeBrandLogoAboveTitle = placeBrandLogoBelowTitle;
@@ -3534,7 +3542,7 @@
       ensurePdpAccordionVisible();
       if (isMahjongHousePdpPage()) {
         ensureMahjongDescriptionVisible();
-        openMahjongProductDetailsAccordionRow();
+        ensureMahjongAccordionClosed();
       }
     }
     return acc;
@@ -3548,11 +3556,20 @@
       acc.style.setProperty("visibility", "visible", "important");
       acc.classList.add("mc-pdp-accordion");
     } catch (eAcc) {}
-    acc.querySelectorAll(".mc-acc-row, .mc-acc-header").forEach(function (node) {
+    acc.querySelectorAll(".mc-acc-row").forEach(function (node) {
       try {
         node.style.setProperty("display", "block", "important");
         node.style.setProperty("visibility", "visible", "important");
       } catch (eRow) {}
+    });
+    acc.querySelectorAll(".mc-acc-header").forEach(function (node) {
+      try {
+        node.style.setProperty("display", "flex", "important");
+        node.style.setProperty("align-items", "center", "important");
+        node.style.setProperty("justify-content", "space-between", "important");
+        node.style.setProperty("width", "100%", "important");
+        node.style.setProperty("visibility", "visible", "important");
+      } catch (eHdr) {}
     });
   }
 
@@ -4278,7 +4295,7 @@
     applyMahjongHouseInfoColumnOrder(infoColumn);
     hideMahjongHeroManufacturerLogo();
     ensureMahjongDescriptionVisible();
-    openMahjongProductDetailsAccordionRow();
+    ensureMahjongAccordionClosed();
   }
 
   function ensurePdpInfoColumnOrder() {

@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260701tmhdesc1 */
+/* C_CSS_DEPLOY_VERIFY_20260701tmhacc1 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -16588,7 +16588,6 @@ html body.mc-saranoni-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
 html body.mc-saranoni-pdp #mc-pdp-accordion #mc-configured-color-swatch-wrapper,
 html body.mc-mahjong-house-pdp #mc-pdp-accordion,
 html body.mc-mahjong-house-pdp .mc-pdp-accordion,
-html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-header,
 html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
 html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-acc-saranoni-product-details-host,
 html body.mc-mahjong-house-pdp #mc-pdp-accordion #ProductDetail_ProductDetails_div,
@@ -17027,10 +17026,17 @@ html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value
 html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #mc-pdp-accordion,
 html body.mc-product-page:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) .mc-pdp-accordion,
 html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-acc-row,
-html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-acc-header,
-html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-row,
-html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-header {
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-row {
   display: block !important;
+  visibility: visible !important;
+}
+
+html body.mc-steve-silver-altview-pdp #mc-pdp-accordion .mc-acc-header,
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
   visibility: visible !important;
 }
 
@@ -20414,4 +20420,31 @@ html body .mc-cart-float > svg.mc-cart-float__icon path {
 :is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table td.colors_backgroundneutral {
   position: static !important;
   float: none !important;
+}
+
+/* MC_MAHJONG_ACC_HEADER_FLEX_20260701 — keep label/chevron on opposite ends */
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-header,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion .mc-acc-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-label,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion .mc-acc-label {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-accordion .mc-acc-chevron,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion .mc-acc-chevron {
+  flex: 0 0 auto !important;
+  margin-left: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
