@@ -4768,6 +4768,14 @@
       if (global.document.body && global.document.body.classList.contains("mc-closeout-pdp")) {
         return true;
       }
+      var closeoutSlugPattern =
+        /\/product-p\/(?:adeline-patio-set|burlington-dining-set|canova-dining-set|delilah-patio-chairs|grayson-dining-set|molly-olson-dining-set|ramona-dining-set|sapphire-sleep-cal-king|tamara-outdoor-sectional|tyler-bar-set|wyatt-chofa)\.htm/i;
+      if (closeoutSlugPattern.test(String(global.location.pathname || ""))) return true;
+      var closeoutCodePattern =
+        /^(?:ADELINE-PATIO-SET|BURLINGTON-DINING-SET|CANOVA-DINING-SET|DELILAH-PATIO-CHAIRS|GRAYSON-DINING-SET|MOLLY-OLSON-DINING-SET|RAMONA-DINING-SET|SAPPHIRE-SLEEP-CAL-KING|TAMARA-OUTDOOR-SECTIONAL|TYLER-BAR-SET|WYATT-CHOFA)$/i;
+      var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pc = String((pcEl && pcEl.value) || global.global_Current_ProductCode || "").trim();
+      if (closeoutCodePattern.test(pc)) return true;
       var ids = parseBreadCrumbCategoryIds();
       var i;
       for (i = 0; i < ids.length; i++) {
