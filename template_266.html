@@ -20,6 +20,7 @@ html.category body:not(.is-home) #slideshow-container,
 html.category body:not(.is-home) #slideshow-container .mc-hero-video,
 body.category:not(.is-home) #if_homepage,
 body.category:not(.is-home) #slideshow-container{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;background:transparent!important}
+html.category #slideshow-container,html[data-mc-category-plp="1"] #slideshow-container,body.category #slideshow-container{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;background:transparent!important}
 
 html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box,html.category .v-product-grid a.v-product__img.mc-plp-image-box{display:flex!important;align-items:flex-end!important;justify-content:center!important;width:100%!important;height:260px!important;overflow:visible!important;background:transparent!important;box-sizing:border-box!important;padding:0!important}
 html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box>img,html.category .v-product-grid a.v-product__img.mc-plp-image-box>img{width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center bottom!important;transform:none!important;display:block!important}
@@ -1515,16 +1516,15 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 </style>
   <style id="mc-tmh-pdp-critical-20260702">
-html:has(#v65-product-parent input[name="ProductCode"][value^="TMH-"]) #ProductDetail_ProductDetails_div,
-html:has(#v65-product-parent input[name="ProductCode"][value^="TMH-"]) #product_description,
-html:has(#v65-product-parent input[name="ProductCode"][value^="TMH-"]) span[itemprop="description"],
-html:has(#v65-product-parent input[name="ProductCode"][value^="TMH-"]) table.colors_descriptionbox,
-html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #ProductDetail_ProductDetails_div,
-html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #product_description,
-html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) span[itemprop="description"],
-html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) table.colors_descriptionbox,
-html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion,
-html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-description-below-features{
+html:has(#v65-product-parent input[name="ProductCode"][value^="TMH-"]):not(.mc-mahjong-pdp-ready) #ProductDetail_ProductDetails_div2,
+html:has(#v65-product-parent input[name="ProductCode"][value^="TMH-"]):not(.mc-mahjong-pdp-ready) #Header_ProductDetail_ProductDetails,
+html:has(#v65-product-parent input[name="ProductCode"][value^="TMH-"]):not(.mc-mahjong-pdp-ready) td#Header_ProductDetail_ProductDetails,
+html:has(#v65-product-parent input[name="ProductCode"][value^="TMH-"]):not(.mc-mahjong-pdp-ready) #v65-product-parent > tbody > tr > td:first-child table.colors_descriptionbox,
+html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #ProductDetail_ProductDetails_div2,
+html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #Header_ProductDetail_ProductDetails,
+html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) td#Header_ProductDetail_ProductDetails,
+html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #v65-product-parent > tbody > tr > td:first-child table.colors_descriptionbox,
+html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion{
   display:none!important}
 </style>
   <script id="mc-tmh-pdp-boot-20260702">
