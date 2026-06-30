@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260630catnav1 */
+/* C_CSS_DEPLOY_VERIFY_20260630sarpdp2 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -19146,13 +19146,9 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     box-sizing: border-box !important;
   }
 
-  html body.mc-saranoni-pdp #v65-product-parent tbody:has(> tr.mc-pdp-main-row) {
-    display: block !important;
-  }
-
-  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp #v65-product-parent > tbody > tr.mc-pdp-main-row {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready #v65-product-parent > tbody > tr.mc-pdp-main-row {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -19165,7 +19161,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
   }
 
   /* Volusion wraps each hero cell in a direct <td> inside mc-pdp-main-row — flex those wrappers. */
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td {
     display: block !important;
     flex: 1 1 0% !important;
     width: auto !important;
@@ -19175,13 +19171,13 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     vertical-align: top !important;
   }
 
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:first-child {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td:first-child {
     flex: 1 1 55% !important;
     flex-basis: 55% !important;
     max-width: 58% !important;
   }
 
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:last-child {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td:last-child {
     flex: 0 0 460px !important;
     flex-basis: 460px !important;
     flex-shrink: 0 !important;
@@ -19214,8 +19210,8 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     border: 0 !important;
   }
 
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
-  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-media-td {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td.mc-unified-pdp-media {
     display: block !important;
     flex: 1 1 55% !important;
     flex-basis: 55% !important;
@@ -19227,9 +19223,8 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     overflow-x: visible !important;
   }
 
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
-  html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td,
-  html body.mc-saranoni-pdp td.mc-unified-pdp-info {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td.mc-unified-pdp-info {
     display: block !important;
     flex: 0 0 460px !important;
     flex-basis: 460px !important;
@@ -20305,8 +20300,7 @@ body.productdetails #content_area .mc-related-plp-card__price font.pricecolorsma
     padding: 0 !important;
   }
 
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp #v65-product-parent > tbody > tr:nth-of-type(2) {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: flex-start !important;
@@ -20318,9 +20312,9 @@ body.productdetails #content_area .mc-related-plp-card__price font.pricecolorsma
     box-sizing: border-box !important;
   }
 
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td.mc-pdp-media-td,
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td.mc-unified-pdp-media,
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:first-child {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td.mc-pdp-media-td,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td.mc-unified-pdp-media,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td:first-child {
     flex: 1 1 0 !important;
     flex-basis: auto !important;
     width: auto !important;
@@ -20330,9 +20324,9 @@ body.productdetails #content_area .mc-related-plp-card__price font.pricecolorsma
     margin-right: 0 !important;
   }
 
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td.mc-pdp-options-td,
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td.mc-unified-pdp-info,
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:last-child {
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td.mc-pdp-options-td,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td.mc-unified-pdp-info,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready tr.mc-pdp-main-row > td:last-child {
     flex: 0 0 400px !important;
     flex-basis: 400px !important;
     width: 400px !important;
@@ -20342,7 +20336,7 @@ body.productdetails #content_area .mc-related-plp-card__price font.pricecolorsma
     margin-left: 0 !important;
   }
 
-  html body.mc-saranoni-pdp img#product_photo,
+  html body.mc-saranoni-pdp.mc-pdp-unified-ready img#product_photo,
   html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,
   html body.mc-saranoni-pdp td.mc-unified-pdp-media img#product_photo,
   html body.mc-saranoni-pdp #product_photo_td img#product_photo,
@@ -20528,5 +20522,32 @@ body.mc-product-page #slideshow-container .hero-menu {
   :is(html.category, body.category, html[data-mc-category-plp="1"]) header.header {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
+  }
+}
+
+/* MC_SARANONI_PDP_TABLE_SAFETY — never break Volusion table before unified layout mounts */
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp:not(.mc-pdp-unified-ready) #v65-product-parent,
+  html body.mc-saranoni-pdp:not(.mc-pdp-unified-ready) #v65-product-parent tbody,
+  html body.mc-saranoni-pdp:not(.mc-pdp-unified-ready) #v65-product-parent tr,
+  html body.mc-saranoni-pdp:not(.mc-pdp-unified-ready) #v65-product-parent td {
+    display: revert !important;
+  }
+
+  html body.mc-saranoni-pdp:not(.mc-pdp-unified-ready) #v65-product-parent {
+    display: table !important;
+    table-layout: auto !important;
+  }
+
+  html body.mc-saranoni-pdp:not(.mc-pdp-unified-ready) #v65-product-parent tbody {
+    display: table-row-group !important;
+  }
+
+  html body.mc-saranoni-pdp:not(.mc-pdp-unified-ready) #v65-product-parent tr {
+    display: table-row !important;
+  }
+
+  html body.mc-saranoni-pdp:not(.mc-pdp-unified-ready) #v65-product-parent td {
+    display: table-cell !important;
   }
 }
