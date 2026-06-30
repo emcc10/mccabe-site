@@ -1372,8 +1372,12 @@
       if (/^SAR/.test(pc)) {
         global.document.body.classList.add("mc-saranoni-pdp");
         global.document.body.classList.toggle("mc-ruched-blanket-pdp", pc === "SAR-RUCHED-MINKY-THROW-BLANKET");
+        global.document.body.classList.remove("mc-mahjong-house-pdp");
+      } else if (/^TMH/.test(pc)) {
+        global.document.body.classList.add("mc-mahjong-house-pdp");
+        global.document.body.classList.remove("mc-saranoni-pdp", "mc-ruched-blanket-pdp", "mc-saranoni-pdp-init", "mc-saranoni-pdp-ready");
       } else {
-        global.document.body.classList.remove("mc-saranoni-pdp", "mc-ruched-blanket-pdp");
+        global.document.body.classList.remove("mc-saranoni-pdp", "mc-ruched-blanket-pdp", "mc-mahjong-house-pdp");
       }
       global.document.body.classList.toggle("mc-gatlin-sectional-pdp", /GATLIN/i.test(pc) && /-SECT/i.test(pc));
       global.document.body.classList.toggle("mc-steve-silver-altview-pdp", /^SS-/.test(pc));
@@ -1619,3 +1623,4 @@
     global.setTimeout(forceNormalizePass, delay);
   });
 })(window);
+

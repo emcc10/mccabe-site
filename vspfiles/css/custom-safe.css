@@ -19610,13 +19610,18 @@ footer.footer .elist__wrapper > div {
 /* ---- MC_20260627d: cart/account float circle fixes (from remote main) ---- */
 html body a.mc-cart-float,
 html body .mc-cart-float,
+html body a.mc-account-float,
+html body .mc-account-float,
 body a.mc-cart-float,
-body .mc-cart-float {
+body .mc-cart-float,
+body a.mc-account-float,
+body .mc-account-float {
   height: 52px !important;
   max-height: 52px !important;
   min-height: 52px !important;
   width: 52px !important;
   max-width: 52px !important;
+  min-width: 52px !important;
   display: grid !important;
   place-items: center !important;
   padding: 0 !important;
@@ -19626,7 +19631,9 @@ body .mc-cart-float {
 }
 
 html body a.mc-cart-float > svg.mc-cart-float__icon,
-body a.mc-cart-float > svg.mc-cart-float__icon {
+html body a.mc-account-float > svg.mc-account-float__icon,
+body a.mc-cart-float > svg.mc-cart-float__icon,
+body a.mc-account-float > svg.mc-account-float__icon {
   position: static !important;
   display: block !important;
   width: 20px !important;
@@ -19642,7 +19649,9 @@ body a.mc-cart-float > svg.mc-cart-float__icon {
 }
 
 html body a.mc-cart-float > svg.mc-cart-float__icon path,
-body a.mc-cart-float > svg.mc-cart-float__icon path {
+html body a.mc-account-float > svg.mc-account-float__icon path,
+body a.mc-cart-float > svg.mc-cart-float__icon path,
+body a.mc-account-float > svg.mc-account-float__icon path {
   transform: none !important;
 }
 
@@ -19654,5 +19663,158 @@ body a.mc-cart-float > svg.mc-cart-float__icon path {
     height: 52px !important;
     max-height: 52px !important;
     min-height: 52px !important;
+    width: 52px !important;
+    max-width: 52px !important;
+    min-width: 52px !important;
   }
+}
+
+/* ---- MC_20260630a: Mahjong PDP/header/category layout locks ---- */
+html body.mc-mahjong-house-pdp #mc-pdp-brand-logo,
+html body.mc-mahjong-house-pdp .mc-pdp-brand-logo {
+  display: block !important;
+  margin: 0 0 10px !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-brand-logo img,
+html body.mc-mahjong-house-pdp .mc-pdp-brand-logo img,
+html body.mc-mahjong-house-pdp img.vCSS_img_mfg_logo[src*="mahjong" i] {
+  display: block !important;
+  width: auto !important;
+  max-width: 230px !important;
+  max-height: 82px !important;
+  height: auto !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+}
+
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-brand-logo,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-title-right,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-price-stack-host,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #messaging-element,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-option-block,
+html body.mc-mahjong-house-pdp td.mc-pdp-options-td > #mc-pdp-purchase-stack,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-brand-logo,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-title-right,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-price-stack-host,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #messaging-element,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-option-block,
+html body.mc-mahjong-house-pdp td.mc-unified-pdp-info > #mc-pdp-purchase-stack {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-accordion,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion,
+html body.mc-mahjong-house-pdp .mc-acc-panel,
+html body.mc-mahjong-house-pdp .mc-acc-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  padding-right: 0 !important;
+}
+
+html body.mc-mahjong-house-pdp #mc-pdp-accordion *,
+html body.mc-mahjong-house-pdp .mc-pdp-accordion * {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-mahjong-house-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-mahjong-house-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row {
+    gap: 24px !important;
+    column-gap: 24px !important;
+    justify-content: center !important;
+  }
+
+  html body.mc-mahjong-house-pdp td.mc-pdp-media-td,
+  html body.mc-mahjong-house-pdp td.mc-unified-pdp-media {
+    max-width: 620px !important;
+    padding-right: 0 !important;
+  }
+
+  html body.mc-mahjong-house-pdp td.mc-pdp-options-td,
+  html body.mc-mahjong-house-pdp td.mc-unified-pdp-info {
+    width: 440px !important;
+    min-width: 420px !important;
+    max-width: 440px !important;
+    padding-left: 0 !important;
+  }
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta__subcats,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area nav.menu,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area .menu {
+  position: relative !important;
+  z-index: 1 !important;
+  clear: both !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) header.header .hero-menu,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) header.header nav.menu,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) .hero-menu {
+  position: relative !important;
+  z-index: 20 !important;
+}
+
+@media (min-width: 992px) {
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area {
+    padding-top: 18px !important;
+  }
+
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) .mc-category-meta {
+    margin-top: 24px !important;
+  }
+}
+
+html body .mc-header-cart,
+html body .mc-header-cart__link {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+html body a.mc-cart-float,
+html body .mc-cart-float {
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+}
+
+html body .mc-header-cart__link::before,
+html body .mc-header-cart__link::after {
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+html body a.mc-cart-float > svg.mc-cart-float__icon,
+body a.mc-cart-float > svg.mc-cart-float__icon {
+  display: block !important;
+  margin: auto !important;
+  align-self: center !important;
+  justify-self: center !important;
 }
