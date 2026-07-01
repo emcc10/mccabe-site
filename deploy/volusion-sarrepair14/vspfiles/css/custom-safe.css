@@ -18181,9 +18181,9 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
-    width: 700px !important;
-    min-width: 700px !important;
-    max-width: 700px !important;
+    width: 678px !important;
+    min-width: 678px !important;
+    max-width: 678px !important;
     padding: 0 28px 0 0 !important;
     vertical-align: top !important;
     text-align: left !important;
@@ -18192,9 +18192,9 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
 
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
     display: table-cell !important;
-    width: 400px !important;
-    min-width: 400px !important;
-    max-width: 400px !important;
+    width: 420px !important;
+    min-width: 420px !important;
+    max-width: 420px !important;
     padding: 30px 0 0 0 !important;
     vertical-align: top !important;
     text-align: left !important;
@@ -18206,7 +18206,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
     order: 1 !important;
     display: block !important;
-    width: auto !important;
+    width: 650px !important;
     max-width: 650px !important;
     height: auto !important;
     margin-left: 0 !important;
