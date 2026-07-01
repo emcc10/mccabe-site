@@ -37,7 +37,7 @@
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260630sarrepair38";
+  var VERSION = "20260630sarrepair39";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -3001,7 +3001,7 @@
   var saranoniLayoutLastRun = 0;
   var saranoniLayoutFinalizing = false;
   function scheduleSaranoniLayoutPass(force) {
-    if (!isSaranoniPdpPage() || isStalePdpAuthRun()) return;
+    if ((!isSaranoniPdpPage() && !isSteveSilverPdpPage()) || isStalePdpAuthRun()) return;
     if (force) {
       if (saranoniLayoutTimer) {
         global.clearTimeout(saranoniLayoutTimer);
