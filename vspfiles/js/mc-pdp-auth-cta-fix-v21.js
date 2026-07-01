@@ -10675,6 +10675,17 @@ try {
     setImportant(el, "overflow", "visible");
   }
 
+  function hide(el) {
+    if (!el) return;
+    setImportant(el, "display", "none");
+    setImportant(el, "visibility", "hidden");
+    setImportant(el, "opacity", "0");
+    setImportant(el, "height", "0");
+    setImportant(el, "max-height", "0");
+    setImportant(el, "overflow", "hidden");
+    setImportant(el, "pointer-events", "none");
+  }
+
   function repairMahjongAccordion() {
     if (!isTmhPdp()) return;
     if (!g.matchMedia || !g.matchMedia("(min-width: 992px)").matches) return;
@@ -10684,7 +10695,7 @@ try {
     var rightCol = acc.closest("td.vol-product__top--right") || acc.closest("td");
     if (rightCol) {
       setImportant(rightCol, "position", "relative");
-      setImportant(rightCol, "left", "-108px");
+      setImportant(rightCol, "left", "-148px");
       setImportant(rightCol, "width", "500px");
       setImportant(rightCol, "max-width", "500px");
       setImportant(rightCol, "min-width", "420px");
@@ -10699,11 +10710,20 @@ try {
       setImportant(pricebox, "margin-left", "0");
       setImportant(pricebox, "margin-right", "0");
       setImportant(pricebox, "overflow", "visible");
+      pricebox.querySelectorAll("table,tbody,tr,td").forEach(function (el) {
+        setImportant(el, "position", "static");
+        setImportant(el, "left", "auto");
+        setImportant(el, "width", "100%");
+        setImportant(el, "max-width", "100%");
+        setImportant(el, "min-width", "0");
+        setImportant(el, "box-sizing", "border-box");
+        setImportant(el, "overflow", "visible");
+      });
     }
     [acc, logo].forEach(function (el) {
       if (!el) return;
       setImportant(el, "position", "relative");
-      setImportant(el, "left", "-24px");
+      setImportant(el, "left", "0");
       setImportant(el, "display", "block");
       setImportant(el, "width", "420px");
       setImportant(el, "max-width", "420px");
@@ -10731,9 +10751,8 @@ try {
       setImportant(row, "width", "100%");
     }
     if (row) {
-      row.querySelectorAll("table,tbody,tr,td,div,a,img").forEach(function (el) {
-        var tag = (el.tagName || "").toUpperCase();
-        show(el, tag === "TR" ? "table-row" : tag === "TD" || tag === "TBODY" || tag === "TABLE" ? "block" : "block");
+      Array.prototype.forEach.call(row.children || [], function (el) {
+        show(el, "block");
       });
     }
     var media = d.querySelector("td.mc-pdp-media-td,td.mc-unified-pdp-media");
@@ -10767,9 +10786,99 @@ try {
     }
   }
 
+  function repairBeanBagSwatches() {
+    if (!isBeanBagPdp()) return;
+    var wrap = d.getElementById("beanbag-swatch-wrapper");
+    if (!wrap) return;
+    show(wrap, "block");
+    setImportant(wrap, "width", "100%");
+    setImportant(wrap, "max-width", "440px");
+    setImportant(wrap, "margin", "12px 0 8px 0");
+    setImportant(wrap, "padding", "0 0 0 14px");
+    var list = wrap.querySelector(".beanbag-swatches");
+    if (list) {
+      show(list, "flex");
+      setImportant(list, "display", "flex");
+      setImportant(list, "flex-wrap", "wrap");
+      setImportant(list, "gap", "8px");
+      setImportant(list, "align-items", "center");
+      setImportant(list, "width", "100%");
+    }
+    wrap.querySelectorAll("img.beanbag-swatch").forEach(function (swatch) {
+      var src = swatch.getAttribute("src") || "";
+      var broken = /\/swatches\/corduroy\//i.test(src) || (swatch.complete && !swatch.naturalWidth);
+      if (!broken) {
+        setImportant(swatch, "display", "inline-block");
+        setImportant(swatch, "width", "54px");
+        setImportant(swatch, "height", "54px");
+        setImportant(swatch, "object-fit", "cover");
+        return;
+      }
+      var label = swatch.getAttribute("data-option") || swatch.getAttribute("alt") || "";
+      var shortLabel = label.replace(/^Faux\s+Fur\s*\/?\s*/i, "").replace(/^Faux\s+Fur\s+/i, "").trim() || label;
+      var btn = d.createElement("button");
+      btn.type = "button";
+      btn.className = swatch.className + " beanbag-swatch--text";
+      btn.setAttribute("data-option", label);
+      btn.setAttribute("aria-label", label);
+      btn.textContent = shortLabel;
+      if (swatch.classList && swatch.classList.contains("active")) btn.classList.add("active");
+      try {
+        swatch.parentNode.replaceChild(btn, swatch);
+      } catch (eReplace) {}
+    });
+    wrap.querySelectorAll(".beanbag-swatch--text").forEach(function (btn) {
+      setImportant(btn, "appearance", "none");
+      setImportant(btn, "-webkit-appearance", "none");
+      setImportant(btn, "display", "inline-flex");
+      setImportant(btn, "align-items", "center");
+      setImportant(btn, "justify-content", "center");
+      setImportant(btn, "min-width", "76px");
+      setImportant(btn, "height", "34px");
+      setImportant(btn, "padding", "0 10px");
+      setImportant(btn, "border", "1px solid #d2d2d2");
+      setImportant(btn, "background", "#fff");
+      setImportant(btn, "color", "#444");
+      setImportant(btn, "font", "400 12px/1 Inter, Arial, sans-serif");
+      setImportant(btn, "letter-spacing", "0.08em");
+      setImportant(btn, "text-transform", "uppercase");
+      setImportant(btn, "cursor", "pointer");
+      setImportant(btn, "box-sizing", "border-box");
+    });
+  }
+
+  function hideBeanBagNoPhotoAlternates() {
+    if (!isBeanBagPdp()) return;
+    d.querySelectorAll("img.vCSS_img_alternate_product_photo,img[id^='alternate_product_photo']").forEach(function (alt) {
+      var src = alt.getAttribute("src") || "";
+      if (!/nophoto|no[-_]?photo/i.test(src)) return;
+      hide(alt.closest("a") || alt);
+      var span = alt.closest("span");
+      if (span) hide(span);
+    });
+  }
+
+  function hideBeanBagStrayPriceBoxes() {
+    if (!isBeanBagPdp()) return;
+    d.querySelectorAll("#v65-product-parent table.colors_pricebox,#content_area table.colors_pricebox").forEach(function (box) {
+      if (
+        box.querySelector(
+          "#mc-pdp-price-stack-host,#mc-bb-size-section,#beanbag-swatch-wrapper,#mc-pdp-features,#mc-pdp-purchase-stack,.mc-pdp-purchase-controls,input[name='btnaddtocart'],button[name='btnaddtocart']"
+        )
+      ) {
+        return;
+      }
+      var txt = String(box.textContent || "").replace(/\s+/g, " ").trim();
+      if (/\bPRICE\b|\bFREE SHIPPING\b|\$[\d,]+/i.test(txt)) hide(box);
+    });
+  }
+
   function runRepair() {
     repairMahjongAccordion();
     repairBeanBagHero();
+    repairBeanBagSwatches();
+    hideBeanBagNoPhotoAlternates();
+    hideBeanBagStrayPriceBoxes();
   }
 
   if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", runRepair);
