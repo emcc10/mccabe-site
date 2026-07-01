@@ -37,7 +37,7 @@
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260630sarrepair36";
+  var VERSION = "20260630sarrepair37";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -4078,7 +4078,9 @@
       }
       var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
       var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
-      return /^SS-/.test(pc);
+      if (/^SS-/.test(pc)) return true;
+      // Steve Silver closeout products: BURLINGTON-DINING-SET, CANOVA-DINING-SET, etc.
+      if (/-(DINING-SET|DINING|SECTIONAL|SOFA|RECLINER|CHAIR|BED|BENCH)$/i.test(pc)) return true;
     } catch (eSs) {}
     return false;
   }
