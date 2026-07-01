@@ -13,7 +13,7 @@ body {
 body * {
   font-family: inherit !important;
 }
-/* Hide ALL Volusion default cart icons to stop flashing */
+/* Hide Volusion default cart icons to stop flashing (but NOT custom .mc-cart-float) */
 header.header a[href*="shoppingcart"],
 header.header .vnav__cart,
 header.header .vnav-cart,
@@ -21,8 +21,7 @@ header.header .vnav__link--cart,
 header.header .cart-link,
 header.header .carticon,
 header.header svg[aria-label="Cart"],
-header.header svg[class*="cart"],
-header.header [class*="cart"] {
+header.header svg[class*="cart"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
