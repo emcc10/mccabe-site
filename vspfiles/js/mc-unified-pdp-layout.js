@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260622sarfix2";
-  var AUTH_LAYOUT_VER = "20260622sarfix2";
+  var LAYOUT_VER = "20260630sarfix3";
+  var AUTH_LAYOUT_VER = "20260630sarfix3";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -847,7 +847,7 @@
     btn.style.setProperty("color", "#fff", "important");
     btn.style.setProperty("border", "1px solid #000", "important");
     btn.style.setProperty("width", "100%", "important");
-    btn.style.setProperty("max-width", "400px", "important");
+    btn.style.setProperty("max-width", "420px", "important");
     btn.style.setProperty("height", "48px", "important");
     btn.style.setProperty("min-height", "48px", "important");
     btn.style.setProperty("box-shadow", "none", "important");
@@ -1107,8 +1107,8 @@
         img.style.setProperty("max-height", "none", "important");
         img.style.setProperty("object-fit", "contain", "important");
         if (isSteveSilver) {
+          img.style.setProperty("width", imgMaxW, "important");
           img.style.setProperty("max-width", imgMaxW, "important");
-          img.style.removeProperty("width");
           img.style.setProperty("margin", isDesktop ? "0" : "0 auto", "important");
         } else {
           img.style.setProperty("width", "100%", "important");
