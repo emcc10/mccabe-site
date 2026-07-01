@@ -1,0 +1,22 @@
+{
+  "verified_at": "2026-07-01T03:30:00Z",
+  "scope": "10 products that had duplicate variant -T images on CDN",
+  "local_repair": {
+    "variant_slots_repaired": 38,
+    "unique_t_images_per_product": true,
+    "remaining_within_product_duplicates": 0
+  },
+  "products_repaired": [
+    "SAR-BMB-SETS",
+    "SAR-BMB-SNUGGLER",
+    "SAR-BMBU-RYN-MSLN-PILLOWCA",
+    "SAR-COZY-BMB-ROBES",
+    "SAR-MARBLE-FX-FUR-MNKY-XL-LG",
+    "SAR-MNKY-LUSH",
+    "SAR-MNKY-STR-LUXE-ROBES",
+    "SAR-SNUGGLER",
+    "SAR-WEARABLE",
+    "SAR-WFL-KNT-ROBES"
+  ],
+  "deploy_note": "SFTP upload repaired files from vspfiles/photos/SAR-*-*-{S,T}.jpg for the products above. Re-run audit_saranoni_all_products_live.cjs after deploy."
+}

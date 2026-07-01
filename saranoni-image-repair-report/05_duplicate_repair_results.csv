@@ -1,0 +1,39 @@
+ProductCode,ColorName,OptionID,Result,Note
+SAR-BMB-SETS,Charcoal,1048,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/daily-deal-bamboni-sets-617
+SAR-BMB-SETS,Taupe,1117,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/daily-deal-bamboni-sets-196
+SAR-BMB-SNUGGLER,Charcoal,1048,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/30_3311b2a2-b700-4d57-87ba-142
+SAR-BMB-SNUGGLER,Ivory,1091,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/Cream_2_9dfedca2-ca4a-4cfb-a97
+SAR-BMB-SNUGGLER,Light Pink,1119,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/LightPink_2.png?v=1738021521&w
+SAR-BMBU-RYN-MSLN-PILLOWCA,Botanica,1145,FAIL,[WinError 32] The process cannot access the file because it is being used by another process
+SAR-BMBU-RYN-MSLN-PILLOWCA,Cambridge Stripe,1146,FAIL,[WinError 32] The process cannot access the file because it is being used by another process
+SAR-BMBU-RYN-MSLN-PILLOWCA,Mini Swiss,1147,FAIL,[WinError 32] The process cannot access the file because it is being used by another process
+SAR-COZY-BMB-ROBES,French Rose,1121,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/cozy-bamboni-robes-703609.j
+SAR-COZY-BMB-ROBES,Gray,1065,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/39_cbc73b7d-b583-45c3-b553-0dc
+SAR-COZY-BMB-ROBES,Ivory,1091,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/cozy-bamboni-robes-759172.jpg?
+SAR-COZY-BMB-ROBES,Taupe,1117,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/cozy-bamboni-robes-597268.j
+SAR-MARBLE-FX-FUR-MNKY-XL-LG,Gray Marble,1077,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/grand-faux-fur-12x20-pillow
+SAR-MARBLE-FX-FUR-MNKY-XL-LG,Tan Marble,1076,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/grand-faux-fur-12x20-pillow
+SAR-MNKY-LUSH,Ivy,1086,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/IvyXL_2.png?v=1741874243&width
+SAR-MNKY-LUSH,Jasmine,1087,OK,manual
+SAR-MNKY-LUSH,Lilly,1088,OK,manual
+SAR-MNKY-STR-LUXE-ROBES,Charcoal,1048,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/30_3311b2a2-b700-4d57-87ba-142
+SAR-MNKY-STR-LUXE-ROBES,Mirage,1151,FAIL,[WinError 32] The process cannot access the file because it is being used by another process
+SAR-MNKY-STR-LUXE-ROBES,Mocha,1153,FAIL,[WinError 32] The process cannot access the file because it is being used by another process
+SAR-MNKY-STR-LUXE-ROBES,Sandshell,1152,FAIL,[WinError 32] The process cannot access the file because it is being used by another process
+SAR-SNUGGLER,Charcoal,1048,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/snuggler-659622.jpg?v=16910
+SAR-SNUGGLER,Classic Leopard,1158,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/snuggler-397131.jpg?v=16910
+SAR-SNUGGLER,Hunter,1062,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/snuggler-196565.jpg?v=16910
+SAR-SNUGGLER,Navy,1053,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/snuggler-503765.jpg?v=16910
+SAR-SNUGGLER,Oatmeal,1111,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/snuggler-192690.jpg?v=16988
+SAR-SNUGGLER,Rose Dust,1157,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/snuggler-594824.jpg?v=16910
+SAR-SNUGGLER,Snow Leopard,1156,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/snuggler-232495.jpg?v=16910
+SAR-WEARABLE,Cream,1154,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/wearable-blankets-244904.jp
+SAR-WEARABLE,Feather,1049,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/wearable-blankets-842490.jp
+SAR-WEARABLE,Hazel,1155,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/wearable-blankets-308947.jp
+SAR-WFL-KNT-ROBES,Allspice,1112,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/waffle-knit-king-blankets-1
+SAR-WFL-KNT-ROBES,Chestnut,1114,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/41_bd1158cf-f3d7-4547-bf84-d9b
+SAR-WFL-KNT-ROBES,Moonbeam,1012,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/37_9f1ae2d8-c65a-4429-a2c0-568
+SAR-WFL-KNT-ROBES,Oatmeal,1111,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/snuggler-397549.jpg?v=16988
+SAR-WFL-KNT-ROBES,Oxford,1110,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/waffle-knit-king-blankets-3
+SAR-WFL-KNT-ROBES,Swan,1115,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/files/55_79c6d266-2ddd-4bf2-a5c8-a1d
+SAR-WFL-KNT-ROBES,Thyme,1113,OK,shopify:https://cdn.shopify.com/s/files/1/2047/7533/products/waffle-knit-king-blankets-7

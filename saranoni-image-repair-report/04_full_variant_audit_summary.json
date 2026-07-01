@@ -1,0 +1,90 @@
+{
+  "audited_at": "2026-07-01T03:08:50.078Z",
+  "products_on_site": 50,
+  "variant_slots": 352,
+  "both_ok": 352,
+  "missing_t": 0,
+  "missing_s": 0,
+  "within_product_duplicate_t": 28,
+  "products_with_gaps": 0,
+  "products_with_duplicates": 10,
+  "missing_t_files": [],
+  "missing_s_files": [],
+  "duplicate_examples": [
+    {
+      "file": "SAR-BMB-SETS-1117-T.jpg",
+      "duplicate_of": "SAR-BMB-SETS-1048-T.jpg",
+      "color": "Taupe"
+    },
+    {
+      "file": "SAR-BMB-SNUGGLER-1091-T.jpg",
+      "duplicate_of": "SAR-BMB-SNUGGLER-1048-T.jpg",
+      "color": "Ivory"
+    },
+    {
+      "file": "SAR-BMB-SNUGGLER-1119-T.jpg",
+      "duplicate_of": "SAR-BMB-SNUGGLER-1048-T.jpg",
+      "color": "Light Pink"
+    },
+    {
+      "file": "SAR-BMBU-RYN-MSLN-PILLOWCA-1146-T.jpg",
+      "duplicate_of": "SAR-BMBU-RYN-MSLN-PILLOWCA-1145-T.jpg",
+      "color": "Cambridge Stripe"
+    },
+    {
+      "file": "SAR-BMBU-RYN-MSLN-PILLOWCA-1147-T.jpg",
+      "duplicate_of": "SAR-BMBU-RYN-MSLN-PILLOWCA-1145-T.jpg",
+      "color": "Mini Swiss"
+    },
+    {
+      "file": "SAR-COZY-BMB-ROBES-1065-T.jpg",
+      "duplicate_of": "SAR-COZY-BMB-ROBES-1121-T.jpg",
+      "color": "Gray"
+    },
+    {
+      "file": "SAR-COZY-BMB-ROBES-1091-T.jpg",
+      "duplicate_of": "SAR-COZY-BMB-ROBES-1121-T.jpg",
+      "color": "Ivory"
+    },
+    {
+      "file": "SAR-COZY-BMB-ROBES-1117-T.jpg",
+      "duplicate_of": "SAR-COZY-BMB-ROBES-1121-T.jpg",
+      "color": "Taupe"
+    },
+    {
+      "file": "SAR-MARBLE-FX-FUR-MNKY-XL-LG-1076-T.jpg",
+      "duplicate_of": "SAR-MARBLE-FX-FUR-MNKY-XL-LG-1077-T.jpg",
+      "color": "Tan Marble"
+    },
+    {
+      "file": "SAR-MNKY-LUSH-1087-T.jpg",
+      "duplicate_of": "SAR-MNKY-LUSH-1086-T.jpg",
+      "color": "Jasmine"
+    },
+    {
+      "file": "SAR-MNKY-LUSH-1088-T.jpg",
+      "duplicate_of": "SAR-MNKY-LUSH-1086-T.jpg",
+      "color": "Lilly"
+    },
+    {
+      "file": "SAR-MNKY-STR-LUXE-ROBES-1151-T.jpg",
+      "duplicate_of": "SAR-MNKY-STR-LUXE-ROBES-1048-T.jpg",
+      "color": "Mirage"
+    },
+    {
+      "file": "SAR-MNKY-STR-LUXE-ROBES-1153-T.jpg",
+      "duplicate_of": "SAR-MNKY-STR-LUXE-ROBES-1048-T.jpg",
+      "color": "Mocha"
+    },
+    {
+      "file": "SAR-MNKY-STR-LUXE-ROBES-1152-T.jpg",
+      "duplicate_of": "SAR-MNKY-STR-LUXE-ROBES-1048-T.jpg",
+      "color": "Sandshell"
+    },
+    {
+      "file": "SAR-SNUGGLER-1158-T.jpg",
+      "duplicate_of": "SAR-SNUGGLER-1048-T.jpg",
+      "color": "Classic Leopard"
+    }
+  ]
+}
