@@ -37,7 +37,7 @@
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260630sarrepair41";
+  var VERSION = "20260630sarrepair42";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -3144,9 +3144,11 @@
       } catch (eTech) {}
       mountNodeInSaranoniAccordionHost(featuresHost, techSpecs);
     }
+    var descNode = global.document.getElementById("mc-pdp-description-below-features") ||
+                   global.document.getElementById("ProductDetail_ProductDetails_div");
     mountNodeInSaranoniAccordionHost(
       detailsHost,
-      global.document.getElementById("mc-pdp-description-below-features")
+      descNode
     );
     mountExistingTextPanel(shippingHost, /\b(shipping|returns?|return policy)\b/i);
     mountExistingTextPanel(faqHost, /\b(faq|frequently asked questions?)\b/i);
