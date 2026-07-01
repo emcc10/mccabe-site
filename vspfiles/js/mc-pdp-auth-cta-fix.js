@@ -3234,6 +3234,15 @@
     global.document.querySelectorAll("#v65-product-parent tr, #content_area tr").forEach(function (row) {
       if (row.closest("#mc-bb-size-section, #beanbag-swatch-wrapper, #mc-pdp-features")) return;
       if (row.closest('[data-mc-bb-native-suppressed="1"]')) return;
+      if (
+        row.classList.contains("mc-pdp-main-row") ||
+        row.classList.contains("mc-unified-pdp-row") ||
+        row.querySelector(
+          "#product_photo, #mc-pdp-features, #mc-pdp-price-stack-host, #mc-pdp-purchase-stack, #beanbag-swatch-wrapper, .mc-pdp-media-td, .mc-pdp-options-td"
+        )
+      ) {
+        return;
+      }
       var sizeSection = global.document.getElementById("mc-bb-size-section");
       var sel = row.querySelector("select");
       if (sel && sizeSection && sizeSection.contains(sel)) return;
@@ -10617,6 +10626,163 @@ try {
       var mo = new g.MutationObserver(function () {
         g.clearTimeout(g.__MC_SS_MEDIA_CONTAIN_TIMER__);
         g.__MC_SS_MEDIA_CONTAIN_TIMER__ = g.setTimeout(normalizeSteveSilverMedia, 120);
+      });
+      mo.observe(d.documentElement || d.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style"] });
+    } catch (eMo) {}
+  }
+})(window, document);
+
+/* MC_TMH_BB_PDP_REPAIR_20260701
+   Late PDP cleanup can leave Mahjong accordions in a narrow native cell and
+   bean-bag hero rows hidden. Repair only those product families after all
+   layout passes have run. */
+(function (g, d) {
+  "use strict";
+  if (!g || !d || g.__MC_TMH_BB_PDP_REPAIR_20260701__) return;
+  g.__MC_TMH_BB_PDP_REPAIR_20260701__ = true;
+
+  function productCode() {
+    var code = String(g.global_Current_ProductCode || "").toUpperCase();
+    if (!code) {
+      var el = d.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      code = String((el && el.value) || "").toUpperCase();
+    }
+    return code;
+  }
+
+  function isTmhPdp() {
+    return /^TMH-/.test(productCode()) || (d.body && d.body.classList.contains("mc-mahjong-house-pdp"));
+  }
+
+  function isBeanBagPdp() {
+    return /^BB-/.test(productCode()) || (d.body && d.body.classList.contains("mc-bean-bag-pdp"));
+  }
+
+  function setImportant(el, prop, value) {
+    if (el && el.style) el.style.setProperty(prop, value, "important");
+  }
+
+  function show(el, displayValue) {
+    if (!el) return;
+    el.hidden = false;
+    el.removeAttribute("hidden");
+    el.removeAttribute("aria-hidden");
+    setImportant(el, "display", displayValue || "block");
+    setImportant(el, "visibility", "visible");
+    setImportant(el, "opacity", "1");
+    setImportant(el, "height", "auto");
+    setImportant(el, "max-height", "none");
+    setImportant(el, "overflow", "visible");
+  }
+
+  function repairMahjongAccordion() {
+    if (!isTmhPdp()) return;
+    if (!g.matchMedia || !g.matchMedia("(min-width: 992px)").matches) return;
+    var acc = d.querySelector("#mc-pdp-accordion,.mc-pdp-accordion");
+    if (!acc) return;
+    var logo = d.getElementById("mc-pdp-brand-logo");
+    var rightCol = acc.closest("td.vol-product__top--right") || acc.closest("td");
+    if (rightCol) {
+      setImportant(rightCol, "position", "relative");
+      setImportant(rightCol, "left", "-108px");
+      setImportant(rightCol, "width", "500px");
+      setImportant(rightCol, "max-width", "500px");
+      setImportant(rightCol, "min-width", "420px");
+      setImportant(rightCol, "overflow", "visible");
+    }
+    var pricebox = acc.closest("table.colors_pricebox") || acc.closest("table");
+    if (pricebox) {
+      setImportant(pricebox, "display", "block");
+      setImportant(pricebox, "width", "440px");
+      setImportant(pricebox, "max-width", "440px");
+      setImportant(pricebox, "min-width", "420px");
+      setImportant(pricebox, "margin-left", "0");
+      setImportant(pricebox, "margin-right", "0");
+      setImportant(pricebox, "overflow", "visible");
+    }
+    [acc, logo].forEach(function (el) {
+      if (!el) return;
+      setImportant(el, "position", "relative");
+      setImportant(el, "left", "-24px");
+      setImportant(el, "display", "block");
+      setImportant(el, "width", "420px");
+      setImportant(el, "max-width", "420px");
+      setImportant(el, "min-width", "0");
+      setImportant(el, "margin-left", "0");
+      setImportant(el, "margin-right", "0");
+      setImportant(el, "box-sizing", "border-box");
+      setImportant(el, "overflow", "visible");
+    });
+    acc.querySelectorAll(".mc-acc-row,.mc-acc-header,.mc-acc-panel,.mc-acc-content").forEach(function (el) {
+      setImportant(el, "width", "100%");
+      setImportant(el, "max-width", "100%");
+      setImportant(el, "box-sizing", "border-box");
+    });
+  }
+
+  function repairBeanBagHero() {
+    if (!isBeanBagPdp()) return;
+    var img = d.getElementById("product_photo");
+    var row = img && img.closest("tr.mc-pdp-main-row,tr.mc-unified-pdp-row");
+    if (row) {
+      show(row, g.matchMedia && g.matchMedia("(min-width: 992px)").matches ? "flex" : "table-row");
+      setImportant(row, "align-items", "flex-start");
+      setImportant(row, "gap", "32px");
+      setImportant(row, "width", "100%");
+    }
+    if (row) {
+      row.querySelectorAll("table,tbody,tr,td,div,a,img").forEach(function (el) {
+        var tag = (el.tagName || "").toUpperCase();
+        show(el, tag === "TR" ? "table-row" : tag === "TD" || tag === "TBODY" || tag === "TABLE" ? "block" : "block");
+      });
+    }
+    var media = d.querySelector("td.mc-pdp-media-td,td.mc-unified-pdp-media");
+    var info = d.querySelector("td.mc-pdp-options-td,td.mc-unified-pdp-info");
+    if (media) {
+      show(media, "flex");
+      setImportant(media, "flex", "0 0 600px");
+      setImportant(media, "width", "600px");
+      setImportant(media, "max-width", "600px");
+    }
+    if (info) {
+      show(info, "flex");
+      setImportant(info, "flex", "0 0 420px");
+      setImportant(info, "width", "420px");
+      setImportant(info, "max-width", "420px");
+      setImportant(info, "flex-direction", "column");
+    }
+    d.querySelectorAll("#mc-pdp-features,#mc-pdp-features *").forEach(function (el) {
+      show(el, el.id === "mc-pdp-features" ? "block" : "");
+    });
+    if (img) {
+      show(img, "block");
+      setImportant(img, "width", "100%");
+      setImportant(img, "max-width", "600px");
+      setImportant(img, "height", "auto");
+    }
+    var zoom = d.getElementById("product_photo_zoom_url");
+    if (zoom) {
+      show(zoom, "block");
+      setImportant(zoom, "max-width", "600px");
+    }
+  }
+
+  function runRepair() {
+    repairMahjongAccordion();
+    repairBeanBagHero();
+  }
+
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", runRepair);
+  else runRepair();
+  g.addEventListener("load", runRepair);
+  [100, 400, 1200, 2500, 5000].forEach(function (ms) {
+    g.setTimeout(runRepair, ms);
+  });
+  if (g.MutationObserver) {
+    try {
+      var mo = new g.MutationObserver(function () {
+        g.clearTimeout(g.__MC_TMH_BB_REPAIR_TIMER__);
+        g.__MC_TMH_BB_REPAIR_TIMER__ = g.setTimeout(runRepair, 140);
       });
       mo.observe(d.documentElement || d.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style"] });
     } catch (eMo) {}
