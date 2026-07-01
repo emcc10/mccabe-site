@@ -13,6 +13,14 @@ body {
 body * {
   font-family: inherit !important;
 }
+/* Product image sizing - Volusion template */
+#product_photo {
+  width: 650px !important;
+  max-width: 650px !important;
+  min-width: 650px !important;
+  height: auto !important;
+}
+
 /* Hide product detail elements that get moved into accordion */
 #ProductDetail_TechSpecs_div {
   display: none !important;
