@@ -1078,10 +1078,13 @@
       var code = String(
         (global.global_Current_ProductCode || "") || (input && input.value) || ""
       ).toUpperCase();
-      return /^SS-/.test(code);
+      if (/^SS-/.test(code)) return true;
+      // Closeout Steve Silver products use hyphenated names (BURLINGTON-DINING-SET etc.)
+      if (/-(DINING-SET|DINING|SECTIONAL|SOFA|RECLINER|CHAIR|BED|BENCH)$/i.test(code)) return true;
     } catch (e) {
       return false;
     }
+    return false;
   }
 
   function normalizeMediaColumn(mediaTd) {
@@ -1376,7 +1379,7 @@
         global.document.body.classList.remove("mc-saranoni-pdp", "mc-ruched-blanket-pdp");
       }
       global.document.body.classList.toggle("mc-gatlin-sectional-pdp", /GATLIN/i.test(pc) && /-SECT/i.test(pc));
-      global.document.body.classList.toggle("mc-steve-silver-altview-pdp", /^SS-/.test(pc));
+      global.document.body.classList.toggle("mc-steve-silver-altview-pdp", /^SS-/.test(pc) || /-(DINING-SET|DINING|SECTIONAL|SOFA|RECLINER|CHAIR|BED|BENCH)$/i.test(pc));
     } catch (e) {}
   }
 
