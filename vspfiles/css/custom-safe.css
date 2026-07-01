@@ -6422,12 +6422,12 @@ body.is-home:not(.productdetails) #content_area_home .v-product-grid .mc-member-
 body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-price__amount,
 :is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price__amount,
 :is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price__amount {
-  font-size: 16px !important;
+  font-size: 14px !important;
   font-weight: 400 !important;
   letter-spacing: 0.02em !important;
   color: #1a1a1a !important;
   margin-top: 2px !important;
-  text-align: left !important;
+  text-align: center !important;
   width: 100% !important;
 }
 
