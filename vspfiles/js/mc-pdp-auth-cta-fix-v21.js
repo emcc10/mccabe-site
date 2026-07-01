@@ -10508,6 +10508,121 @@ try {
   }
 })(window, document);
 
+/* MC_SS_ALEXANDRIA_MEDIA_CONTAIN_20260701
+   Steve Silver PDPs can inherit a legacy 250px media-table gutter from the
+   generic thumbnail layout. Keep the 650px hero image inside its media column
+   so the accordion/right column cannot overlap it. */
+(function (g, d) {
+  "use strict";
+  if (!g || !d || g.__MC_SS_MEDIA_CONTAIN_20260701__) return;
+  g.__MC_SS_MEDIA_CONTAIN_20260701__ = true;
+
+  function isSteveSilverPdp() {
+    var body = d.body;
+    if (body && body.classList && body.classList.contains("mc-gatlin-sectional-pdp")) return false;
+    if (body && body.classList && body.classList.contains("mc-steve-silver-altview-pdp")) return true;
+    var code = String(g.global_Current_ProductCode || "").toUpperCase();
+    if (!code) {
+      var codeEl = d.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      code = String((codeEl && codeEl.value) || "").toUpperCase();
+    }
+    return /^SS-/.test(code);
+  }
+
+  function setImportant(el, prop, value) {
+    if (el && el.style) el.style.setProperty(prop, value, "important");
+  }
+
+  function normalizeSteveSilverMedia() {
+    if (!isSteveSilverPdp()) return;
+    if (!g.matchMedia || !g.matchMedia("(min-width: 992px)").matches) return;
+
+    var media = d.querySelector("td.mc-pdp-media-td,td.mc-unified-pdp-media");
+    var info = d.querySelector("td.mc-pdp-options-td,td.mc-unified-pdp-info");
+    var row = media && media.parentElement;
+
+    if (row) {
+      setImportant(row, "display", "flex");
+      setImportant(row, "flex-wrap", "nowrap");
+      setImportant(row, "align-items", "flex-start");
+      setImportant(row, "gap", "28px");
+      setImportant(row, "width", "1128px");
+      setImportant(row, "max-width", "1128px");
+      setImportant(row, "margin", "0 auto");
+    }
+    if (media) {
+      setImportant(media, "display", "flex");
+      setImportant(media, "flex-direction", "column");
+      setImportant(media, "flex", "0 0 690px");
+      setImportant(media, "width", "690px");
+      setImportant(media, "min-width", "690px");
+      setImportant(media, "max-width", "690px");
+      setImportant(media, "align-items", "flex-start");
+      setImportant(media, "overflow", "visible");
+      setImportant(media, "padding", "0");
+    }
+    if (info) {
+      setImportant(info, "display", "block");
+      setImportant(info, "flex", "0 0 400px");
+      setImportant(info, "width", "400px");
+      setImportant(info, "min-width", "400px");
+      setImportant(info, "max-width", "400px");
+      setImportant(info, "padding", "30px 0 0 0");
+    }
+
+    d.querySelectorAll("td.mc-pdp-media-td > table:has(img#product_photo),td.mc-unified-pdp-media > table:has(img#product_photo)").forEach(function (table) {
+      setImportant(table, "display", "block");
+      setImportant(table, "margin-left", "0");
+      setImportant(table, "margin-right", "auto");
+      setImportant(table, "width", "650px");
+      setImportant(table, "max-width", "650px");
+      setImportant(table, "min-width", "0");
+      setImportant(table, "table-layout", "fixed");
+      setImportant(table, "border-collapse", "collapse");
+      setImportant(table, "border-spacing", "0");
+      setImportant(table, "transform", "none");
+      setImportant(table, "box-sizing", "border-box");
+      table.querySelectorAll("tbody,tr,td").forEach(function (el) {
+        setImportant(el, "display", "block");
+        setImportant(el, "width", "650px");
+        setImportant(el, "max-width", "650px");
+        setImportant(el, "min-width", "0");
+        setImportant(el, "box-sizing", "border-box");
+        setImportant(el, "padding", "0");
+        setImportant(el, "margin", "0");
+      });
+    });
+
+    d.querySelectorAll("td.mc-pdp-media-td img#product_photo,td.mc-unified-pdp-media img#product_photo,td.mc-pdp-media-td a#product_photo_zoom_url,td.mc-unified-pdp-media a#product_photo_zoom_url,td.mc-pdp-media-td a#product_photo_zoom_url2,td.mc-unified-pdp-media a#product_photo_zoom_url2").forEach(function (el) {
+      setImportant(el, "display", "block");
+      setImportant(el, "margin-left", "0");
+      setImportant(el, "margin-right", "auto");
+      setImportant(el, "width", "650px");
+      setImportant(el, "max-width", "650px");
+      setImportant(el, "min-width", "0");
+      setImportant(el, "height", "auto");
+      setImportant(el, "box-sizing", "border-box");
+      setImportant(el, "float", "none");
+    });
+  }
+
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", normalizeSteveSilverMedia);
+  else normalizeSteveSilverMedia();
+  g.addEventListener("load", normalizeSteveSilverMedia);
+  [100, 400, 1200, 2500].forEach(function (ms) {
+    g.setTimeout(normalizeSteveSilverMedia, ms);
+  });
+  if (g.MutationObserver) {
+    try {
+      var mo = new g.MutationObserver(function () {
+        g.clearTimeout(g.__MC_SS_MEDIA_CONTAIN_TIMER__);
+        g.__MC_SS_MEDIA_CONTAIN_TIMER__ = g.setTimeout(normalizeSteveSilverMedia, 120);
+      });
+      mo.observe(d.documentElement || d.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style"] });
+    } catch (eMo) {}
+  }
+})(window, document);
+
 /* MC_WINDSOR_HERO_FIX_20260620 — live CDN still caches 4MB slideshow at windsor.mp4; use windsor-home.mp4 */
 (function (g, d) {
   if (!g || !d || g.__MC_WINDSOR_HERO_FIX_20260620__) return;
