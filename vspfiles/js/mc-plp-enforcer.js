@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260701a — remove push-menu position:relative override (was fighting custom-safe.css)
+ * MC_PLP_ENFORCER_20260701b — fix PDP_AUTH_WANT version mismatch causing infinite script reload on bean bag pages
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260701a";
+  var VERSION = "20260701b";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -1254,7 +1254,7 @@
     }
   }
 
-  var PDP_AUTH_WANT = "20260625sarrepair2";
+  var PDP_AUTH_WANT = "20260626sarrepair15";
 
   function isSaranoniPdpPage() {
     try {
