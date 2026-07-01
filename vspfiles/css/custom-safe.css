@@ -13,6 +13,11 @@ body {
 body * {
   font-family: inherit !important;
 }
+/* Hide product detail elements that get moved into accordion */
+#ProductDetail_TechSpecs_div {
+  display: none !important;
+}
+
 /* Hide Volusion default cart icons to stop flashing (but NOT custom .mc-cart-float) */
 header.header a[href*="shoppingcart"],
 header.header .vnav__cart,
@@ -2593,6 +2598,7 @@ body.mc-product-page select.mc-native-leather {
 ========================================= */
 @media (min-width: 992px) {
   body.mc-product-page #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-media-td,
+  body.mc-product-page #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-media-td,
   body.productdetails #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-media-td {
     flex: 0 0 650px !important;
     width: 650px !important;
@@ -2620,6 +2626,12 @@ body.mc-product-page select.mc-native-leather {
     overflow-x: visible !important;
     overflow-y: visible !important;
     background: #fff !important;
+  }
+
+  body.mc-product-page #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-media-td > img,
+  body.productdetails #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-media-td > img {
+    width: 650px !important;
+    max-width: 650px !important;
   }
 
   /* Stop cut-off on the left — never use bare `td *` here: it sets overflow:visible on
