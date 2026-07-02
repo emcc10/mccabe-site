@@ -8493,13 +8493,11 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
   flex-direction: column !important;
 }
 
-/* Category: 3 / 2 / 1 — grid containers only; card flex/width lives in one block below (no duplicate @media nesting) */
+/* Category: 3 / 2 / 1 — grid containers only */
 @media (min-width: 992px) {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
-  :is(html.category, body.category) #content_area ul.v-product-grid,
-  :is(html.category, body.category) #content_area .v-product-grid,
-  html.vol-list.category #content_area ul.v-product-grid,
-  html.vol-list.category #content_area .v-product-grid {
+  :is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid,
+  :is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 20px !important;
@@ -8517,10 +8515,8 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
 
 @media (min-width: 576px) and (max-width: 991px) {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
-  :is(html.category, body.category) #content_area ul.v-product-grid,
-  :is(html.category, body.category) #content_area .v-product-grid,
-  html.vol-list.category #content_area ul.v-product-grid,
-  html.vol-list.category #content_area .v-product-grid {
+  :is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid,
+  :is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 16px !important;
@@ -8538,10 +8534,8 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
 
 @media (max-width: 575px) {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
-  :is(html.category, body.category) #content_area ul.v-product-grid,
-  :is(html.category, body.category) #content_area .v-product-grid,
-  html.vol-list.category #content_area ul.v-product-grid,
-  html.vol-list.category #content_area .v-product-grid {
+  :is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid,
+  :is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
     gap: 12px !important;
@@ -8554,17 +8548,13 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
   }
 }
 
-/* --- Category cards — single block (grid cells: flex + 100% width; vol-list + grid-item kept for markup variants) --- */
+/* Category cards — flex column allows image, name and price ordering */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product,
-:is(html.category, body.category) #content_area .v-product-grid > div.v-product,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product-grid-item,
-html.vol-list.category #content_area ul.v-product-grid > li,
-html.vol-list.category #content_area ul.v-product-grid > li.v-product,
-html.vol-list.category #content_area .v-product-grid > .v-product,
-html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > div.v-product,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li.v-product,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > .v-product,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > .v-product-grid-item {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
@@ -8582,33 +8572,29 @@ html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
   background: #ffffff !important;
 }
 
-/* Sale / list price nodes default to flex order 0 — push behind image (order 1) on category cards */
-:is(html.category, body.category) #content_area .v-product-grid > div.v-product > *,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product > *,
-:is(html.category, body.category) #content_area ul.v-product-grid > li > *,
-html.vol-list.category #content_area ul.v-product-grid > li > * {
-  order: 5;
-}
-
+/* Default card elements go below the image and product name */
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > div.v-product > *,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li.v-product > *,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li > *,
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product > *,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product > * {
   order: 5;
 }
 
-/* --- Image link: fixed height, centered, same size every card --- */
+/* Product image first */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__img,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product .v-product__img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img {
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > .v-product .v-product__img,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li.v-product .v-product__img {
   order: 1 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   max-width: none !important;
-  height: 380px !important;
+  height: 280px !important;
   min-height: 280px !important;
-  max-height: none !important;
+  max-height: 280px !important;
   margin: 0 auto 10px !important;
   overflow: hidden !important;
   text-align: center !important;
@@ -8619,31 +8605,32 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__img img,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product .v-product__img img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img img,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product a.v-product__img > img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product a.v-product__img > img {
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > .v-product .v-product__img img,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li.v-product .v-product__img img {
   display: block !important;
-  width: 100% !important;
-  height: 100% !important;
   max-width: 100% !important;
   max-height: 100% !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
+  width: auto !important;
+  height: auto !important;
   object-fit: contain !important;
   object-position: center center !important;
   margin: 0 !important;
 }
 
-/* --- Title --- */
+/* Product name second, directly below image */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__title,
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__name,
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .productnamecolor,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__title,
+body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__name,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .productnamecolor,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product .v-product__title,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product .productnamecolor,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__title,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .productnamecolor {
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > .v-product .v-product__title,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > .v-product .v-product__name,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > .v-product .productnamecolor,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li.v-product .v-product__title,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li.v-product .v-product__name,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li.v-product .productnamecolor {
+  order: 2 !important;
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -8651,27 +8638,11 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   overflow-wrap: break-word !important;
   word-break: normal !important;
   text-align: center !important;
-  font-size: 17px !important;
-  letter-spacing: 0.14em !important;
-  margin-top: 9px !important;
+  font-size: 16px !important;
+  letter-spacing: 0.02em !important;
+  margin: 9px 0 0 !important;
   text-transform: uppercase;
-  font-weight: 400 !important;
-}
-.v-product-grid {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: flex-start !important;
-  gap: 40px 36px !important;
-}
-
-.v-product-grid .v-product {
-  width: calc(33.333% - 24px) !important;
-  vertical-align: top !important;
-}
-
-.mc-member-grid-price,
-.mc-member-price-caption {
-  display: block !important;
+  font-weight: 300 !important;
 }
 
 /* =========================================================
