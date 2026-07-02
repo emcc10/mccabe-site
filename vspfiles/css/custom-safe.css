@@ -1186,8 +1186,8 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
 }
 
 /* Category grids: white thumb bg + fixed stage (see --mc-plp-* block below) */
-:is(html.category, body.category) #content_area .v-product-grid a.v-product__img,
-:is(html.category, body.category) #content_area ul.v-product-grid .v-product__img {
+ #content_area .v-product-grid a.v-product__img,
+ #content_area ul.v-product-grid .v-product__img {
   background: var(--mc-plp-mat-bg, #ffffff) !important;
 }
 
@@ -2328,7 +2328,7 @@ nav.push-menu .push-menu__close-btn::before {
 
 /* MOBILE: category — title centered; member + list price left */
 @media (max-width: 991px) {
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
+   .v-product-grid .v-product .v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
   :is(html.category, body.category) .v-product-grid .v-product .product_image,
@@ -8685,8 +8685,8 @@ body.is-home:not(.productdetails) #content_area_home ul.v-product-grid,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid,
 body.is-home:not(.productdetails) #content_area ul.v-product-grid,
 body.is-home:not(.productdetails) #content_area .v-product-grid,
-:is(html.category, body.category) #content_area ul.v-product-grid,
-:is(html.category, body.category) #content_area .v-product-grid,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid,
 html.vol-list.category #content_area ul.v-product-grid,
 html.vol-list.category #content_area .v-product-grid {
   display: grid !important;
@@ -8703,10 +8703,10 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product
 body.is-home:not(.productdetails) #content_area ul.v-product-grid > li,
 body.is-home:not(.productdetails) #content_area .v-product-grid > .v-product,
 body.is-home:not(.productdetails) #content_area .v-product-grid > .v-product-grid-item,
-:is(html.category, body.category) #content_area ul.v-product-grid > li,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product-grid-item,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area ul.v-product-grid > li.v-product,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > .v-product,
+:is(html.category, body.category, html.vol-list, body.vol-list) #content_area .v-product-grid > .v-product-grid-item,
 html.vol-list.category #content_area ul.v-product-grid > li,
 html.vol-list.category #content_area .v-product-grid > .v-product {
   display: flex !important;
