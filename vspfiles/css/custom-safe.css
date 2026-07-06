@@ -1,4 +1,4 @@
-/* C_CSS_DEPLOY_VERIFY_20260702tmhpdp2 */
+/* C_CSS_DEPLOY_VERIFY_20260705livefix1 */
 /* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
@@ -965,6 +965,38 @@ body.productdetails header.header nav.menu {
   }
 }
 
+/* Category PLP: keep desktop nav + menu visible when Volusion leaves body.is-home set */
+:is(html.category, html[data-mc-category-plp="1"]) body.is-home header.header > .mc-header-desktop-bar,
+:is(html.category, html[data-mc-category-plp="1"]) body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar],
+body.category.is-home header.header > .mc-header-desktop-bar,
+body.category.is-home header.header .mc-header-desktop-bar[data-mc-header-bar] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: 48px !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+  border: 0 !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+:is(html.category, html[data-mc-category-plp="1"]) body.is-home #display_menu_1,
+body.category.is-home #display_menu_1,
+:is(html.category, html[data-mc-category-plp="1"]) body.is-home header.header .main-menu,
+body.category.is-home header.header .main-menu,
+:is(html.category, html[data-mc-category-plp="1"]) body.is-home header.header nav.menu,
+body.category.is-home header.header nav.menu,
+:is(html.category, html[data-mc-category-plp="1"]) body.is-home header.header .microblock.main-menu,
+body.category.is-home header.header .microblock.main-menu {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 /* PDP: never show homepage hero (#if_homepage). Belt-and-suspenders with html.mc-url / body classes. */
 body.productdetails #if_homepage,
 body.productdetails.is-home #if_homepage,
@@ -1021,6 +1053,17 @@ html.mc-allow-home-hero body.is-home #display_menu_1 {
 html.mc-url-looks-like-pdp body.is-home #display_menu_1,
 html.mc-url-looks-like-pdp body.is-home header.header nav.menu,
 html.mc-url-looks-like-pdp body.is-home header.header .main-menu {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Category PLP: beat html.mc-allow-home-hero body.is-home #display_menu_1 hide */
+html.mc-allow-home-hero.category body.is-home #display_menu_1,
+html.mc-allow-home-hero[data-mc-category-plp="1"] body.is-home #display_menu_1,
+html.category body.is-home #display_menu_1,
+html[data-mc-category-plp="1"] body.is-home #display_menu_1,
+body.category.is-home #display_menu_1 {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -1276,7 +1319,7 @@ html.mc-url-looks-like-pdp body.is-home #display_menu_1 {
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 32px !important;
+  gap: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
 }
@@ -1293,13 +1336,13 @@ html.mc-url-looks-like-pdp body.is-home #display_menu_1 > ul {
   display: flex !important;
   flex-wrap: nowrap !important;
   flex-direction: row !important;
-  justify-content: center !important;
+  justify-content: space-between !important;
   align-items: center !important;
-  gap: 32px !important;
-  margin: 0 !important;
-  padding: 0 20px 0 20px !important;
-  width: auto !important;
-  max-width: 100% !important;
+  gap: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  width: 60% !important;
+  max-width: 60% !important;
   min-width: 0 !important;
 }
 
@@ -1320,7 +1363,7 @@ body:not(.is-home) #display_menu_1 {
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 32px !important; /* space between uls if Volusion injects more than one */
+  gap: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
 }
@@ -1331,13 +1374,13 @@ body:not(.is-home) #display_menu_1 > ul {
   display: flex !important;
   flex-wrap: nowrap !important;
   flex-direction: row !important;
-  justify-content: center !important;
+  justify-content: space-between !important;
   align-items: center !important;
-  gap: 32px !important;
-  margin: 0 !important;
-  padding: 0 20px 0 20px !important;
-  width: auto !important;
-  max-width: 100% !important;
+  gap: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  width: 60% !important;
+  max-width: 60% !important;
   min-width: 0 !important;
 }
 
@@ -1348,18 +1391,23 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li {
   display: flex !important;
   width: auto !important;
   flex: 0 0 auto !important;
-  margin: 0 6px !important;
+  margin: 0 !important;
   padding: 0 !important;
   position: relative !important;
 }
 
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li.vnav__item > a.vnav__link,
 body:not(.is-home) #display_menu_1 > ul > li > a,
 body:not(.is-home) #display_menu_1 .vnav--level1 > li > a {
   display: inline-block !important;
   width: auto !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
-  padding: 0 8px !important;
+  padding: 0 4px !important;
+  letter-spacing: 0.15em !important;
+  color: #777 !important;
+  font-weight: 400 !important;
 }
 
 body:not(.is-home) #display_menu_1 br {
@@ -2453,19 +2501,26 @@ body.mc-product-page #content_area .main-image img {
   }
 }
 
-/* Match homepage hero menu: flex (not inline-flex) so ul doesn’t shrink and overlap items */
+/* Match homepage hero menu: 60% row, space-between (do not revert to gap:32px / width:auto) */
 body:not(.is-home) #display_menu_1 > ul.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
-body:not(.is-home) #display_menu_1 > ul {
+body:not(.is-home) #display_menu_1 > ul,
+html[data-mc-category-plp="1"] header.header #display_menu_1 > ul.vnav--level1,
+html[data-mc-category-plp="1"] header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+html[data-mc-category-plp="1"] header.header #display_menu_1 > ul,
+html.category header.header #display_menu_1 > ul.vnav--level1,
+html.category header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+html.category header.header #display_menu_1 > ul {
   display: flex !important;
-  justify-content: center !important;
+  justify-content: space-between !important;
   align-items: center !important;
-  gap: 32px !important;
+  gap: 0 !important;
   flex-wrap: nowrap !important;
-  width: auto !important;
-  min-width: min-content !important;
+  width: 60% !important;
+  max-width: 60% !important;
+  min-width: 0 !important;
   margin: 0 auto !important;
-  padding: 12px 20px !important;
+  padding: 0 !important;
   position: static !important;
   transform: none !important;
   left: auto !important;
@@ -4607,7 +4662,7 @@ body.is-home body .mc-cart-float {
   flex-wrap: nowrap !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 32px !important;
+  gap: 0 !important;
   min-width: 0 !important;
   overflow: visible !important;
 }
@@ -4626,12 +4681,14 @@ body.is-home body .mc-cart-float {
   > ul {
   display: flex !important;
   flex-wrap: nowrap !important;
-  justify-content: center !important;
+  justify-content: space-between !important;
   align-items: center !important;
-  gap: 32px !important;
-  min-width: min-content !important; /* never shrink below content = no overlap */
-  margin: 0 !important;
-  padding: 0 20px !important;
+  gap: 0 !important;
+  width: 60% !important;
+  max-width: 60% !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
   position: static !important;
   left: auto !important;
   overflow: visible !important;
@@ -4708,42 +4765,45 @@ body.is-home body .mc-cart-float {
     box-sizing: border-box !important;
   }
 
-  :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
+  :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html[data-mc-category-plp="1"] body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
     header.header
     .mc-header-desktop-bar
     #display_menu_1 {
-    width: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
     margin: 0 auto !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
   }
 
-  :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
+  :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html[data-mc-category-plp="1"] body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
     header.header
     .mc-header-desktop-bar
     #display_menu_1
     > ul,
-  :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
+  :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html[data-mc-category-plp="1"] body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
     header.header
     .mc-header-desktop-bar
     #display_menu_1
     > ul.vnav--level1,
-  :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
+  :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html[data-mc-category-plp="1"] body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
     header.header
     .mc-header-desktop-bar
     #display_menu_1
     > ul.vnav--horizontal.vnav--level1 {
-    width: auto !important;
+    width: 60% !important;
+    max-width: 60% !important;
+    min-width: 0 !important;
     margin: 0 auto !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
     box-sizing: border-box !important;
     display: flex !important;
-    justify-content: center !important;
+    justify-content: space-between !important;
     align-items: center !important;
     flex-wrap: nowrap !important;
-    gap: clamp(14px, 2.5vw, 22px) !important;
+    gap: 0 !important;
   }
 
   :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp, html.category body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
@@ -6502,8 +6562,8 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__image,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image,
 :is(html.category, body.category) .v-product-grid .v-product a.v-product__img.mc-plp-image-box {
-  height: 260px;
-  min-height: 0;
+  height: var(--mc-plp-tile-h);
+  min-height: var(--mc-plp-tile-h);
   max-height: var(--mc-plp-tile-h);
   overflow: visible;
 }
@@ -8651,11 +8711,13 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   overflow-wrap: break-word !important;
   word-break: normal !important;
   text-align: center !important;
-  font-size: 17px !important;
+  font-size: 16px !important;
   letter-spacing: 0.14em !important;
   margin-top: 9px !important;
+  margin-bottom: -18px !important;
   text-transform: uppercase;
-  font-weight: 400 !important;
+  font-weight: 600 !important;
+  color: #777 !important;
 }
 .v-product-grid {
   display: flex !important;
@@ -9989,11 +10051,11 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin-right: auto !important;
   }
 
-  /* Pull main column up on non-category pages only — category breadcrumb must stay below nav */
-  html:not(.category):not([data-mc-category-plp="1"]) .container--content,
-  html:not(.category):not([data-mc-category-plp="1"]) .content_area-wrapper,
-  body:not(.category):not([data-mc-category-plp="1"]) .container--content,
-  body:not(.category):not([data-mc-category-plp="1"]) .content_area-wrapper {
+  /* Pull main column up on non-category pages only — never cart/checkout (mc-commerce-surface) */
+  html:not(.mc-commerce-surface):not(.category):not([data-mc-category-plp="1"]) .container--content,
+  html:not(.mc-commerce-surface):not(.category):not([data-mc-category-plp="1"]) .content_area-wrapper,
+  body:not(.mc-commerce-surface):not(.category):not([data-mc-category-plp="1"]) .container--content,
+  body:not(.mc-commerce-surface):not(.category):not([data-mc-category-plp="1"]) .content_area-wrapper {
     margin-top: -40px !important;
   }
 
@@ -10959,13 +11021,16 @@ body.mc-saranoni-pdp table[id*="options_table"][data-mc-hide-native-options="1"]
 
   body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul,
   body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--level1,
-  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
-    width: auto !important;
-    max-width: 100% !important;
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+  html[data-mc-category-plp="1"] body header.header .mc-header-desktop-bar #display_menu_1 > ul,
+  html[data-mc-category-plp="1"] body header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
+    width: 60% !important;
+    max-width: 60% !important;
+    min-width: 0 !important;
     margin: 0 auto !important;
     padding: 0 !important;
-    gap: 16px !important;
-    justify-content: center !important;
+    gap: 0 !important;
+    justify-content: space-between !important;
   }
 }
 
@@ -15937,9 +16002,9 @@ html[data-mc-category-plp="1"] #content_area ul.v-product-grid > li.v-product a.
 body.is-home:not(.productdetails) #content_area .v-product-grid .v-product a.v-product__img,
 body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product a.v-product__img {
   width: 100% !important;
-  height: 260px !important;
-  min-height: 260px !important;
-  max-height: 260px !important;
+  height: var(--mc-plp-tile-h, 280px) !important;
+  min-height: var(--mc-plp-tile-h, 280px) !important;
+  max-height: var(--mc-plp-tile-h, 280px) !important;
   padding: 0 !important;
   margin: 0 auto 14px auto !important;
   display: flex !important;
@@ -20718,9 +20783,12 @@ html body .mc-cart-float > svg.mc-cart-float__icon {
   #content_area
   :is(.v-product__title, .v-product__name, .productnamecolor, .productnamecolorLARGE, .productnamecolorSMALL, .productnamecolor a, .v-product__title a) {
   text-align: center !important;
-  font-size: 13px !important;
+  font-size: 16px !important;
   line-height: 1.35 !important;
-  letter-spacing: 0.02em !important;
+  letter-spacing: 0.14em !important;
+  font-weight: 600 !important;
+  color: #777 !important;
+  margin-bottom: -18px !important;
 }
 
 :is(html.category, body.category, html[data-mc-category-plp="1"], body[data-mc-category-plp="1"])
@@ -20830,4 +20898,178 @@ html body.mc-pdp-accordion-pdp #mc-pdp-accordion .mc-acc-header {
   align-items: center !important;
   justify-content: space-between !important;
   width: 100% !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) form.search_results_section aside.vol-list-grid,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area form.search_results_section .vol-list-grid {
+  display: none !important;
+}
+
+#MainForm > table:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > button:nth-child(1) {
+  display: none !important;
+}
+
+div.mc-cat-prodcard > div:nth-child(3) > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) {
+  display: none !important;
+}
+
+/* Category PLP product titles — grid + legacy table (bean bags); kill Volusion link underline */
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area .v-product-grid .v-product a.productnamecolor,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area .v-product-grid .v-product a.colors_productname,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area .v-product-grid .v-product .v-product__title,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area ul.v-product-grid li.v-product a.productnamecolor,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay a.productnamecolor,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay a.colors_productname,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay table.v65-productDisplay a.productnamecolor,
+div.mc-cat-prodcard > div:nth-child(2) > a:nth-child(1) {
+  display: block !important;
+  font-size: 16px !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  color: #777 !important;
+  font-weight: 600 !important;
+  font-style: normal !important;
+  margin-bottom: -18px !important;
+}
+
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay a.productnamecolor span[itemprop="name"],
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay a.colors_productname span[itemprop="name"] {
+  text-decoration: none !important;
+  font: inherit !important;
+  color: inherit !important;
+}
+
+/* Main menu spacing — all pages; beats .mc-header-desktop-bar width:auto rules above */
+header.header .mc-header-desktop-bar #display_menu_1,
+header.header #display_menu_1 {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav.vnav--horizontal.vnav--level1,
+header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+header.header #display_menu_1 > ul.vnav.vnav--horizontal.vnav--level1,
+header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+html[data-mc-category-plp="1"] header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 60% !important;
+  max-width: 60% !important;
+  min-width: 0 !important;
+  gap: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+header.header #display_menu_1 > ul.vnav.vnav--horizontal.vnav--level1 > li.vnav__item,
+header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li {
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+header.header #display_menu_1 > ul.vnav.vnav--horizontal.vnav--level1 > li.vnav__item > a.vnav__link,
+header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a {
+  letter-spacing: 0.15em !important;
+  padding: 0 4px !important;
+  color: #777 !important;
+  font-weight: 400 !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 60% !important;
+  max-width: 60% !important;
+  gap: 0 !important;
+  margin: 0 auto !important;
+}
+
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav a {
+  letter-spacing: 0.15em !important;
+  padding: 0 4px !important;
+  font-weight: 400 !important;
+}
+
+/* === MC_LIVE_FIX_20260705 — cart page + PLP image/title/menu (loads last) === */
+html.mc-commerce-surface #if_homepage,
+html.mc-commerce-surface #slideshow-container,
+html.mc-commerce-surface #slideshow-container .mc-hero-video,
+html.mc-commerce-surface .mc-hero-video,
+body.shoppingcart #if_homepage,
+body.shoppingcart #slideshow-container {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.mc-commerce-surface .content_area-wrapper,
+html.mc-commerce-surface .container--content,
+body.shoppingcart .content_area-wrapper,
+body.shoppingcart .container--content {
+  margin-top: 0 !important;
+  padding-top: 20px !important;
+  min-height: 200px !important;
+}
+
+html.mc-commerce-surface #content_area,
+body.shoppingcart #content_area {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  min-height: 120px !important;
+}
+
+html.mc-commerce-surface #content_area table,
+html.mc-commerce-surface #content_area .v65-your-cart-title,
+html.mc-commerce-surface #content_area h2.v65-your-cart-title,
+body.shoppingcart #content_area table,
+body.shoppingcart #content_area .v65-your-cart-title {
+  display: table !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html.mc-commerce-surface #content_area h2.v65-your-cart-title,
+body.shoppingcart #content_area h2.v65-your-cart-title {
+  display: block !important;
+}
+
+@media (min-width: 992px) {
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td img,
+  :is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay > tbody > tr > td img[src*="/photos/"] {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 220px !important;
+    min-height: 180px !important;
+    margin: 0 auto 10px auto !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
 }

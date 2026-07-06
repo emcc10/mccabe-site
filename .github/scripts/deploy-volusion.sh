@@ -165,6 +165,7 @@ CRITICAL_ALWAYS=(
   "vspfiles/js/mc-unified-pdp-layout.js"
   "vspfiles/js/mc-plp-enforcer.js"
   "vspfiles/css/mc-plp-body-last.css"
+  "vspfiles/js/mc-cart-checkout-fix.js"
 )
 
 deploy_file_changed() {

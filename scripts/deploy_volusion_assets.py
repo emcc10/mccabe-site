@@ -30,6 +30,7 @@ OPTIONAL = (
     "vspfiles/js/mc-windsor-hero-fix.js",
     "vspfiles/js/mc-plp-sofa-bounds.json",
     "vspfiles/js/mc-site-fix.js",
+    "vspfiles/js/mc-cart-checkout-fix.js",
     "vspfiles/js/sectional-configs.js",
     "vspfiles/my-boards.html",
     "vspfiles/boards/my-boards-boot.js",
@@ -85,6 +86,7 @@ _ALWAYS_DEPLOY = frozenset(
         "vspfiles/js/mc-unified-pdp-layout.js",
         "vspfiles/js/mc-plp-enforcer.js",
         "vspfiles/css/mc-plp-body-last.css",
+        "vspfiles/js/mc-cart-checkout-fix.js",
     }
 )
 

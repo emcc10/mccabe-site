@@ -378,6 +378,17 @@ display:none!important;visibility:hidden!important;height:0!important;max-height
       if (typeof window.mcApplyUrlHeroClassHints === "function") window.mcApplyUrlHeroClassHints();
       var root = document.documentElement;
       if (!document.body) return;
+      var pathCommerce = String(location.pathname || "").toLowerCase();
+      if (/shoppingcart|onepagecheckout|checkout|orderconfirm|myaccount|login\.asp/i.test(pathCommerce)) {
+        document.body.classList.remove("is-home");
+        try {
+          if (root) {
+            root.classList.remove("mc-allow-home-hero");
+            root.classList.add("mc-commerce-surface");
+          }
+        } catch (eComm) {}
+        return;
+      }
       if (mcDomLooksLikeProductPage() || mcPathLooksLikeProductOrInteriorUrl()) {
         document.body.classList.remove("is-home");
         try {
@@ -553,7 +564,7 @@ display:none!important;visibility:hidden!important;height:0!important;max-height
 <!-- MC_CSS_DEPLOY_VERIFY_20260607memberpricing: same token as /v/vspfiles/css/custom-safe.css line 1 -->
 <meta name="mc-deploy-verify" content="20260630catnav1">
 <meta name="mc-pdp-cache-buster" content="20260630catnav1">
-<meta name="mc-live-deploy-check" content="20260630-cat-nav-overlap-fix">
+<meta name="mc-live-deploy-check" content="20260705-livefix-cart-menu-plp">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -566,6 +577,33 @@ display:none!important;visibility:hidden!important;height:0!important;max-height
   } catch (e) {}
 })();
 </script>
+<style id="mc-commerce-cart-critical">
+html.mc-commerce-surface #if_homepage,
+html.mc-commerce-surface #slideshow-container,
+body.shoppingcart #if_homepage,
+body.shoppingcart #slideshow-container {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+html.mc-commerce-surface .content_area-wrapper,
+html.mc-commerce-surface .container--content,
+body.shoppingcart .content_area-wrapper {
+  margin-top: 0 !important;
+  padding-top: 20px !important;
+}
+html.mc-commerce-surface #content_area,
+body.shoppingcart #content_area {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 120px !important;
+}
+</style>
 <script src="/v/vspfiles/js/mc-cart-checkout-fix.js?v=20260620cart3"></script><!-- MC_CART_CHECKOUT_FIX -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -2669,16 +2707,23 @@ document.addEventListener("DOMContentLoaded", function () {
    =============================== */
 
 #slideshow-container .hero-menu {
-  padding-left: max(40px, 5vw);
-  padding-right: max(40px, 5vw);
-  gap: clamp(14px, 2.5vw, 22px);
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  gap: 0 !important;
   box-sizing: border-box;
   max-width: 100%;
+  justify-content: center !important;
 }
 
 .hero-nav {
   display: flex;
-  gap: clamp(14px, 2.5vw, 22px);
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 60% !important;
+  max-width: 60% !important;
+  gap: 0 !important;
+  margin: 0 auto !important;
 }
 
 .hero-nav a,
@@ -2688,11 +2733,11 @@ document.addEventListener("DOMContentLoaded", function () {
   color: #fff !important;
   -webkit-text-fill-color: #fff !important;
   font-size: clamp(12px, 1.4vw, 15px);
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-weight: 400;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   text-decoration: none;
-  padding: 0 clamp(4px, 0.5vw, 8px);
+  padding: 0 4px;
   position: relative;
   z-index: 2;
   transition: background 0.15s ease, color 0.15s ease;
@@ -2773,14 +2818,14 @@ body:not(.is-home) #display_menu_1 > ul {
   flex-direction: row !important;
   flex-wrap: nowrap !important;
   align-items: center !important;
-  justify-content: center !important;
-  gap: 32px !important;
-  padding-left: max(80px, 8vw) !important;
-  padding-right: max(80px, 8vw) !important;
+  justify-content: space-between !important;
+  gap: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   box-sizing: border-box !important;
   margin: 0 auto !important;
-  width: 100% !important;
-  max-width: 100% !important;
+  width: 60% !important;
+  max-width: 60% !important;
 }
 body:not(.is-home) .microblock.main-menu {
   padding: 0 !important;
@@ -2790,13 +2835,15 @@ body:not(.is-home) #display_menu_1 > ul > li,
 body:not(.is-home) #display_menu_1 .vnav--level1 > li {
   display: flex !important;
   flex: 0 0 auto !important;
-  margin: 0 6px !important;
+  margin: 0 !important;
   padding: 0 !important;
 }
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li.vnav__item > a.vnav__link,
 body:not(.is-home) #display_menu_1 > ul > li > a,
 body:not(.is-home) #display_menu_1 .vnav--level1 > li > a {
   white-space: nowrap !important;
-  padding: 0 8px !important;
+  padding: 0 4px !important;
 }
 
 /* Remove hidden cart list item from nav flow so centering math stays correct */
@@ -2810,32 +2857,30 @@ body:not(.is-home) #display_menu_1 .mc-vnav-cart {
 
 
 
-/* Typography match for non-home */
-body:not(.is-home) #display_menu_1 .vnav--level1 > li > a,
-body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li > a,
-body:not(.is-home) #display_menu_1 .vnav__link,
-body:not(.is-home) #display_menu_1 .vnav__label {
-  color: #2a2a2a !important;
+/* Typography match for non-home — top-level header links only */
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li.vnav__item > a.vnav__link,
+body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li > a {
+  color: #777 !important;
   font-family: Inter, sans-serif !important;
   font-size: 15px !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.12em !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
-  padding: 0 8px !important;
+  padding: 0 4px !important;
   white-space: nowrap !important;
   line-height: 1.2 !important;
   transition: color 0.15s ease !important;
 }
 
-body:not(.is-home) #display_menu_1 .vnav--level1 > li > a:hover,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a:hover,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li.vnav__item > a.vnav__link:hover,
 body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li > a:hover,
-body:not(.is-home) #display_menu_1 .vnav__link:hover,
-body:not(.is-home) #display_menu_1 .vnav__label:hover,
-body:not(.is-home) #display_menu_1 .vnav--level1 > li > a:focus-visible,
-body:not(.is-home) #display_menu_1 .vnav__link:focus-visible,
-body:not(.is-home) #display_menu_1 .vnav__label:focus-visible {
-  color: #0a0a0a !important;
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a:focus-visible,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li.vnav__item > a.vnav__link:focus-visible,
+body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li > a:focus-visible {
+  color: #555 !important;
   background: rgba(0, 0, 0, 0.08) !important;
   border-radius: 4px !important;
 }
@@ -3922,27 +3967,52 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     if (!scope) return;
 
     var isHome = document.body.classList.contains('is-home');
-
-    /* FORCE NON-HOME WIDTH ON THE ACTUAL UL */
-    if (!isHome) {
-  // DO NOT force layout here (CSS will handle layout)
-}
-   
+    var isCategoryPlp =
+      document.documentElement.classList.contains('category') ||
+      document.documentElement.getAttribute('data-mc-category-plp') === '1' ||
+      (document.body && document.body.classList.contains('category'));
 
     var topNodes = scope.querySelectorAll(
-      '.vnav--level1 > li > a, .vnav--horizontal.vnav--level1 > li > a, .vnav__link, .vnav__label'
+      '.vnav--horizontal.vnav--level1 > li.vnav__item > a.vnav__link, .vnav--horizontal.vnav--level1 > li > a'
     );
     topNodes.forEach(function (el) {
       if (el.closest && el.closest('.vnav--level2, .vnav--level3, .vnav__submenu')) return;
       el.style.setProperty('font-family', 'Inter, sans-serif', 'important');
       el.style.setProperty('font-size', '15px', 'important');
-      el.style.setProperty('font-weight', '500', 'important');
-      el.style.setProperty('letter-spacing', '0.12em', 'important');
+      el.style.setProperty('font-weight', '400', 'important');
+      el.style.setProperty('letter-spacing', '0.15em', 'important');
       el.style.setProperty('text-transform', 'uppercase', 'important');
       el.style.setProperty('line-height', '1.2', 'important');
       el.style.setProperty('text-decoration', 'none', 'important');
-      el.style.setProperty('padding', '0 8px', 'important');
+      el.style.setProperty('padding', '0 4px', 'important');
+      if (!isHome || isCategoryPlp) {
+        el.style.setProperty('color', '#777', 'important');
+      }
     });
+
+    if (!isHome || isCategoryPlp) {
+      scope.style.setProperty('display', 'flex', 'important');
+      scope.style.setProperty('justify-content', 'center', 'important');
+      scope.style.setProperty('align-items', 'center', 'important');
+      scope.style.setProperty('width', '100%', 'important');
+      scope.style.setProperty('max-width', '100%', 'important');
+      scope.style.setProperty('margin', '0 auto', 'important');
+      scope.style.setProperty('padding', '0', 'important');
+
+      var topUl = scope.querySelector('ul.vnav.vnav--horizontal.vnav--level1, ul.vnav--horizontal.vnav--level1');
+      if (topUl) {
+        topUl.style.setProperty('display', 'flex', 'important');
+        topUl.style.setProperty('flex-direction', 'row', 'important');
+        topUl.style.setProperty('flex-wrap', 'nowrap', 'important');
+        topUl.style.setProperty('align-items', 'center', 'important');
+        topUl.style.setProperty('justify-content', 'space-between', 'important');
+        topUl.style.setProperty('width', '60%', 'important');
+        topUl.style.setProperty('max-width', '60%', 'important');
+        topUl.style.setProperty('gap', '0', 'important');
+        topUl.style.setProperty('margin', '0 auto', 'important');
+        topUl.style.setProperty('padding', '0', 'important');
+      }
+    }
 
     scope.querySelectorAll('.vnav--level2 a, .vnav--level3 a, .vnav__submenu a').forEach(function (el) {
       el.style.setProperty('font-family', 'Inter, sans-serif', 'important');
@@ -15476,6 +15546,90 @@ body.mc-product-page #v65-product-related img {
     max-width: 50% !important;
     padding: 8px !important;
   }
+}
+</style>
+
+<style id="mc-main-menu-spacing-final">
+/* Final menu spacing — loads last, beats .mc-header-desktop-bar width:auto / gap:clamp rules */
+header.header .mc-header-desktop-bar #display_menu_1,
+header.header #display_menu_1 {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav.vnav--horizontal.vnav--level1,
+header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+header.header #display_menu_1 > ul.vnav.vnav--horizontal.vnav--level1,
+header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+html[data-mc-category-plp="1"] header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 60% !important;
+  max-width: 60% !important;
+  min-width: 0 !important;
+  gap: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+header.header #display_menu_1 > ul.vnav.vnav--horizontal.vnav--level1 > li.vnav__item,
+header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+header.header #display_menu_1 > ul.vnav.vnav--horizontal.vnav--level1 > li.vnav__item > a.vnav__link,
+header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a {
+  letter-spacing: 0.15em !important;
+  padding: 0 4px !important;
+  color: #777 !important;
+  font-weight: 400 !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 60% !important;
+  max-width: 60% !important;
+  gap: 0 !important;
+  margin: 0 auto !important;
+}
+
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav a {
+  letter-spacing: 0.15em !important;
+  padding: 0 4px !important;
+  font-weight: 400 !important;
+}
+
+/* Category PLP product titles — wins over earlier 13px/14px/left-align blocks */
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area .v-product-grid .v-product a.productnamecolor,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area .v-product-grid .v-product a.colors_productname,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area .v-product-grid .v-product .v-product__title,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area ul.v-product-grid li.v-product a.productnamecolor,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay a.productnamecolor,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay a.colors_productname,
+:is(html.category, body.category, html[data-mc-category-plp="1"]) #content_area table.v65-productDisplay table.v65-productDisplay a.productnamecolor {
+  font-size: 16px !important;
+  color: #777 !important;
+  font-weight: 600 !important;
+  margin-bottom: -18px !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  text-decoration: none !important;
 }
 </style>
 
