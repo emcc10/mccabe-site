@@ -33,11 +33,11 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260630sarrepair36
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260626sarrepair15";
+  var VERSION = "20260710mj650v04";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -81,6 +81,39 @@
         mainImage: "SAR-CHNK-KNT-LG-1012-T.jpg",
       },
     ],
+    // Peter Rabbit Muslin/Lush — Girl/Boy (Volusion option IDs 1213/1214, color cat 23)
+    "SAR-PTR-RBT-BMBU-RYN-MSLN": [
+      {
+        optionId: "1213",
+        label: "Girl",
+        swatchImage: "SAR-PTR-RBT-BMBU-RYN-MSLN-1213-S.jpg",
+        mainImage: "SAR-PTR-RBT-BMBU-RYN-MSLN-1213-T.jpg",
+      },
+      {
+        optionId: "1214",
+        label: "Boy",
+        swatchImage: "SAR-PTR-RBT-BMBU-RYN-MSLN-1214-S.jpg",
+        mainImage: "SAR-PTR-RBT-BMBU-RYN-MSLN-1214-T.jpg",
+      },
+    ],
+    "SAR-PTR-RBT-BMBU-RYN-MSLN-02": [
+      {
+        optionId: "1213",
+        label: "Girl",
+        swatchImage: "SAR-PTR-RBT-BMBU-RYN-MSLN-02-1213-S.jpg",
+        mainImage: "SAR-PTR-RBT-BMBU-RYN-MSLN-02-1213-T.jpg",
+      },
+      {
+        optionId: "1214",
+        label: "Boy",
+        swatchImage: "SAR-PTR-RBT-BMBU-RYN-MSLN-02-1214-S.jpg",
+        mainImage: "SAR-PTR-RBT-BMBU-RYN-MSLN-02-1214-T.jpg",
+      },
+    ],
+  };
+  var PTR_BOY_GIRL_PRODUCT_CODES = {
+    "SAR-PTR-RBT-BMBU-RYN-MSLN": 1,
+    "SAR-PTR-RBT-BMBU-RYN-MSLN-02": 1,
   };
   // When a configured-color swatch is chosen we "lock" that selection so that
   // MutationObserver-driven re-renders (and Volusion's async option-image logic)
@@ -247,10 +280,10 @@
     var wrap = global.document.getElementById("mc-pdp-title-right");
     if (!wrap) return;
     try {
-      if (!isSaranoniPdpPage()) {
-        wrap.style.setProperty("padding-left", "1.1em", "important");
-      } else {
+      if (isSaranoniPdpPage() || (isBeanBagPdpPage() && global.innerWidth <= 991)) {
         wrap.style.setProperty("padding-left", "0", "important");
+      } else {
+        wrap.style.setProperty("padding-left", "1.1em", "important");
       }
       wrap.style.setProperty("padding-right", "0", "important");
       wrap.style.setProperty("margin-left", "0", "important");
@@ -396,50 +429,91 @@
     pruneDescriptionDuplicateFeatures();
   }
 
+  function isTmhPdpPage() {
+    try {
+      var pc = resolveSoftGoodsProductCode();
+      if (/^TMH/i.test(pc)) return true;
+      if (
+        global.document.body &&
+        (global.document.body.classList.contains("mc-tmh-pdp") ||
+          global.document.body.classList.contains("mc-mahjong-house-pdp"))
+      ) {
+        return true;
+      }
+      var path = String(global.location.pathname || "").toLowerCase();
+      if (/product-p\/tmh-/i.test(path)) return true;
+    } catch (eTmh) {}
+    return false;
+  }
+
   function fixTmhMatPhotoUrls(root) {
     root = root || global.document;
-    function swap2Tto1(el, attr) {
+    function swap2TtoFull(el, attr) {
       if (!el || !el.getAttribute) return;
       var val = el.getAttribute(attr) || "";
-      if (!/\/TMH-(?:MAT|TRV)-[A-Z0-9-]+-2T\./i.test(val)) return;
+      /* All TMH heroes: -2T thumbs are ~320px; prefer full -1 photo for 650px display. */
+      if (!/\/TMH-[A-Z0-9-]+-2T\./i.test(val)) return;
       var next = val.replace(/-2T\.(jpg|jpeg|png|webp)/i, "-1.$1");
       if (next === val) return;
       el.setAttribute(attr, next);
       if (attr === "src" && "src" in el) el.src = next;
     }
-    swap2Tto1(global.document.getElementById("product_photo"), "src");
+    swap2TtoFull(global.document.getElementById("product_photo"), "src");
     global.document.querySelectorAll("#product_photo_zoom_url, #product_photo_zoom_url2").forEach(function (link) {
-      swap2Tto1(link, "href");
+      swap2TtoFull(link, "href");
     });
     root.querySelectorAll('img[src*="/vspfiles/photos/TMH-"][src*="-2T."]').forEach(function (img) {
-      swap2Tto1(img, "src");
+      swap2TtoFull(img, "src");
     });
   }
 
   function applyPdpMainImageCap() {
     if (!isProductPdp()) return;
     if (isSteveSilverPdpPage()) return;
-    if (global.__MC_PDP_MAIN_IMAGE_CAP_VER__ === VERSION) return;
-    global.__MC_PDP_MAIN_IMAGE_CAP_VER__ = VERSION;
     fixTmhMatPhotoUrls(global.document);
     var img = global.document.getElementById("product_photo");
+    var isMahjong = isTmhPdpPage();
     var maxW = isBeanBagPdpPage() ? "600px" : "650px";
+    /* Mahjong/TMH: pin display width to 650px (not just max-width). */
+    var pinW = isMahjong ? "650px" : null;
     if (img) {
       try {
-        img.style.setProperty("max-width", maxW, "important");
-        img.style.setProperty("width", "100%", "important");
+        if (pinW) {
+          img.style.setProperty("width", pinW, "important");
+          img.style.setProperty("max-width", "min(650px, 100%)", "important");
+        } else {
+          img.style.setProperty("max-width", maxW, "important");
+          img.style.setProperty("width", "100%", "important");
+        }
         img.style.setProperty("height", "auto", "important");
         img.style.setProperty("box-sizing", "border-box", "important");
       } catch (eImg) {}
     }
     global.document.querySelectorAll("#product_photo_zoom_url, a#product_photo_zoom_url2").forEach(function (link) {
       try {
-        link.style.setProperty("max-width", maxW, "important");
-        link.style.setProperty("width", "100%", "important");
+        if (pinW) {
+          link.style.setProperty("width", pinW, "important");
+          link.style.setProperty("max-width", "min(650px, 100%)", "important");
+        } else {
+          link.style.setProperty("max-width", maxW, "important");
+          link.style.setProperty("width", "100%", "important");
+        }
         link.style.setProperty("display", "block", "important");
         link.style.setProperty("box-sizing", "border-box", "important");
       } catch (eLink) {}
     });
+    if (global.__MC_PDP_MAIN_IMAGE_CAP_VER__ !== VERSION) {
+      global.__MC_PDP_MAIN_IMAGE_CAP_VER__ = VERSION;
+      if (isMahjong) {
+        [200, 600, 1500, 3000].forEach(function (ms) {
+          global.setTimeout(function () {
+            try {
+              applyPdpMainImageCap();
+            } catch (eRe) {}
+          }, ms);
+        });
+      }
+    }
   }
 
   function applyPdpDescriptionTypography(el) {
@@ -500,6 +574,14 @@
             "#mc-pdp-qty-row, #mc-pdp-purchase-stack, input[name='btnaddtocart'], .mc-atc-button-wrap, input[name^='QTY.']"
           )
         ) {
+          return;
+        }
+        // Never hide a structural container: on no-option products (bb-chinchilla)
+        // the whole action-wrapper td momentarily reads exactly "Quantity:" while
+        // hero nodes are being built, and hiding it entombs the entire info column.
+        if (el.id === "v65-productdetail-action-wrapper") return;
+        if (el.classList && el.classList.contains("v65-productdetail-options")) return;
+        if (el.querySelector("table, td.mc-pdp-options-td, td.mc-unified-pdp-info, #mc-pdp-title-right, #mc-pdp-price-stack-host, #mc-pdp-brand-logo, #mc-pdp-accordion")) {
           return;
         }
         var txt = String(el.textContent || "")
@@ -1166,8 +1248,16 @@
   function fmtMoney(n) {
     n = Number(n || 0);
     if (!(n > 0)) return "";
-    if (typeof global.mcFmtMoney === "function") return global.mcFmtMoney(n);
     var cents = Math.round(n * 100) % 100;
+    if (typeof global.mcFmtMoney === "function") {
+      // The page's own mcFmtMoney always appends ".00" regardless of
+      // whether the amount is a whole dollar — every call re-introduced the
+      // zero cents our stripPriceZeroCents() pass had just removed, so the
+      // price visibly flickered between "$32" and "$32.00" on a loop.
+      var formatted = global.mcFmtMoney(n);
+      if (cents === 0) formatted = formatted.replace(/\.00(?!\d)/, "");
+      return formatted;
+    }
     return (
       "$" +
       n.toLocaleString(undefined, {
@@ -1786,6 +1876,10 @@
       ensureSaranoniBrandLogo();
       return;
     }
+    if (isBeanBagPdpPage()) {
+      ensureBeanBagBrandLogo();
+      return;
+    }
     if (
       isPdpLayoutMounted() &&
       global.document.getElementById("mc-pdp-brand-logo") &&
@@ -1836,10 +1930,25 @@
     if (logo) {
       wrap.appendChild(logo);
     } else {
+      // No manufacturer logo found on the page — derive it from the product's ACTUAL
+      // manufacturer rather than always defaulting to Saranoni (which was wrongly showing on
+      // mahjong pages). Volusion exposes it via meta[itemprop=manufacturer]; the logo file is
+      // that name, lowercased, under /manufacturers/.
+      var pc = resolveSoftGoodsProductCode();
+      var mfgMeta = global.document.querySelector('meta[itemprop="manufacturer"]');
+      var mfgName = (mfgMeta && (mfgMeta.getAttribute("content") || "").trim()) || "";
+      var src;
+      if (mfgName) {
+        src = "/v/vspfiles/photos/manufacturers/" + encodeURIComponent(mfgName.toLowerCase()) + ".jpg";
+      } else if (/^TMH/.test(pc)) {
+        src = "/v/vspfiles/photos/manufacturers/mahjong%20house.jpg";
+      } else {
+        src = SARANONI_BRAND_LOGO_SRC;
+      }
       var img = global.document.createElement("img");
       img.className = "vCSS_img_mfg_logo";
-      img.alt = "Saranoni";
-      img.setAttribute("src", SARANONI_BRAND_LOGO_SRC);
+      img.alt = mfgName || (/^TMH/.test(pc) ? "Mahjong House" : "Saranoni");
+      img.setAttribute("src", src);
       wrap.appendChild(img);
     }
     positionSaranoniBrandLogo(wrap);
@@ -1862,6 +1971,81 @@
         col.appendChild(wrap);
       } catch (eCol) {}
     }
+    try {
+      wrap.style.setProperty("display", "flex", "important");
+      wrap.style.setProperty("justify-content", "center", "important");
+      wrap.style.setProperty("align-items", "center", "important");
+      wrap.style.setProperty("width", "100%", "important");
+      wrap.style.setProperty("max-width", "100%", "important");
+      wrap.style.setProperty("margin-left", "auto", "important");
+      wrap.style.setProperty("margin-right", "auto", "important");
+      wrap.style.setProperty("box-sizing", "border-box", "important");
+      wrap.style.setProperty("overflow", "visible", "important");
+      var logoImg = wrap.querySelector("img");
+      if (logoImg) {
+        logoImg.style.setProperty("display", "block", "important");
+        logoImg.style.setProperty("margin", "0 auto", "important");
+        logoImg.style.setProperty("max-width", "100%", "important");
+        logoImg.style.setProperty("width", "auto", "important");
+        logoImg.style.setProperty("height", "auto", "important");
+        logoImg.style.setProperty("max-height", "72px", "important");
+        logoImg.style.setProperty("object-fit", "contain", "important");
+      }
+    } catch (eLogoCenter) {}
+  }
+
+  /* Inlined as a data URI: the photos-dir file also exists, but inlining removes any network/cache failure mode for the brand logo. */
+  var BEAN_BAG_BRAND_LOGO_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAABUCAYAAADNqUOYAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAN1ElEQVR4nO2d3Y3jvA6GXYIrCIKpIDdz7xJSgktICS4hJbiElOASUoJLcAfzYc+RFhlvYpMSSdH2e/EAg8Um0Q+lVz8UWZ2+visAAACb53z6+m5OX9/X09d394Fb+D+Ng/L+Q/ECAAAAYPNHfNrT13d/+vp+nr6+fxIZT1/fjyBWxUWqdKMCAACgcTl9fd+DiPwoMQWB+iN2tXUdSzcwAACAz9ThmE1ThJbEqQ9CaFLf0o0NAADg/ZFcH0ThxwGDxZFe6UYHAADwe0d0dyBARYSpdOMDAAD4PzdHO6I1HmEXJ9oGpTsAAACOzjnsPH4ydy73F2+5uWt3dAlvgsNCF0Ql525qCiIq1halOwIAAI5Mm7gregq6akcX8kfGbknEI690ZwAAwFHpE3Ykd42jshfqIE7ct02jhDde6Q4BAICjUTMn/DGIhHU5G+ZR4pRbztIdAwAAR4IjRpP0HY2RMCWLUumKAlsoxtQ5KCcAe+TCcCLoS0RKWOHKuO9KEqXSFQS2QJAA8L0zmjzElFupx0NLlEpXDtgCQQLArxg9He6KPnHTEKXSlQK2QJAAsGcgHtFVG6MhHuGRd3ylKwRsgSABYAslDNDdQTmrjHuxNVGaqC7hpSsDbIEgAWDrBKBy+X/aqSiVrgiwBYIEgA01YZLe4jFdlSlKi496S1cC2AJBAsCGx4HEqGKI0qLjRukKAFsgSADo0+RMyqd9132x/qULD2yBIAGgz5hzbHXaPi1RlP75bOmCA1sgSACUnYw9hAKqHLTD22PL0oUGtkCQANBl6Q5lcFC+ypCOK0qlCwxsgSABUG5XsPejuioxxcZfUcrJl9EvvECO2Qtb48u7epYtMTs/x86AINkCe/yXy6xN5plN93p3tOXHr5WBKP3vPRbnS5uEhFKvCtgoPTy7E0JzTMEN82a4SqlD+bpQvndlTBnM8fvGD/UcFuppIUhrffIM9nD9YGMdAYk+vIR2igur+VFL49AeW8P26YisLTjj4pUS5XoM7WK9kNV+BDttsD5VgfBJLeWLzhmpbec8BAZLHQZCTi74QXFVxkkFzPnOZ+JC4GwgSLFPuKmYp9nvUc6cU8UiilAvHH/L0h6p7XM3iDDw0VMqwx7W7NczvbPd0SXY1O0l1XlTSBipG5lWK9/72iTUGuTjoE4EUgZ/TZiUKEY1CLa3hiDdBPrkGfpBS5DOCe3YOLTHM6PPc2w5J71AkynOEjZpTb1SfitRbYgLrmcYt7UTMfo7R+V+UQ6cl8q1YnmmD8dHFmWzXAz0woOfkxeF2g8PBUFKbcfGqT1ShTV10UcVvZ83ExrF1TcVz49Jl+r9MPj9S+LCdX5CIQl1jPyKcVdKjDiixM0/n0rKAM4tW4qBa9M56pNcQbor/EZpe6TaRqqLcZc4di8GbeJVlPqCwVM7oXY9F0pG+MvRR3oQS4uS9cTHNZ7c47ScCaekIOXW20KQWoXf8GKP1B1fyiQzJraPVbtY7Di4LPWHpoD2gu1KThGxAnWMjO9+L/Uy02oStNqpvXIxXJnMv/OscGcn1RelFiwpgnRR+o0S9thk9AH3Mp06/seE+GWSeErZcCkknr1Cu+aK0jk3My43XLomZyfiOBJWNVLC4W3nsSZI1hNPqiANCr/hyR61nBuod3i3xMlxCiL5+v4ousqPjO/w9G6pLRAm6GZsb1KRvlnRvlNXvsPsXcIg4HVXWhw7o9UJ1bC91N2DYP6sTEiNwm/UCp5juX0i7dyQ48xAKQvlLc6ap+rD4R3S0rypIZxn4twY3yO+Cj/1yQP3ro4qRqv9l2KM0biWHsXFdwipW8SU47D42PJ1pxX98LmTydrgSRHLKZSx/fA6PaWMcbVZzyID3DMEvROc6IdQ39c+voR/yxG3RmGxEB+qvnuvcXNoj9QFzEPZmaFSOD6cl2V0tit6ZcmONX6vJ4jJmofoXVCUqE8fSF7VXGOMBaWeM14WzhSXzitHBQ8R7nuZT9tt7tHNRNi6c+887gRjSXXLlrjPo04gjYJL9qTQlqPC+JCwR0nnhlRnhor4OW5CupbRPyUZmY+GNd87PRlt1QosZlrpvucaY8r54juvi7ceFgkTvtbWcsmg7gqXhHfFC91eQJBqxT5J8VxrhHZxlLa8OLZHqbdlqc4MEWoduBfmW4jSYBnZ+7Yy19QWKSIYn6XY3i9ip+dOBJyBtzZo78qXb5zjl3cDYlBoL+qCIDUECWen1GVMWKleOtwdYiPQt9S21LbHNsMeL5lCwrWPTzv9Qeiof4twxlEuDwXPQ1Y0buaJGrtMnAGRmwP+QryUfBq4flIH0DVDPKjtVStPeNxFx7uBRDXAnEHYCQgS9Ts4q0ntyAi5v0EdL1cFZ4ZUh5x4n3rduDhdjAVpWmjPnO+liFLHjUuXUhbOILYKnS+x4lsjZ7tJHXTUcETUY6ZcA38YeHTlTC4SO/VBYafp3R5znRtynBmkvGK3GuG7MRakH2bfcqAIDdWbMtkBhTOILTqYOinlRs+l7kredTR1kFHLcjNaEORMehQbkTgzfxoJ0lXYHnsjexwyxeAs7Myg8U4rilO1AbwIUifw3RJRSLKjPVhONrkdLP3gbEysd+rEUWWuUK3aNnVXKDEoeiNBqh3a4zPDrlKdG3KdGSrFt3TjBoRpT4JUZYqSSOihrQqSxJuE1HpvVZCqDQhSbvoJ6d3+Fuwxx7kh15nBIkr9kkduabwI0iD4GymiJBaclToQRgcd7GUC0H4EmDuJphj02kBK/RwXCBLfHlOP3iScGSySekY87pasnRpGo4y0nNBoohHYOdt9iwvHvRzZdQc8srtv6Miu2tmRHecushd0ZqC0X79zUdIcD9WMh6EAUt7IiacD4RimVqBAz5fIqU4NHOOgnrvDqcFekOoN2CP3O36Ysfkkdn91mD8kUlR4CyGkOR4qxhiWSh9BFaVcm38LZxWY8w5GooPnjV9qck793Ceo7X8v6PZN/ex5I27fe7LHV6i7EWo7aRzV16G+qUd6VtcHVJ7GbTcZi9LVSoz+EP+gGoNaQYwfIo4Z7sESE8fcyKiT3p4fxvZOBcnTw9g1d3Xp9CAWpyLXhEC7VLf9PQZX7QjzhHS/tVYaEP94ODLSu/IEzQkv8+77NSZm6lFGqjFwBnyXOdGVDB2kIUidc3ucI5kmI3XHe074bMMou4bDQCqd8fFiTXQ4iNEwOiGegU6RNmXC0c5LohnMkvNO4lNwVY0B4z24asXwuuEeG3ACjJYQJO/2qJW8LfX1f4xiPiju5K2eoVC4FhDORqiPvTGkDGaLeFTccP+UlQg3x9KniZ/y2U55h9ATs9oOhdJPTMRjFWoulZKCxLXH0dgec5wbJI/F3tlbyo7e07tIar1/DFNQVM4SeqoJUinVHYQaOyaDi8nVLi/J6iQT9FE+n7IyylkQxB3Ja2bI1P7ohEQzDsiY9C4e4zQCHlfWguTZHt+R+waIeyG/lNuJ+2iSmnm0csRSf2o6grWZ/exakCrhNwOcgcvtZG2W7sm0BMnLNnzLKcw14zJ6S2GuGVeO+nucXXhPECap/E7W3AveuV+FI2O4EiSJAHvsQjiboNe22ZoDRvp1ewpLZeemut+TIHm1Rw0BPSu2SbwYv77s6DtmeT152UVRkO6/ikFdaDOhLkipl8xZhRC67JeAciGvKUi5Yfwl6ITvPvYiSF7tUbqfuMdh1rtm6TA5UiyNW6tYfHXYkXk5yRARJGtRWrugtGxcysWx9pFC6aM7Stn7gwqS9S42523T2dCZwXIR5e24jjImLN5vVh/6pnHIkytIsTJPB4JUG4kSdfBbDJqSl5WUslv1iUdBqo1ESSJuG7eco/NFlFW0mBTWnH5EomGf9sGQIkhWRzRD4eMSboZDq1VcI7zy1LgwltwpTYwJtKQgebNHSeeGHLvVPlXRCIsjzeBwl1TtTZCqoO5axzQDc4BJejtR3vPM0R7Y83YfBAZyq1h2CS+f6BrsLf2EZHSBUg/OOX1zdmCvW8uJxDnZ8BYYttqqIL0anFTU3r+FSOz4MXPgpxpHiXPuJnGgz11ttcpeh89xhWma/d7WBMmDPUrt5CTf9lwF54jO8THdO8bCHnfVkQTplToMojY3flFGGS5hwK1NRGMYcDeBVSClTlqTS1wQDB8MP4Zs+VRPi7JfV/rk+fKgd/7ZhljGT31ItUWtgUa1x0nQHin9UcqVOrYHV6yjDW9JiKjt7dUpo9q6IHkkimRkC9t8sF882GPvJKXD2gI2vkuqdsDagmQv9ayE22d3ggQA4Me1w6rd1uPO61uqyggIEgAHhBr5Gy7J9nd34um/T9sBggTAARk3GKh0L1DCsB3VFXyAIAFwLJqNxoXbE5QI+UcUpQGCBMCx8OLMcHRapfeQ1YaBIAFwIODMsL3FwfNAogRBAuBAwJnBH48dRaSoMoEgAXAgxo2lAT8CnFxznYPyagJBAuAgNIbRxIGeKD13vFuCIAFwECj3FZODch4VbvqSfodHqxAkAA4A1Znh7qCsR4ebPaHfkTBBkAA4AHBm2BYpiTiH8Lkte+RBkAA4ABdiCunS5QS/+yw1dckjLEK2dtcEQQIAAKfUQhmIh3C01wWhapzyybEDggQAAE5YmqyPAAQJAACc0WZmIN4qECQAAHBKezBhgiABAMAGjvJ6B4IBQQIAAPAdnR/a4F03ORAQCBIAAIDvKrh738Lu6ZMr9ZaAIAEAwM5oNsrlPwHDh4BwYsaZAAAAAElFTkSuQmCC";
+
+  function ensureBeanBagBrandLogo() {
+    if (!isBeanBagPdpPage()) return;
+    var wrap = global.document.getElementById("mc-pdp-brand-logo");
+    if (!wrap) {
+      wrap = global.document.createElement("div");
+      wrap.id = "mc-pdp-brand-logo";
+      wrap.className = "mc-pdp-brand-logo";
+    }
+    // Always use the known-good CordaRoy's file — the generic manufacturer-logo
+    // finder can grab a broken/hidden native img and permanently wedge the wrap.
+    var img = wrap.querySelector("img");
+    if (!img) {
+      img = global.document.createElement("img");
+      img.className = "vCSS_img_mfg_logo";
+      img.alt = "CordaRoy's";
+      wrap.appendChild(img);
+    }
+    if (String(img.getAttribute("src") || "").indexOf("mc-brand-cordaroys") === -1) {
+      img.setAttribute("src", BEAN_BAG_BRAND_LOGO_SRC);
+    }
+    img.style.setProperty("max-height", "42px", "important");
+    img.style.setProperty("width", "auto", "important");
+    img.style.setProperty("display", "block", "important");
+    if (!img.dataset.mcBbLogoErrBound) {
+      img.dataset.mcBbLogoErrBound = "1";
+      img.onerror = function () {
+        var n = parseInt(img.getAttribute("data-mc-logo-retry") || "0", 10);
+        if (n >= 2) {
+          try {
+            wrap.style.setProperty("display", "none", "important");
+          } catch (eLogoErr) {}
+          return;
+        }
+        img.setAttribute("data-mc-logo-retry", String(n + 1));
+        img.src = BEAN_BAG_BRAND_LOGO_SRC + "?mcbust=" + Date.now();
+      };
+    }
+    if (img.complete && img.naturalWidth === 0 && !img.getAttribute("data-mc-logo-retry")) {
+      img.setAttribute("data-mc-logo-retry", "1");
+      img.src = BEAN_BAG_BRAND_LOGO_SRC + "?mcbust=" + Date.now();
+    }
+    wrap.style.setProperty("display", "flex", "important");
+    wrap.style.setProperty("visibility", "visible", "important");
+    if (global.innerWidth <= 991) {
+      wrap.style.setProperty("margin", "12px auto 8px", "important");
+    } else {
+      wrap.style.setProperty("margin", "0 0 10px 0", "important");
+    }
+    positionSaranoniBrandLogo(wrap);
   }
 
   var placeBrandLogoAboveTitle = placeBrandLogoBelowTitle;
@@ -2235,7 +2419,7 @@
       if (isBeanBagPdpPage()) stack.classList.add("mc-bean-bag-purchase-stack");
       stack.style.setProperty("flex-direction", "column", "important");
       stack.style.setProperty("align-items", "stretch", "important");
-      stack.style.setProperty("max-width", isSaranoniPdpPage() ? "100%" : "400px", "important");
+      stack.style.setProperty("max-width", (isSaranoniPdpPage() || global.document.body.classList.contains("mc-steve-silver-altview-pdp")) ? "100%" : "400px", "important");
       stack.style.setProperty("width", "100%", "important");
       if (isSaranoniPdpPage()) {
         stack.style.setProperty("margin-left", "0", "important");
@@ -2262,7 +2446,9 @@
       if (btn) {
         try {
           btn.style.setProperty("width", "100%", "important");
-          btn.style.setProperty("display", "block", "important");
+          btn.style.setProperty("display", "flex", "important");
+          btn.style.setProperty("justify-content", "center", "important");
+          btn.style.setProperty("align-items", "center", "important");
           btn.style.setProperty("box-sizing", "border-box", "important");
         } catch (eBtn) {}
       }
@@ -2355,6 +2541,7 @@
       btn.style.setProperty("opacity", "1", "important");
       btn.style.setProperty("width", "100%", "important");
       btn.style.setProperty("display", "block", "important");
+      btn.style.setProperty("text-align", "center", "important");
       btn.style.setProperty("box-sizing", "border-box", "important");
       btn.style.setProperty("-webkit-appearance", "none", "important");
       btn.style.setProperty("appearance", "none", "important");
@@ -2411,48 +2598,59 @@
       applySoftGoodsAtcChrome(wrap);
       return;
     }
+    // Idempotency guard: this function is called from ~12 sites across the
+    // main patch loop, which itself re-runs on nearly every DOM mutation.
+    // Confirmed via live trace: 326 calls in 12s on a single PDP, each
+    // re-issuing 17+ setProperty calls that always set the identical final
+    // value. Skipping a setProperty call whose value already matches cannot
+    // change behavior (unlike a one-time "already styled" flag, this still
+    // re-corrects immediately if something else changes the button later).
+    function setIfChanged(el, prop, value) {
+      if (el.style.getPropertyValue(prop) === value) return;
+      el.style.setProperty(prop, value, "important");
+    }
     try {
-      wrap.style.setProperty("border", "none", "important");
-      wrap.style.setProperty("border-color", "transparent", "important");
-      wrap.style.setProperty("box-shadow", "none", "important");
-      wrap.style.setProperty("border-radius", "0", "important");
-      wrap.style.setProperty("background", "transparent", "important");
-      wrap.style.setProperty("background-color", "transparent", "important");
-      wrap.style.setProperty("padding", "0", "important");
-      wrap.style.setProperty("width", "100%", "important");
-      wrap.style.setProperty("min-width", "0", "important");
-      wrap.style.setProperty("max-width", "none", "important");
-      wrap.style.setProperty("display", "inline-flex", "important");
-      wrap.style.setProperty("align-items", "center", "important");
-      wrap.style.setProperty("justify-content", "center", "important");
-      wrap.style.setProperty("gap", "0", "important");
+      setIfChanged(wrap, "border", "none");
+      setIfChanged(wrap, "border-color", "transparent");
+      setIfChanged(wrap, "box-shadow", "none");
+      setIfChanged(wrap, "border-radius", "0");
+      setIfChanged(wrap, "background", "transparent");
+      setIfChanged(wrap, "background-color", "transparent");
+      setIfChanged(wrap, "padding", "0");
+      setIfChanged(wrap, "width", "100%");
+      setIfChanged(wrap, "min-width", "0");
+      setIfChanged(wrap, "max-width", "none");
+      setIfChanged(wrap, "display", "inline-flex");
+      setIfChanged(wrap, "align-items", "center");
+      setIfChanged(wrap, "justify-content", "center");
+      setIfChanged(wrap, "gap", "0");
       var icon = wrap.querySelector(".mc-cart-icon-wrapper");
-      if (icon) icon.style.setProperty("display", "none", "important");
+      if (icon) setIfChanged(icon, "display", "none");
       var btn = wrap.querySelector(
         "input[name='btnaddtocart'], button[name='btnaddtocart'], input[type='submit'], input, button"
       );
       if (btn) {
         var softGoods = isSoftGoodsPdpPage();
-        btn.style.setProperty("border", "1px solid #111", "important");
-        btn.style.setProperty("box-shadow", "none", "important");
-        btn.style.setProperty("background", "#111", "important");
-        btn.style.setProperty("background-color", "#111", "important");
-        btn.style.setProperty("background-image", "none", "important");
-        btn.style.setProperty("color", "#fff", "important");
-        btn.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
-        btn.style.setProperty("font-size", "13px", "important");
-        btn.style.setProperty("font-weight", "600", "important");
-        btn.style.setProperty("letter-spacing", "0.12em", "important");
-        btn.style.setProperty("text-transform", "uppercase", "important");
-        btn.style.setProperty("line-height", "1", "important");
-        btn.style.setProperty("padding", "0 28px", "important");
-        btn.style.setProperty("min-height", "48px", "important");
-        btn.style.setProperty("margin", "0", "important");
-        btn.style.setProperty("width", "100%", "important");
-        btn.style.setProperty("min-width", "0", "important");
-        btn.style.setProperty("max-width", "none", "important");
-        btn.style.setProperty("border-radius", "0", "important");
-        btn.style.setProperty("cursor", "pointer", "important");
+        setIfChanged(btn, "border", "1px solid #111");
+        setIfChanged(btn, "box-shadow", "none");
+        setIfChanged(btn, "background", "#111");
+        setIfChanged(btn, "background-color", "#111");
+        setIfChanged(btn, "background-image", "none");
+        setIfChanged(btn, "color", "#fff");
+        setIfChanged(btn, "font-family", "Inter, Arial, sans-serif");
+        setIfChanged(btn, "font-size", "13px");
+        setIfChanged(btn, "font-weight", "600");
+        setIfChanged(btn, "letter-spacing", "0.12em");
+        setIfChanged(btn, "text-transform", "uppercase");
+        setIfChanged(btn, "line-height", "1");
+        setIfChanged(btn, "padding", "0 28px");
+        setIfChanged(btn, "min-height", "48px");
+        setIfChanged(btn, "margin", "0");
+        setIfChanged(btn, "width", "100%");
+        setIfChanged(btn, "min-width", "0");
+        setIfChanged(btn, "max-width", "none");
+        setIfChanged(btn, "border-radius", "0");
+        setIfChanged(btn, "cursor", "pointer");
         forceBlackAtcButton(btn);
       }
       forceBlackAtcWrap(wrap);
@@ -2775,9 +2973,37 @@
           table.setAttribute("aria-hidden", "true");
         } catch (eHide) {}
       });
+    // Self-heal: un-hide any structural row a previous (older/racing) engine
+    // copy mis-stamped as a stray option row.
+    global.document
+      .querySelectorAll('tr[data-mc-bb-stray-option-row="1"]')
+      .forEach(function (row) {
+        if (!row.querySelector("table, #product_photo, td.mc-pdp-options-td, td.mc-unified-pdp-info, #mc-pdp-price-stack-host, #mc-pdp-purchase-stack, #beanbag-swatch-wrapper, #mc-pdp-features")) return;
+        try {
+          row.removeAttribute("data-mc-bb-stray-option-row");
+          row.style.removeProperty("display");
+          row.style.removeProperty("visibility");
+          row.style.removeProperty("height");
+          row.style.removeProperty("overflow");
+        } catch (eRowHeal) {}
+      });
     global.document.querySelectorAll("#v65-product-parent tr, #content_area tr").forEach(function (row) {
       if (row.closest("#mc-bb-size-section, #beanbag-swatch-wrapper, #mc-pdp-features")) return;
       if (row.closest('[data-mc-bb-native-suppressed="1"]')) return;
+      // Never hide a structural row: textContent matching below sees ALL descendant
+      // text, so any ancestor row of the native options/pricebox area matches
+      // "CHOOSE COVER" transitively and hiding it collapses the whole PDP.
+      // A legitimate stray option row is a leaf: no nested tables, no hero nodes.
+      // (Class checks alone are not enough — hero classification runs after the
+      // first hide pass, so the info column td may not be tagged yet.)
+      if (row.querySelector("table")) return;
+      if (
+        row.querySelector(
+          "#product_photo, td.mc-pdp-media-td, td.mc-unified-pdp-media, td.mc-pdp-options-td, td.mc-unified-pdp-info, #mc-pdp-price-stack-host, #mc-pdp-purchase-stack, #beanbag-swatch-wrapper, #mc-pdp-features"
+        )
+      ) {
+        return;
+      }
       var sizeSection = global.document.getElementById("mc-bb-size-section");
       var sel = row.querySelector("select");
       if (sel && sizeSection && sizeSection.contains(sel)) return;
@@ -2847,26 +3073,193 @@
     if (!isBeanBagPdpPage()) return;
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
+    // Self-heal: a racing hide pass (e.g. the "Quantity:" row hider on a
+    // no-option product) can have hidden an ancestor of the info column,
+    // entombing everything this pass is about to arrange. Un-hide the chain.
+    var healNode = infoColumn;
+    while (healNode && healNode.id !== "v65-product-parent" && healNode.tagName !== "BODY") {
+      try {
+        if (
+          healNode.style &&
+          (healNode.style.display === "none" ||
+            healNode.style.visibility === "hidden" ||
+            healNode.style.height === "0px")
+        ) {
+          healNode.style.removeProperty("display");
+          healNode.style.removeProperty("visibility");
+          healNode.style.removeProperty("height");
+          healNode.style.removeProperty("overflow");
+          healNode.style.removeProperty("margin");
+          healNode.style.removeProperty("padding");
+          healNode.removeAttribute("aria-hidden");
+        }
+      } catch (eHeal) {}
+      healNode = healNode.parentElement;
+    }
+    // Bean bags are not theater seating — the template classifier misfires on
+    // "CHAIR BY DAY" in the features copy and its CSS narrows the column.
+    try {
+      global.document.body.classList.remove("mc-theater-seating-pdp");
+    } catch (eBbCls) {}
+    // Pin the column geometry: with the native remnant rows hidden, the nested
+    // pricebox tables shrink-wrap and the whole column can collapse to ~150px.
+    if (global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
+      infoColumn.style.setProperty("width", "420px", "important");
+      infoColumn.style.setProperty("min-width", "420px", "important");
+      infoColumn.style.setProperty("max-width", "420px", "important");
+      infoColumn.style.setProperty("flex", "0 0 420px", "important");
+      infoColumn.style.setProperty("box-sizing", "border-box", "important");
+      // Pin the hero IMAGE only — never the media td. The template's
+      // mc-pdp-late-alignment script owns the td at 682px (650 img + padding);
+      // setting any width on the td here alternates 650<->682 and the whole
+      // features/accordion section flickers left-right (verified by sampling).
+      var bbHeroImg = global.document.getElementById("product_photo");
+      if (bbHeroImg) {
+        bbHeroImg.style.setProperty("width", "650px", "important");
+        bbHeroImg.style.setProperty("min-width", "650px", "important");
+        bbHeroImg.style.setProperty("max-width", "650px", "important");
+        bbHeroImg.style.setProperty("aspect-ratio", "1 / 1", "important");
+        bbHeroImg.style.setProperty("height", "auto", "important");
+        bbHeroImg.style.setProperty("object-fit", "contain", "important");
+        var bbHeroLink = bbHeroImg.closest("a");
+        if (bbHeroLink) {
+          bbHeroLink.style.setProperty("display", "block", "important");
+          bbHeroLink.style.setProperty("width", "650px", "important");
+          bbHeroLink.style.setProperty("min-width", "650px", "important");
+          bbHeroLink.style.setProperty("max-width", "650px", "important");
+        }
+      }
+    }
+    /* Klarna/Affirm (#messaging-element) is a known PDP glitch source — hide
+       on Bean Bags (desktop + mobile) and never reorder it after Stripe mounts. */
+    hideBeanBagBnpl();
     var brandElement = global.document.getElementById("mc-pdp-brand-logo");
     var titleElement = global.document.getElementById("mc-pdp-title-right");
     var priceElement = global.document.getElementById("mc-pdp-price-stack-host");
-    var klarnaElement = global.document.getElementById("messaging-element");
     var sizeOptionsElement = resolveBeanBagSizeOptionsElement();
     var coverOptionsElement = global.document.getElementById("beanbag-swatch-wrapper");
     var purchaseElement = resolveBeanBagPurchaseElement(infoColumn);
     var featuresElement = global.document.getElementById("mc-pdp-features");
     var descriptionElement = global.document.getElementById("mc-pdp-description-below-features");
-    var ordered = [
-      brandElement,
-      titleElement,
-      priceElement,
-      klarnaElement,
-      sizeOptionsElement,
-      coverOptionsElement,
-      featuresElement,
-      purchaseElement,
-      descriptionElement,
-    ];
+    // When the accordion owns features/description, order the accordion as one
+    // unit — appending the loose refs would rip them back out of the accordion.
+    var accordionElement = global.document.getElementById("mc-pdp-accordion");
+    // Self-heal: if a competing pass pulled features/description out of the
+    // accordion, put them back before ordering — otherwise the ordering pass
+    // strands the accordion above the title with loose features below it.
+    if (accordionElement) {
+      var bbFeatHost = global.document.getElementById("mc-acc-saranoni-features-host");
+      if (featuresElement && bbFeatHost && accordionElement.contains(bbFeatHost) && !accordionElement.contains(featuresElement)) {
+        try {
+          bbFeatHost.appendChild(featuresElement);
+          featuresElement.style.setProperty("display", "none", "important");
+        } catch (eBbAccFeat) {}
+      }
+      var bbDetHost = global.document.getElementById("mc-acc-saranoni-product-details-host");
+      if (descriptionElement && bbDetHost && accordionElement.contains(bbDetHost) && !accordionElement.contains(descriptionElement)) {
+        try {
+          bbDetHost.appendChild(descriptionElement);
+        } catch (eBbAccDesc) {}
+      }
+    }
+    var accordionOwnsContent =
+      accordionElement &&
+      ((featuresElement && accordionElement.contains(featuresElement)) ||
+        (descriptionElement && accordionElement.contains(descriptionElement)));
+    /* Same order as Saranoni soft-goods: brand → title → price → options →
+       accordion → purchase. BNPL intentionally omitted. */
+    var ordered = accordionOwnsContent
+      ? [
+          brandElement,
+          titleElement,
+          priceElement,
+          sizeOptionsElement,
+          coverOptionsElement,
+          accordionElement,
+          purchaseElement,
+        ]
+      : [
+          brandElement,
+          titleElement,
+          priceElement,
+          sizeOptionsElement,
+          coverOptionsElement,
+          featuresElement,
+          accordionElement,
+          purchaseElement,
+          descriptionElement,
+        ];
+    /* Kill leftover translateX / flex crush on options-td (desktop + mobile).
+       Do not change desktop column widths — only clear glitch transforms. */
+    try {
+      infoColumn.style.setProperty("transform", "none", "important");
+      infoColumn.style.setProperty("-webkit-transform", "none", "important");
+      var parent = global.document.getElementById("v65-product-parent");
+      if (parent) {
+        parent.querySelectorAll("td.mc-pdp-options-td, td.mc-unified-pdp-info, td.vol-product__top--right").forEach(function (td) {
+          try {
+            td.style.setProperty("transform", "none", "important");
+            td.style.setProperty("-webkit-transform", "none", "important");
+          } catch (eTd) {}
+        });
+      }
+    } catch (eXf) {}
+    /* Mobile: strip desktop 650px hero pins so the image can fill the column. */
+    if (global.innerWidth <= 991) {
+      var bbHeroImgM = global.document.getElementById("product_photo");
+      if (bbHeroImgM) {
+        try {
+          bbHeroImgM.style.removeProperty("min-width");
+          bbHeroImgM.style.setProperty("max-width", "100%", "important");
+          bbHeroImgM.style.setProperty("width", "100%", "important");
+          bbHeroImgM.style.setProperty("height", "auto", "important");
+          var bbHeroLinkM = bbHeroImgM.closest("a");
+          if (bbHeroLinkM) {
+            bbHeroLinkM.style.removeProperty("min-width");
+            bbHeroLinkM.style.setProperty("max-width", "100%", "important");
+            bbHeroLinkM.style.setProperty("width", "100%", "important");
+          }
+        } catch (eHeroM) {}
+      }
+      try {
+        infoColumn.style.removeProperty("width");
+        infoColumn.style.removeProperty("min-width");
+        infoColumn.style.removeProperty("max-width");
+        infoColumn.style.removeProperty("flex");
+        infoColumn.style.setProperty("width", "100%", "important");
+        infoColumn.style.setProperty("max-width", "100%", "important");
+        infoColumn.style.setProperty("min-width", "0", "important");
+        infoColumn.style.setProperty("flex", "none", "important");
+      } catch (eColM) {}
+    }
+    // Stray "Availability:" cell (no-option products leave it outside the
+    // ordered column) — hide it; hero products never render it.
+    global.document.querySelectorAll("#content_area td, #content_area div, #v65-product-parent td, #v65-product-parent div").forEach(function (node) {
+      if (infoColumn.contains(node) || node.contains(infoColumn)) return;
+      if (node.querySelector("table, img, select, input")) return;
+      var availTxt = String(node.textContent || "").replace(/\s+/g, " ").trim();
+      if (!/^Availability:?:?\s/i.test(availTxt) || availTxt.length > 80) return;
+      try {
+        node.style.setProperty("display", "none", "important");
+        node.style.setProperty("visibility", "hidden", "important");
+      } catch (eAvail) {}
+    });
+    // Bare "<b>Availability::</b> Usually Ships..." markup inside the price div
+    // (no wrapper of its own) — hide the <b> and blank the trailing text node.
+    global.document.querySelectorAll("#v65-product-parent b, #content_area b").forEach(function (bEl) {
+      if (infoColumn.contains(bEl)) return;
+      if (!/^Availability:?:?$/i.test(String(bEl.textContent || "").trim())) return;
+      try {
+        bEl.style.setProperty("display", "none", "important");
+        var sib = bEl.nextSibling;
+        while (sib && sib.nodeType === 3) {
+          if (/\S/.test(sib.nodeValue)) { sib.nodeValue = ""; break; }
+          sib = sib.nextSibling;
+        }
+        var br = bEl.nextElementSibling;
+        if (br && br.tagName === "BR") br.style.setProperty("display", "none", "important");
+      } catch (eAvailB) {}
+    });
     var allowedIds = {};
     var oi;
     for (oi = 0; oi < ordered.length; oi++) {
@@ -2883,13 +3276,34 @@
         } catch (eHide0) {}
       }
     });
-    ordered.forEach(function (element) {
-      if (element) {
-        try {
-          infoColumn.appendChild(element);
-        } catch (eAppend) {}
-      }
+    // Skip the re-append when everything is already in place — appendChild
+    // moves nodes even when the order is right, forcing a visible reflow
+    // flash on every maintenance pass (worst when clicking swatches).
+    var presentOrdered = ordered.filter(function (el) {
+      return el && el.parentNode === infoColumn;
     });
+    var alreadyOrdered = presentOrdered.length === ordered.filter(Boolean).length;
+    if (alreadyOrdered) {
+      var seqIdx = 0;
+      var ci;
+      for (ci = 0; ci < infoColumn.children.length && seqIdx < presentOrdered.length; ci++) {
+        if (infoColumn.children[ci] === presentOrdered[seqIdx]) seqIdx++;
+        else if (presentOrdered.indexOf(infoColumn.children[ci]) !== -1) {
+          alreadyOrdered = false;
+          break;
+        }
+      }
+      if (seqIdx < presentOrdered.length) alreadyOrdered = false;
+    }
+    if (!alreadyOrdered) {
+      ordered.forEach(function (element) {
+        if (element) {
+          try {
+            infoColumn.appendChild(element);
+          } catch (eAppend) {}
+        }
+      });
+    }
     try {
       hideBeanBagNativeOptionsTable();
     } catch (eHideNative) {}
@@ -2933,6 +3347,33 @@
         } catch (eHide) {}
       }
     );
+    // Some Saranoni products render a THIRD, orphaned table.colors_pricebox
+    // as its own sibling <td> in tr.mc-pdp-main-row — outside infoColumn
+    // entirely, so the scoped sweep above never reaches it. It duplicates
+    // the native "$X.XX / Price with Selected Options" markup we already
+    // replace with #mc-pdp-price-stack-host, so it's always safe to hide.
+    var mainRow = infoColumn.closest("tr.mc-pdp-main-row") || infoColumn.closest("tr");
+    if (mainRow) {
+      mainRow.querySelectorAll("table.colors_pricebox").forEach(function (table) {
+        if (infoColumn.contains(table)) return;
+        if (
+          table.querySelector(
+            "#mc-pdp-option-block, #mc-pdp-brand-logo, #mc-pdp-title-right, #mc-pdp-price-stack-host, #mc-pdp-features, #mc-pdp-purchase-stack, #product_photo"
+          )
+        ) {
+          return;
+        }
+        try {
+          table.style.setProperty("display", "none", "important");
+          table.style.setProperty("visibility", "hidden", "important");
+          table.style.setProperty("height", "0", "important");
+          table.style.setProperty("max-height", "0", "important");
+          table.style.setProperty("overflow", "hidden", "important");
+          table.style.setProperty("margin", "0", "important");
+          table.style.setProperty("padding", "0", "important");
+        } catch (eHideOrphan) {}
+      });
+    }
     infoColumn.querySelectorAll(".option_pricing, font.option_pricing").forEach(function (node) {
       try {
         node.style.setProperty("display", "none", "important");
@@ -2961,18 +3402,42 @@
   }
 
   function hideSaranoniNativeStripePriceTable(infoColumn) {
-    // Do NOT move #messaging-element — Klarna/Affirm renders content as siblings
-    // or adjacent nodes; any DOM relocation orphans the widget and hides it.
-    // Only ensure its inline visibility styles are clear.
+    /* User request: remove Klarna/Affirm from Saranoni PDPs — the BNPL
+       widget (and its iframes/siblings) was a likely overflow/glitch source
+       in Firefox mobile view. Hide the host and common BNPL nodes. */
     var msg = global.document.getElementById("messaging-element");
     if (msg) {
       try {
-        msg.style.removeProperty("display");
-        msg.style.removeProperty("visibility");
-        msg.style.removeProperty("opacity");
-        msg.style.removeProperty("height");
+        msg.style.setProperty("display", "none", "important");
+        msg.style.setProperty("visibility", "hidden", "important");
+        msg.style.setProperty("height", "0", "important");
+        msg.style.setProperty("max-height", "0", "important");
+        msg.style.setProperty("overflow", "hidden", "important");
+        msg.style.setProperty("margin", "0", "important");
+        msg.style.setProperty("padding", "0", "important");
+        msg.setAttribute("aria-hidden", "true");
+        msg.setAttribute("data-mc-sar-bnpl-hidden", "1");
       } catch (eBnpl) {}
     }
+    try {
+      var scope = infoColumn || global.document.getElementById("v65-product-parent") || global.document;
+      scope
+        .querySelectorAll(
+          'klarna-placement, [id*="klarna" i], [class*="klarna" i], [id*="affirm" i], [class*="affirm" i], .StripeElement, [data-testid*="klarna" i]'
+        )
+        .forEach(function (el) {
+          if (!el || !el.style) return;
+          if (el.closest && el.closest("#mc-pdp-purchase-stack, #mc-pdp-accordion, #mc-configured-color-swatch-wrapper")) {
+            return;
+          }
+          try {
+            el.style.setProperty("display", "none", "important");
+            el.style.setProperty("visibility", "hidden", "important");
+            el.style.setProperty("height", "0", "important");
+            el.style.setProperty("overflow", "hidden", "important");
+          } catch (eHide) {}
+        });
+    } catch (eScope) {}
   }
 
   function anchorSaranoniMessagingElement(infoColumn) {
@@ -2982,14 +3447,43 @@
   var saranoniLayoutTimer = null;
   var saranoniLayoutLastRun = 0;
   var saranoniLayoutFinalizing = false;
+  function saranoniVariantOrderBroken() {
+    if (!isSaranoniPdpPage()) return false;
+    var info = resolveSaranoniInfoColumn();
+    if (!info) return false;
+    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    var size = global.document.getElementById("mc-saranoni-size-thumbs");
+    var acc = global.document.getElementById("mc-pdp-accordion");
+    var purchase = global.document.getElementById("mc-pdp-purchase-stack");
+    function afterAnchor(el, anchor) {
+      if (!el || !anchor || el.parentNode !== info || anchor.parentNode !== info) return false;
+      return !!(anchor.compareDocumentPosition(el) & 4);
+    }
+    if (wrap && (afterAnchor(wrap, acc) || afterAnchor(wrap, purchase))) return true;
+    if (size && (afterAnchor(size, acc) || afterAnchor(size, purchase))) return true;
+    return false;
+  }
+
   function scheduleSaranoniLayoutPass(force) {
-    if (!isSaranoniPdpPage() || isStalePdpAuthRun()) return;
+    if ((!isSaranoniPdpPage() && !isSteveSilverPdpPage()) || isStalePdpAuthRun()) return;
     if (force) {
       if (saranoniLayoutTimer) {
         global.clearTimeout(saranoniLayoutTimer);
         saranoniLayoutTimer = null;
       }
       finalizeSaranoniInfoColumnOrder();
+      return;
+    }
+    if (
+      global.document.body &&
+      global.document.body.classList.contains("mc-saranoni-pdp-ready")
+    ) {
+      if (saranoniVariantOrderBroken()) {
+        try {
+          applySaranoniInfoColumnOrder(resolveSaranoniInfoColumn());
+        } catch (eOrd) {}
+      }
+      ensureSaranoniRelatedItemsVisible();
       return;
     }
     if (saranoniLayoutTimer) return;
@@ -3053,10 +3547,44 @@
     } catch (eMount) {}
   }
 
-  function ensureSaranoniPdpAccordion() {
-    if (!isSaranoniPdpPage() && !isSteveSilverPdpPage()) return null;
+  function remountSaranoniStyleSelectionNodes() {
+    /* Saranoni variants stay as info-column siblings ABOVE the accordion
+       (SARANONI_INFO_COLUMN_ORDER). Moving them into Style Selection, then
+       rebuilding accordion via innerHTML="", destroyed the wrap and caused
+       recreate-after-ATC + bounce. Steve Silver / bean bag still use the host. */
+    if (isSaranoniPdpPage()) return;
+    var styleHost = global.document.getElementById("mc-acc-style-selection-host");
+    if (!styleHost) return;
+    [
+      "mc-configured-color-swatch-wrapper",
+      "mc-saranoni-size-thumbs",
+      "mc-pdp-option-block",
+    ].forEach(function (id) {
+      var el = global.document.getElementById(id);
+      if (el) mountNodeInSaranoniAccordionHost(styleHost, el);
+    });
+    try {
+      var optionsTable = global.document.getElementById("options_table");
+      if (optionsTable && !styleHost.contains(optionsTable)) {
+        var optBlock = global.document.getElementById("mc-pdp-option-block");
+        if (optBlock) mountNodeInSaranoniAccordionHost(optBlock, optionsTable);
+        else mountNodeInSaranoniAccordionHost(styleHost, optionsTable);
+      }
+    } catch (eOptTbl) {}
+  }
+
+  function ensureSaranoniPdpAccordion(opts) {
+    opts = opts || {};
+    if (!isSaranoniPdpPage() && !isSteveSilverPdpPage() && !isBeanBagPdpPage()) return null;
+    if (global.__MC_SAR_ACCORDION_BUSY__) {
+      return global.document.getElementById("mc-pdp-accordion");
+    }
+    global.__MC_SAR_ACCORDION_BUSY__ = true;
     var infoColumn = resolveSaranoniInfoColumn();
-    if (!infoColumn) return null;
+    if (!infoColumn) {
+      global.__MC_SAR_ACCORDION_BUSY__ = false;
+      return null;
+    }
     var acc = global.document.getElementById("mc-pdp-accordion");
     if (!acc) {
       acc = global.document.createElement("div");
@@ -3097,6 +3625,10 @@
       });
     }
 
+    var styleHost = getOrCreateHost(
+      "mc-acc-style-selection-host",
+      "mc-acc-content mc-acc-content--style-selection"
+    );
     var detailsHost = getOrCreateHost(
       "mc-acc-saranoni-product-details-host",
       "mc-acc-content mc-acc-content--saranoni-description"
@@ -3111,27 +3643,45 @@
     );
     var faqHost = getOrCreateHost("mc-acc-saranoni-faq-host", "mc-acc-content mc-acc-content--saranoni-faq");
 
+    /* Build swatches/size/options FIRST, then move them into Style Selection. */
+    if (isSaranoniPdpPage() && !opts.skipVariantBuild) {
+      try {
+        ensureSaranoniVariantUi();
+      } catch (eVarUi) {}
+      try {
+        if (typeof ensureSaranoniVariantOptionBlock === "function") ensureSaranoniVariantOptionBlock();
+      } catch (eOptBlk) {}
+    }
+    remountSaranoniStyleSelectionNodes();
+
     var features = global.document.getElementById("mc-pdp-features");
     if (features) {
       mountNodeInSaranoniAccordionHost(featuresHost, features);
-      var featHeading = features.querySelector(".mc-pdp-features__heading");
-      if (featHeading) {
-        try {
-          featHeading.style.setProperty("display", "none", "important");
-        } catch (eHideFeat) {}
-      }
     }
+    // For Steve Silver products, also check for TechSpecs and unhide them
+    var techSpecs = global.document.getElementById("ProductDetail_TechSpecs_div");
+    if (techSpecs && !features) {
+      try {
+        techSpecs.style.setProperty("display", "block", "important");
+      } catch (eTech) {}
+      mountNodeInSaranoniAccordionHost(featuresHost, techSpecs);
+    }
+    var descNode = global.document.getElementById("mc-pdp-description-below-features") ||
+                   global.document.getElementById("ProductDetail_ProductDetails_div");
     mountNodeInSaranoniAccordionHost(
       detailsHost,
-      global.document.getElementById("mc-pdp-description-below-features")
+      descNode
     );
     mountExistingTextPanel(shippingHost, /\b(shipping|returns?|return policy)\b/i);
     mountExistingTextPanel(faqHost, /\b(faq|frequently asked questions?)\b/i);
 
     var rows = [];
-    function addRow(id, label, host) {
-      if (hostHasContent(host)) rows.push({ id: id, label: label, host: host });
+    function addRow(id, label, host, force) {
+      if (force || hostHasContent(host)) rows.push({ id: id, label: label, host: host });
     }
+    /* Prefer showing Style Selection once variants exist. If still empty after
+       ensureSaranoniVariantUi(), omit the row so single-SKU items stay clean. */
+    addRow("style-selection", "STYLE SELECTION OPTIONS", styleHost, false);
     addRow("saranoni-product-details", "PRODUCT DETAILS", detailsHost);
     addRow("saranoni-features", "FEATURES", featuresHost);
     addRow("saranoni-shipping-returns", "SHIPPING & RETURNS", shippingHost);
@@ -3143,6 +3693,7 @@
           acc.parentNode.removeChild(acc);
         } catch (eAccRm) {}
       }
+      global.__MC_SAR_ACCORDION_BUSY__ = false;
       return null;
     }
 
@@ -3172,23 +3723,172 @@
       acc.style.setProperty("display", "block", "important");
       acc.style.setProperty("visibility", "visible", "important");
     } catch (eAccVis) {}
+    // Some other script (not found in this codebase's own files after an
+    // extensive search — traced live via runtime inspection instead, since
+    // static search came up empty) sets an inline "padding-right: 44px
+    // !important" on .mc-acc-header, which eats into the flex content box
+    // and leaves the chevron sitting directly against the label text with
+    // no visible gap (confirmed live: 0px between chevron and label box,
+    // and the actual rendered text stopped 56px short of the chevron once
+    // this override was removed). Confirmed via a live 4-second poll that
+    // this value is set once and never re-enforced afterward, so removing
+    // it here (after the row-build pass, on every ensureSaranoniPdpAccordion
+    // call) reliably wins and sticks.
+    try {
+      acc.querySelectorAll(".mc-acc-header").forEach(function (h) {
+        h.style.removeProperty("padding-right");
+        h.style.setProperty("display", "flex", "important");
+        h.style.setProperty("align-items", "center", "important");
+        h.style.setProperty("justify-content", "space-between", "important");
+        h.style.setProperty("width", "100%", "important");
+        h.style.setProperty("max-width", "100%", "important");
+        h.style.setProperty("box-sizing", "border-box", "important");
+        h.style.setProperty("padding-left", "0", "important");
+        h.style.setProperty("padding-right", "0", "important");
+        var chev = h.querySelector(".mc-acc-chevron");
+        if (chev) {
+          chev.style.setProperty("margin-left", "auto", "important");
+          chev.style.setProperty("flex", "0 0 auto", "important");
+        }
+        var lab = h.querySelector(".mc-acc-label");
+        if (lab) {
+          lab.style.setProperty("flex", "1 1 auto", "important");
+          lab.style.setProperty("min-width", "0", "important");
+        }
+      });
+      acc.style.setProperty("width", "100%", "important");
+      acc.style.setProperty("max-width", "100%", "important");
+      acc.style.setProperty("box-sizing", "border-box", "important");
+    } catch (eHeaderPad) {}
+    /* Saranoni: do not retry remounting variants into Style Selection — that
+       wiped nodes on accordion rebuild and bounced ATC/variants. Re-assert
+       column order once after late swatch mounts instead. */
+    if (isSaranoniPdpPage() && !global.__MC_SAR_ORDER_RETRY__) {
+      global.__MC_SAR_ORDER_RETRY__ = true;
+      [400, 1200].forEach(function (ms) {
+        global.setTimeout(function () {
+          try {
+            if (isStalePdpAuthRun()) return;
+            applySaranoniInfoColumnOrder(resolveSaranoniInfoColumn());
+          } catch (eRetry) {}
+        }, ms);
+      });
+    } else if (
+      !isSaranoniPdpPage() &&
+      !hostHasContent(styleHost) &&
+      !global.__MC_SAR_STYLE_RETRY__
+    ) {
+      global.__MC_SAR_STYLE_RETRY__ = true;
+      [500, 1500, 3500].forEach(function (ms) {
+        global.setTimeout(function () {
+          try {
+            remountSaranoniStyleSelectionNodes();
+            ensureSaranoniPdpAccordion({ skipVariantBuild: true });
+          } catch (eRetry) {}
+        }, ms);
+      });
+    }
+    global.__MC_SAR_ACCORDION_BUSY__ = false;
     return acc;
+  }
+
+  function ensureSaranoniMediaColumnLayout() {
+    // The media (photo) column on Saranoni PDPs sits in its own deeply nested
+    // <table><tbody><tr><td class="mc-pdp-media-td"> chain (separate from the
+    // options-column chain fixed via CSS in custom-safe.css). On mobile, this
+    // chain has the same "table row/cell resists layout override" bug already
+    // documented throughout this codebase — confirmed live: a CSS :has()-based
+    // fix (matching custom-safe.css's own working pattern) DID match the
+    // element (verified via el.matches() and reading the parsed CSSOM rule
+    // directly — selector text and display:block!important were both
+    // present) but still lost to something, most likely a different,
+    // dynamically-inserted <style> tag added later by other page scripts
+    // (several such scripts run on delayed timers elsewhere in this
+    // codebase). Setting it via JS inline style instead sidesteps that race
+    // entirely, since inline !important always wins regardless of when any
+    // other stylesheet gets inserted.
+    if (!isSaranoniPdpPage()) return;
+    if (!(global.matchMedia && global.matchMedia("(max-width: 991px)").matches)) return;
+    var mediaTd = global.document.querySelector("td.mc-pdp-media-td");
+    if (!mediaTd) return;
+    var node = mediaTd;
+    var guard = 0;
+    while (node && guard < 8) {
+      var tag = node.tagName;
+      if (tag === "TABLE" || tag === "TBODY" || tag === "TR" || tag === "TD") {
+        try {
+          node.style.setProperty("display", "block", "important");
+          node.style.setProperty("width", "100%", "important");
+          node.style.setProperty("max-width", "100%", "important");
+          if (tag === "TABLE") node.style.setProperty("table-layout", "auto", "important");
+        } catch (eMediaChain) {}
+        node = node.parentElement;
+        guard++;
+      } else {
+        break;
+      }
+    }
   }
 
   function ensureSaranoniHeroImage() {
     if (!isSaranoniPdpPage()) return;
     var mainImg = global.document.getElementById("product_photo");
     if (!mainImg) return;
+    ensureSaranoniMediaColumnLayout();
+    if (isTmhPdpPage()) {
+      try {
+        fixTmhMatPhotoUrls(global.document);
+      } catch (eFix) {}
+    }
     // Give the hero image a real, capped intrinsic width. width:auto avoids the
     // circular dependency that width:100% has against the (auto-width) photo cell,
     // and these inline styles beat the high-specificity custom-safe.css rule that
     // otherwise pins #product_photo to max-width:800px/max-height:100%.
+    // Mobile (<=991px) uses a hardcoded 350px instead of "auto": the photo cell's
+    // own column width is itself unreliable on mobile (same nested-table column-
+    // sizing bug documented elsewhere in this file / custom-safe.css), so "auto"
+    // was resolving to whatever narrow width that broken cell happened to compute
+    // (~139px, confirmed live) instead of a real intrinsic size. A hardcoded pixel
+    // value sidesteps that the same way other fixes in this codebase do.
     try {
-      mainImg.style.setProperty("width", "auto", "important");
-      mainImg.style.setProperty("max-width", "min(650px, 100%)", "important");
+      var isMobileHero = global.matchMedia && global.matchMedia("(max-width: 991px)").matches;
+      var isTmh = isTmhPdpPage();
+      if (isMobileHero) {
+        mainImg.style.setProperty("display", "block", "important");
+        /* TMH/mahjong: fill the column (up to 650). Saranoni blankets stay 350. */
+        if (isTmh) {
+          mainImg.style.setProperty("width", "100%", "important");
+          mainImg.style.setProperty("max-width", "min(650px, 100%)", "important");
+        } else {
+          mainImg.style.setProperty("width", "auto", "important");
+          mainImg.style.setProperty("max-width", "min(350px, 100%)", "important");
+        }
+        mainImg.style.setProperty("margin-left", "auto", "important");
+        mainImg.style.setProperty("margin-right", "auto", "important");
+        var mediaTd =
+          (mainImg.closest &&
+            mainImg.closest("td.mc-pdp-media-td, td.mc-unified-pdp-media, #product_photo_td")) ||
+          null;
+        if (mediaTd) {
+          mediaTd.style.setProperty("text-align", "center", "important");
+          mediaTd.style.setProperty("display", "block", "important");
+          mediaTd.style.setProperty("width", "100%", "important");
+        }
+      } else if (isTmh) {
+        /* Desktop mahjong: force 650px (was stuck ~320px from -2T thumb + width:auto). */
+        mainImg.style.setProperty("display", "block", "important");
+        mainImg.style.setProperty("width", "650px", "important");
+        mainImg.style.setProperty("max-width", "min(650px, 100%)", "important");
+        mainImg.style.setProperty("min-width", "0", "important");
+        mainImg.style.setProperty("margin-left", "0", "important");
+        mainImg.style.setProperty("margin-right", "0", "important");
+      } else {
+        mainImg.style.setProperty("width", "auto", "important");
+        mainImg.style.setProperty("max-width", "min(650px, 100%)", "important");
+        mainImg.style.setProperty("margin-left", "0", "important");
+      }
       mainImg.style.setProperty("height", "auto", "important");
       mainImg.style.setProperty("max-height", "none", "important");
-      mainImg.style.setProperty("margin-left", "0", "important");
     } catch (eHeroSize) {}
     var pc = resolveConfiguredColorProductCode(null);
     var cur = mainImg.getAttribute("src") || "";
@@ -3267,7 +3967,7 @@
     "mc-pdp-brand-logo",
     "mc-pdp-title-right",
     "mc-pdp-price-stack-host",
-    "messaging-element",
+    // messaging-element (Klarna/Affirm) intentionally omitted — hidden on Saranoni
     "mc-configured-color-swatch-wrapper",
     "mc-saranoni-size-thumbs",
     "mc-pdp-option-block",
@@ -3276,34 +3976,25 @@
   ];
 
   function applySaranoniInfoColumnOrder(infoColumn) {
+    // Uses the same simple sequential-appendChild pattern as
+    // appendBeanBagInfoColumnOrder() / appendSteveSilverInfoColumnOrder()
+    // instead of the previous anchor-tracking insertBefore/insertNodeAfter
+    // logic. That anchor logic was also missing
+    // "mc-configured-color-swatch-wrapper" from the order list entirely, so
+    // it never managed that element's position at all — it just stayed
+    // wherever native Volusion markup happened to place it, which could be
+    // early (matching the intended order by luck) or after the purchase
+    // stack (the reported "choose color under ADD TO CART" bug). Appending
+    // every listed element in sequence guarantees final DOM order matches
+    // this list exactly, regardless of where anything started out.
     if (!infoColumn || !isSaranoniPdpPage()) return;
-    var anchor = null;
+    hideSaranoniNativeStripePriceTable(infoColumn);
     SARANONI_INFO_COLUMN_ORDER.forEach(function (id) {
       var element = global.document.getElementById(id);
       if (!element) return;
-      // messaging-element: only move once, before Klarna/Affirm renders into it.
-      // Once the widget has rendered (has child elements), never touch it again.
-      if (id === "messaging-element") {
-        if (element.childElementCount > 0) {
-          if (element.parentNode === infoColumn) anchor = element;
-          return;
-        }
-      }
-      if (element.parentNode !== infoColumn) {
-        try {
-          infoColumn.appendChild(element);
-        } catch (eHoist) {}
-      }
       try {
-        if (anchor) {
-          if (anchor.nextElementSibling !== element) {
-            insertNodeAfter(infoColumn, anchor, element);
-          }
-        } else if (infoColumn.firstElementChild !== element) {
-          infoColumn.insertBefore(element, infoColumn.firstElementChild);
-        }
-        if (element.parentNode === infoColumn) anchor = element;
-      } catch (eOrd) {}
+        infoColumn.appendChild(element);
+      } catch (eAppend) {}
     });
     dedupeSaranoniConfiguredColorSwatchWrappers();
   }
@@ -3315,6 +4006,970 @@
       hideSaranoniNativeStripePriceTable(infoColumn);
     }
     applySaranoniInfoColumnOrder(infoColumn);
+  }
+
+  function neutralizeLegacyPdpEnforcer() {
+    if (!isProductPdp()) return;
+    var MIN = 20260708012;
+    function vn(v) {
+      var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
+      return isNaN(n) ? 0 : n;
+    }
+    if (vn(global.__MC_PLP_ENFORCER_VER__) > 0 && vn(global.__MC_PLP_ENFORCER_VER__) < MIN) {
+      global.mcPlpEnforcerRun = function () {};
+      global.__MC_PLP_ENFORCER_VER__ = String(MIN);
+    }
+    try {
+      global.document.querySelectorAll('script[src*="mc-plp-enforcer"]').forEach(function (s) {
+        var m = (s.src || "").match(/[?&]v=([^&]+)/);
+        if (vn(m ? m[1] : "") < MIN) {
+          try {
+            s.remove();
+          } catch (eRm) {}
+        }
+      });
+    } catch (eScripts) {}
+  }
+
+  function cleanupPdpMobileInlineDamage() {
+    if (!isProductPdp() || global.innerWidth > 991) return;
+    /* Saranoni uses ensureSaranoniMobileColumnWidth + CSS — this walker sets
+       display:block on every nested td/table and compounds padding until the
+       info column shrinks to ~100px (vertical accordion letters). */
+    if (isSaranoniPdpPage()) return;
+    if (global.__MC_SAR_MOBILE_CLEANUP_BUSY__) return;
+    global.__MC_SAR_MOBILE_CLEANUP_BUSY__ = true;
+    neutralizeLegacyPdpEnforcer();
+    var parent = global.document.getElementById("v65-product-parent");
+    if (!parent) {
+      global.__MC_SAR_MOBILE_CLEANUP_BUSY__ = false;
+      return;
+    }
+    function zeroPad(el) {
+      if (!el || !el.style) return;
+      try {
+        el.style.setProperty("padding-left", "0", "important");
+        el.style.setProperty("padding-right", "0", "important");
+        el.style.setProperty("margin-left", "0", "important");
+        el.style.setProperty("margin-right", "0", "important");
+        el.style.setProperty("box-sizing", "border-box", "important");
+      } catch (ePad) {}
+    }
+    function fullWidthBlock(el) {
+      if (!el || !el.style) return;
+      try {
+        el.style.setProperty("display", "block", "important");
+        el.style.setProperty("width", "100%", "important");
+        el.style.setProperty("max-width", "100%", "important");
+        el.style.setProperty("min-width", "0", "important");
+        el.style.setProperty("float", "none", "important");
+        el.style.setProperty("box-sizing", "border-box", "important");
+      } catch (eFw) {}
+      zeroPad(el);
+    }
+    zeroPad(parent);
+    parent.querySelectorAll("td, th, table, tr, tbody").forEach(zeroPad);
+    try {
+      parent.style.setProperty("width", "100%", "important");
+      parent.style.setProperty("max-width", "100%", "important");
+    } catch (eParent) {}
+
+    if (isSaranoniPdpPage()) {
+      parent.querySelectorAll("tr.mc-pdp-main-row").forEach(fullWidthBlock);
+      parent
+        .querySelectorAll(
+          "td.mc-pdp-media-td, td.mc-pdp-options-td, td.mc-unified-pdp-info, td.vol-product__top--left, td.vol-product__top--right"
+        )
+        .forEach(fullWidthBlock);
+      Array.prototype.forEach.call(
+        parent.querySelectorAll("tr.mc-pdp-main-row > td"),
+        fullWidthBlock
+      );
+
+      /* Nested Volusion option tables keep table-cell + re-apply 16px padding.
+         Walk the accordion/info-column ancestry and force a stacked full-width chain. */
+      var info =
+        parent.querySelector("td.mc-pdp-options-td, td.mc-unified-pdp-info") ||
+        global.document.getElementById("mc-pdp-accordion");
+      var walk = info;
+      while (walk && walk !== parent) {
+        fullWidthBlock(walk);
+        walk = walk.parentElement;
+      }
+
+      var hero = global.document.getElementById("product_photo");
+      if (hero) {
+        try {
+          hero.style.setProperty("width", "100%", "important");
+          hero.style.setProperty("max-width", "100%", "important");
+          hero.style.setProperty("height", "auto", "important");
+        } catch (eHero) {}
+      }
+      [
+        "mc-pdp-brand-logo",
+        "mc-pdp-title-right",
+        "mc-pdp-price-stack-host",
+        "mc-pdp-accordion",
+        "mc-pdp-features",
+        "mc-pdp-purchase-stack",
+        "mc-acc-style-selection-host",
+      ].forEach(function (id) {
+        var el = global.document.getElementById(id);
+        if (!el) return;
+        try {
+          el.style.setProperty("width", "100%", "important");
+          el.style.setProperty("max-width", "100%", "important");
+          el.style.setProperty("margin-left", "0", "important");
+          el.style.setProperty("padding-left", "0", "important");
+          el.style.setProperty("box-sizing", "border-box", "important");
+        } catch (eEl) {}
+      });
+    }
+    global.__MC_SAR_MOBILE_CLEANUP_BUSY__ = false;
+  }
+
+  function ensureSaranoniMobileColumnWidth() {
+    if (!isSaranoniPdpPage() || global.innerWidth > 991) return;
+    if (global.__MC_SAR_MOBILE_WIDTH_BUSY__) return;
+    global.__MC_SAR_MOBILE_WIDTH_BUSY__ = true;
+    try {
+      var parent = global.document.getElementById("v65-product-parent");
+      if (!parent) return;
+      var content = global.document.getElementById("content_area");
+      var contentWrap =
+        (content && content.closest && content.closest(".content_area-wrapper")) ||
+        global.document.querySelector(".content_area-wrapper");
+      var st = global.document.getElementById("mc-saranoni-mobile-width-css");
+      if (!st) {
+        st = global.document.createElement("style");
+        st.id = "mc-saranoni-mobile-width-css";
+        (global.document.head || global.document.documentElement).appendChild(st);
+      }
+      /* Do NOT force display:block on every nested td/table — that crushed the
+         info column to ~100px. Also zero nested padding: live template gutters
+         re-apply 10–16px on every #v65-product-parent td and compound. */
+      st.textContent =
+        "@media (max-width:991px){" +
+        "html body.mc-saranoni-pdp #content_area," +
+        "html body.mc-saranoni-pdp .content_area-wrapper{" +
+        "width:100%!important;max-width:100%!important;box-sizing:border-box!important;" +
+        "padding-left:12px!important;padding-right:12px!important}" +
+        "html body.mc-saranoni-pdp #v65-product-parent{" +
+        "display:block!important;width:100%!important;max-width:100%!important;" +
+        "padding-left:0!important;padding-right:0!important;margin:0!important;box-sizing:border-box!important}" +
+        "html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row," +
+        "html body.mc-saranoni-pdp #v65-product-parent tr.vol-product__top__inner," +
+        "html body.mc-saranoni-pdp #v65-product-parent tr.vol-product__main-details_row{" +
+        "display:block!important;width:100%!important;max-width:100%!important}" +
+        "html body.mc-saranoni-pdp td.vol-product__top--right," +
+        "html body.mc-saranoni-pdp td.vol-product__top--left," +
+        "html body.mc-saranoni-pdp td.mc-pdp-options-td," +
+        "html body.mc-saranoni-pdp td.mc-pdp-media-td," +
+        "html body.mc-saranoni-pdp td.mc-unified-pdp-info," +
+        "html body.mc-saranoni-pdp td.mc-unified-pdp-media," +
+        "html body.mc-saranoni-pdp #v65-productdetail-action-wrapper," +
+        "html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{" +
+        "display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;" +
+        "padding:0!important;margin:0!important;box-sizing:border-box!important;float:none!important;" +
+        "flex:none!important;position:static!important;left:auto!important;right:auto!important;" +
+        "transform:none!important;-webkit-transform:none!important}" +
+        "html body.mc-saranoni-pdp #v65-product-parent td," +
+        "html body.mc-saranoni-pdp #v65-product-parent th," +
+        "html body.mc-saranoni-pdp #v65-product-parent table," +
+        "html body.mc-saranoni-pdp #v65-product-parent tbody," +
+        "html body.mc-saranoni-pdp #v65-product-parent tr{" +
+        "padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important;" +
+        "max-width:100%!important;box-sizing:border-box!important;transform:none!important}" +
+        "html body.mc-saranoni-pdp #v65-product-parent table," +
+        "html body.mc-saranoni-pdp #v65-product-parent tbody," +
+        "html body.mc-saranoni-pdp #v65-product-parent tr{width:100%!important}" +
+        "html body.mc-saranoni-pdp td.mc-pdp-media-td," +
+        "html body.mc-saranoni-pdp #product_photo_td{text-align:center!important}" +
+        "html body.mc-saranoni-pdp:not(.mc-tmh-pdp) img#product_photo{" +
+        "display:block!important;margin:0 auto!important;max-width:min(350px,100%)!important;" +
+        "width:auto!important;height:auto!important}" +
+        "html body.mc-saranoni-pdp.mc-tmh-pdp img#product_photo," +
+        "html body.mc-tmh-pdp img#product_photo{" +
+        "display:block!important;margin:0 auto!important;width:100%!important;" +
+        "max-width:min(650px,100%)!important;height:auto!important}" +
+        "html body.mc-saranoni-pdp #mc-pdp-brand-logo{" +
+        "display:flex!important;justify-content:center!important;align-items:center!important;" +
+        "width:100%!important;max-width:100%!important;margin:12px auto!important;box-sizing:border-box!important}" +
+        "html body.mc-saranoni-pdp #mc-pdp-brand-logo img{" +
+        "display:block!important;margin:0 auto!important;max-width:min(280px,100%)!important;" +
+        "width:auto!important;height:auto!important;max-height:72px!important;object-fit:contain!important}" +
+        "html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper," +
+        "html body.mc-saranoni-pdp #mc-saranoni-size-thumbs," +
+        "html body.mc-saranoni-pdp #mc-pdp-accordion," +
+        "html body.mc-saranoni-pdp #mc-pdp-title-right," +
+        "html body.mc-saranoni-pdp #mc-pdp-price-stack-host," +
+        "html body.mc-saranoni-pdp #mc-pdp-purchase-stack{" +
+        "width:100%!important;max-width:100%!important;box-sizing:border-box!important;" +
+        "margin-left:0!important;margin-right:0!important}" +
+        "html body.mc-saranoni-pdp .mc-configured-color-swatches," +
+        "html body.mc-saranoni-pdp .mc-saranoni-swatches{" +
+        "display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;gap:12px!important}" +
+        "html body.mc-saranoni-pdp .mc-configured-color-swatch{" +
+        "display:inline-flex!important;width:82px!important;height:82px!important;min-width:82px!important}" +
+        "html body.mc-saranoni-pdp .mc-configured-color-swatch img{" +
+        "display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;visibility:visible!important;opacity:1!important}" +
+        "html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-header," +
+        "html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-label{" +
+        "letter-spacing:0.04em!important;white-space:normal!important;word-break:normal!important;overflow-wrap:normal!important}" +
+        "html body.mc-saranoni-pdp #messaging-element,html body.mc-saranoni-pdp #messaging-element *,html body.mc-saranoni-pdp klarna-placement," +
+        "html body.mc-saranoni-pdp [id*=klarna i],html body.mc-saranoni-pdp [class*=klarna i]," +
+        "html body.mc-saranoni-pdp [id*=affirm i],html body.mc-saranoni-pdp [class*=affirm i]{" +
+        "display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}" +
+        "html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-header{display:flex!important;justify-content:space-between!important;align-items:center!important;width:100%!important;padding-left:0!important;padding-right:0!important}" +
+        "html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-chevron{margin-left:auto!important;flex:0 0 auto!important}" +
+        /* Kill native Quantity sibling that sits left of mc-pdp-options-td. */
+        "html body.mc-saranoni-pdp tr:has(>td.mc-pdp-options-td)>td:not(.mc-pdp-options-td)," +
+        "html body.mc-saranoni-pdp tr:has(>td.mc-pdp-options-td)>td:not(.mc-pdp-options-td) *{" +
+        "display:none!important;width:0!important;max-width:0!important;min-width:0!important;" +
+        "padding:0!important;margin:0!important;border:0!important;overflow:hidden!important;visibility:hidden!important}" +
+        "html body.mc-saranoni-pdp td.vol-product__top--right," +
+        "html body.mc-saranoni-pdp td.mc-unified-pdp-info{" +
+        "display:block!important;width:100%!important;max-width:100%!important;padding:0!important;" +
+        "margin:0!important;box-sizing:border-box!important;text-align:left!important}" +
+        "}";
+
+      function zeroPad(el) {
+        if (!el || !el.style) return;
+        try {
+          el.style.setProperty("padding-left", "0", "important");
+          el.style.setProperty("padding-right", "0", "important");
+          el.style.setProperty("margin-left", "0", "important");
+          el.style.setProperty("margin-right", "0", "important");
+          el.style.setProperty("box-sizing", "border-box", "important");
+          el.style.setProperty("max-width", "100%", "important");
+          el.style.setProperty("transform", "none", "important");
+          el.style.setProperty("-webkit-transform", "none", "important");
+        } catch (ePad) {}
+      }
+
+      function widen(el) {
+        if (!el || !el.style) return;
+        try {
+          el.style.setProperty("display", "block", "important");
+          el.style.setProperty("width", "100%", "important");
+          el.style.setProperty("max-width", "100%", "important");
+          el.style.setProperty("min-width", "0", "important");
+          el.style.setProperty("padding", "0", "important");
+          el.style.setProperty("padding-left", "0", "important");
+          el.style.setProperty("padding-right", "0", "important");
+          el.style.setProperty("margin-left", "0", "important");
+          el.style.setProperty("margin-right", "0", "important");
+          el.style.setProperty("float", "none", "important");
+          el.style.setProperty("flex", "none", "important");
+          el.style.setProperty("box-sizing", "border-box", "important");
+          el.style.setProperty("position", "static", "important");
+          el.style.setProperty("left", "auto", "important");
+          el.style.setProperty("right", "auto", "important");
+          el.style.setProperty("transform", "none", "important");
+          el.style.setProperty("-webkit-transform", "none", "important");
+        } catch (eW) {}
+      }
+
+      if (contentWrap) {
+        try {
+          contentWrap.style.setProperty("width", "100%", "important");
+          contentWrap.style.setProperty("max-width", "100%", "important");
+          contentWrap.style.setProperty("padding-left", "12px", "important");
+          contentWrap.style.setProperty("padding-right", "12px", "important");
+          contentWrap.style.setProperty("box-sizing", "border-box", "important");
+        } catch (eCw) {}
+      }
+      if (content) {
+        try {
+          content.style.setProperty("width", "100%", "important");
+          content.style.setProperty("max-width", "100%", "important");
+          content.style.setProperty("padding-left", "12px", "important");
+          content.style.setProperty("padding-right", "12px", "important");
+          content.style.setProperty("box-sizing", "border-box", "important");
+        } catch (eC) {}
+      }
+
+      widen(parent);
+      parent
+        .querySelectorAll(
+          "tr.mc-pdp-main-row, tr.vol-product__top__inner, td.mc-pdp-media-td, td.mc-pdp-options-td, td.mc-unified-pdp-media, td.mc-unified-pdp-info, td.vol-product__top--left, td.vol-product__top--right, #v65-productdetail-action-wrapper, tr.mc-pdp-main-row > td"
+        )
+        .forEach(widen);
+
+      parent.querySelectorAll("td, th, table, tbody, tr").forEach(zeroPad);
+      parent.querySelectorAll("table, tbody, tr").forEach(function (el) {
+        try {
+          el.style.setProperty("width", "100%", "important");
+          el.style.setProperty("max-width", "100%", "important");
+        } catch (eW2) {}
+      });
+
+      var optTd = parent.querySelector("td.mc-pdp-options-td, td.mc-unified-pdp-info");
+      var walk = optTd;
+      while (walk && walk !== contentWrap) {
+        zeroPad(walk);
+        try {
+          walk.style.setProperty("width", "100%", "important");
+          walk.style.setProperty("max-width", "100%", "important");
+          walk.style.setProperty("transform", "none", "important");
+          walk.style.setProperty("flex", "none", "important");
+        } catch (eWalk) {}
+        walk = walk.parentElement;
+      }
+
+      [
+        "mc-pdp-brand-logo",
+        "mc-pdp-title-right",
+        "mc-pdp-price-stack-host",
+        "mc-configured-color-swatch-wrapper",
+        "mc-saranoni-size-thumbs",
+        "mc-pdp-accordion",
+        "mc-pdp-purchase-stack",
+      ].forEach(function (id) {
+        var el = global.document.getElementById(id);
+        if (!el) return;
+        try {
+          el.style.setProperty("width", "100%", "important");
+          el.style.setProperty("max-width", "100%", "important");
+          el.style.setProperty("margin-left", "0", "important");
+          el.style.setProperty("margin-right", "0", "important");
+          el.style.setProperty("box-sizing", "border-box", "important");
+        } catch (eEl) {}
+      });
+
+      try {
+        hideSaranoniNativeStripePriceTable(
+          parent.querySelector("td.vol-product__top--right, td.mc-unified-pdp-info, td.mc-pdp-options-td")
+        );
+        /* Collapse native Quantity cell that sits left of options-td, then
+           reparent info blocks onto vol-product__top--right (mobile host). */
+        parent.querySelectorAll("td.mc-pdp-options-td").forEach(function (optTd) {
+          var row = optTd.parentElement;
+          if (!row) return;
+          Array.prototype.forEach.call(row.children, function (sib) {
+            if (sib === optTd) return;
+            try {
+              sib.style.setProperty("display", "none", "important");
+              sib.style.setProperty("width", "0", "important");
+              sib.style.setProperty("max-width", "0", "important");
+              sib.style.setProperty("min-width", "0", "important");
+              sib.style.setProperty("padding", "0", "important");
+              sib.style.setProperty("overflow", "hidden", "important");
+              sib.style.setProperty("visibility", "hidden", "important");
+            } catch (eSib) {}
+          });
+          try {
+            optTd.style.setProperty("display", "block", "important");
+            optTd.style.setProperty("width", "100%", "important");
+            optTd.style.setProperty("max-width", "100%", "important");
+            optTd.style.setProperty("padding", "0", "important");
+            optTd.style.setProperty("transform", "none", "important");
+            optTd.style.setProperty("flex", "none", "important");
+          } catch (eOpt) {}
+        });
+        var topRight =
+          parent.querySelector("td.vol-product__top--right, td.mc-unified-pdp-info") || null;
+        if (topRight) widen(topRight);
+        applySaranoniInfoColumnOrder(resolveSaranoniInfoColumn());
+        /* After reparent, hide empty nested qty/options chrome still under topRight. */
+        if (topRight) {
+          topRight.querySelectorAll("table").forEach(function (tbl) {
+            if (tbl.querySelector("#mc-pdp-brand-logo, #mc-pdp-accordion, #mc-configured-color-swatch-wrapper, #mc-pdp-purchase-stack")) {
+              return;
+            }
+            var txt = String(tbl.textContent || "")
+              .replace(/\s+/g, " ")
+              .trim()
+              .toLowerCase();
+            if (!txt || /quantity|minus|plus/.test(txt)) {
+              try {
+                tbl.style.setProperty("display", "none", "important");
+                tbl.style.setProperty("height", "0", "important");
+                tbl.style.setProperty("overflow", "hidden", "important");
+              } catch (eHideTbl) {}
+            }
+          });
+        }
+      } catch (eOrdW) {}
+      try {
+        ensureSaranoniHeroImage();
+        positionSaranoniBrandLogo(global.document.getElementById("mc-pdp-brand-logo"));
+      } catch (eCenter) {}
+
+      try {
+        var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+        if (wrap) {
+          var textOnly = wrap.querySelectorAll(".mc-saranoni-text-swatch");
+          if (textOnly.length && !global.__MC_SAR_SWATCH_REBUILD_ONCE__) {
+            global.__MC_SAR_SWATCH_REBUILD_ONCE__ = true;
+            try {
+              wrap.removeAttribute("data-mc-signature");
+            } catch (eSig) {}
+            try {
+              ensureConfiguredColorSwatches();
+            } catch (eRebuild) {}
+            wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+          }
+          if (wrap) {
+            wrap.querySelectorAll(".mc-configured-color-swatch").forEach(function (btn) {
+              var img = btn.querySelector("img");
+              if (!img || !img.getAttribute("src")) return;
+              btn.classList.remove("mc-saranoni-text-swatch");
+              try {
+                btn.style.setProperty("display", "inline-flex", "important");
+                btn.style.setProperty("width", "82px", "important");
+                btn.style.setProperty("height", "82px", "important");
+                img.style.setProperty("display", "block", "important");
+                img.style.setProperty("width", "100%", "important");
+                img.style.setProperty("height", "100%", "important");
+                img.style.setProperty("object-fit", "cover", "important");
+                img.style.setProperty("visibility", "visible", "important");
+                img.style.setProperty("opacity", "1", "important");
+              } catch (eImg) {}
+            });
+            var rail = wrap.querySelector(".mc-configured-color-swatches, .mc-saranoni-swatches");
+            if (rail) {
+              rail.style.setProperty("display", "flex", "important");
+              rail.style.setProperty("flex-direction", "row", "important");
+              rail.style.setProperty("flex-wrap", "wrap", "important");
+              rail.style.setProperty("gap", "12px", "important");
+            }
+          }
+        }
+      } catch (eSw) {}
+
+      global.__MC_SAR_MOBILE_WIDTH_FIXED__ = true;
+    } finally {
+      global.__MC_SAR_MOBILE_WIDTH_BUSY__ = false;
+    }
+  }
+
+  function armSaranoniMobileLayoutGuard() {
+    if (!isSaranoniPdpPage() || global.innerWidth > 991) return;
+    if (global.__MC_SAR_MOBILE_LAYOUT_ARMED__) return;
+    global.__MC_SAR_MOBILE_LAYOUT_ARMED__ = true;
+    ensureSaranoniMobileColumnWidth();
+    [300, 900, 2000, 4000].forEach(function (ms) {
+      global.setTimeout(function () {
+        try {
+          ensureSaranoniMobileColumnWidth();
+          if (saranoniVariantOrderBroken()) {
+            applySaranoniInfoColumnOrder(resolveSaranoniInfoColumn());
+          }
+        } catch (eGuard) {}
+      }, ms);
+    });
+    if (!global.__MC_SAR_MOBILE_PAD_WATCH__) {
+      global.__MC_SAR_MOBILE_PAD_WATCH__ = true;
+      var ticks = 0;
+      var padTimer = global.setInterval(function () {
+        ticks++;
+        try {
+          if (!isSaranoniPdpPage() || global.innerWidth > 991) {
+            global.clearInterval(padTimer);
+            return;
+          }
+          var parent = global.document.getElementById("v65-product-parent");
+          if (!parent) return;
+          var opt = parent.querySelector("td.mc-pdp-options-td");
+          var acc = global.document.getElementById("mc-pdp-accordion");
+          var needs =
+            (opt && (opt.getBoundingClientRect().width < 220 || getComputedStyle(opt).transform !== "none")) ||
+            (acc && acc.getBoundingClientRect().width < 220);
+          if (needs) ensureSaranoniMobileColumnWidth();
+          else if (ticks > 25) global.clearInterval(padTimer);
+        } catch (eWatch) {
+          global.clearInterval(padTimer);
+        }
+      }, 400);
+    }
+  }
+
+  function hideBeanBagBnpl() {
+    if (!isBeanBagPdpPage()) return;
+    var msg = global.document.getElementById("messaging-element");
+    if (msg) {
+      try {
+        msg.style.setProperty("display", "none", "important");
+        msg.style.setProperty("visibility", "hidden", "important");
+        msg.style.setProperty("height", "0", "important");
+        msg.style.setProperty("max-height", "0", "important");
+        msg.style.setProperty("overflow", "hidden", "important");
+        msg.style.setProperty("margin", "0", "important");
+        msg.style.setProperty("padding", "0", "important");
+        msg.setAttribute("aria-hidden", "true");
+        msg.setAttribute("data-mc-bb-bnpl-hidden", "1");
+      } catch (eBnpl) {}
+    }
+    try {
+      var scope = global.document.getElementById("v65-product-parent") || global.document;
+      scope
+        .querySelectorAll(
+          'klarna-placement, [id*="klarna" i], [class*="klarna" i], [id*="affirm" i], [class*="affirm" i], [data-testid*="klarna" i]'
+        )
+        .forEach(function (el) {
+          if (!el || !el.style) return;
+          if (el.closest && el.closest("#mc-pdp-purchase-stack, #mc-pdp-accordion, #beanbag-swatch-wrapper, #mc-bb-size-section")) {
+            return;
+          }
+          try {
+            el.style.setProperty("display", "none", "important");
+            el.style.setProperty("visibility", "hidden", "important");
+            el.style.setProperty("height", "0", "important");
+            el.style.setProperty("overflow", "hidden", "important");
+          } catch (eHide) {}
+        });
+    } catch (eScope) {}
+  }
+
+  function ensureBeanBagMobileColumnWidth() {
+    if (!isBeanBagPdpPage() || global.innerWidth > 991) return;
+    if (global.__MC_BB_MOBILE_WIDTH_BUSY__) return;
+    global.__MC_BB_MOBILE_WIDTH_BUSY__ = true;
+    try {
+      hideBeanBagBnpl();
+      var parent = global.document.getElementById("v65-product-parent");
+      if (!parent) return;
+      var content = global.document.getElementById("content_area");
+      var contentWrap =
+        (content && content.closest && content.closest(".content_area-wrapper")) ||
+        global.document.querySelector(".content_area-wrapper");
+      var infoHost = ensureBeanBagMobileInfoHost();
+      var st = global.document.getElementById("mc-beanbag-mobile-width-css");
+      if (!st) {
+        st = global.document.createElement("style");
+        st.id = "mc-beanbag-mobile-width-css";
+        (global.document.head || global.document.documentElement).appendChild(st);
+      }
+      st.textContent =
+        "@media (max-width:991px){" +
+        "html body.mc-bean-bag-pdp #content_area,html body.mc-bean-bag-pdp .content_area-wrapper{" +
+        "width:100%!important;max-width:100%!important;box-sizing:border-box!important;" +
+        "padding-left:12px!important;padding-right:12px!important;overflow:visible!important}" +
+        "html body.mc-bean-bag-pdp .content_area-wrapper.col-md-9," +
+        "html body.mc-bean-bag-pdp .content_area-wrapper.col-xs-12," +
+        "html body.mc-bean-bag-pdp .container.container--content," +
+        "html body.mc-bean-bag-pdp .page-wrap,html body.mc-bean-bag-pdp .vol-inner," +
+        "html body.mc-bean-bag-pdp .vol-product,html body.mc-bean-bag-pdp #vCSS_mainform{" +
+        "width:100%!important;max-width:100%!important;box-sizing:border-box!important;" +
+        "padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important;float:none!important}" +
+        "html body.mc-bean-bag-pdp #v65-product-parent{" +
+        "display:block!important;width:100%!important;max-width:100%!important;" +
+        "padding:0!important;margin:0!important;box-sizing:border-box!important;overflow:visible!important;" +
+        "flex:none!important;table-layout:auto!important}" +
+        "html body.mc-bean-bag-pdp #v65-product-parent>tbody," +
+        "html body.mc-bean-bag-pdp #v65-product-parent tbody{" +
+        "display:block!important;width:100%!important;max-width:100%!important}" +
+        "html body.mc-bean-bag-pdp #v65-product-parent tr.mc-pdp-main-row," +
+        "html body.mc-bean-bag-pdp #v65-product-parent tr.vol-product__top__inner{" +
+        "display:block!important;width:100%!important;max-width:100%!important}" +
+        "html body.mc-bean-bag-pdp tr.mc-pdp-main-row>td," +
+        "html body.mc-bean-bag-pdp td[data-mc-bb-mobile-info-td='1']," +
+        "html body.mc-bean-bag-pdp td.mc-pdp-media-td," +
+        "html body.mc-bean-bag-pdp td.mc-unified-pdp-media{" +
+        "display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;" +
+        "float:none!important;flex:none!important;box-sizing:border-box!important;" +
+        "padding-left:0!important;padding-right:0!important;margin:0!important;" +
+        "transform:none!important;position:static!important}" +
+        "html body.mc-bean-bag-pdp #mc-bb-mobile-info-host{" +
+        "display:block!important;width:100%!important;max-width:100%!important;" +
+        "box-sizing:border-box!important;margin:0!important;padding:0!important}" +
+        "html body.mc-bean-bag-pdp a#product_photo_zoom_url,html body.mc-bean-bag-pdp a#product_photo_zoom_url2{" +
+        "display:block!important;width:100%!important;max-width:100%!important;margin:0 auto!important}" +
+        "html body.mc-bean-bag-pdp img#product_photo{" +
+        "display:block!important;margin:0 auto!important;width:100%!important;" +
+        "max-width:100%!important;height:auto!important;object-fit:contain!important}" +
+        "html body.mc-bean-bag-pdp td.mc-pdp-media-td,html body.mc-bean-bag-pdp .mc-bean-bag-media-stack{" +
+        "text-align:center!important;margin-bottom:0!important;padding-bottom:0!important}" +
+        "html body.mc-bean-bag-pdp #mc-pdp-brand-logo{" +
+        "display:flex!important;justify-content:center!important;width:100%!important;margin:12px auto 8px!important}" +
+        "html body.mc-bean-bag-pdp #mc-pdp-title-right{padding-left:0!important;width:100%!important;max-width:100%!important}" +
+        "html body.mc-bean-bag-pdp #mc-bb-size-section,html body.mc-bean-bag-pdp #mc-pdp-price-stack-host," +
+        "html body.mc-bean-bag-pdp #mc-pdp-accordion,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack," +
+        "html body.mc-bean-bag-pdp #beanbag-swatch-wrapper{" +
+        "display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;" +
+        "margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important}" +
+        "html body.mc-bean-bag-pdp #beanbag-swatch-wrapper .beanbag-swatches{" +
+        "display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important}" +
+        "html body.mc-bean-bag-pdp #beanbag-swatch-wrapper img.beanbag-swatch{" +
+        "display:inline-block!important;width:56px!important;height:56px!important;visibility:visible!important;opacity:1!important}" +
+        "html body.mc-bean-bag-pdp #mc-pdp-accordion .mc-acc-header{display:flex!important;justify-content:space-between!important;align-items:center!important;width:100%!important}" +
+        "html body.mc-bean-bag-pdp #mc-pdp-accordion .mc-acc-chevron{margin-left:auto!important;flex:0 0 auto!important}" +
+        "html body.mc-bean-bag-pdp #messaging-element,html body.mc-bean-bag-pdp #messaging-element *{" +
+        "display:none!important;height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}" +
+        "html body.mc-bean-bag-pdp table.colors_pricebox:not(:has(#mc-bb-mobile-info-host)):not(:has(#mc-pdp-brand-logo)):not(:has(#mc-pdp-accordion)){" +
+        "display:none!important;height:0!important;overflow:hidden!important;margin:0!important}" +
+        "}";
+
+      function widen(el) {
+        if (!el || !el.style) return;
+        try {
+          el.style.setProperty("display", "block", "important");
+          el.style.setProperty("width", "100%", "important");
+          el.style.setProperty("max-width", "100%", "important");
+          el.style.setProperty("min-width", "0", "important");
+          el.style.setProperty("float", "none", "important");
+          el.style.setProperty("flex", "none", "important");
+          el.style.setProperty("box-sizing", "border-box", "important");
+          el.style.setProperty("transform", "none", "important");
+          el.style.setProperty("position", "static", "important");
+        } catch (eW) {}
+      }
+
+      if (contentWrap) {
+        try {
+          contentWrap.style.setProperty("width", "100%", "important");
+          contentWrap.style.setProperty("max-width", "100%", "important");
+          contentWrap.style.setProperty("padding-left", "12px", "important");
+          contentWrap.style.setProperty("padding-right", "12px", "important");
+          contentWrap.style.setProperty("box-sizing", "border-box", "important");
+        } catch (eCw) {}
+      }
+      if (content) {
+        try {
+          content.style.setProperty("width", "100%", "important");
+          content.style.setProperty("max-width", "100%", "important");
+          content.style.setProperty("padding-left", "12px", "important");
+          content.style.setProperty("padding-right", "12px", "important");
+          content.style.setProperty("box-sizing", "border-box", "important");
+          content.style.setProperty("overflow", "visible", "important");
+        } catch (eC) {}
+      }
+
+      widen(parent);
+      parent.style.setProperty("overflow", "visible", "important");
+      parent.style.setProperty("flex", "none", "important");
+      parent.querySelectorAll("tbody").forEach(widen);
+      [
+        contentWrap,
+        global.document.querySelector(".container.container--content"),
+        global.document.querySelector(".page-wrap"),
+        global.document.querySelector(".vol-inner"),
+        global.document.querySelector(".vol-product"),
+        global.document.getElementById("vCSS_mainform"),
+      ].forEach(function (wrap) {
+        if (!wrap) return;
+        try {
+          wrap.style.setProperty("width", "100%", "important");
+          wrap.style.setProperty("max-width", "100%", "important");
+          wrap.style.setProperty("float", "none", "important");
+          wrap.style.setProperty("box-sizing", "border-box", "important");
+        } catch (eWrap) {}
+      });
+      parent.querySelectorAll("tr.mc-pdp-main-row, tr.vol-product__top__inner").forEach(function (row) {
+        widen(row);
+        Array.prototype.forEach.call(row.children, function (cell) {
+          if (cell.tagName === "TD") widen(cell);
+        });
+      });
+      parent.querySelectorAll("td.mc-pdp-media-td, td.mc-unified-pdp-media").forEach(function (mediaTd) {
+        widen(mediaTd);
+        var row = mediaTd.parentElement;
+        if (!row) return;
+        Array.prototype.forEach.call(row.children, function (sib) {
+          if (sib === mediaTd) return;
+          var txt = String(sib.textContent || "")
+            .replace(/\s+/g, " ")
+            .trim();
+          if (
+            (!txt || txt === "\u00a0") &&
+            !sib.querySelector("#product_photo, #altviews, #mc-bb-mobile-info-host, #mc-pdp-brand-logo")
+          ) {
+            try {
+              sib.style.setProperty("display", "none", "important");
+              sib.style.setProperty("width", "0", "important");
+              sib.style.setProperty("height", "0", "important");
+              sib.style.setProperty("padding", "0", "important");
+            } catch (eSib) {}
+          }
+        });
+        try {
+          row.style.setProperty("display", "block", "important");
+          row.style.setProperty("width", "100%", "important");
+        } catch (eRow) {}
+      });
+
+      if (infoHost) widen(infoHost);
+      var infoTd = infoHost && infoHost.closest("td");
+      if (infoTd) widen(infoTd);
+
+      try {
+        appendBeanBagInfoColumnOrder();
+      } catch (eOrd) {}
+      try {
+        ensureBeanBagBrandLogo();
+        positionSaranoniBrandLogo(global.document.getElementById("mc-pdp-brand-logo"));
+      } catch (eLogo) {}
+      try {
+        restoreBeanBagAltviews();
+      } catch (eAlt) {}
+      try {
+        collapseBeanBagMobileNativeChrome();
+        hideBeanBagPriceboxRemnants();
+        placePdpFreeShippingBesidePrice();
+      } catch (eChrome) {}
+
+      var hero = global.document.getElementById("product_photo");
+      if (hero) {
+        try {
+          hero.style.setProperty("display", "block", "important");
+          hero.style.setProperty("width", "100%", "important");
+          hero.style.setProperty("max-width", "100%", "important");
+          hero.style.setProperty("min-width", "0", "important");
+          hero.style.setProperty("height", "auto", "important");
+          hero.style.setProperty("margin", "0 auto", "important");
+          var heroLink = hero.closest("a");
+          if (heroLink) {
+            heroLink.style.setProperty("display", "block", "important");
+            heroLink.style.setProperty("width", "100%", "important");
+            heroLink.style.setProperty("max-width", "100%", "important");
+            heroLink.style.removeProperty("min-width");
+          }
+        } catch (eHero) {}
+      }
+
+      [
+        "mc-bb-mobile-info-host",
+        "mc-pdp-brand-logo",
+        "mc-pdp-title-right",
+        "mc-pdp-price-stack-host",
+        "mc-bb-size-section",
+        "beanbag-swatch-wrapper",
+        "mc-pdp-accordion",
+        "mc-pdp-purchase-stack",
+      ].forEach(function (id) {
+        var el = global.document.getElementById(id);
+        if (!el) return;
+        try {
+          el.style.setProperty("width", "100%", "important");
+          el.style.setProperty("max-width", "100%", "important");
+          el.style.setProperty("box-sizing", "border-box", "important");
+          el.style.setProperty("margin-left", "0", "important");
+          el.style.setProperty("margin-right", "0", "important");
+          el.style.setProperty("visibility", "visible", "important");
+        } catch (eEl) {}
+      });
+
+      var swWrap = global.document.getElementById("beanbag-swatch-wrapper");
+      if (swWrap) {
+        try {
+          swWrap.style.setProperty("display", "block", "important");
+          swWrap.style.setProperty("max-width", "100%", "important");
+          swWrap.style.setProperty("padding-left", "0", "important");
+          swWrap.style.setProperty("padding-right", "0", "important");
+        } catch (eSw) {}
+        var rail = swWrap.querySelector(".beanbag-swatches");
+        if (rail) {
+          try {
+            rail.style.setProperty("display", "flex", "important");
+            rail.style.setProperty("flex-direction", "row", "important");
+            rail.style.setProperty("flex-wrap", "wrap", "important");
+            rail.style.setProperty("gap", "10px", "important");
+            rail.style.setProperty("width", "100%", "important");
+          } catch (eRail) {}
+        }
+        swWrap.querySelectorAll("img.beanbag-swatch").forEach(function (img) {
+          try {
+            img.style.setProperty("display", "inline-block", "important");
+            img.style.setProperty("visibility", "visible", "important");
+            img.style.setProperty("opacity", "1", "important");
+          } catch (eImg) {}
+        });
+      }
+
+      global.__MC_BB_MOBILE_WIDTH_FIXED__ = true;
+    } finally {
+      global.__MC_BB_MOBILE_WIDTH_BUSY__ = false;
+    }
+  }
+
+  function restoreBeanBagAltviews() {
+    if (!isBeanBagPdpPage()) return;
+    var mediaTd =
+      findPdpMediaTd() ||
+      global.document.querySelector(
+        "#v65-product-parent td.mc-pdp-media-td, #v65-product-parent td.mc-unified-pdp-media, #product_photo_td"
+      );
+    if (!mediaTd) return;
+
+    var alt =
+      global.document.getElementById("altviews") ||
+      global.document.querySelector("#content_area .altviews, #v65-product-parent .altviews, .mc-unified-altviews");
+
+    /* Collect orphaned alternate thumbs (hidden anchors / NoPhoto skipped). */
+    var orphans = [];
+    global.document
+      .querySelectorAll(
+        "a[id^='alternate_product_photo'], img[id^='alternate_product_photo'], img.vCSS_img_alternate_product_photo"
+      )
+      .forEach(function (node) {
+        var img = node.tagName === "IMG" ? node : node.querySelector("img");
+        if (!img) return;
+        var src = String(img.getAttribute("src") || "");
+        if (/nophoto/i.test(src)) return;
+        if (alt && alt.contains(node)) return;
+        orphans.push(node.tagName === "A" ? node : node.closest("a") || node);
+      });
+
+    if (!alt && orphans.length) {
+      alt = global.document.createElement("span");
+      alt.id = "altviews";
+      alt.className = "altviews mc-unified-altviews";
+    }
+    if (!alt) return;
+
+    orphans.forEach(function (node) {
+      try {
+        if (!alt.contains(node)) alt.appendChild(node);
+        if (node.style) {
+          node.style.removeProperty("display");
+          node.style.setProperty("display", "inline-block", "important");
+          node.style.setProperty("visibility", "visible", "important");
+        }
+      } catch (eMove) {}
+    });
+
+    var main =
+      global.document.getElementById("product_photo") ||
+      mediaTd.querySelector("img#product_photo");
+    if (main) {
+      try {
+        ensureBeanBagMediaStack(main, alt);
+      } catch (eStack) {
+        try {
+          if (!mediaTd.contains(alt)) mediaTd.appendChild(alt);
+        } catch (eApp) {}
+      }
+    } else if (!mediaTd.contains(alt)) {
+      try {
+        mediaTd.appendChild(alt);
+      } catch (eApp2) {}
+    }
+
+    try {
+      alt.style.setProperty("display", "flex", "important");
+      alt.style.setProperty("visibility", "visible", "important");
+      alt.style.setProperty("height", "auto", "important");
+      alt.style.setProperty("overflow", "visible", "important");
+      alt.style.setProperty("opacity", "1", "important");
+    } catch (eShow) {}
+    hideAlternativeViewsLabel(alt);
+    applySoftGoodsAltviewsLayout(alt);
+  }
+
+  function armBeanBagMobileLayoutGuard() {
+    if (!isBeanBagPdpPage() || global.innerWidth > 991) return;
+    if (global.__MC_BB_MOBILE_LAYOUT_ARMED__) return;
+    global.__MC_BB_MOBILE_LAYOUT_ARMED__ = true;
+    ensureBeanBagMobileColumnWidth();
+    /* One delayed pass only — no 400ms pad-watch (that caused mobile glitch). */
+    [400, 1200].forEach(function (ms) {
+      global.setTimeout(function () {
+        try {
+          if (!isBeanBagPdpPage() || global.innerWidth > 991) return;
+          ensureBeanBagMobileColumnWidth();
+        } catch (eGuard) {}
+      }, ms);
+    });
+  }
+
+  function repairPdpRelatedRailLayout() {
+    if (!isProductPdp()) return;
+    neutralizeLegacyPdpEnforcer();
+    var related = global.document.getElementById("v65-product-related");
+    var content = global.document.getElementById("related_products_content");
+    function showRoot(el) {
+      if (!el) return;
+      try {
+        var isTable = el.tagName === "TABLE";
+        el.style.removeProperty("display");
+        el.style.removeProperty("visibility");
+        el.style.removeProperty("height");
+        el.style.removeProperty("max-height");
+        el.style.removeProperty("overflow");
+        el.style.setProperty("display", isTable ? "table" : "block", "important");
+        el.style.setProperty("visibility", "visible", "important");
+        el.style.setProperty("opacity", "1", "important");
+        el.style.setProperty("width", "100%", "important");
+        el.style.setProperty("max-width", "100%", "important");
+        el.style.setProperty("overflow", "visible", "important");
+      } catch (eShow) {}
+    }
+    showRoot(related);
+    showRoot(content);
+    if (!related) return;
+    var bottom = related.closest("table.vol-product__bottom");
+    if (bottom) {
+      try {
+        bottom.style.setProperty("display", "table", "important");
+        bottom.style.setProperty("width", "100%", "important");
+        bottom.style.setProperty("table-layout", "fixed", "important");
+      } catch (eBottom) {}
+    }
+    var relTr = related.closest("tr");
+    if (relTr) {
+      try {
+        relTr.style.setProperty("display", "table-row", "important");
+        relTr.style.setProperty("width", "100%", "important");
+      } catch (eTr) {}
+    }
+    if (related.parentElement && related.parentElement.tagName === "TD") {
+      try {
+        related.parentElement.style.setProperty("display", "table-cell", "important");
+        related.parentElement.style.setProperty("width", "100%", "important");
+        related.parentElement.style.setProperty("visibility", "visible", "important");
+      } catch (eWrap) {}
+    }
+    var grid = related.querySelector(".mc-related-plp-grid");
+    if (grid && grid.parentElement && grid.parentElement.tagName === "TD") {
+      try {
+        grid.parentElement.style.setProperty("display", "table-cell", "important");
+        grid.parentElement.style.setProperty("visibility", "visible", "important");
+        grid.parentElement.style.setProperty("width", "100%", "important");
+      } catch (eGridTd) {}
+    }
+    if (grid) {
+      try {
+        grid.style.setProperty("display", "flex", "important");
+        grid.style.setProperty("visibility", "visible", "important");
+        grid.style.setProperty("width", "100%", "important");
+        grid.style.setProperty("max-width", "100%", "important");
+        if (global.innerWidth >= 992) {
+          grid.style.setProperty("justify-content", "center", "important");
+          grid.style.setProperty("gap", "24px", "important");
+        }
+      } catch (eGrid) {}
+    }
+  }
+
+  function ensurePdpRelatedItemsVisible() {
+    repairPdpRelatedRailLayout();
+    if (global.__MC_PDP_RELATED_VISIBLE_DONE__) return;
+    if (typeof global.mcRunRelatedFix === "function") {
+      if (global.__MC_PDP_RELATED_FIX_T__) {
+        global.clearTimeout(global.__MC_PDP_RELATED_FIX_T__);
+      }
+      global.__MC_PDP_RELATED_FIX_T__ = global.setTimeout(function () {
+        global.__MC_PDP_RELATED_FIX_T__ = null;
+        try {
+          global.mcRunRelatedFix();
+        } catch (eFix) {}
+        repairPdpRelatedRailLayout();
+        global.__MC_PDP_RELATED_VISIBLE_DONE__ = true;
+      }, 400);
+      [900, 2600].forEach(function (ms) {
+        global.setTimeout(repairPdpRelatedRailLayout, ms);
+      });
+      return;
+    }
+    global.__MC_PDP_RELATED_VISIBLE_DONE__ = true;
+  }
+
+  global.mcRepairPdpRelatedRail = repairPdpRelatedRailLayout;
+
+  function ensureSaranoniRelatedItemsVisible() {
+    if (!isSaranoniPdpPage()) return;
+    ensurePdpRelatedItemsVisible();
   }
 
   function markSaranoniPdpReady() {
@@ -3334,6 +4989,9 @@
     ) {
       markPdpHeroReady();
     }
+    ensureSaranoniRelatedItemsVisible();
+    ensureSaranoniMobileColumnWidth();
+    armSaranoniMobileLayoutGuard();
   }
 
   function applySaranoniInfoColumnAlignment() {
@@ -3341,7 +4999,7 @@
     var col = resolveSaranoniInfoColumn();
     if (!col) return;
     try {
-      col.style.setProperty("margin-left", "20px", "important");
+      col.style.setProperty("margin-left", (global.innerWidth <= 991 ? "0" : "10px"), "important");
       col.style.setProperty("padding-left", "0", "important");
       col.style.setProperty("padding-right", "0", "important");
       col.style.setProperty("text-align", "left", "important");
@@ -3418,15 +5076,28 @@
     return global.document.getElementById("mc-configured-color-swatch-wrapper");
   }
 
+  function removePboxBorderBottomRows() {
+    global.document.querySelectorAll('td[background*="PBox_Border_Bottom"]').forEach(function (td) {
+      var tr = td.parentNode;
+      var target = tr && tr.tagName === "TR" ? tr : td;
+      if (target.parentNode) try { target.parentNode.removeChild(target); } catch (e) {}
+    });
+  }
+
   function removeSaranoniDuplicateColorPicker() {
     if (!isSaranoniPdpPage()) return;
     dedupeSaranoniConfiguredColorSwatchWrappers();
-    global.document.querySelectorAll("#mc-saranoni-color-picker, .mc-saranoni-color-picker").forEach(function (picker) {
-      if (!picker || !picker.parentNode) return;
-      try {
-        picker.parentNode.removeChild(picker);
-      } catch (eRmPicker) {}
-    });
+    // .mc-sar-hotfix-picker is a legacy color picker injected by template.min.js; it
+    // duplicates our #mc-configured-color-swatch-wrapper (which is positioned after the
+    // price). Remove it here; a CSS display:none backs this up in case it is re-injected.
+    global.document
+      .querySelectorAll("#mc-saranoni-color-picker, .mc-saranoni-color-picker, #mc-sar-hotfix-picker, .mc-sar-hotfix-picker")
+      .forEach(function (picker) {
+        if (!picker || !picker.parentNode) return;
+        try {
+          picker.parentNode.removeChild(picker);
+        } catch (eRmPicker) {}
+      });
   }
 
   function finalizeSaranoniInfoColumnOrder() {
@@ -3445,7 +5116,9 @@
       mountDescriptionBelowFeatures();
   
       hideSaranoniNestedStrayMediaCol();
-  
+
+      removePboxBorderBottomRows();
+
       removeSaranoniDuplicateColorPicker();
   
       relocateVariantSwatchesFromMediaColumn();
@@ -3698,6 +5371,32 @@
     ensureSaranoniVariantOptionBlock();
   }
 
+  function ensureSteveSilverBnplAfterPrice(infoColumn) {
+    var messaging = global.document.getElementById("messaging-element");
+    var price = global.document.getElementById("mc-pdp-price-stack-host");
+    var logo = global.document.getElementById("mc-pdp-brand-logo");
+    if (!messaging || !price || !infoColumn) return;
+    if (price.parentNode !== infoColumn) return;
+    if (messaging.parentNode !== infoColumn) {
+      try {
+        infoColumn.appendChild(messaging);
+      } catch (eJoin) {}
+    }
+    if (price.nextElementSibling === messaging) {
+      messaging.dataset.mcSsBnplPlaced = "1";
+      return;
+    }
+    var bnplBeforeLogo =
+      logo &&
+      logo.parentNode === infoColumn &&
+      !!(logo.compareDocumentPosition(messaging) & Node.DOCUMENT_POSITION_FOLLOWING);
+    if (messaging.dataset.mcSsBnplPlaced === "1" && !bnplBeforeLogo) return;
+    try {
+      insertNodeAfter(infoColumn, price, messaging);
+      messaging.dataset.mcSsBnplPlaced = "1";
+    } catch (eBnpl) {}
+  }
+
   function appendSteveSilverInfoColumnOrder() {
     if (!isSteveSilverPdpPage()) return;
     var infoColumn =
@@ -3713,11 +5412,18 @@
       mountDescriptionBelowFeatures();
     } catch (eSsBlocks) {}
     var accordion = ensureSaranoniPdpAccordion();
+    // #messaging-element is handled separately below, not in this list — see
+    // the guard after this forEach. Once Klarna/Affirm has mounted content
+    // into it (childElementCount > 0), appendChild-ing it again yanks their
+    // widget out of wherever they positioned it and re-inserts it, which
+    // both breaks their internal DOM references and generates a new
+    // mutation that re-triggers our own MutationObserver (see the observer
+    // filter above) — a feedback loop that was the main source of the
+    // Steve Silver PDP glitching on mobile.
     var ordered = [
       global.document.getElementById("mc-pdp-brand-logo"),
       global.document.getElementById("mc-pdp-title-right"),
       global.document.getElementById("mc-pdp-price-stack-host"),
-      global.document.getElementById("messaging-element"),
       global.document.getElementById("mc-pdp-option-block"),
       accordion || global.document.getElementById("mc-pdp-features"),
       accordion ? null : global.document.getElementById("mc-pdp-description-below-features"),
@@ -3730,6 +5436,22 @@
         infoColumn.appendChild(element);
       } catch (eAppend) {}
     });
+    var messaging = global.document.getElementById("messaging-element");
+    if (messaging && messaging.childElementCount === 0) {
+      // Not yet populated by Klarna/Affirm — safe to position once. Insert
+      // it right after the price block (its intended slot in `ordered`
+      // above) rather than at the end, so first paint still gets correct
+      // ordering before BNPL has anything to mount.
+      var priceHost = global.document.getElementById("mc-pdp-price-stack-host");
+      try {
+        if (priceHost && priceHost.parentNode === infoColumn) {
+          insertNodeAfter(infoColumn, priceHost, messaging);
+        } else {
+          infoColumn.appendChild(messaging);
+        }
+      } catch (eMsgPlace) {}
+    }
+    ensureSteveSilverBnplAfterPrice(infoColumn);
   }
 
   function ensurePdpInfoColumnOrder() {
@@ -4024,6 +5746,8 @@
     try {
       var pc = resolveSoftGoodsProductCode();
       if (/^SAR/.test(pc)) return true;
+      // Mahjong products (TMH-*) use the identical soft-goods PDP layout + accordion.
+      if (/^TMH/.test(pc)) return true;
       if (global.document.body && global.document.body.classList.contains("mc-saranoni-pdp")) return true;
     } catch (eSar) {}
     return false;
@@ -4043,12 +5767,28 @@
       }
       var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
       var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
-      return /^SS-/.test(pc);
+      if (/^SS-/.test(pc)) return true;
+      // Steve Silver closeout products: BURLINGTON-DINING-SET, CANOVA-DINING-SET, etc.
+      if (/-(DINING-SET|DINING|SECTIONAL|SOFA|RECLINER|CHAIR|BED|BENCH)$/i.test(pc)) return true;
     } catch (eSs) {}
     return false;
   }
 
   function findPdpHeroColumnTd() {
+    /* Mobile Bean Bags: no vol-product__top--right — info lives nested inside
+       colors_pricebox (~198px) which squashes accordion/swatches. Host on a
+       dedicated full-width node in the main-row info cell instead.
+       Mobile Saranoni: prefer vol-product__top--right. Desktop: options-td. */
+    if (isBeanBagPdpPage() && global.innerWidth <= 991) {
+      var bbHost = ensureBeanBagMobileInfoHost();
+      if (bbHost) return bbHost;
+    }
+    if (isSaranoniPdpPage() && global.innerWidth <= 991) {
+      var topRight = global.document.querySelector(
+        "#v65-product-parent td.vol-product__top--right, #v65-product-parent td.mc-unified-pdp-info"
+      );
+      if (topRight) return topRight;
+    }
     var td = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
     if (td) return td;
     var seeds = [
@@ -4066,6 +5806,148 @@
       }
     }
     return null;
+  }
+
+  function ensureBeanBagMobileInfoHost() {
+    if (!isBeanBagPdpPage() || global.innerWidth > 991) return null;
+    var host = global.document.getElementById("mc-bb-mobile-info-host");
+    if (host) return host;
+
+    var mainRow =
+      global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row") ||
+      global.document.querySelector("#v65-product-parent tr.vol-product__top__inner");
+    var mediaTd = null;
+    var infoTd = null;
+    if (mainRow) {
+      Array.prototype.forEach.call(mainRow.children, function (cell) {
+        if (!cell || cell.tagName !== "TD") return;
+        if (cell.querySelector && cell.querySelector("#product_photo, img#product_photo")) {
+          mediaTd = cell;
+          return;
+        }
+        if (
+          cell.querySelector &&
+          cell.querySelector(
+            "td.mc-pdp-options-td, #mc-pdp-brand-logo, #mc-pdp-accordion, #beanbag-swatch-wrapper, table.colors_pricebox, #mc-pdp-purchase-stack"
+          )
+        ) {
+          infoTd = cell;
+        }
+      });
+      if (!infoTd && mediaTd && mediaTd.nextElementSibling && mediaTd.nextElementSibling.tagName === "TD") {
+        infoTd = mediaTd.nextElementSibling;
+      }
+      if (!infoTd && mainRow.cells && mainRow.cells.length >= 2) {
+        var ci;
+        for (ci = 0; ci < mainRow.cells.length; ci++) {
+          if (mainRow.cells[ci] !== mediaTd) {
+            infoTd = mainRow.cells[ci];
+            break;
+          }
+        }
+      }
+    }
+    if (!infoTd) {
+      infoTd = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
+      while (infoTd && infoTd.parentElement && infoTd.parentElement.closest) {
+        var row = infoTd.parentElement;
+        if (row.classList && row.classList.contains("mc-pdp-main-row")) break;
+        var outer = infoTd.parentElement.closest("td");
+        if (!outer || outer === infoTd) break;
+        infoTd = outer;
+      }
+    }
+    if (!infoTd) return null;
+
+    host = global.document.createElement("div");
+    host.id = "mc-bb-mobile-info-host";
+    host.className = "mc-bb-mobile-info-host";
+    try {
+      infoTd.insertBefore(host, infoTd.firstChild);
+    } catch (eIns) {
+      try {
+        infoTd.appendChild(host);
+      } catch (eApp) {
+        return null;
+      }
+    }
+    try {
+      infoTd.style.setProperty("display", "block", "important");
+      infoTd.style.setProperty("width", "100%", "important");
+      infoTd.style.setProperty("max-width", "100%", "important");
+      infoTd.style.setProperty("min-width", "0", "important");
+      infoTd.style.setProperty("box-sizing", "border-box", "important");
+      infoTd.style.setProperty("padding", "0", "important");
+      infoTd.setAttribute("data-mc-bb-mobile-info-td", "1");
+    } catch (eTd) {}
+    try {
+      host.style.setProperty("display", "block", "important");
+      host.style.setProperty("width", "100%", "important");
+      host.style.setProperty("max-width", "100%", "important");
+      host.style.setProperty("box-sizing", "border-box", "important");
+      host.style.setProperty("margin", "0", "important");
+      host.style.setProperty("padding", "0", "important");
+    } catch (eHost) {}
+    return host;
+  }
+
+  function collapseBeanBagMobileNativeChrome() {
+    if (!isBeanBagPdpPage() || global.innerWidth > 991) return;
+    var host = global.document.getElementById("mc-bb-mobile-info-host");
+    var parent = global.document.getElementById("v65-product-parent");
+    if (!parent) return;
+
+    parent.querySelectorAll("table.colors_pricebox").forEach(function (tbl) {
+      if (host && tbl.contains(host)) return;
+      if (
+        tbl.querySelector(
+          "#mc-bb-mobile-info-host, #mc-pdp-brand-logo, #mc-pdp-accordion, #beanbag-swatch-wrapper, #mc-pdp-purchase-stack, #mc-bb-size-section"
+        )
+      ) {
+        return;
+      }
+      try {
+        tbl.style.setProperty("display", "none", "important");
+        tbl.style.setProperty("height", "0", "important");
+        tbl.style.setProperty("max-height", "0", "important");
+        tbl.style.setProperty("overflow", "hidden", "important");
+        tbl.style.setProperty("margin", "0", "important");
+        tbl.style.setProperty("padding", "0", "important");
+        tbl.setAttribute("aria-hidden", "true");
+      } catch (eHide) {}
+    });
+
+    parent.querySelectorAll("td.mc-pdp-hero-media-col").forEach(function (td) {
+      if (td.querySelector("#product_photo")) return;
+      try {
+        td.style.setProperty("display", "none", "important");
+        td.style.setProperty("width", "0", "important");
+        td.style.setProperty("height", "0", "important");
+        td.style.setProperty("padding", "0", "important");
+        td.style.setProperty("overflow", "hidden", "important");
+      } catch (eCol) {}
+    });
+
+    /* Nested options-td left behind after reparent — collapse empty shells. */
+    parent.querySelectorAll("td.mc-pdp-options-td").forEach(function (td) {
+      if (host && (td === host || td.contains(host))) return;
+      if (
+        td.querySelector(
+          "#mc-bb-mobile-info-host, #mc-pdp-brand-logo, #mc-pdp-accordion, #beanbag-swatch-wrapper, #mc-pdp-purchase-stack"
+        )
+      ) {
+        return;
+      }
+      var txt = String(td.textContent || "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (txt && txt.length > 2 && !/quantity|minus|plus|^\$/.test(txt.toLowerCase())) return;
+      try {
+        td.style.setProperty("display", "none", "important");
+        td.style.setProperty("height", "0", "important");
+        td.style.setProperty("overflow", "hidden", "important");
+      } catch (eOpt) {}
+    });
   }
 
   function findPdpHeroInsertParent() {
@@ -4162,6 +6044,12 @@
         bodyHtml +
         "</div>";
       block.setAttribute("data-mc-features-sig", featuresSig);
+    }
+    // If the accordion owns the features block, leave it there — re-showing or
+    // re-anchoring it into the info column would rip it out of the accordion.
+    if (block.closest && block.closest("#mc-pdp-accordion")) {
+      hideNativeVolusionTabPanels();
+      return;
     }
     try {
       block.style.removeProperty("display");
@@ -4360,8 +6248,9 @@
   // native options + the verified filename convention below.
   var SARANONI_COLOR_OPTION_CATEGORY = "23";
   var SARANONI_SIZE_OPTION_CATEGORY = "58";
+  var SARANONI_STYLE_OPTION_CATEGORY = "60";
   var SARANONI_VARIANT_LABEL_PATTERNS =
-    /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color|choose\s+size|selected\s+size|size\s*\*|^size$)/;
+    /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color|choose\s+size|selected\s+size|size\s*\*|^size$|select\s+style|choose\s+style|selected\s+style|style\s*\*|^style$)/;
   var SARANONI_SWATCH_PROBE_DIRS = [
     "/v/vspfiles/swatches/saranoni/",
     "/v/vspfiles/swatches/lush/",
@@ -4461,6 +6350,7 @@
     if (!select || !select.name) return false;
     if (select.classList && select.classList.contains("mc-native-leather")) return false;
     if (!/^SAR/i.test(parseProductCodeFromSelectName(select.name))) return false;
+    if (isSaranoniStyleSelect(select)) return true;
     if (parseOptionCategoryFromSelectName(select.name) === SARANONI_COLOR_OPTION_CATEGORY) return true;
     var labelHay = "";
     try {
@@ -4495,26 +6385,56 @@
     return /(choose\s+size|selected\s+size|size\s*\*|^size$)/.test(labelHay);
   }
 
+  function isSaranoniStyleSelect(select) {
+    if (!select || !select.name) return false;
+    if (select.classList && select.classList.contains("mc-native-leather")) return false;
+    if (!/^SAR/i.test(parseProductCodeFromSelectName(select.name))) return false;
+    if (parseOptionCategoryFromSelectName(select.name) === SARANONI_STYLE_OPTION_CATEGORY) return true;
+    var labelHay = "";
+    try {
+      var row = select.closest ? select.closest("tr") : null;
+      labelHay = String(
+        (select.getAttribute("title") || "") +
+          " " +
+          (row ? row.textContent : "") +
+          " " +
+          (select.options[0] && select.options[0].text ? select.options[0].text : "")
+      ).toLowerCase();
+    } catch (eLbl) {}
+    return /(select\s+style|choose\s+style|selected\s+style|style\s*\*|^style$)/.test(labelHay);
+  }
+
   function getConfiguredVariantAxis(ctx) {
+    if (ctx && ctx.variantAxis === "style") return "style";
     return ctx && ctx.variantAxis === "size" ? "size" : "color";
   }
 
   function configuredVariantChooseLabel(ctx, isSar) {
-    if (getConfiguredVariantAxis(ctx) === "size") {
+    var axis = getConfiguredVariantAxis(ctx);
+    if (axis === "style") {
+      return isSar ? "Choose style: " : "Selected style: ";
+    }
+    if (axis === "size") {
       return isSar ? "Choose size: " : "Selected size: ";
     }
     return isSar ? "Choose color: " : "Selected color: ";
   }
 
   function configuredVariantPickerHeading(ctx) {
-    if (getConfiguredVariantAxis(ctx) === "size") {
+    var axis = getConfiguredVariantAxis(ctx);
+    if (axis === "style") {
+      return "Selected style: ";
+    }
+    if (axis === "size") {
       return "Selected size: ";
     }
     return "Selected color: ";
   }
 
   function configuredVariantPickerPlaceholder(ctx) {
-    return getConfiguredVariantAxis(ctx) === "size" ? "Choose a size" : "Choose a color";
+    var axis = getConfiguredVariantAxis(ctx);
+    if (axis === "style") return "Choose a style";
+    return axis === "size" ? "Choose a size" : "Choose a color";
   }
 
   function buildConfiguredColorThumbCandidates(entry, productCode) {
@@ -4555,13 +6475,14 @@
       if (!isSaranoniColorSelect(sarSel)) continue;
       var sarEntries = buildDataDrivenSaranoniEntries(sarSel, sarPc);
       if (!sarEntries.length) continue;
+      var sarAxis = isSaranoniStyleSelect(sarSel) ? "style" : "color";
       return {
         productCode: sarPc,
         select: sarSel,
         entries: sarEntries,
         score: sarEntries.length,
         dataDriven: true,
-        variantAxis: "color",
+        variantAxis: sarAxis,
       };
     }
     for (i = 0; i < selects.length; i++) {
@@ -4599,13 +6520,14 @@
       if (!isSaranoniColorSelect(sel)) continue;
       var dynEntries = buildDataDrivenSaranoniEntries(sel, pc);
       if (!dynEntries.length) continue;
+      var dynAxis = isSaranoniStyleSelect(sel) ? "style" : "color";
       return {
         productCode: pc,
         select: sel,
         entries: dynEntries,
         score: dynEntries.length,
         dataDriven: true,
-        variantAxis: "color",
+        variantAxis: dynAxis,
       };
     }
     return null;
@@ -4698,7 +6620,14 @@
     }
     if (typeof global.updateBNPLMessaging === "function") {
       try {
-        global.updateBNPLMessaging(Math.round(amt * 100));
+        // Template's own updateBNPLMessaging(newPrice) does
+        // `messagingElement.update({amount: newPrice * 100})` — it ALREADY
+        // converts dollars to cents internally. Passing amt*100 here on top
+        // of that double-converted it (a $179 item became a $17,900
+        // principal), and Klarna/Affirm's own installment math on that
+        // inflated amount produced garbage figures like "$621/month".
+        // Pass plain dollars; the template multiplies by 100 exactly once.
+        global.updateBNPLMessaging(amt);
       } catch (eBnpl) {}
     }
   }
@@ -4914,8 +6843,15 @@
     row.querySelectorAll("td.mc-pdp-media-td").forEach(function (cell) {
       try {
         if (cell.parentNode === row) {
-          // mc-pdp-media-td is itself the flex media column (direct child of the
-          // product row) — size it as the 55% flex item.
+          if (global.innerWidth <= 991) {
+            cell.style.setProperty("display", "block", "important");
+            cell.style.setProperty("flex", "none", "important");
+            cell.style.setProperty("width", "100%", "important");
+            cell.style.setProperty("max-width", "100%", "important");
+            cell.style.setProperty("min-width", "0", "important");
+            cell.style.setProperty("box-sizing", "border-box", "important");
+            return;
+          }
           cell.style.setProperty("display", "block", "important");
           cell.style.setProperty("flex", "1 1 55%", "important");
           cell.style.setProperty("flex-basis", "55%", "important");
@@ -4940,6 +6876,17 @@
     });
     row.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
       try {
+        if (global.innerWidth <= 991) {
+          cell.style.setProperty("display", "block", "important");
+          cell.style.setProperty("flex", "none", "important");
+          cell.style.setProperty("flex-basis", "auto", "important");
+          cell.style.setProperty("flex-shrink", "1", "important");
+          cell.style.setProperty("min-width", "0", "important");
+          cell.style.setProperty("max-width", "100%", "important");
+          cell.style.setProperty("width", "100%", "important");
+          cell.style.setProperty("box-sizing", "border-box", "important");
+          return;
+        }
         cell.style.setProperty("display", "block", "important");
         cell.style.setProperty("flex", "0 0 460px", "important");
         cell.style.setProperty("flex-basis", "460px", "important");
@@ -4966,11 +6913,19 @@
       }
       row.style.setProperty("width", "100%", "important");
       row.style.setProperty("max-width", "100%", "important");
-      row.style.setProperty("display", "flex", "important");
-      row.style.setProperty("flex-wrap", "nowrap", "important");
-      row.style.setProperty("align-items", "flex-start", "important");
-      row.style.setProperty("gap", "0", "important");
-      row.style.setProperty("column-gap", "0", "important");
+      if (global.innerWidth <= 991) {
+        row.style.setProperty("display", "block", "important");
+        row.style.setProperty("flex-wrap", "wrap", "important");
+        row.style.setProperty("align-items", "stretch", "important");
+        row.style.setProperty("gap", "0", "important");
+        row.style.setProperty("column-gap", "0", "important");
+      } else {
+        row.style.setProperty("display", "flex", "important");
+        row.style.setProperty("flex-wrap", "nowrap", "important");
+        row.style.setProperty("align-items", "flex-start", "important");
+        row.style.setProperty("gap", "0", "important");
+        row.style.setProperty("column-gap", "0", "important");
+      }
     } catch (eRow) {}
   }
 
@@ -4982,10 +6937,30 @@
       (global.document.head || global.document.documentElement).appendChild(st);
     }
     st.textContent =
-      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #v65-product-parent tbody:has(>tr.mc-pdp-main-row){display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:0!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 650px!important;flex-basis:650px!important;max-width:650px!important;min-width:0!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;min-width:460px!important;max-width:460px!important;width:460px!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table.colors_pricebox{display:table!important;table-layout:fixed!important}html body.mc-saranoni-pdp td.mc-pdp-media-td{display:table-cell!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;width:460px!important;max-width:460px!important;min-width:460px!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:auto!important;max-width:min(650px,100%)!important;height:auto!important;max-height:none!important;display:block!important;margin-left:0!important;margin-right:auto!important}}" +
+      "@media (max-width:991px){html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:block!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td,html body.mc-saranoni-pdp td.mc-pdp-media-td,html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;flex:none!important;box-sizing:border-box!important}}" +
+      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #v65-product-parent tbody:has(>tr.mc-pdp-main-row){display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;justify-content:center!important;gap:0!important;column-gap:48px!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:0 1 650px!important;flex-basis:650px!important;max-width:650px!important;min-width:0!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;min-width:460px!important;max-width:460px!important;width:460px!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table.colors_pricebox{display:table!important;table-layout:fixed!important}html body.mc-saranoni-pdp td.mc-pdp-media-td{display:table-cell!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;width:460px!important;max-width:460px!important;min-width:460px!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:auto!important;max-width:min(650px,100%)!important;height:auto!important;max-height:none!important;display:block!important;margin-left:0!important;margin-right:0!important}}" +
       "html body.mc-saranoni-pdp td.mc-pdp-options-td>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-unified-pdp-info>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-pdp-options-td>#options_table:not(#mc-pdp-option-block #options_table),html body.mc-saranoni-pdp td.mc-pdp-options-td>table:has(>#options_table):not(:has(#mc-pdp-option-block)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-brand-logo,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-price-stack-host,html body.mc-saranoni-pdp #messaging-element,html body.mc-saranoni-pdp #mc-pdp-accordion,html body.mc-saranoni-pdp #mc-pdp-option-block,html body.mc-saranoni-pdp #mc-pdp-features,html body.mc-saranoni-pdp #mc-pdp-description-below-features,html body.mc-saranoni-pdp #mc-pdp-purchase-stack{order:unset!important}" +
-      "html body.mc-saranoni-pdp #mc-pdp-option-block{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;pointer-events:none!important}";
+      "html body.mc-saranoni-pdp #mc-pdp-option-block{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;pointer-events:none!important}" +
+      "html body.mc-saranoni-pdp .mc-sar-hotfix-picker,html body.mc-saranoni-pdp #mc-sar-hotfix-picker{display:none!important}" +
+      "html body.mc-saranoni-pdp td.mc-pdp-media-td>table>tbody>tr>td+td{display:none!important;width:0!important;padding:0!important;margin:0!important;overflow:hidden!important}" +
+      "html body.mc-saranoni-pdp td.mc-pdp-media-td>table>tbody>tr>td:first-child{width:100%!important;text-align:left!important}" +
+      // The custom info blocks live in td.mc-pdp-options-td, the RIGHT cell of a nested
+      // native options table whose left side holds the redundant Quantity cell (~97px,
+      // duplicated in #mc-pdp-purchase-stack) plus ~80px of colors_pricebox border-chrome
+      // indent. That pushed our content ~193px right inside the info column. Collapse the
+      // quantity cell and zero the indent so content aligns to the column's left edge.
+      "html body.mc-saranoni-pdp td:has(>table>tbody>tr>td.mc-pdp-options-td){padding-left:0!important}" +
+      "html body.mc-saranoni-pdp table:has(>tbody>tr>td.mc-pdp-options-td){width:100%!important;margin-left:0!important;margin-right:0!important}" +
+      "html body.mc-saranoni-pdp tr:has(>td.mc-pdp-options-td)>td:not(.mc-pdp-options-td){width:0!important;max-width:0!important;min-width:0!important;padding:0!important;border:0!important;overflow:hidden!important}" +
+      "html body.mc-saranoni-pdp tr:has(>td.mc-pdp-options-td)>td:not(.mc-pdp-options-td) *{visibility:hidden!important}" +
+      "html body.mc-saranoni-pdp td.mc-pdp-options-td{width:100%!important;padding-left:0!important;margin-left:0!important}" +
+      // Accordion (Product Details / Features) content must wrap to the panel width — the
+      // mahjong descriptions carry wide tables/long text that otherwise overflow the column
+      // and get clipped. Force wrapping + make embedded media/tables responsive.
+      "html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-panel,html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content{overflow-wrap:break-word!important;word-break:break-word!important;white-space:normal!important;max-width:100%!important;box-sizing:border-box!important;overflow-x:auto!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content img,html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content table,html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content iframe{max-width:100%!important;height:auto!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content td,html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content font,html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content span,html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content div,html body.mc-saranoni-pdp #mc-pdp-accordion .mc-acc-content p{max-width:100%!important;white-space:normal!important;word-break:break-word!important}";
   }
 
   function ensureSaranoniSizeVariantCss() {
@@ -5154,16 +7129,116 @@
     syncSaranoniOptionPriceFromVolusion();
   }
 
+  function ensurePeterRabbitBoyGirlColorSelect() {
+    var pc = "";
+    try {
+      var inp =
+        global.document.querySelector('input[name="ProductCode"]') ||
+        global.document.querySelector('input[name="productcode"]');
+      pc = String((inp && inp.value) || global.global_Current_ProductCode || "").trim().toUpperCase();
+    } catch (ePc) {}
+    if (!pc || !PTR_BOY_GIRL_PRODUCT_CODES[pc]) return null;
+    var existing = global.document.querySelector(
+      'select[name="SELECT___' + pc + '___23"], select[name="SELECT___' + pc + '___23"]'
+    );
+    if (!existing) {
+      existing = global.document.querySelector(
+        'select[name*="SELECT___' + pc + '___23"]'
+      );
+    }
+    if (existing && existing.options && existing.options.length > 1) return existing;
+
+    var entries = PDP_CONFIGURED_COLOR_SWATCHS[pc] || [];
+    if (!entries.length) return null;
+
+    var table =
+      global.document.getElementById("options_table") ||
+      global.document.querySelector("#v65-product-parent table[id*='options_table']") ||
+      global.document.querySelector("table[id*='options_table']");
+    if (!table) {
+      table = global.document.createElement("table");
+      table.id = "options_table";
+      table.cellPadding = "3";
+      table.cellSpacing = "0";
+      table.border = "0";
+      var hostCol =
+        global.document.querySelector("td.mc-pdp-options-td, td.mc-unified-pdp-info") ||
+        global.document.getElementById("v65-productdetail-action-wrapper") ||
+        global.document.querySelector("#v65-product-parent");
+      if (hostCol) {
+        try {
+          hostCol.appendChild(table);
+        } catch (eAppend) {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    }
+
+    var sel = existing;
+    if (!sel) {
+      var row = global.document.createElement("tr");
+      var lab = global.document.createElement("td");
+      lab.className = "productoptionname";
+      lab.align = "right";
+      lab.vAlign = "top";
+      lab.textContent = "Color:";
+      var cell = global.document.createElement("td");
+      cell.vAlign = "top";
+      sel = global.document.createElement("select");
+      sel.name = "SELECT___" + pc + "___23";
+      sel.id = "SELECT___" + pc + "___23";
+      sel.title = "Choose Color";
+      sel.setAttribute("data-mc-ptr-boy-girl", "1");
+      var ph = global.document.createElement("option");
+      ph.value = "";
+      ph.textContent = "Choose Color";
+      sel.appendChild(ph);
+      cell.appendChild(sel);
+      row.appendChild(lab);
+      row.appendChild(cell);
+      var tbody = table.tBodies && table.tBodies[0] ? table.tBodies[0] : table;
+      try {
+        tbody.appendChild(row);
+      } catch (eRow) {
+        table.appendChild(row);
+      }
+    }
+
+    var have = {};
+    var oi;
+    for (oi = 0; oi < sel.options.length; oi++) {
+      have[String(sel.options[oi].value || "")] = 1;
+    }
+    entries.forEach(function (entry) {
+      var id = String(entry.optionId || "");
+      if (!id || have[id]) return;
+      var opt = global.document.createElement("option");
+      opt.value = id;
+      opt.textContent = entry.label || id;
+      sel.appendChild(opt);
+      have[id] = 1;
+    });
+    return sel;
+  }
+
   function ensureSaranoniVariantUi() {
     if (!isSaranoniPdpPage()) return;
     ensureSaranoniPdpLayoutCss();
     removeSaranoniColorPickerUi();
+    try {
+      ensurePeterRabbitBoyGirlColorSelect();
+    } catch (ePtr) {}
     var sizeCtx = findSaranoniSizeVariantContext();
     var colorCtx = findConfiguredColorSwatchContext();
     if (colorCtx) ensureConfiguredColorSwatches();
     if (sizeCtx) ensureSaranoniSizeVariantThumbs(sizeCtx);
     if (!colorCtx && !sizeCtx) return;
     hideSaranoniNativeOptionPricing();
+    try {
+      applySaranoniInfoColumnOrder(resolveSaranoniInfoColumn());
+    } catch (eVarOrd) {}
   }
 
   function buildConfiguredColorImageCandidates(fileName, productCode) {
@@ -5828,6 +7903,44 @@
         lab.style.setProperty("overflow", "hidden", "important");
       } catch (eLab) {}
     });
+    // Volusion's native "image swatch" option display renders a SEPARATE <tr>
+    // (no class of its own) full of <a href="javascript:change_option(...)">
+    // <img class="vCSS_img_swatch">, distinct from the <select>'s own row —
+    // hiding the select's row above never touches it, so it kept showing as a
+    // second, stacked, duplicate set of variant thumbnails next to our custom
+    // swatch picker. Hide every row in this table that carries one.
+    table.querySelectorAll("tr").forEach(function (row) {
+      if (row.contains(select)) return;
+      if (!row.querySelector("img.vCSS_img_swatch, a[href^='javascript:change_option']")) return;
+      try {
+        row.style.setProperty("display", "none", "important");
+        row.style.setProperty("visibility", "hidden", "important");
+        row.style.setProperty("height", "0", "important");
+        row.style.setProperty("max-height", "0", "important");
+        row.style.setProperty("overflow", "hidden", "important");
+        row.style.setProperty("margin", "0", "important");
+        row.style.setProperty("padding", "0", "important");
+      } catch (eImgRow) {}
+    });
+    // Native "Select Style"/"Select Color" heading row (tr.vol-option-heading)
+    // sits ABOVE both the select's row and the image-swatch row, no longer
+    // adjacent to either once the image row is hidden, so the previous-
+    // sibling check above never reaches it — it kept floating above the
+    // brand logo as an orphaned heading. Our own wrapper already renders
+    // "Choose style:" — hide the native one outright.
+    table.querySelectorAll("tr.vol-option-heading").forEach(function (row) {
+      var txt = String(row.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      if (!SARANONI_VARIANT_LABEL_PATTERNS.test(txt)) return;
+      try {
+        row.style.setProperty("display", "none", "important");
+        row.style.setProperty("visibility", "hidden", "important");
+        row.style.setProperty("height", "0", "important");
+        row.style.setProperty("max-height", "0", "important");
+        row.style.setProperty("overflow", "hidden", "important");
+        row.style.setProperty("margin", "0", "important");
+        row.style.setProperty("padding", "0", "important");
+      } catch (eHeadRow) {}
+    });
   }
 
   function hideSaranoniNestedStrayMediaCol() {
@@ -5923,6 +8036,8 @@
     }
     st.textContent =
       ".mc-configured-color-swatch-wrapper{display:block!important;width:100%!important;max-width:460px!important;margin:12px 0 0!important}" +
+      "html body.mc-saranoni-pdp .mc-configured-color-swatch-wrapper,html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper{max-width:100%!important}" +
+      "@media (max-width:991px){.mc-configured-color-swatch-wrapper{max-width:100%!important}}" +
       ".mc-configured-color-swatch-label{display:block!important;margin-bottom:8px!important;font:700 12px/1.4 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#444!important}" +
       ".mc-configured-color-swatch-label span{font-weight:600!important;letter-spacing:.03em!important;text-transform:none!important}" +
       ".mc-configured-color-swatches,.mc-saranoni-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
@@ -5938,16 +8053,26 @@
     if (!wrap || !isSaranoniPdpPage()) return;
     wrap.setAttribute("data-mc-saranoni-swatches", "1");
     var col = findPdpHeroColumnTd();
-    if (col && wrap.parentNode !== col) {
+    if (col) {
       try {
-        // Insert after price-stack (index 2 in SARANONI_INFO_COLUMN_ORDER) so
-        // swatches land in the correct position immediately, not at the bottom
-        // of the column where they'd flash below the ATC until finalize runs.
-        var priceAnchor = global.document.getElementById("mc-pdp-price-stack-host");
-        if (priceAnchor && priceAnchor.parentNode === col) {
-          insertNodeAfter(col, priceAnchor, wrap);
+        var acc = global.document.getElementById("mc-pdp-accordion");
+        var purchase = global.document.getElementById("mc-pdp-purchase-stack");
+        var messaging = global.document.getElementById("messaging-element");
+        var before =
+          (acc && acc.parentNode === col && acc) ||
+          (purchase && purchase.parentNode === col && purchase) ||
+          null;
+        if (before) {
+          col.insertBefore(wrap, before);
+        } else if (messaging && messaging.parentNode === col) {
+          insertNodeAfter(col, messaging, wrap);
         } else {
-          col.appendChild(wrap);
+          var priceAnchor = global.document.getElementById("mc-pdp-price-stack-host");
+          if (priceAnchor && priceAnchor.parentNode === col) {
+            insertNodeAfter(col, priceAnchor, wrap);
+          } else if (wrap.parentNode !== col) {
+            col.appendChild(wrap);
+          }
         }
       } catch (eCol) {}
     }
@@ -5957,6 +8082,9 @@
       wrap.style.setProperty("margin", "12px 0 8px 0", "important");
       wrap.style.setProperty("padding", "0", "important");
     } catch (eWrapStyle) {}
+    try {
+      applySaranoniInfoColumnOrder(col || resolveSaranoniInfoColumn());
+    } catch (eOrdMount) {}
   }
 
   function finishDataDrivenSaranoniSwatchProbe(wrap, select, ctx, probeState) {
@@ -6842,7 +8970,7 @@
         unified.style.setProperty("visibility", "visible", "important");
         unified.style.setProperty("opacity", "1", "important");
         unified.style.setProperty("width", "100%", "important");
-        unified.style.setProperty("max-width", "400px", "important");
+        unified.style.setProperty("max-width", global.document.body.classList.contains("mc-steve-silver-altview-pdp") ? "100%" : "400px", "important");
         unified.style.setProperty("height", "auto", "important");
         unified.style.setProperty("max-height", "none", "important");
         unified.style.setProperty("overflow", "visible", "important");
@@ -7008,6 +9136,16 @@
   }
 
   function readRetailAmountForStack() {
+    // Volusion recalculates this node when options with price adjustments are
+    // selected — prefer it, otherwise the stack reads its own displayed price
+    // back (circular) and never updates after a size/option change.
+    var pwo =
+      global.document.getElementById("priceWithOptions") ||
+      global.document.getElementById("priceWithOptionsNoTax");
+    if (pwo) {
+      var pwoAmt = parseMoney(pwo.textContent || "");
+      if (pwoAmt > 0) return pwoAmt;
+    }
     var fromRow = global.document.querySelector(
       ".mc-pdp-retail-row .mc-pdp-stack-retail-amt, .mc-pdp-retail-row .product_list_price, .mc-pdp-retail-row font.product_list_price"
     );
@@ -7031,6 +9169,11 @@
         if (v > best) best = v;
       }
       if (best > 0) return best;
+    }
+    var schemaEl = global.document.querySelector('[itemprop="price"]');
+    if (schemaEl) {
+      var schemaAmt = parseMoney(schemaEl.getAttribute("content") || schemaEl.textContent || "");
+      if (schemaAmt > 0) return schemaAmt;
     }
     return readRetailAmountForSale();
   }
@@ -7207,6 +9350,9 @@
       markSaranoniPdpReady();
     }
     global.__MC_PDP_STACK_FORCE__ = "20260531a";
+    try {
+      placePdpFreeShippingBesidePrice();
+    } catch (eFsAfterStack) {}
   }
 
   global.mcForceRebuildCleanPriceStack = forceRebuildCleanPriceStack;
@@ -7324,26 +9470,65 @@
     });
   }
 
-  // OptionID → image filename for Faux Fur Bean Bag covers.
-  // Source: Volusion product data. Do not infer by position or text guessing.
-  var BB_COVER_IMAGE_BY_OPTION_ID = {
-    "799": "bb-fauxfur-navy.jpg",
-    "801": "bb-fauxfur-pink.jpg",
-    "803": "bb-fauxfur-cow.jpg",
-    "805": "bb-fauxfur-tan.jpg",
-    "807": "bb-fauxfur-white.jpg",
-    "809": "bb-fauxfur-gray.jpg",
-    "811": "bb-fauxfur-black.jpg"
-  };
-  var BB_COVER_IMAGE_BY_LABEL = {
-    navy: "bb-fauxfur-navy.jpg",
-    pink: "bb-fauxfur-pink.jpg",
-    cow: "bb-fauxfur-cow.jpg",
-    tan: "bb-fauxfur-tan.jpg",
-    white: "bb-fauxfur-white.jpg",
-    gray: "bb-fauxfur-gray.jpg",
-    grey: "bb-fauxfur-gray.jpg",
-    black: "bb-fauxfur-black.jpg"
+  // Per-product cover maps. Shared color words (tan/navy) must NOT cross products —
+  // that previously painted faux-fur photos onto Chenille when those labels matched.
+  var BB_COVER_MAPS = {
+    "BB-FAUX-FUR": {
+      byOptionId: {
+        "799": "mc-bb-fauxfur-navy.jpg",
+        "801": "mc-bb-fauxfur-pink.jpg",
+        "803": "mc-bb-fauxfur-cow.jpg",
+        "805": "mc-bb-fauxfur-tan.jpg",
+        "807": "mc-bb-fauxfur-white.jpg",
+        "809": "mc-bb-fauxfur-gray.jpg",
+        "811": "mc-bb-fauxfur-black.jpg"
+      },
+      byLabel: {
+        navy: "mc-bb-fauxfur-navy.jpg",
+        pink: "mc-bb-fauxfur-pink.jpg",
+        cow: "mc-bb-fauxfur-cow.jpg",
+        tan: "mc-bb-fauxfur-tan.jpg",
+        white: "mc-bb-fauxfur-white.jpg",
+        gray: "mc-bb-fauxfur-gray.jpg",
+        grey: "mc-bb-fauxfur-gray.jpg",
+        black: "mc-bb-fauxfur-black.jpg"
+      }
+    },
+    "BB-CHENILLE": {
+      byOptionId: {
+        "787": "bb-chenille-tan.jpg",
+        "788": "bb-chenille-moss.jpg",
+        "789": "bb-chenille-espresso.jpg",
+        "790": "bb-chenille-navy.jpg",
+        "791": "bb-chenille-charcoal.jpg",
+        "821": "bb-chenille-veriperi.jpg",
+        "822": "bb-chenille-rainforest.jpg"
+      },
+      byLabel: {
+        tan: "bb-chenille-tan.jpg",
+        moss: "bb-chenille-moss.jpg",
+        espresso: "bb-chenille-espresso.jpg",
+        navy: "bb-chenille-navy.jpg",
+        charcoal: "bb-chenille-charcoal.jpg",
+        "very peri": "bb-chenille-veriperi.jpg",
+        veriperi: "bb-chenille-veriperi.jpg",
+        rainforest: "bb-chenille-rainforest.jpg"
+      }
+    },
+    "BB-FAUX-LEATHER": {
+      byOptionId: {
+        "817": "bb-fauxLeather-ivory.jpg",
+        "819": "bb-fauxLeather-black.jpg",
+        "813": "bb-fauxLeather-cognac.jpg",
+        "815": "bb-fauxLeather-coffee.jpg"
+      },
+      byLabel: {
+        ivory: "bb-fauxLeather-ivory.jpg",
+        black: "bb-fauxLeather-black.jpg",
+        cognac: "bb-fauxLeather-cognac.jpg",
+        coffee: "bb-fauxLeather-coffee.jpg"
+      }
+    }
   };
 
   function initBeanBagImageSync() {
@@ -7351,6 +9536,23 @@
     if (global.document.documentElement.dataset.mcBbImgBound === "1") return;
     global.document.documentElement.dataset.mcBbImgBound = "1";
     var activeBbImageFile = "";
+
+    function bbProductCode() {
+      try {
+        var input = global.document.querySelector('input[name="ProductCode"]');
+        return String(
+          (global.global_Current_ProductCode || "") || (input && input.value) || ""
+        )
+          .toUpperCase()
+          .trim();
+      } catch (ePc) {
+        return "";
+      }
+    }
+
+    function bbCoverMaps() {
+      return BB_COVER_MAPS[bbProductCode()] || null;
+    }
 
     function normalizeBbLabel(str) {
       return String(str || "")
@@ -7376,40 +9578,90 @@
       var normalized = normalizeBbLabel(label);
       if (!normalized) return "";
       var parts = normalized.split("/");
-      return (parts.length > 1 ? parts[parts.length - 1] : normalized).trim();
+      var fromSlash = (parts.length > 1 ? parts[parts.length - 1] : normalized).trim();
+      if (fromSlash && fromSlash.indexOf(" ") < 0) return fromSlash;
+      /* "Faux Leather Ivory" / "Faux Leather / Ivory" → ivory */
+      var known = [
+        "ivory",
+        "black",
+        "cognac",
+        "coffee",
+        "navy",
+        "pink",
+        "cow",
+        "tan",
+        "white",
+        "gray",
+        "grey",
+        "moss",
+        "espresso",
+        "charcoal",
+        "rainforest",
+        "veriperi",
+        "very peri"
+      ];
+      var ki;
+      for (ki = 0; ki < known.length; ki++) {
+        var key = known[ki];
+        if (normalized === key || normalized.indexOf(" " + key) >= 0 || normalized.slice(-key.length) === key) {
+          return key;
+        }
+      }
+      return fromSlash;
     }
 
     function bbImageForSwatchLabel(label) {
+      var maps = bbCoverMaps();
+      if (!maps) return null;
       var colorKey = bbColorFromSwatchLabel(label);
-      return colorKey ? BB_COVER_IMAGE_BY_LABEL[colorKey] || null : null;
+      return colorKey ? maps.byLabel[colorKey] || null : null;
     }
 
     function applyBbImage(imgFile) {
       var mainImg = global.document.getElementById("product_photo");
-      if (!mainImg) return;
+      if (!mainImg || !imgFile) return;
       activeBbImageFile = imgFile;
-      var targetSrc = "/v/vspfiles/images/" + imgFile;
+      /*
+        Cover images: prefer /photos/ (served). Fall back to /images/ because
+        the product HTML imageMap was written for that folder.
+      */
+      var photoSrc = "/v/vspfiles/photos/" + imgFile;
+      var imagesSrc = "/v/vspfiles/images/" + imgFile;
+      var targetSrc = photoSrc;
+      try {
+        global.__MC_BB_ACTIVE_COVER_SRC__ = targetSrc;
+        global.__MC_BB_ACTIVE_COVER_FILE__ = imgFile;
+      } catch (eStore) {}
       try {
         if (mainImg.getAttribute("src") !== targetSrc) mainImg.src = targetSrc;
-        // A stale srcset lets the browser re-pick the previous cover; remove it.
         if (mainImg.hasAttribute("srcset")) mainImg.removeAttribute("srcset");
         mainImg.style.setProperty("opacity", "1", "important");
+        mainImg.onerror = function () {
+          try {
+            if (mainImg.getAttribute("data-mc-bb-img-fallback") === "1") return;
+            mainImg.setAttribute("data-mc-bb-img-fallback", "1");
+            mainImg.src = imagesSrc;
+            global.__MC_BB_ACTIVE_COVER_SRC__ = imagesSrc;
+            ["product_photo_zoom_url", "product_photo_zoom_url2"].forEach(function (id) {
+              var lnk = global.document.getElementById(id);
+              if (lnk) lnk.href = imagesSrc;
+            });
+          } catch (eFb) {}
+        };
       } catch (eSet) {}
-      // Point both Volusion zoom-link variants at the selected cover full image.
       ["product_photo_zoom_url", "product_photo_zoom_url2"].forEach(function (id) {
         var lnk = global.document.getElementById(id);
         if (lnk) {
-          try { lnk.href = targetSrc; } catch (eZm) {}
+          try {
+            lnk.href = targetSrc;
+          } catch (eZm) {}
         }
       });
-      // Re-register the new image with Volusion's zoom plugin if present, so the
-      // magnifier shows the chosen cover instead of the original photo.
       try {
         if (global.vZoom && typeof global.vZoom.add === "function") {
           global.vZoom.add(mainImg, targetSrc);
         }
       } catch (eVz) {}
-      // Clear any "selected" styling on alternate thumbnails so none conflicts.
       try {
         global.document
           .querySelectorAll("#altviews a, #altviews img, a[id^='alternate_product_photo']")
@@ -7422,18 +9674,24 @@
     function reassertBbImageOnce(imgFile) {
       var mainImg = global.document.getElementById("product_photo");
       if (!mainImg) return;
-      if (mainImg && typeof global.MutationObserver === "function") {
+      if (typeof global.MutationObserver === "function") {
         var bbObs = new global.MutationObserver(function (mutations, obs) {
           var src = mainImg.getAttribute("src") || "";
-          if (src.indexOf("bb-fauxfur") === -1) {
+          if (src.indexOf(imgFile) === -1) {
             applyBbImage(imgFile);
           }
           obs.disconnect();
         });
         bbObs.observe(mainImg, { attributes: true, attributeFilter: ["src"] });
-        global.setTimeout(function () { try { bbObs.disconnect(); } catch (e) {} }, 2000);
+        global.setTimeout(function () {
+          try {
+            bbObs.disconnect();
+          } catch (e) {}
+        }, 2000);
       } else {
-        global.setTimeout(function () { applyBbImage(imgFile); }, 600);
+        global.setTimeout(function () {
+          applyBbImage(imgFile);
+        }, 600);
       }
     }
 
@@ -7446,6 +9704,7 @@
     }
 
     function selectCoverByLabel(label) {
+      var maps = bbCoverMaps();
       var target = bbColorFromSwatchLabel(label) || normalizeBbLabel(label);
       var coverSel =
         global.document.querySelector("#options_table select[name*='___4']") ||
@@ -7468,75 +9727,90 @@
           coverSel.selectedIndex = foundIndex;
           coverSel.value = coverSel.options[foundIndex].value;
           optVal = String(coverSel.options[foundIndex].value || "");
-          imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optVal] || imgFile;
+          if (maps && maps.byOptionId[optVal]) imgFile = maps.byOptionId[optVal];
         }
       }
       return { coverSel: coverSel, imgFile: imgFile, optVal: optVal };
     }
 
-    // Capture phase so this runs before legacy inline swatch scripts baked into product HTML.
-    global.document.addEventListener("click", function (eBb) {
-      var swatch = eBb.target && eBb.target.closest ? eBb.target.closest(".beanbag-swatch") : null;
-      if (!swatch) return;
-      var label = beanBagSwatchLabel(swatch);
-      var selected = selectCoverByLabel(label);
-      var coverSel = selected.coverSel;
-      var imgFile = selected.imgFile;
-      var optVal = selected.optVal;
+    // Capture phase so this runs before legacy inline swatch scripts baked into product HTML
+    // (those still point at the deleted /vspfiles/images/ path).
+    global.document.addEventListener(
+      "click",
+      function (eBb) {
+        var swatch = eBb.target && eBb.target.closest ? eBb.target.closest(".beanbag-swatch") : null;
+        if (!swatch) return;
+        var label = beanBagSwatchLabel(swatch);
+        var selected = selectCoverByLabel(label);
+        var coverSel = selected.coverSel;
+        var imgFile = selected.imgFile;
+        var optVal = selected.optVal;
 
-      if (!imgFile) return;
-
-      if (coverSel && optVal) {
-        if (typeof global.change_option === "function") {
+        if (coverSel && optVal) {
+          if (typeof global.change_option === "function") {
+            try {
+              global.change_option(coverSel.name, optVal);
+            } catch (eCo) {}
+          }
+          if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
+            try {
+              global.AutoUpdatePriceWithSelectedOptions(optVal, 4);
+            } catch (eAu) {}
+          }
           try {
-            global.change_option(coverSel.name, optVal);
-          } catch (eCo) {}
-        }
-        if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
+            coverSel.dispatchEvent(new Event("input", { bubbles: true }));
+          } catch (eIn) {}
           try {
-            global.AutoUpdatePriceWithSelectedOptions(optVal, 4);
-          } catch (eAu) {}
+            coverSel.dispatchEvent(new Event("change", { bubbles: true }));
+          } catch (eCh) {}
         }
-        try {
-          coverSel.dispatchEvent(new Event("input", { bubbles: true }));
-        } catch (eIn) {}
-        try {
-          coverSel.dispatchEvent(new Event("change", { bubbles: true }));
-        } catch (eCh) {}
-      }
 
-      var labelSpan = global.document.getElementById("beanbag-selected-cover-name");
-      if (labelSpan) {
+        var labelSpan = global.document.getElementById("beanbag-selected-cover-name");
+        if (labelSpan) {
+          try {
+            labelSpan.textContent = label;
+          } catch (eLbl) {}
+        }
+
+        global.document.querySelectorAll(".beanbag-swatch").forEach(function (node) {
+          try {
+            node.classList.remove("active");
+          } catch (eRm) {}
+        });
         try {
-          labelSpan.textContent = label;
-        } catch (eLbl) {}
-      }
+          swatch.classList.add("active");
+        } catch (eAct) {}
 
-      global.document.querySelectorAll(".beanbag-swatch").forEach(function (node) {
+        if (!imgFile) return;
         try {
-          node.classList.remove("active");
-        } catch (eRm) {}
-      });
-      try {
-        swatch.classList.add("active");
-      } catch (eAct) {}
+          eBb.preventDefault();
+          eBb.stopPropagation();
+        } catch (eStop) {}
+        applyBbImage(imgFile);
+        reassertBbImageOnce(imgFile);
+        scheduleBbImageLock(imgFile);
+      },
+      true
+    );
 
-      applyBbImage(imgFile);
-      reassertBbImageOnce(imgFile);
-      scheduleBbImageLock(imgFile);
-    }, true);
-
-    global.document.addEventListener("change", function (eBbChange) {
-      var sel = eBbChange.target;
-      if (!sel || !sel.matches || !sel.matches("select")) return;
-      if (!sel.matches("#options_table select[name*='___4'], select[name*='___4']")) return;
-      var opt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
-      var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[String(sel.value || "")] || bbImageForSwatchLabel(opt ? opt.text : "");
-      if (!imgFile) return;
-      applyBbImage(imgFile);
-      reassertBbImageOnce(imgFile);
-      scheduleBbImageLock(imgFile);
-    }, true);
+    global.document.addEventListener(
+      "change",
+      function (eBbChange) {
+        var sel = eBbChange.target;
+        if (!sel || !sel.matches || !sel.matches("select")) return;
+        if (!sel.matches("#options_table select[name*='___4'], select[name*='___4']")) return;
+        var maps = bbCoverMaps();
+        var opt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
+        var imgFile =
+          (maps && maps.byOptionId[String(sel.value || "")]) ||
+          bbImageForSwatchLabel(opt ? opt.text : "");
+        if (!imgFile) return;
+        applyBbImage(imgFile);
+        reassertBbImageOnce(imgFile);
+        scheduleBbImageLock(imgFile);
+      },
+      true
+    );
   }
 
   function initSaranoniImageSync() {
@@ -7779,21 +10053,258 @@
     } catch (eCls) {}
   }
 
+  function hideBeanBagPriceboxRemnants() {
+    if (!isBeanBagPdpPage()) return;
+    var root = global.document.getElementById("content_area") || global.document;
+    function hideLeafRowOrSelf(el) {
+      var row = el.closest ? el.closest("tr") : null;
+      var target =
+        row &&
+        !row.querySelector(
+          "table, select, #mc-pdp-price-stack-host, #mc-pdp-purchase-stack, #mc-pdp-brand-logo, img.vCSS_img_mfg_logo, img[src*='manufacturers' i]"
+        )
+          ? row
+          : el;
+      try {
+        target.style.setProperty("display", "none", "important");
+        target.setAttribute("aria-hidden", "true");
+      } catch (eHideRem) {}
+    }
+    // Native "PRICE" pricebox header label.
+    root.querySelectorAll("font.colors_text, font.text").forEach(function (el) {
+      if (/^PRICE:?$/i.test(String(el.textContent || "").replace(/\s+/g, " ").trim())) {
+        hideLeafRowOrSelf(el);
+      }
+    });
+    // Native free-shipping qualifier block — keep visible; placed beside price elsewhere.
+    // (Previously hidden; store wants Volusion free-ship icon on qualifying products.)
+    // Decorative pricebox border lines.
+    root.querySelectorAll("td[background*='PBox_Border'], img[src*='PBox_Border']").forEach(hideLeafRowOrSelf);
+    // Native "Larger Photo" zoom link under the hero image.
+    root.querySelectorAll("a").forEach(function (a) {
+      if (!/larger\s*photo/i.test(String(a.textContent || ""))) return;
+      if (a.querySelector("#product_photo")) return;
+      try {
+        a.style.setProperty("display", "none", "important");
+        a.setAttribute("aria-hidden", "true");
+      } catch (eZoomLink) {}
+    });
+  }
+
+  /** Move Volusion free-shipping icon to the right of the price stack (no layout jump). */
+  function placePdpFreeShippingBesidePrice() {
+    try {
+      if (!isProductPdp()) return;
+      var img =
+        global.document.querySelector("img.vCSS_img_icon_free_shipping") ||
+        global.document.querySelector("img[src*='Icon_FreeShipping' i]") ||
+        global.document.querySelector("img[alt='Free Shipping' i]");
+      if (!img) return;
+
+      /* Prefer the readable full badge over the tiny "box" Small.gif. */
+      try {
+        var src = String(img.getAttribute("src") || "");
+        if (/Icon_FreeShipping_Small\.gif/i.test(src)) {
+          img.setAttribute(
+            "src",
+            src.replace(/Icon_FreeShipping_Small\.gif/i, "Icon_FreeShipping.gif")
+          );
+        }
+      } catch (eSrc) {}
+
+      var node =
+        (img.closest &&
+          img.closest("a[href*='FreeShipping'], a[onclick*='FreeShipping'], a[title*='Free Shipping' i]")) ||
+        img;
+
+      var priceHost = global.document.getElementById("mc-pdp-price-stack-host");
+      if (!priceHost) {
+        priceHost =
+          global.document.querySelector(".mc-pdp-retail-row") ||
+          global.document.querySelector(
+            "#v65-product-parent .product_productprice, #v65-product-parent .product_saleprice, #content_area .product_productprice"
+          );
+      }
+      if (!priceHost) return;
+
+      var wrap = priceHost.parentNode && priceHost.parentNode.classList.contains("mc-pdp-price-with-freeship")
+        ? priceHost.parentNode
+        : priceHost.closest
+          ? priceHost.closest(".mc-pdp-price-with-freeship")
+          : null;
+      if (!wrap) {
+        wrap = global.document.createElement("div");
+        wrap.className = "mc-pdp-price-with-freeship";
+        if (!priceHost.parentNode) return;
+        priceHost.parentNode.insertBefore(wrap, priceHost);
+        wrap.appendChild(priceHost);
+      } else if (priceHost.parentNode !== wrap) {
+        wrap.insertBefore(priceHost, wrap.firstChild);
+      }
+
+      var slot = wrap.querySelector(".mc-pdp-freeship-slot");
+      if (!slot) {
+        slot = global.document.createElement("span");
+        slot.className = "mc-pdp-freeship-slot";
+        wrap.appendChild(slot);
+      }
+      if (node.parentNode !== slot) slot.appendChild(node);
+
+      try {
+        wrap.style.setProperty("display", "flex", "important");
+        slot.style.setProperty("display", "inline-flex", "important");
+        slot.style.setProperty("visibility", "visible", "important");
+        node.style.setProperty("display", "inline-flex", "important");
+        node.style.setProperty("visibility", "visible", "important");
+        img.style.setProperty("display", "inline-block", "important");
+        img.style.setProperty("visibility", "visible", "important");
+        img.style.setProperty("max-height", "28px", "important");
+        img.style.setProperty("width", "auto", "important");
+        /* Unhide any ancestor that BB chrome may have collapsed. */
+        var p = slot.parentNode;
+        var hops = 0;
+        while (p && p !== global.document.body && hops < 6) {
+          if (p.style && /none/i.test(p.style.display || "")) {
+            p.style.removeProperty("display");
+          }
+          p = p.parentNode;
+          hops++;
+        }
+      } catch (eShow) {}
+    } catch (eFs) {}
+  }
+
+  function schedulePdpFreeShippingIcon() {
+    if (!isProductPdp()) return;
+    function run() {
+      try {
+        placePdpFreeShippingBesidePrice();
+      } catch (eRun) {}
+    }
+    run();
+    [100, 400, 900, 2000, 4500, 9000].forEach(function (ms) {
+      global.setTimeout(run, ms);
+    });
+  }
+
+  function repairBeanBagSwatchImageSrcs() {
+    if (!isBeanBagPdpPage()) return;
+    global.document.querySelectorAll("img.beanbag-swatch").forEach(function (img) {
+      var raw = String(img.getAttribute("src") || "");
+      var base = raw.split("?")[0];
+      if (!base) return;
+
+      var m = base.match(/\/swatches\/corduroy\/([a-z0-9-]+\.jpg)$/i);
+      if (m) {
+        var file = m[1];
+        /*
+          Faux leather: keep the author's /swatches/corduroy/fauxLeather-*.jpg
+          paths. Do NOT remap to /photos/mc-swatch-* (that overwrote the real
+          swatches with generated placeholders).
+        */
+        if (/^fauxLeather-/i.test(file)) {
+          if (img.getAttribute("data-mc-swatch-mapped") === "1") {
+            img.removeAttribute("data-mc-swatch-mapped");
+            img.setAttribute("src", "/v/vspfiles/swatches/corduroy/" + file);
+          }
+          return;
+        }
+        /* Chenille / faux-fur etc.: corduroy often 404s; mirror in /photos/mc-swatch-*. */
+        var mapped = "/v/vspfiles/photos/mc-swatch-" + file;
+        if (raw.indexOf("/photos/mc-swatch-") < 0) {
+          img.setAttribute("src", mapped);
+          img.setAttribute("data-mc-swatch-mapped", "1");
+          img.onerror = function () {
+            try {
+              if (img.getAttribute("data-mc-swatch-fallback") === "1") return;
+              img.setAttribute("data-mc-swatch-fallback", "1");
+              img.src = "/v/vspfiles/swatches/corduroy/" + file + "?mcbust=" + Date.now();
+            } catch (eFb) {}
+          };
+          return;
+        }
+        base = mapped;
+      }
+
+      if (!img.complete || img.naturalWidth > 0) return;
+      var retries = parseInt(img.getAttribute("data-mc-swatch-retry") || "0", 10);
+      if (retries >= 4) return;
+      img.setAttribute("data-mc-swatch-retry", String(retries + 1));
+      img.src = base + (base.indexOf("?") >= 0 ? "&" : "?") + "mcbust=" + Date.now();
+    });
+  }
+
+  function bindBeanBagPriceSync() {
+    if (!isBeanBagPdpPage()) return;
+    if (global.document.documentElement.dataset.mcBbPriceSync === "1") return;
+    global.document.documentElement.dataset.mcBbPriceSync = "1";
+    // Volusion recalculates the (hidden) native price after an option change;
+    // re-read it into the rebuilt price stack once the recalc has landed.
+    global.document.addEventListener(
+      "change",
+      function (eChg) {
+        var sel = eChg.target && eChg.target.tagName === "SELECT" ? eChg.target : null;
+        if (!sel) return;
+        if (!sel.closest("#mc-bb-size-section, #options_table, td.mc-pdp-options-td, td.mc-unified-pdp-info")) return;
+        [300, 800, 1600].forEach(function (ms) {
+          global.setTimeout(function () {
+            try {
+              forceRebuildCleanPriceStack();
+            } catch (eBbPrice) {}
+          }, ms);
+        });
+      },
+      true
+    );
+  }
+
   function scheduleBeanBagOptionRepair() {
     if (!isBeanBagPdpPage()) return;
     if (global.__MC_BB_OPTION_REPAIR_VER__ === VERSION) return;
     global.__MC_BB_OPTION_REPAIR_VER__ = VERSION;
-    [120, 600].forEach(function (ms) {
+    bindBeanBagPriceSync();
+    try {
+      repairBeanBagSwatchImageSrcs();
+      placePdpFreeShippingBesidePrice();
+    } catch (eBbEager) {}
+    [50, 120, 600].forEach(function (ms) {
       global.setTimeout(function () {
         try {
           initBeanBagImageSync();
           ensureBeanBagSizeRow();
           markBeanBagCoverSwatchesReady();
+          ensureBeanBagBrandLogo();
+          ensureSaranoniPdpAccordion();
           appendBeanBagInfoColumnOrder();
           hideBeanBagNativeOptionsTable();
+          hideBeanBagPriceboxRemnants();
+          placePdpFreeShippingBesidePrice();
+          repairBeanBagSwatchImageSrcs();
           sanitizeBeanBagAltviews();
           applyPdpMainImageCap();
         } catch (eBbRepair) {}
+      }, ms);
+    });
+    [400, 800, 2500, 6000, 12000].forEach(function (ms) {
+      global.setTimeout(function () {
+        try {
+          repairBeanBagSwatchImageSrcs();
+          placePdpFreeShippingBesidePrice();
+        } catch (eBbSw) {}
+      }, ms);
+    });
+    // Late settling passes: competing repair loops (price stack, qty, MO-driven
+    // reasserts) can disturb the column after the initial passes — re-assert
+    // the final arrangement until the page is quiet.
+    [1500, 3500, 8000, 15000].forEach(function (ms) {
+      global.setTimeout(function () {
+        try {
+          ensureBeanBagBrandLogo();
+          ensureSaranoniPdpAccordion();
+          appendBeanBagInfoColumnOrder();
+          hideBeanBagPriceboxRemnants();
+          placePdpFreeShippingBesidePrice();
+        } catch (eBbLate) {}
       }, ms);
     });
   }
@@ -7803,23 +10314,47 @@
     if (!shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
     if (global.__MC_SS_LAYOUT_REPAIR_VER__ === VERSION) return;
     global.__MC_SS_LAYOUT_REPAIR_VER__ = VERSION;
-    [120, 700].forEach(function (ms) {
-      global.setTimeout(function () {
-        try {
-          prepareDeferredUnifiedPdpHero();
-          hideNativeVolusionTabPanels();
-          mountDescriptionBelowFeatures();
-          if (isSteveSilverPdpPage()) {
-            appendSteveSilverInfoColumnOrder();
-          }
-          syncPdpDescriptionViewMore();
-          ensureUnifiedPdpLayout();
-          if (typeof global.mcNormalizePdpLayout === "function") {
-            global.mcNormalizePdpLayout();
-          }
-        } catch (eSsRepair) {}
-      }, ms);
-    });
+    function ssLayoutAttempt() {
+      try {
+        prepareDeferredUnifiedPdpHero();
+        hideNativeVolusionTabPanels();
+        mountDescriptionBelowFeatures();
+        if (isSteveSilverPdpPage()) {
+          appendSteveSilverInfoColumnOrder();
+          ensureSteveSilverBnplAfterPrice(
+            global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
+              findPdpHeroColumnTd()
+          );
+        }
+        syncPdpDescriptionViewMore();
+        ensureUnifiedPdpLayout();
+        if (typeof global.mcNormalizePdpLayout === "function") {
+          global.mcNormalizePdpLayout();
+        }
+      } catch (eSsRepair) {}
+    }
+    // The old fixed [120, 700]ms schedule missed slow/disrupted loads: on some
+    // products (e.g. the Luna power sofas) Volusion's template.min.js throws
+    // during its own PDP init, which delays the product DOM past 700ms — so
+    // the unified layout never ran and those pages rendered with NO accordion,
+    // an overflowing title, and a cut-off Add-to-Cart (intermittently, which is
+    // why "the fixes didn't apply to all products"). Poll instead: retry every
+    // 300ms until the layout is actually applied (body.mc-pdp-unified-ready),
+    // then stop. Already-good pages settle in 1-2 ticks and stop; nothing
+    // re-arranges once ready, so no flicker.
+    ssLayoutAttempt();
+    var ssAttempts = 0;
+    var ssIv = global.setInterval(function () {
+      ssAttempts++;
+      var ready =
+        global.document.body &&
+        global.document.body.classList.contains("mc-pdp-unified-ready");
+      if (ready || ssAttempts >= 40) {
+        global.clearInterval(ssIv);
+        return;
+      }
+      ssLayoutAttempt();
+    }, 300);
   }
 
   function installPdpStackApiGuards() {
@@ -8357,6 +10892,9 @@
     try {
       var body = global.document.body;
       if (!body) return;
+      if (isTmhPdpPage()) {
+        body.classList.add("mc-tmh-pdp");
+      }
       if (isSaranoniPdpPage()) {
         body.classList.add("mc-saranoni-pdp");
         if (!body.classList.contains("mc-saranoni-pdp-ready")) {
@@ -8788,6 +11326,9 @@
     if (isBeanBagPdpPage()) {
       ensureBeanBagPurchaseStack();
       appendBeanBagInfoColumnOrder();
+      hideBeanBagBnpl();
+      ensureBeanBagMobileColumnWidth();
+      armBeanBagMobileLayoutGuard();
     } else if (isSaranoniPdpPage()) {
       appendSaranoniInfoColumnOrder();
       finalizeSaranoniInfoColumnOrder();
@@ -8865,6 +11406,9 @@
         appendBeanBagInfoColumnOrder();
         styleBeanBagPriceAtc();
         ensureBeanBagReturnLink();
+        hideBeanBagBnpl();
+        ensureBeanBagMobileColumnWidth();
+        armBeanBagMobileLayoutGuard();
       } else if (isSaranoniPdpPage()) {
         scheduleSaranoniLayoutPass(true);
         applySoftGoodsColumnPurchaseStackLayout(
@@ -8925,6 +11469,10 @@
       hideNativeVolusionTabPanels();
       if (isSteveSilverPdpPage()) {
         appendSteveSilverInfoColumnOrder();
+        ensureSteveSilverBnplAfterPrice(
+          global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
+            findPdpHeroColumnTd()
+        );
       }
       syncPdpDescriptionViewMore();
       applyPdpPriceTypography();
@@ -8970,7 +11518,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260625ssaccordion1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260701sarfix17&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -9103,12 +11651,35 @@
       scheduleBeanBagOptionRepair();
       scheduleSaranoniColorRepair();
       scheduleSteveSilverLayoutRepair();
+      schedulePdpFreeShippingIcon();
       installDescriptionViewMoreResize();
       syncPdpDescriptionViewMore();
       if (isSaranoniPdpPage()) {
         try {
-          finalizeSaranoniInfoColumnOrder();
+          if (
+            !global.document.body ||
+            !global.document.body.classList.contains("mc-saranoni-pdp-ready")
+          ) {
+            finalizeSaranoniInfoColumnOrder();
+          }
+          ensureSaranoniRelatedItemsVisible();
         } catch (eSarFinal) {}
+      }
+      if (isSteveSilverPdpPage()) {
+        try {
+          ensureSteveSilverBnplAfterPrice(
+            global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
+              findPdpHeroColumnTd()
+          );
+        } catch (eSsBnpl) {}
+        try {
+          repairPdpRelatedRailLayout();
+        } catch (eSsRel) {}
+      }
+      if (isProductPdp()) {
+        try {
+          ensurePdpRelatedItemsVisible();
+        } catch (eRelVis) {}
       }
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
         prepareDeferredUnifiedPdpHero();
@@ -9140,8 +11711,14 @@
     } catch (eBind) {}
   }
 
-  if (!global.__MC_PDP_AUTH_CTA_CAPTURE__) {
-    global.__MC_PDP_AUTH_CTA_CAPTURE__ = true;
+  // NOTE: template_266.html bakes its OWN inline login/signup-only click
+  // listener that (coincidentally) claims this exact same flag name for an
+  // unrelated purpose — it runs before this external file loads (inline
+  // scripts parse first), wins the flag, and silently prevents OUR listener
+  // (which also owns swatch clicks) from ever attaching. Use a name that
+  // can't collide with the DB-served template's copy.
+  if (!global.__MC_PDP_AUTH_CTA_CAPTURE_V2__) {
+    global.__MC_PDP_AUTH_CTA_CAPTURE_V2__ = true;
     global.document.addEventListener(
       "click",
       function (e) {
@@ -9220,11 +11797,30 @@
   if (typeof MutationObserver !== "undefined") {
     var scheduled = false;
     var moLastRun = 0;
-    var mo = new MutationObserver(function () {
+    var mo = new MutationObserver(function (mutations) {
       if (isStalePdpAuthRun()) return;
       if (isUnifiedPdpReady()) return;
       if (scheduled) return;
       if (global.__MC_PDP_MO_PAUSE__) return;
+      // Ignore mutations confined entirely to #messaging-element. Klarna/
+      // Affirm mount into this node and keep re-rendering themselves inside
+      // it (currency changes, cart total changes, etc.) — none of that is
+      // something our layout patch needs to react to, and reacting anyway
+      // was the other half of a feedback loop: BNPL mutates -> we react ->
+      // appendSteveSilverInfoColumnOrder() re-appends #messaging-element ->
+      // that reappend is itself a mutation -> observer fires again.
+      var msgEl = global.document.getElementById("messaging-element");
+      if (msgEl && mutations.length) {
+        var allInsideMessaging = true;
+        for (var mi = 0; mi < mutations.length; mi++) {
+          var t = mutations[mi].target;
+          if (t !== msgEl && !msgEl.contains(t)) {
+            allInsideMessaging = false;
+            break;
+          }
+        }
+        if (allInsideMessaging) return;
+      }
       // Throttle on every page (not just sectional). Once the hero is built,
       // third-party widgets (Klarna/Affirm) keep mutating the DOM; reacting to
       // each one re-runs the full patch and causes a visible reflow flash.
@@ -10200,4 +12796,736 @@ try {
   if (g.document && g.document.addEventListener) {
     g.document.addEventListener("DOMContentLoaded", killLegacyStabilizer);
   }
+})(window);
+
+/* ============================================================================
+ * MC_MAHJONG_HOUSE_PDP_PARITY_20260630sarrepair27
+ * The live site routes mahjong (TMH-*) products through a separate
+ * "mc-mahjong-house-pdp" layout that is NOT the mc-saranoni-pdp path, so none
+ * of the Saranoni layout CSS reaches it. That layout:
+ *   - splits the info area into TWO narrow side-by-side cells (content ~262px
+ *     beside the native qty/ATC cell), squishing the accordion (~230px) so the
+ *     Product Details description is cut off, and floating ATC to the top-right;
+ *   - renders no price line;
+ *   - leaves native Volusion PBox_Border separator lines; and
+ *   - mounts the "RETURN TO ..." link in a 0-width container, so the text wraps
+ *     one character per line (~300px tall) — the oversized gap under the menu.
+ * This module is scoped STRICTLY to body.mc-mahjong-house-pdp and is purely
+ * additive (CSS + a price <div>); it touches no other PDP type. It brings the
+ * mahjong PDP to visual parity with the Saranoni layout: one stacked ~460px
+ * info column (logo -> title -> price -> Klarna -> accordion -> qty -> ATC).
+ * Deployable via FTP overwrite of mc-pdp-auth-cta-fix-v21.js (no template edit).
+ * ========================================================================== */
+(function (global) {
+  "use strict";
+  var doc = global.document;
+  if (!doc) return;
+  var MJ_PARITY_START = Date.now();
+
+  function isMahjongHousePdp() {
+    return !!(doc.body && doc.body.classList.contains("mc-mahjong-house-pdp"));
+  }
+
+  function ensureMahjongParityCss() {
+    var st = doc.getElementById("mc-mahjong-house-parity-css");
+    if (!st) {
+      st = doc.createElement("style");
+      st.id = "mc-mahjong-house-parity-css";
+      (doc.head || doc.documentElement).appendChild(st);
+    }
+    st.textContent =
+      // Center brand logo to match Steve Silver layout
+      "html body.mc-mahjong-house-pdp #mc-pdp-brand-logo{display:flex!important;justify-content:center!important;align-items:center!important;text-align:center!important;width:100%!important;margin:0 auto 14px auto!important}" +
+      /* Main product image: 650px wide (was visually small / capped). */
+      "html body.mc-mahjong-house-pdp img#product_photo," +
+      "html body.mc-mahjong-house-pdp a#product_photo_zoom_url," +
+      "html body.mc-mahjong-house-pdp a#product_photo_zoom_url2{" +
+      "width:650px!important;max-width:min(650px,100%)!important;min-width:0!important;" +
+      "height:auto!important;display:block!important;box-sizing:border-box!important}" +
+      "html body.mc-mahjong-house-pdp td.mc-pdp-media-td," +
+      "html body.mc-mahjong-house-pdp #product_photo_td," +
+      "html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{" +
+      "max-width:650px!important}" +
+      "@media (min-width:992px){" +
+      "html body.mc-mahjong-house-pdp tr.mc-pdp-main-row>td:first-child," +
+      "html body.mc-mahjong-house-pdp tr.mc-pdp-main-row>td.mc-pdp-media-td," +
+      "html body.mc-mahjong-house-pdp tr.mc-unified-pdp-row>td.mc-unified-pdp-media{" +
+      "flex:0 1 650px!important;flex-basis:650px!important;max-width:650px!important;min-width:0!important}" +
+      "}" +
+      // Collapse the 2-cell nested info table into one stacked ~460px column so
+      // the content cell (logo/title/price/Klarna/accordion) and the native
+      // qty/ATC cell sit on top of each other, matching the Saranoni PDP.
+      "html body.mc-mahjong-house-pdp td[data-mc-mj-hosttd] table[data-mc-mj-info]," +
+      "html body.mc-mahjong-house-pdp td[data-mc-mj-hosttd] table[data-mc-mj-info]>tbody{display:block!important;width:460px!important;max-width:460px!important}" +
+      "html body.mc-mahjong-house-pdp table[data-mc-mj-info]>tbody>tr{display:block!important;width:100%!important}" +
+      "html body.mc-mahjong-house-pdp table[data-mc-mj-info]>tbody>tr>td{display:block!important;width:100%!important;max-width:460px!important;padding:0!important;text-align:left!important}" +
+      "html body.mc-mahjong-house-pdp #mc-pdp-accordion{width:100%!important;max-width:460px!important}" +
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options{margin-top:14px!important}" +
+      // Stack Quantity above the ADD TO CART button. The native options cell
+      // lays qty and ATC side-by-side in one table row (qty td first, then
+      // td.mc-atc-row); making that row's cells block-level stacks them.
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options>table," +
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options>table>tbody," +
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options>table>tbody>tr{display:block!important;width:100%!important}" +
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options>table>tbody>tr>td{display:block!important;width:100%!important}" +
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options td.mc-atc-row{margin-top:12px!important}" +
+      // Center the ADD TO CART label. The info-column left-align leaks down into
+      // the options cell; force the button (and its wrap/cell) back to center.
+      // Also enforced inline in runMahjongParity() to win any specificity war.
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options td.mc-atc-row," +
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options .mc-atc-button-wrap{text-align:center!important}" +
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options input[name='btnaddtocart']," +
+      "html body.mc-mahjong-house-pdp td.v65-productdetail-options button[name='btnaddtocart']{display:block!important;margin:0 auto!important;text-align:center!important}" +
+      // Injected price line (read from schema [itemprop=price]).
+      "html body.mc-mahjong-house-pdp #mc-mj-price{font:600 22px/1.2 Inter,Arial,sans-serif!important;color:#111!important;margin:10px 0 6px 0!important;display:block!important}" +
+      // Hide native Volusion PBox decorative separator lines + any <hr>.
+      "html body.mc-mahjong-house-pdp #v65-product-parent td[background*='PBox_Border']{display:none!important}" +
+      "html body.mc-mahjong-house-pdp #v65-product-parent hr{display:none!important}" +
+      // Hide the empty ~97px breadcrumb row at the top of the product table —
+      // that row is the oversized gap between the menu and the product.
+      "html body.mc-mahjong-house-pdp #v65-product-parent tr:has(.vCSS_breadcrumb_td)," +
+      "html body.mc-mahjong-house-pdp #v65-product-parent .vCSS_breadcrumb_td{display:none!important}" +
+      // Return link sits in a 0-width container here; nowrap stops the vertical
+      // char-by-char wrap that otherwise creates a ~300px gap under the menu.
+      "html body.mc-mahjong-house-pdp #mc-pdp-return-link-static," +
+      "html body.mc-mahjong-house-pdp a.mc-pdp-return-link{white-space:nowrap!important;width:auto!important;max-width:none!important}" +
+      // Mobile only: relax the fixed 460px so the stacked column fits narrow
+      // screens (the stacking above is correct at all widths; only the fixed
+      // width needs to flex down here).
+      "@media (max-width:991px){" +
+      "html body.mc-mahjong-house-pdp td[data-mc-mj-hosttd] table[data-mc-mj-info]," +
+      "html body.mc-mahjong-house-pdp td[data-mc-mj-hosttd] table[data-mc-mj-info]>tbody," +
+      "html body.mc-mahjong-house-pdp table[data-mc-mj-info]>tbody>tr>td{width:auto!important;max-width:100%!important}" +
+      "html body.mc-mahjong-house-pdp img#product_photo," +
+      "html body.mc-mahjong-house-pdp a#product_photo_zoom_url," +
+      "html body.mc-mahjong-house-pdp a#product_photo_zoom_url2{width:100%!important;max-width:100%!important}" +
+      "}";
+  }
+
+  function tagMahjongInfoTable() {
+    var acc = doc.getElementById("mc-pdp-accordion");
+    var table = acc && acc.closest ? acc.closest("table") : null;
+    if (!table) return;
+    table.setAttribute("data-mc-mj-info", "1");
+    var host = table.parentElement;
+    if (host && host.tagName === "TD") host.setAttribute("data-mc-mj-hosttd", "1");
+  }
+
+  function fmtMahjongPrice(n) {
+    if (n % 1 === 0) return "$" + n.toLocaleString();
+    return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function injectMahjongPrice() {
+    // Prefer the real price stack if it has rendered a $ amount — this layout
+    // builds it inconsistently across loads. When it's present, remove our
+    // fallback so the price never shows twice (the duplicate that was landing
+    // under the ATC button).
+    var realStack = doc.getElementById("mc-pdp-price-stack-host");
+    var realHasPrice = !!(realStack && /\$\s*[\d,]/.test(realStack.textContent || ""));
+    var mine = doc.getElementById("mc-mj-price");
+    if (realHasPrice) {
+      if (mine) {
+        try { mine.remove(); } catch (eRm) {}
+      }
+      return;
+    }
+    // No real price yet. Hold off briefly before injecting our own so we don't
+    // flash a duplicate while the native/Saranoni stack is still building.
+    if (Date.now() - MJ_PARITY_START < 1500) return;
+    if (mine) return;
+    var title = doc.getElementById("mc-pdp-title-right");
+    if (!title || !title.parentElement) return;
+    var pr = doc.querySelector('[itemprop="price"]');
+    var amt = pr ? (pr.getAttribute("content") || pr.textContent || "") : "";
+    var num = parseFloat(String(amt).replace(/[^0-9.]/g, ""));
+    if (!(num > 0)) return;
+    var div = doc.createElement("div");
+    div.id = "mc-mj-price";
+    div.textContent = fmtMahjongPrice(num);
+    title.parentElement.insertBefore(div, title.nextSibling);
+  }
+
+  function centerMahjongAtc() {
+    var btn = doc.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]');
+    if (btn) {
+      try { btn.style.setProperty("text-align", "center", "important"); } catch (eAtc) {}
+    }
+  }
+
+  function runMahjongParity() {
+    if (!isMahjongHousePdp()) return;
+    ensureMahjongParityCss();
+    tagMahjongInfoTable();
+    injectMahjongPrice();
+    centerMahjongAtc();
+  }
+
+  function bootMahjongParity() {
+    runMahjongParity();
+    // The mahjong layout system rebuilds the DOM asynchronously; re-run on churn
+    // (throttled) so our tags/price survive, then stop once it has settled.
+    var pending = null;
+    try {
+      var mo = new global.MutationObserver(function () {
+        if (pending) return;
+        pending = global.setTimeout(function () {
+          pending = null;
+          runMahjongParity();
+        }, 150);
+      });
+      mo.observe(doc.documentElement, { childList: true, subtree: true });
+      global.setTimeout(function () {
+        try { mo.disconnect(); } catch (eDis) {}
+      }, 12000);
+    } catch (eMo) {}
+    [200, 600, 1200, 2500].forEach(function (ms) {
+      global.setTimeout(runMahjongParity, ms);
+    });
+  }
+
+  if (doc.readyState === "loading") {
+    doc.addEventListener("DOMContentLoaded", bootMahjongParity);
+  } else {
+    bootMahjongParity();
+  }
+  global.addEventListener("load", runMahjongParity);
+})(window);
+
+(function(global) {
+  var doc = global.document;
+  function fixInlineStyles() {
+    /* 2026-07-07: cart.style.* block removed — this ran redundantly across up
+       to 5 concurrently-loaded copies of this script (this file plus the
+       "-v21" mc-pdp-auth-cta-fix-v21.js, each injected multiple times by
+       separate loader mechanisms in the DB template), all racing template.min.js's
+       own cart-sizing pass within the first ~1.5s of page load. That produced
+       the "product page glitches after loading" cart-icon flicker. Per the
+       existing rule in mc-plp-enforcer.js ("Cart float position/size is
+       already owned by a native template script... do not re-add cart
+       positioning here" — a prior attempt caused a 10x/sec oscillation),
+       template.min.js already owns this and doesn't need help: confirmed live
+       that a.mc-cart-float renders at the correct 52x52px from template.min.js
+       alone with no JS override from here. */
+    var logo = doc.getElementById('mc-pdp-brand-logo');
+    if (logo) {
+      logo.style.width = '100%';
+      logo.style.margin = '0 auto 14px auto';
+      logo.style.display = 'flex';
+      logo.style.justifyContent = 'center';
+      logo.style.alignItems = 'center';
+    }
+    var body = doc.body;
+    if (body && body.classList.contains('productdetails')) {
+      body.classList.remove('category');
+      body.classList.remove('is-category-or-listing-page');
+    }
+    if (body && body.classList.contains('mc-product-page')) {
+      body.classList.remove('category');
+      body.classList.remove('is-category-or-listing-page');
+    }
+    var relRoot = doc.getElementById('v65-product-related');
+    var relContent = doc.getElementById('related_products_content');
+    [relRoot, relContent].forEach(function (el) {
+      if (!el) return;
+      try {
+        el.style.removeProperty('display');
+        el.style.removeProperty('visibility');
+        el.style.removeProperty('height');
+        el.style.removeProperty('max-height');
+        el.style.removeProperty('overflow');
+        el.style.setProperty('display', 'block', 'important');
+        el.style.setProperty('visibility', 'visible', 'important');
+      } catch (eRel) {}
+    });
+  }
+  if (doc.readyState === 'loading') {
+    doc.addEventListener('DOMContentLoaded', fixInlineStyles);
+  } else {
+    fixInlineStyles();
+  }
+  global.addEventListener('load', fixInlineStyles);
+  global.setTimeout(fixInlineStyles, 200);
+  global.setTimeout(fixInlineStyles, 600);
+  global.setTimeout(fixInlineStyles, 1500);
+
+  // Volusion's own Menu design settings bake inline font styles onto every
+  // .vnav__link (font-family/size/weight/letter-spacing/text-transform), and
+  // inline styles beat any external stylesheet rule regardless of !important.
+  // vnav.js (loaded inline inside #display_menu_1) reasserts those baked
+  // styles after our one-shot passes above run, so this has to be a standing
+  // enforcer, not a fixed set of timeouts — cheap idempotent check, runs
+  // indefinitely (menu never "settles" the way a one-time PDP layout pass does).
+  function enforceMenuLinkTypography() {
+    var mainMenuNav = doc.getElementById('display_menu_1');
+    if (!mainMenuNav || !mainMenuNav.closest('header.header')) return;
+    var setIfChanged = function (el, prop, value) {
+      if (el.style.getPropertyValue(prop) === value) return;
+      el.style.setProperty(prop, value, 'important');
+    };
+    mainMenuNav.querySelectorAll(':scope > ul > li > a.vnav__link').forEach(function (a) {
+      setIfChanged(a, 'font-family', 'var(--mc-font-display)');
+      setIfChanged(a, 'font-size', '16px');
+      setIfChanged(a, 'font-weight', '400');
+      setIfChanged(a, 'letter-spacing', '0.18em');
+      setIfChanged(a, 'text-transform', 'uppercase');
+      setIfChanged(a, 'text-decoration', 'none');
+      setIfChanged(a, 'padding', '4px 0');
+      setIfChanged(a, 'line-height', '1.2');
+    });
+    mainMenuNav.querySelectorAll('ul.vnav--level2 a.vnav__link, ul.vnav--level3 a.vnav__link').forEach(function (a) {
+      setIfChanged(a, 'font-family', 'var(--mc-font-display)');
+      setIfChanged(a, 'font-size', '15px');
+      setIfChanged(a, 'font-weight', '400');
+      setIfChanged(a, 'letter-spacing', '0.06em');
+      setIfChanged(a, 'text-transform', 'none');
+      setIfChanged(a, 'text-decoration', 'none');
+    });
+  }
+  // A polling interval left a visible flicker: vnav.js re-bakes the inline
+  // Inter styling faster than a timer can react, so the link visibly flashed
+  // between Inter and Cormorant Garamond. A MutationObserver corrects within
+  // the same microtask vnav.js writes, so there's no visible in-between frame.
+  // setIfChanged() means our own corrective write doesn't re-trigger a loop —
+  // the next mutation record it produces already matches, so the observer
+  // callback no-ops on it.
+  function bindMenuLinkTypographyObserver() {
+    var mainMenuNav = doc.getElementById('display_menu_1');
+    if (!mainMenuNav || !mainMenuNav.closest('header.header')) return false;
+    if (mainMenuNav.dataset.mcTypographyObserverBound === '1') return true;
+    mainMenuNav.dataset.mcTypographyObserverBound = '1';
+    enforceMenuLinkTypography();
+    try {
+      var mo = new global.MutationObserver(enforceMenuLinkTypography);
+      mo.observe(mainMenuNav, { attributes: true, attributeFilter: ['style'], subtree: true, childList: true });
+    } catch (eMo) {}
+    return true;
+  }
+  global.setInterval(function () {
+    if (!bindMenuLinkTypographyObserver()) enforceMenuLinkTypography();
+  }, 1000);
+  if (doc.readyState === 'loading') {
+    doc.addEventListener('DOMContentLoaded', bindMenuLinkTypographyObserver);
+  } else {
+    bindMenuLinkTypographyObserver();
+  }
+})(window);
+
+/* Home hero overlay menu (.hero-menu, visible only on the homepage) is a
+   SEPARATE, hand-authored, hardcoded link list baked into template_266.html
+   (DB-served, not FTP-editable) — it was never updated when categories got
+   renamed/reorganized: it still reads "Sofas & Sectionals" for the category
+   now called "Living Room" (same numeric category id, just a stale label),
+   and it's missing "Closeout Sale" and "About Us" entirely. Rather than
+   hand-patch three stale labels and hope nothing else drifts, rebuild it
+   from the real header nav (#display_menu_1) every load, so it can never
+   fall out of sync with the actual category list again. */
+(function (global) {
+  var doc = global.document;
+  function syncHeroMenuFromMainNav() {
+    var heroNav = doc.querySelector('#slideshow-container .hero-menu .hero-nav, #slideshow-container .hero-nav');
+    if (!heroNav) return;
+    var mainNav = Array.prototype.find.call(
+      doc.querySelectorAll('#display_menu_1'),
+      function (n) { return n.closest('header.header'); }
+    );
+    if (!mainNav) return;
+    var items = Array.prototype.map.call(
+      mainNav.querySelectorAll(':scope > ul > li > a.vnav__link'),
+      function (a) { return { text: a.textContent.replace(/\s+/g, ' ').trim(), href: a.getAttribute('href') || '#' }; }
+    ).filter(function (item) { return item.text; });
+    if (!items.length) return;
+    var signature = items.map(function (i) { return i.text + '|' + i.href; }).join(',');
+    if (heroNav.dataset.mcHeroMenuSignature === signature) return;
+    heroNav.dataset.mcHeroMenuSignature = signature;
+    heroNav.innerHTML = items
+      .map(function (i) {
+        return '<a href="' + i.href.replace(/"/g, '&quot;') + '">' + i.text.replace(/</g, '&lt;') + '</a>';
+      })
+      .join(' ');
+  }
+  global.setInterval(syncHeroMenuFromMainNav, 500);
+  if (doc.readyState === 'loading') {
+    doc.addEventListener('DOMContentLoaded', syncHeroMenuFromMainNav);
+  } else {
+    syncHeroMenuFromMainNav();
+  }
+  global.addEventListener('load', syncHeroMenuFromMainNav);
+})(window);
+
+/* Hero tagline copy change: template_266.html hardcodes "CUSTOM FURNITURE,
+   DESIGNED FOR LIVING" as the initial content of #mc-hero-copy-tagline (DB-
+   served template, not FTP-editable), AND runs its own boot() loop for ~6s
+   (50x120ms) that BLANKS the div back to an empty TAG string the instant its
+   text stops containing the literal phrase "CUSTOM FURNITURE" — so a plain
+   one-time textContent set gets wiped moments later. Out-persist that loop
+   with our own MutationObserver + trailing interval past the ~6s window. */
+(function (global) {
+  var doc = global.document;
+  var HERO_TAGLINE_TEXT = "Fresh Style, New Products, Same Service.";
+  function enforceHeroTagline() {
+    var el = doc.getElementById("mc-hero-copy-tagline");
+    if (!el || el.textContent === HERO_TAGLINE_TEXT) return;
+    el.textContent = HERO_TAGLINE_TEXT;
+  }
+  function bindHeroTaglineObserver() {
+    var el = doc.getElementById("mc-hero-copy-tagline");
+    if (!el) return false;
+    if (el.dataset.mcTaglineObserverBound === "1") return true;
+    el.dataset.mcTaglineObserverBound = "1";
+    enforceHeroTagline();
+    try {
+      var mo = new global.MutationObserver(enforceHeroTagline);
+      mo.observe(el, { characterData: true, childList: true, subtree: true });
+    } catch (eMo) {}
+    return true;
+  }
+  global.setInterval(function () {
+    if (!bindHeroTaglineObserver()) enforceHeroTagline();
+  }, 200);
+  if (doc.readyState === "loading") {
+    doc.addEventListener("DOMContentLoaded", bindHeroTaglineObserver);
+  } else {
+    bindHeroTaglineObserver();
+  }
+  global.addEventListener("load", bindHeroTaglineObserver);
+})(window);
+
+/* MC_PDP_ALT_FILENAME_GALLERY — show -ALT/-ALT2/-ALT3… photos under main image on PDPs only.
+   Desktop thumbs 250×250. Mobile: smaller row. Does not touch related items. */
+(function (g, d) {
+  function isPdp() {
+    try {
+      return !!(
+        (d.body && d.body.classList.contains("productdetails")) ||
+        d.getElementById("v65-product-parent")
+      );
+    } catch (e) {
+      return false;
+    }
+  }
+  function productCode() {
+    var input = d.querySelector('input[name="ProductCode"]');
+    return String((g.global_Current_ProductCode || "") || (input && input.value) || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9_-]/g, "");
+  }
+  function mediaCell() {
+    var img = d.getElementById("product_photo");
+    return (
+      (img &&
+        img.closest &&
+        (img.closest("td.mc-pdp-media-td") ||
+          img.closest("td.mc-unified-pdp-media") ||
+          img.closest("#product_photo_td") ||
+          img.closest("td"))) ||
+      d.querySelector("td.mc-pdp-media-td, td.mc-unified-pdp-media, #product_photo_td")
+    );
+  }
+  function probe(url, ok, fail) {
+    var img = new Image();
+    img.onload = function () {
+      ok(url);
+    };
+    img.onerror = fail || function () {};
+    img.src = url;
+  }
+  function ensureCss() {
+    if (d.getElementById("mc-pdp-alt-filename-css")) return;
+    var st = d.createElement("style");
+    st.id = "mc-pdp-alt-filename-css";
+    st.textContent =
+      "#mc-pdp-alt-filename-gallery{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;width:100%!important;max-width:100%!important;margin:12px 0 0 0!important;padding:0!important;box-sizing:border-box!important;overflow-x:auto!important}" +
+      "#mc-pdp-alt-filename-gallery a{display:block!important;flex:0 0 auto!important;width:250px!important;height:250px!important;border:1px solid #e5e5e5!important;background:#fff!important;overflow:hidden!important;box-sizing:border-box!important}" +
+      "#mc-pdp-alt-filename-gallery img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important}" +
+      "@media (max-width:991px){#mc-pdp-alt-filename-gallery{justify-content:center!important;gap:8px!important}" +
+      "#mc-pdp-alt-filename-gallery a{width:96px!important;height:96px!important}}" +
+      "#mc-acc-style-selection-host{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:14px!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}" +
+      "#mc-acc-style-selection-host #mc-configured-color-swatch-wrapper,#mc-acc-style-selection-host #mc-saranoni-size-thumbs,#mc-acc-style-selection-host #mc-pdp-option-block{width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box!important}" +
+      "@media (max-width:991px){#mc-acc-style-selection-host .mc-saranoni-size-thumbs,#mc-acc-style-selection-host .mc-configured-color-swatches{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:center!important;gap:10px!important}" +
+      "html body.mc-product-page #mc-pdp-accordion .mc-acc-content,html body.productdetails #mc-pdp-accordion .mc-acc-content,html body.mc-product-page #mc-pdp-features,html body.productdetails #mc-pdp-features{overflow-wrap:anywhere!important;word-break:break-word!important;max-width:100%!important;box-sizing:border-box!important}}";
+    (d.head || d.documentElement).appendChild(st);
+  }
+  function ensureGallery() {
+    if (!isPdp()) return;
+    var code = productCode();
+    if (!code) return;
+    var cell = mediaCell();
+    if (!cell) return;
+    ensureCss();
+    var wrap = d.getElementById("mc-pdp-alt-filename-gallery");
+    if (!wrap) {
+      wrap = d.createElement("div");
+      wrap.id = "mc-pdp-alt-filename-gallery";
+    }
+    if (wrap.getAttribute("data-mc-code") === code && wrap.children.length) {
+      place(wrap, cell);
+      return;
+    }
+    wrap.setAttribute("data-mc-code", code);
+    wrap.innerHTML = "";
+    place(wrap, cell);
+    var suffixes = ["-ALT", "-ALT2", "-ALT3", "-ALT4", "-ALT5"];
+    var i = 0;
+    function next() {
+      if (i >= suffixes.length) return;
+      var sfx = suffixes[i++];
+      var full = "/v/vspfiles/photos/" + code + sfx + ".jpg";
+      probe(
+        full,
+        function (url) {
+          var a = d.createElement("a");
+          a.href = url;
+          a.title = "Alternate view";
+          var im = d.createElement("img");
+          im.src = url;
+          im.alt = "Alternate view";
+          im.loading = "lazy";
+          a.appendChild(im);
+          a.addEventListener("click", function (ev) {
+            ev.preventDefault();
+            var hero = d.getElementById("product_photo");
+            if (hero) {
+              hero.setAttribute("src", url);
+              hero.src = url;
+            }
+            var z = d.getElementById("product_photo_zoom_url");
+            if (z) {
+              z.setAttribute("href", url);
+              z.href = url;
+            }
+            return false;
+          });
+          wrap.appendChild(a);
+          next();
+        },
+        next
+      );
+    }
+    next();
+  }
+  function place(wrap, cell) {
+    var hero = d.getElementById("product_photo");
+    var anchor =
+      (hero && hero.closest && (hero.closest("a") || hero.parentElement)) ||
+      d.getElementById("product_photo_zoom_url") ||
+      hero;
+    if (!wrap.parentNode || wrap.parentNode !== cell) {
+      if (anchor && anchor.parentNode === cell) {
+        cell.insertBefore(wrap, anchor.nextSibling);
+      } else {
+        cell.appendChild(wrap);
+      }
+    }
+  }
+  function go() {
+    try {
+      ensureGallery();
+    } catch (e) {}
+  }
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", go);
+  else go();
+  g.addEventListener("load", go);
+  [400, 1200, 3000].forEach(function (ms) {
+    g.setTimeout(go, ms);
+  });
+})(window, document);
+
+/* Orphaned Saranoni native price table (table.colors_pricebox living as its
+   own sibling <td> in tr.mc-pdp-main-row, outside the info column entirely)
+   keeps growing — some native size-change handler re-runs and APPENDS a
+   fresh "PRICE..." text node to it every time (never replaces), so a single
+   hide pass gets outpaced: it re-renders visible again moments later. Needs
+   the same persistent MutationObserver treatment as the menu/tagline fixes
+   above, not a one-shot hide. */
+(function (global) {
+  var doc = global.document;
+  function isSaranoniPage() {
+    return !!(doc.body && doc.body.classList.contains("mc-saranoni-pdp"));
+  }
+  function hideOrphanPriceboxTables() {
+    if (!isSaranoniPage()) return;
+    var mainRow = doc.querySelector("tr.mc-pdp-main-row");
+    if (!mainRow) return;
+    var infoColumn =
+      doc.querySelector("td.mc-pdp-options-td") || doc.querySelector("td.mc-unified-pdp-info");
+    mainRow.querySelectorAll("table.colors_pricebox").forEach(function (table) {
+      if (infoColumn && infoColumn.contains(table)) return;
+      if (
+        table.querySelector(
+          "#mc-pdp-option-block, #mc-pdp-brand-logo, #mc-pdp-title-right, #mc-pdp-price-stack-host, #mc-pdp-features, #mc-pdp-purchase-stack, #product_photo"
+        )
+      ) {
+        return;
+      }
+      if (table.style.display === "none") return;
+      table.style.setProperty("display", "none", "important");
+      table.style.setProperty("visibility", "hidden", "important");
+      table.style.setProperty("height", "0", "important");
+      table.style.setProperty("max-height", "0", "important");
+      table.style.setProperty("overflow", "hidden", "important");
+      table.style.setProperty("margin", "0", "important");
+      table.style.setProperty("padding", "0", "important");
+    });
+  }
+  function bindOrphanPriceboxObserver() {
+    var mainRow = doc.querySelector("tr.mc-pdp-main-row");
+    if (!mainRow) return false;
+    if (mainRow.dataset.mcOrphanPriceboxObserverBound === "1") return true;
+    mainRow.dataset.mcOrphanPriceboxObserverBound = "1";
+    hideOrphanPriceboxTables();
+    try {
+      var mo = new global.MutationObserver(hideOrphanPriceboxTables);
+      mo.observe(mainRow, { childList: true, subtree: true, characterData: true });
+    } catch (eMo) {}
+    return true;
+  }
+  global.setInterval(function () {
+    if (!bindOrphanPriceboxObserver()) hideOrphanPriceboxTables();
+  }, 500);
+  if (doc.readyState === "loading") {
+    doc.addEventListener("DOMContentLoaded", bindOrphanPriceboxObserver);
+  } else {
+    bindOrphanPriceboxObserver();
+  }
+})(window);
+
+/* Mini-cart popup (.soft_add_wrapper):
+   1) Header clipped on desktop+mobile (absolute header + font-size:0/:before)
+   2) Qty/price/remove overlap — force grid with Remove on the right
+   3) Cart thumb ignores cover swatch — sync icon to current #product_photo
+   Injected CSS bypasses stale custom-safe.css cache bust. */
+(function (global) {
+  var doc = global.document;
+  var CSS_ID = "mc-soft-add-fix-css";
+  var CSS_VER = "20260710atc02";
+
+  function injectSoftAddCss() {
+    var st = doc.getElementById(CSS_ID);
+    if (st && st.getAttribute("data-mc-ver") === CSS_VER) return;
+    if (st) {
+      try {
+        st.parentNode.removeChild(st);
+      } catch (eRm) {}
+    }
+    st = doc.createElement("style");
+    st.id = CSS_ID;
+    st.setAttribute("data-mc-ver", CSS_VER);
+    st.textContent =
+      "html body .soft_add_wrapper{height:auto!important;max-height:85vh!important;overflow:visible!important;box-sizing:border-box!important}" +
+      "html body .soft_add_header_shadow{position:relative!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;z-index:2!important;width:100%!important;height:auto!important;min-height:0!important;overflow:visible!important}" +
+      "html body .soft_add_header{position:relative!important;height:auto!important;min-height:48px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;box-sizing:border-box!important;padding:16px 20px!important;overflow:visible!important;line-height:1.3!important}" +
+      "html body .soft_add_span,html body .soft_add_header .soft_add_span{display:block!important;font-size:18px!important;line-height:1.3!important;padding:0!important;margin:0!important;height:auto!important;max-height:none!important;overflow:visible!important;text-indent:0!important;background:none!important}" +
+      "html body .soft_add_header .soft_add_span:before,html body .soft_add_header .soft_add_span::before,html body.touch-device .soft_add_span:before,html body.touch-device .soft_add_span::before{content:none!important;display:none!important;margin:0!important;padding:0!important;font-size:0!important}" +
+      "html body .soft_add_content_shadow{padding:0!important;max-height:none!important;overflow:visible!important}" +
+      "html body .soft_add_content_wrapper{position:relative!important;z-index:1!important;top:auto!important;margin-top:0!important;height:auto!important;max-height:70vh!important;overflow-x:hidden!important;overflow-y:auto!important}" +
+      "html body .soft_add_wrapper table.cart_table tr.product-row{display:grid!important;grid-template-columns:64px minmax(0,1fr) max-content max-content max-content!important;align-items:start!important;column-gap:12px!important;row-gap:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;padding:14px 0!important;overflow:visible!important}" +
+      "html body .soft_add_wrapper table.cart_table td{display:block!important;width:auto!important;max-width:none!important;min-width:0!important;padding:0!important;overflow:visible!important}" +
+      "html body .soft_add_wrapper table.cart_table td.icon{grid-column:1!important}" +
+      "html body .soft_add_wrapper table.cart_table td.description{grid-column:2!important;min-width:0!important}" +
+      "html body .soft_add_wrapper table.cart_table td.quantity{grid-column:3!important;text-align:center!important;white-space:nowrap!important;padding:0 4px!important}" +
+      "html body .soft_add_wrapper table.cart_table td.price{grid-column:4!important;text-align:right!important;white-space:nowrap!important;padding:0 4px!important}" +
+      "html body .soft_add_wrapper table.cart_table td.remove{grid-column:5!important;text-align:right!important;white-space:nowrap!important;justify-self:end!important;padding:0 0 0 4px!important}" +
+      "html body .soft_add_action_area{height:auto!important;flex-shrink:0!important}" +
+      "@media (max-width:991px){" +
+      "html body .soft_add_wrapper{width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important}" +
+      "html body .soft_add_header{padding:14px 16px!important}" +
+      "html body .soft_add_span,html body .soft_add_header .soft_add_span{font-size:16px!important}" +
+      "html body .soft_add_wrapper table.cart_table tr.product-row{grid-template-columns:56px minmax(0,1fr) max-content max-content max-content!important;column-gap:8px!important}" +
+      "}";
+    (doc.head || doc.documentElement).appendChild(st);
+  }
+
+  function currentCoverSrc() {
+    if (global.__MC_BB_ACTIVE_COVER_SRC__) return String(global.__MC_BB_ACTIVE_COVER_SRC__);
+    var hero = doc.getElementById("product_photo");
+    if (!hero) return "";
+    return String(hero.getAttribute("src") || hero.src || "");
+  }
+
+  function productCodeFromHref(href) {
+    var m = String(href || "").match(/ProductCode=([^&]+)/i);
+    if (!m) return "";
+    try {
+      return decodeURIComponent(m[1]).toUpperCase();
+    } catch (e) {
+      return String(m[1]).toUpperCase();
+    }
+  }
+
+  function syncSoftAddCoverImages(wrap) {
+    if (!wrap) return;
+    var coverSrc = currentCoverSrc();
+    if (!coverSrc || !/bb-chenille-|mc-bb-fauxfur-|bb-fauxfur-/i.test(coverSrc)) return;
+    var codeInput = doc.querySelector('input[name="ProductCode"]');
+    var pageCode = String(
+      (global.global_Current_ProductCode || "") || (codeInput && codeInput.value) || ""
+    )
+      .toUpperCase()
+      .trim();
+    wrap.querySelectorAll("tr.product-row").forEach(function (row) {
+      var link =
+        row.querySelector("td.icon a[href*='ProductCode']") ||
+        row.querySelector("td.description a[href*='ProductCode']");
+      var rowCode = productCodeFromHref(link && link.getAttribute("href"));
+      if (pageCode && rowCode && rowCode !== pageCode) return;
+      if (!rowCode && pageCode && !/BB-/i.test(pageCode)) return;
+      var img = row.querySelector("td.icon img");
+      if (!img) return;
+      try {
+        if (img.getAttribute("src") !== coverSrc) img.src = coverSrc;
+        if (img.hasAttribute("srcset")) img.removeAttribute("srcset");
+      } catch (eImg) {}
+    });
+  }
+
+  function fixCartPopup() {
+    injectSoftAddCss();
+    var wrap = doc.querySelector(".soft_add_wrapper");
+    if (!wrap || wrap.closest(".cartDiv2")) return;
+    try {
+      if (wrap.style.height) wrap.style.removeProperty("height");
+      wrap.style.setProperty("height", "auto", "important");
+      wrap.style.setProperty("max-height", "85vh", "important");
+    } catch (eH) {}
+    var hdr = wrap.querySelector(".soft_add_header_shadow");
+    if (hdr) {
+      try {
+        hdr.style.setProperty("position", "relative", "important");
+        hdr.style.setProperty("height", "auto", "important");
+        hdr.style.setProperty("top", "auto", "important");
+        hdr.style.setProperty("left", "auto", "important");
+        hdr.style.setProperty("z-index", "2", "important");
+      } catch (eHdr) {}
+    }
+    var head = wrap.querySelector(".soft_add_header");
+    if (head) {
+      try {
+        head.style.setProperty("height", "auto", "important");
+        head.style.setProperty("min-height", "48px", "important");
+        head.style.setProperty("overflow", "visible", "important");
+      } catch (eHead) {}
+    }
+    var content = wrap.querySelector(".soft_add_content_wrapper");
+    if (content) {
+      try {
+        content.style.setProperty("z-index", "1", "important");
+        content.style.setProperty("height", "auto", "important");
+        content.style.setProperty("max-height", "70vh", "important");
+      } catch (eC) {}
+    }
+    syncSoftAddCoverImages(wrap);
+  }
+
+  injectSoftAddCss();
+  global.setInterval(fixCartPopup, 200);
+})(window);
+
+/* Loader handshake: mc-plp-enforcer.js re-injects mc-pdp-auth-cta-fix.js on a
+   timer until this global equals its PDP_AUTH_WANT ("20260625sarrepair2").
+   Without this, the enforcer injects a fresh engine copy up to 6x per page
+   load. The generation guard makes stale copies stand down, but the churn is
+   wasted work and causes visible reflow — satisfy the handshake instead. */
+(function (global) {
+  global.__MC_PDP_AUTH_CTA_FIX_VER__ = "20260625sarrepair2";
 })(window);
