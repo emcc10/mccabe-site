@@ -9320,8 +9320,43 @@
     } catch (eCls) {}
   }
 
+  /* Final Bean Bag-only ownership pass. Volusion leaves two submit buttons in
+     the original quantity wrapper after this script moves its numeric input. */
+  function finalizeBeanBagQuantityControl() {
+    if (!isBeanBagPdpPage()) return;
+    var stack = global.document.getElementById("mc-pdp-purchase-stack");
+    var qtyRow = global.document.getElementById("mc-pdp-qty-row");
+    var atc = stack && stack.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]');
+    if (stack && qtyRow && atc) {
+      try {
+        if (qtyRow.parentNode !== stack || qtyRow.nextElementSibling !== atc) {
+          stack.insertBefore(qtyRow, atc);
+        }
+        qtyRow.style.setProperty("display", "inline-flex", "important");
+        qtyRow.style.setProperty("visibility", "visible", "important");
+        qtyRow.style.setProperty("height", "48px", "important");
+        qtyRow.style.setProperty("width", "100%", "important");
+      } catch (eBbQtyMount) {}
+    }
+    global.document.querySelectorAll("#v65-product-parent .vol-cartqty__wrap").forEach(function (wrap) {
+      if (wrap.closest("#mc-pdp-qty-row")) return;
+      /* Once the numeric input has moved, this wrapper contains only the two
+         orphaned increment/decrement buttons that show as grey boxes. */
+      if (wrap.querySelector('input[name^="QTY."], input[name="QTY"], input[name="quantity"]')) return;
+      try {
+        wrap.style.setProperty("display", "none", "important");
+        wrap.style.setProperty("visibility", "hidden", "important");
+        wrap.style.setProperty("height", "0", "important");
+        wrap.style.setProperty("overflow", "hidden", "important");
+      } catch (eBbOrphanStepper) {}
+    });
+  }
+
   function scheduleBeanBagOptionRepair() {
     if (!isBeanBagPdpPage()) return;
+    /* This must run even when an earlier Bean Bag initializer has already
+       claimed the page; that earlier initializer hides the real quantity row. */
+    global.setTimeout(finalizeBeanBagQuantityControl, 2400);
     if (global.__MC_BB_OPTION_REPAIR_VER__ === VERSION) return;
     global.__MC_BB_OPTION_REPAIR_VER__ = VERSION;
     [120, 600, 1800].forEach(function (ms) {

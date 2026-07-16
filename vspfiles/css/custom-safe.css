@@ -6872,6 +6872,22 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   }
 }
 
+/* Requested Bean Bag-only accordion behavior: the shared PDP hover fill is
+   distracting here and can look like a flicker while the panel opens. */
+html body.mc-bean-bag-pdp #mc-pdp-accordion .mc-acc-header:hover {
+  background: transparent !important;
+}
+
+/* The utility writer leaves an entire duplicate desktop icon group at the
+   upper-left. Keep the intended floating icon group at upper-right. */
+@media (min-width: 992px) {
+  html body .mc-desktop-utility {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
 @media (max-width: 991px) {
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
@@ -23358,7 +23374,7 @@ html body.mc-product-page #related_products_content {
    controls in stable, equally spaced top-right slots. */
 @media (min-width: 992px) {
   html body header.header #display_menu_1#display_menu_1 {
-    top: -12px !important;
+    top: 0 !important;
   }
 
   html body a.mc-search-float,

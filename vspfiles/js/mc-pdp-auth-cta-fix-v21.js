@@ -37,7 +37,7 @@
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260702tmhpdp2";
+  var VERSION = "20260708sarmob1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -5717,17 +5717,31 @@
       }
       walk = walk.parentNode;
     }
+    var desktopTwoCol = false;
+    try {
+      desktopTwoCol = !!(
+        global.matchMedia &&
+        global.matchMedia("(min-width: 992px)").matches
+      );
+    } catch (eMq) {}
     row.querySelectorAll("td.mc-pdp-media-td").forEach(function (cell) {
       try {
         if (cell.parentNode === row) {
           // mc-pdp-media-td is itself the flex media column (direct child of the
-          // product row) — size it as the 55% flex item.
+          // product row) — size it as the 55% flex item on desktop; full-bleed on mobile.
           cell.style.setProperty("display", "block", "important");
-          cell.style.setProperty("flex", "1 1 55%", "important");
-          cell.style.setProperty("flex-basis", "55%", "important");
-          cell.style.setProperty("max-width", "58%", "important");
+          if (desktopTwoCol) {
+            cell.style.setProperty("flex", "1 1 55%", "important");
+            cell.style.setProperty("flex-basis", "55%", "important");
+            cell.style.setProperty("max-width", "58%", "important");
+            cell.style.setProperty("width", "auto", "important");
+          } else {
+            cell.style.setProperty("flex", "0 0 auto", "important");
+            cell.style.setProperty("flex-basis", "auto", "important");
+            cell.style.setProperty("max-width", "100%", "important");
+            cell.style.setProperty("width", "100%", "important");
+          }
           cell.style.setProperty("min-width", "0", "important");
-          cell.style.setProperty("width", "auto", "important");
           cell.style.setProperty("box-sizing", "border-box", "important");
         } else {
           // mc-pdp-media-td is the native photo cell nested inside the media
@@ -5747,12 +5761,23 @@
     row.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
       try {
         cell.style.setProperty("display", "block", "important");
-        cell.style.setProperty("flex", "0 0 460px", "important");
-        cell.style.setProperty("flex-basis", "460px", "important");
-        cell.style.setProperty("flex-shrink", "0", "important");
-        cell.style.setProperty("min-width", "460px", "important");
-        cell.style.setProperty("max-width", "460px", "important");
-        cell.style.setProperty("width", "460px", "important");
+        // Desktop keeps a fixed info column; mobile must drop the 460px lock or the
+        // accordion / purchase stack compresses to ~160px beside the hero.
+        if (desktopTwoCol) {
+          cell.style.setProperty("flex", "0 0 460px", "important");
+          cell.style.setProperty("flex-basis", "460px", "important");
+          cell.style.setProperty("flex-shrink", "0", "important");
+          cell.style.setProperty("min-width", "460px", "important");
+          cell.style.setProperty("max-width", "460px", "important");
+          cell.style.setProperty("width", "460px", "important");
+        } else {
+          cell.style.setProperty("flex", "0 0 auto", "important");
+          cell.style.setProperty("flex-basis", "auto", "important");
+          cell.style.setProperty("flex-shrink", "1", "important");
+          cell.style.setProperty("min-width", "0", "important");
+          cell.style.setProperty("max-width", "100%", "important");
+          cell.style.setProperty("width", "100%", "important");
+        }
         cell.style.setProperty("box-sizing", "border-box", "important");
       } catch (eOpt) {}
     });
@@ -5761,8 +5786,72 @@
         tbl.style.setProperty("width", "100%", "important");
         tbl.style.setProperty("max-width", "100%", "important");
         tbl.style.setProperty("box-sizing", "border-box", "important");
+        if (!desktopTwoCol) {
+          tbl.style.setProperty("min-width", "0", "important");
+          tbl.style.setProperty("display", "block", "important");
+        }
       } catch (eTbl) {}
     });
+    if (!desktopTwoCol) {
+      row.querySelectorAll("td.mc-pdp-options-td, td.mc-pdp-options-td table, td.mc-pdp-options-td tbody, td.mc-pdp-options-td tr, td.mc-pdp-options-td td").forEach(function (node) {
+        try {
+          node.style.setProperty("width", "100%", "important");
+          node.style.setProperty("max-width", "100%", "important");
+          node.style.setProperty("min-width", "0", "important");
+          node.style.setProperty("box-sizing", "border-box", "important");
+          node.style.setProperty("padding-left", "0", "important");
+          node.style.setProperty("padding-right", "0", "important");
+          node.style.setProperty("margin-left", "0", "important");
+          node.style.setProperty("margin-right", "0", "important");
+        } catch (eNest) {}
+      });
+      // Accordion may sit inside a nested colors_pricebox/table chain; walk parents up to the main-row cell.
+      var accNode = global.document.getElementById("mc-pdp-accordion");
+      var walk = accNode;
+      while (walk && walk !== row) {
+        try {
+          if (walk.tagName === "TABLE" || walk.tagName === "TBODY" || walk.tagName === "TR" || walk.tagName === "TD" || walk.tagName === "DIV") {
+            walk.style.setProperty("width", "100%", "important");
+            walk.style.setProperty("max-width", "100%", "important");
+            walk.style.setProperty("min-width", "0", "important");
+            walk.style.setProperty("box-sizing", "border-box", "important");
+          }
+        } catch (eAccWalk) {}
+        walk = walk.parentElement;
+      }
+      // Remove Volusion spacer gutters that keep the options column ~160px on phones.
+      row.querySelectorAll('td').forEach(function (cell) {
+        try {
+          var kids = cell.children;
+          if (
+            kids &&
+            kids.length === 1 &&
+            kids[0].tagName === "IMG" &&
+            /clear1x1/i.test(kids[0].getAttribute("src") || "")
+          ) {
+            cell.style.setProperty("display", "none", "important");
+            cell.style.setProperty("width", "0", "important");
+            cell.style.setProperty("max-width", "0", "important");
+            cell.style.setProperty("padding", "0", "important");
+          }
+        } catch (eSpacer) {}
+      });
+      row.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
+        try {
+          var qtyRow = cell.parentElement;
+          if (qtyRow && qtyRow.tagName === "TR") {
+            qtyRow.querySelectorAll("td").forEach(function (sib) {
+              if (sib === cell) return;
+              var txt = String(sib.textContent || "").replace(/\s+/g, " ").trim();
+              if (!txt || /^quantity:?$/i.test(txt)) {
+                sib.style.setProperty("display", "none", "important");
+                sib.style.setProperty("width", "0", "important");
+              }
+            });
+          }
+        } catch (eQty) {}
+      });
+    }
     try {
       if (row.parentElement && row.parentElement.tagName === "TBODY") {
         row.parentElement.style.setProperty("display", "block", "important");
