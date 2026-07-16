@@ -10,6 +10,7 @@ on:
       - "scripts/upload_recliner_plp_photos.py"
       - "scripts/fetch_recliner_plp_photos.py"
       - "scripts/upload_tmh_mat_photos.py"
+      - "scripts/upload_tmh_plp_thumbs_only.py"
       - "scripts/fetch_tmh_tile_photos.py"
       - "scripts/audit_tmh_photos.py"
       - "scripts/upload_steve_silver_bedroom_photos.py"
@@ -71,7 +72,10 @@ jobs:
             printf '%s\n' "$changed_files"
             echo "EOF"
           } >> "$GITHUB_ENV"
-          if grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|TMH-TILE-|TMH-RACK-|TMH-ACC-|\.tmh-mat-fullsize|\.tmh-lifestyle)' <<< "$changed_files"; then
+          # Thumbs-only restore: never trigger full TMH -2T sync/upload
+          if grep -qE 'vspfiles/photos/\.tmh-thumbs-only' <<< "$changed_files"; then
+            echo "UPLOAD_TMH_THUMBS_ONLY=1" >> "$GITHUB_ENV"
+          elif grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|TMH-TILE-|TMH-RACK-|TMH-ACC-|\.tmh-mat-fullsize|\.tmh-lifestyle)' <<< "$changed_files"; then
             echo "UPLOAD_TMH_MATS=1" >> "$GITHUB_ENV"
           fi
 
@@ -123,6 +127,15 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Upload TMH PLP thumbnails only (-1 / -1T — never -2T)
+        if: env.UPLOAD_TMH_THUMBS_ONLY == '1'
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_tmh_plp_thumbs_only.py
 
       - name: Upload all TMH photos (full-size -1 and -2T sync)
         if: env.UPLOAD_TMH_MATS == '1' || (github.event_name == 'workflow_dispatch' && inputs.scope == 'full')
