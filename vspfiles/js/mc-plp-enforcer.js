@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260706c";
+  var VERSION = "20260716swatchfix";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -75,8 +75,21 @@
   function isCategoryPlp() {
     try {
       var p = String(global.location.pathname || "").toLowerCase();
+      var q = String(global.location.search || "").toLowerCase();
       var body = global.document.body;
-      if (body && body.classList.contains("productdetails")) return false;
+      // Never treat product detail pages as PLPs. Related-product grids on PDPs
+      // used to trip the .v-product-grid heuristic and blow up Saranoni swatches.
+      if (body) {
+        if (
+          body.classList.contains("productdetails") ||
+          body.classList.contains("mc-product-page") ||
+          body.classList.contains("mc-saranoni-pdp") ||
+          body.classList.contains("mc-bean-bag-pdp")
+        ) {
+          return false;
+        }
+      }
+      if (/productdetails\.asp/i.test(p) || /[?&]productcode=/.test(q)) return false;
       if (/(?:-p\/|product-p\/)/.test(p)) return false;
       if (/(?:shoppingcart|one-page-checkout|checkout|orderconfirm)/i.test(p)) return false;
       if (p === "/" || p === "/default.asp" || p === "/default.aspx") return false;
@@ -269,6 +282,16 @@
   }
 
   function isProductPhoto(img) {
+    if (!img) return false;
+    // PDP option swatches / size thumbs must never get PLP 280px box sizing.
+    if (
+      img.closest &&
+      img.closest(
+        "#mc-configured-color-swatch-wrapper, .mc-configured-color-swatch, #mc-saranoni-size-thumbs, .mc-saranoni-size-thumb, #beanbag-swatch-wrapper, .beanbag-swatch, #mcLeatherSwatchStrip, #mc-pdp-brand-logo, #product_photo, a#product_photo_zoom_url"
+      )
+    ) {
+      return false;
+    }
     var src = String(img.currentSrc || img.src || "").toLowerCase();
     return /vspfiles\/photos\//.test(src) || /vspfiles\/product\//.test(src);
   }
@@ -1330,9 +1353,12 @@
     root.querySelectorAll("img").forEach(function (img) {
       if (!isProductPhoto(img)) return;
       if (img.closest("#v65-product-related, #related_products_content, .mc-related-plp-grid")) return;
+      if (img.closest("#v65-product-parent, .mc-pdp-main-row, .mc-pdp-options-td, .mc-pdp-media-td")) return;
 
       var parent = thumbBox(img);
       if (!parent) return;
+      // Only size real PLP grid thumbs, never random photo parents (buttons/swatches).
+      if (!parent.matches || !parent.matches("a.v-product__img, .v-product__img")) return;
 
       parent.classList.add("mc-plp-image-box");
       clearClippingStyles(img, parent);
