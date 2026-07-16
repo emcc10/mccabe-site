@@ -22,6 +22,12 @@ body.category:not(.is-home) #if_homepage,
 body.category:not(.is-home) #slideshow-container{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;background:transparent!important}
 html.category #slideshow-container,html[data-mc-category-plp="1"] #slideshow-container,body.category #slideshow-container{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;background:transparent!important}
 
+/* Homepage desktop navigation must remain above landing-page category tabs. */
+@media (min-width:992px){
+html.home body.is-home header.header{position:relative!important;z-index:2001!important}
+html.home body.is-home #slideshow-container .hero-menu,html.home body.is-home #slideshow-container .hero-nav{z-index:2002!important;pointer-events:auto!important}
+}
+
 html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box,html.category .v-product-grid a.v-product__img.mc-plp-image-box{display:flex!important;align-items:flex-end!important;justify-content:center!important;width:100%!important;height:260px!important;overflow:visible!important;background:transparent!important;box-sizing:border-box!important;padding:0!important}
 html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box>img,html.category .v-product-grid a.v-product__img.mc-plp-image-box>img{width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center bottom!important;transform:none!important;display:block!important}
 
@@ -1471,7 +1477,7 @@ document.addEventListener("DOMContentLoaded", function () {
  
   <!-- DESIGN TOOLKIT -->
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
-  <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix-v21.js */</script>
+  <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
   <script>
 (function (g, d) {
   var FP = "20260624A";
@@ -1480,11 +1486,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
     if (d.documentElement.getAttribute("data-mc-pdp-auth-head-boot")) return;
     d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", "1");
-    d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix-v21.js"]').forEach(function (old) {
+    d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix-v21.js?mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -1494,7 +1500,7 @@ document.addEventListener("DOMContentLoaded", function () {
   </script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
-  <!-- mc-pdp-auth-cta-fix-v21.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
+  <!-- mc-pdp-auth-cta-fix.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
        A second static ?mcrd=live tag used to live here; it cached an old copy whose stabilizer
        fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260624B -->
   <style id="mc-ss-hero-critical-20260701">
@@ -1660,7 +1666,7 @@ html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion{
 })(window, document);
   </script>
   <script id="mc-plp-enforcer-bridge">
-(function(g,d){var W="20260706a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
+(function(g,d){var W="20260714home5",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
 function cat(){try{var p=String(g.location.pathname||"").toLowerCase();
 var isHome =
@@ -2626,13 +2632,18 @@ document.addEventListener("DOMContentLoaded", function () {
 (function () {
   var FP = "20260624A";
   if (String(window.__MC_DEPLOY_FP__ || "") === FP) {
-  } else if (!document.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
+  } else if (
+    !document.documentElement.getAttribute("data-mc-pdp-auth-reload") &&
+    !document.documentElement.getAttribute("data-mc-pdp-auth-head-boot") &&
+    !document.querySelector('script[src*="mc-pdp-auth-cta-fix.js"]')
+  ) {
+    /* mc-pdp-auth-cta-boot (above, in <head>) is the primary loader. This block only
+       fires as a fallback when that loader did not already inject the script — it must
+       never remove/re-inject a copy that is already present, or the PDP script runs twice
+       (MC_PDP_AUTH_DUPLICATE_LOAD_FIX_20260713). */
     document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
-    document.querySelectorAll('script[src*="mc-pdp-auth-cta-fix-v21.js"]').forEach(function (old) {
-      try { old.remove(); } catch (eRm) {}
-    });
     var s = document.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix-v21.js?mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
     s.async = false;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -3915,66 +3926,6 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
 }
 
 </style>
-<script>
-(function () {
-  function forceMenuTypography() {
-    var scope = document.querySelector('#display_menu_1');
-    if (!scope) return;
-
-    var isHome = document.body.classList.contains('is-home');
-
-    /* FORCE NON-HOME WIDTH ON THE ACTUAL UL */
-    if (!isHome) {
-  // DO NOT force layout here (CSS will handle layout)
-}
-   
-
-    var topNodes = scope.querySelectorAll(
-      '.vnav--level1 > li > a, .vnav--horizontal.vnav--level1 > li > a, .vnav__link, .vnav__label'
-    );
-    topNodes.forEach(function (el) {
-      if (el.closest && el.closest('.vnav--level2, .vnav--level3, .vnav__submenu')) return;
-      el.style.setProperty('font-family', 'Inter, sans-serif', 'important');
-      el.style.setProperty('font-size', '15px', 'important');
-      el.style.setProperty('font-weight', '500', 'important');
-      el.style.setProperty('letter-spacing', '0.12em', 'important');
-      el.style.setProperty('text-transform', 'uppercase', 'important');
-      el.style.setProperty('line-height', '1.2', 'important');
-      el.style.setProperty('text-decoration', 'none', 'important');
-      el.style.setProperty('padding', '0 8px', 'important');
-    });
-
-    scope.querySelectorAll('.vnav--level2 a, .vnav--level3 a, .vnav__submenu a').forEach(function (el) {
-      el.style.setProperty('font-family', 'Inter, sans-serif', 'important');
-      el.style.setProperty('font-size', '14px', 'important');
-      el.style.setProperty('font-weight', '400', 'important');
-      el.style.setProperty('letter-spacing', '0.08em', 'important');
-      el.style.setProperty('text-transform', 'uppercase', 'important');
-      el.style.setProperty('text-align', 'left', 'important');
-      el.style.setProperty('line-height', '1.2', 'important');
-      el.style.setProperty('text-decoration', 'none', 'important');
-    });
-  }
-
-  function run() {
-    forceMenuTypography();
-    setTimeout(forceMenuTypography, 150);
-    setTimeout(forceMenuTypography, 500);
-    setTimeout(forceMenuTypography, 1000);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', run);
-  } else {
-    run();
-  }
-
-  window.addEventListener('load', run);
-
-  var obs = new MutationObserver(function () { forceMenuTypography(); });
-  obs.observe(document.documentElement, { childList: true, subtree: true });
-})();
-</script>
 <script>
 (function () {
   function killLegacyCategoryBar() {
@@ -7237,7 +7188,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 </style>
 
-<!-- MC unified PDP normalizer: external mc-unified-pdp-layout.js (via mc-pdp-auth-cta-fix-v21.js) -->
+<!-- MC unified PDP normalizer: external mc-unified-pdp-layout.js (via mc-pdp-auth-cta-fix.js) -->
 
 
 <!-- MC removed legacy PDP accordion script: replaced by unified PDP normalizer 20260616unified12 -->
@@ -12312,19 +12263,29 @@ function mcEnsurePdpPriceStack() {
   function mcEnsureBeanBagPlpSubline(card) {
     if (!card || !card.querySelector) return;
     if (!mcPathLooksLikeCategory103Listing()) return;
-    if (card.querySelector('.mc-plp-bean-subline')) return;
     var title =
       card.querySelector('.v-product__name') ||
       card.querySelector('.productnamecolor') ||
       card.querySelector('h2') ||
       card.querySelector('h3');
     if (!title || !title.parentNode) return;
-    var sub = document.createElement('div');
-    sub.className = 'mc-plp-bean-subline';
-    sub.textContent = 'More sizes and colors available';
+    if (!card.querySelector('.mc-plp-bean-subline')) {
+      var sub = document.createElement('div');
+      sub.className = 'mc-plp-bean-subline';
+      sub.textContent = 'More sizes and colors available';
+      try {
+        title.parentNode.insertBefore(sub, title.nextSibling);
+      } catch (eBeanSub) {}
+    }
+    if (card.querySelector('.vol-free-shipping-icon')) return;
+    var price = card.querySelector('.v-product__price, .product_productprice');
+    if (!price || !price.parentNode) return;
+    var shipping = document.createElement('div');
+    shipping.className = 'vol-free-shipping-icon';
+    shipping.innerHTML = '<i class="icon-free-shipping"></i>';
     try {
-      title.parentNode.insertBefore(sub, title.nextSibling);
-    } catch (eBeanSub) {}
+      price.parentNode.insertBefore(shipping, price.nextSibling);
+    } catch (eBeanShipping) {}
   }
 
   var __mcMemberPlpPendingRevealToken = 0;
@@ -13262,6 +13223,21 @@ window.addEventListener('mcMemberPricingReady', function () {
     padding-top: 24px !important;
     margin-top: 16px !important;
     clear: both !important;
+  }
+
+  /* Bean Bag mobile purchase column: its native table reserves the media-row
+     height even after the PDP controls are moved. Keep this correction local
+     to Bean Bag pages so other product layouts retain their own spacing. */
+  @media (max-width: 991px) {
+    html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-pdp-options-td,
+    html body.mc-bean-bag-pdp.productdetails #content_area .mc-pdp-options-td,
+    html body.mc-bean-bag-pdp.mc-product-page #content_area td:has(.colors_pricebox),
+    html body.mc-bean-bag-pdp.productdetails #content_area td:has(.colors_pricebox),
+    html body.mc-bean-bag-pdp.mc-product-page #content_area td:has(#priceWithOptions),
+    html body.mc-bean-bag-pdp.productdetails #content_area td:has(#priceWithOptions) {
+      padding-top: 78px !important;
+      margin-top: -280px !important;
+    }
   }
 
   html body.mc-product-page #content_area table.colors_pricebox,
@@ -14648,7 +14624,7 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260706a"></script>
+  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260714home5"></script>
  
   <script id="mc-my-boards-template-boot">
 (function () {
@@ -15133,8 +15109,8 @@ body.mc-product-page .mc-pdp-top-retail-row--regular-only {
 }
 
 /* Hide accordion on PDPs that don't use the McCabe accordion layout */
-body:not(.mc-saranoni-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-mahjong-house-pdp):not(.mc-pdp-accordion-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])) #mc-pdp-accordion,
-body:not(.mc-saranoni-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-mahjong-house-pdp):not(.mc-pdp-accordion-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])) .mc-pdp-accordion {
+body:not(.mc-saranoni-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-mahjong-house-pdp):not(.mc-bean-bag-pdp):not(.mc-pdp-accordion-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])) #mc-pdp-accordion,
+body:not(.mc-saranoni-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-mahjong-house-pdp):not(.mc-bean-bag-pdp):not(.mc-pdp-accordion-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])) .mc-pdp-accordion {
   display: none !important;
   visibility: hidden !important;
 }
@@ -15144,6 +15120,8 @@ html body.mc-steve-silver-altview-pdp #mc-pdp-accordion,
 html body.mc-steve-silver-altview-pdp .mc-pdp-accordion,
 html body.mc-mahjong-house-pdp #mc-pdp-accordion,
 html body.mc-mahjong-house-pdp .mc-pdp-accordion,
+html body.mc-bean-bag-pdp #mc-pdp-accordion,
+html body.mc-bean-bag-pdp .mc-pdp-accordion,
 html body.mc-pdp-accordion-pdp #mc-pdp-accordion,
 html body.mc-pdp-accordion-pdp .mc-pdp-accordion,
 html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #mc-pdp-accordion,
@@ -15479,5 +15457,15 @@ body.mc-product-page #v65-product-related img {
 }
 </style>
 
+<script>
+(function () {
+  function removeOnlyStaleCustomSafeCss() {
+    var stale = document.querySelectorAll('link[data-mc-pdp-fix="20260713relbb1"][href*="custom-safe.css"]');
+    stale.forEach(function (link) { if (link.parentNode) link.parentNode.removeChild(link); });
+  }
+  removeOnlyStaleCustomSafeCss();
+  window.addEventListener('load', removeOnlyStaleCustomSafeCss, { once: true });
+})();
+</script>
 </body>
 </html>
