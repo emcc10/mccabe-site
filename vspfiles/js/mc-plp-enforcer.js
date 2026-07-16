@@ -2522,25 +2522,6 @@
     } catch (eLoad) {}
   }
 
-  function loadStablePdp() {
-    try {
-      if (global.__MC_PDP_STABLE_LOADER__) return;
-      if (String(global.__MC_PDP_STABLE_VER__ || "").indexOf("20260713tblfix1") === 0) {
-        global.__MC_PDP_STABLE_LOADER__ = true;
-        return;
-      }
-      if (d.querySelector('script[src*="mc-pdp-stable-20260712"]')) {
-        global.__MC_PDP_STABLE_LOADER__ = true;
-        return;
-      }
-      global.__MC_PDP_STABLE_LOADER__ = true;
-      var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-stable-20260712.js?v=20260713tblfix1";
-      s.async = false;
-      (d.head || d.documentElement).appendChild(s);
-    } catch (eSt) {}
-  }
-
   function loadMobileNavSoftAddHotfix() {
     try {
       if (global.__MC_MOBILE_NAV_SOFTADD_LOADER__) return;
@@ -2562,13 +2543,11 @@
 
   fixLevel3Flyouts();
   loadAuthHotfix();
-  loadStablePdp();
   loadMobileNavSoftAddHotfix();
   [80, 250, 600, 1200, 2200, 4500, 8000].forEach(function (ms) {
     global.setTimeout(function () {
       fixLevel3Flyouts();
       loadAuthHotfix();
-      loadStablePdp();
       loadMobileNavSoftAddHotfix();
     }, ms);
   });
