@@ -71,7 +71,7 @@ jobs:
             printf '%s\n' "$changed_files"
             echo "EOF"
           } >> "$GITHUB_ENV"
-          if grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|TMH-TILE-|TMH-RACK-|TMH-ACC-|\.tmh-mat-fullsize)' <<< "$changed_files"; then
+          if grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|TMH-TILE-|TMH-RACK-|TMH-ACC-|\.tmh-mat-fullsize|\.tmh-lifestyle)' <<< "$changed_files"; then
             echo "UPLOAD_TMH_MATS=1" >> "$GITHUB_ENV"
           fi
 
