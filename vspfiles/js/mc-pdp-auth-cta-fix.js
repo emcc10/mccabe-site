@@ -37,7 +37,7 @@
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260702tmhpdp2";
+  var VERSION = "20260714sarvariant2";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -500,6 +500,7 @@
     if (!/^SS-/.test(pc)) return false;
     var img = global.document.getElementById("product_photo");
     if (!img) return false;
+    if (img.__mcSsUserSelectedAlt) return true;
     var full = "/v/vspfiles/photos/" + pc + "-1.jpg";
     var cur = String(img.getAttribute("src") || img.src || "");
     var normalizedCur = cur.replace(/\?.*$/, "").split("#")[0];
@@ -1915,6 +1916,13 @@
       alt.style.setProperty("width", "100%", "important");
       alt.style.setProperty("max-width", "600px", "important");
     } catch (eAltOrd) {}
+    /* Volusion's empty zoom-icon span is being rendered as a stray glyph on
+       the Bean Bag "Larger Photo" link.  Keep the link and its text. */
+    try {
+      stack.querySelectorAll("#product_photo_zoom_url2 .btn-icon-zoom").forEach(function (icon) {
+        if (icon.parentNode) icon.parentNode.removeChild(icon);
+      });
+    } catch (eZoomGlyph) {}
   }
 
   function moveAltViewsUnderMainImage() {
@@ -2025,6 +2033,8 @@
   }
 
   var SARANONI_BRAND_LOGO_SRC = "/v/vspfiles/photos/manufacturers/saranoni%20blankets.jpg";
+  /* Restored from the known-good July 11 Bean Bag implementation. */
+  var CORDAROYS_BRAND_LOGO_SRC = "/v/vspfiles/photos/manufacturers/mc-brand-cordaroys.png";
   var MAHJONG_HOUSE_BRAND_LOGO_SRC = "/v/vspfiles/photos/manufacturers/the%20mahjong%20house.png";
   var MAHJONG_HOUSE_BRAND_LOGO_SRC_FALLBACK =
     "/v/vspfiles/photos/manufacturers/the%20mahjong%20house.jpg";
@@ -2054,6 +2064,33 @@
     positionSaranoniBrandLogo(wrap);
   }
 
+  function ensureBeanBagBrandLogo() {
+    if (!isBeanBagPdpPage()) return;
+    var wrap = global.document.getElementById("mc-pdp-brand-logo");
+    if (!wrap) {
+      wrap = global.document.createElement("div");
+      wrap.id = "mc-pdp-brand-logo";
+      wrap.className = "mc-pdp-brand-logo mc-pdp-brand-logo--cordaroys";
+    } else {
+      wrap.classList.add("mc-pdp-brand-logo--cordaroys");
+    }
+    var img = wrap.querySelector("img");
+    var src = String((img && img.getAttribute("src")) || "");
+    if (!img || src.indexOf(CORDAROYS_BRAND_LOGO_SRC) === -1) {
+      while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+      img = global.document.createElement("img");
+      img.className = "vCSS_img_mfg_logo";
+      img.alt = "Cordaroy's";
+      img.setAttribute("src", CORDAROYS_BRAND_LOGO_SRC);
+      wrap.appendChild(img);
+    }
+    try {
+      img.style.setProperty("max-height", "42px", "important");
+      img.style.setProperty("width", "auto", "important");
+      img.style.setProperty("display", "block", "important");
+    } catch (eCordaroysSize) {}
+    positionSaranoniBrandLogo(wrap);
+  }
   function positionSaranoniBrandLogo(wrap) {
     if (!wrap) return;
     var col = findPdpHeroColumnTd();
@@ -2163,7 +2200,8 @@
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion *,html body.mc-mahjong-house-pdp .mc-pdp-accordion *{box-sizing:border-box!important;max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important}" +
       "html body.mc-mahjong-house-pdp .mc-acc-panel,html body.mc-mahjong-house-pdp .mc-acc-content{width:100%!important;max-width:100%!important;overflow:visible!important;padding-right:0!important}" +
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-pdp-description-below-features,html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-acc-saranoni-product-details-host,html body.mc-mahjong-house-pdp #mc-pdp-accordion #ProductDetail_ProductDetails_div,html body.mc-mahjong-house-pdp #mc-pdp-accordion #product_description{display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important;overflow:visible!important}" +
-      "@media (min-width:992px){html body.mc-mahjong-house-pdp #content_area tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #content_area tr.mc-unified-pdp-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{column-gap:24px!important;gap:24px!important;justify-content:center!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{max-width:620px!important;padding-right:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{width:440px!important;max-width:440px!important;min-width:420px!important;padding-left:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td img#product_photo,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media img#product_photo{max-width:min(620px,100%)!important;margin-right:0!important}}";
+      "@media (min-width:992px){html body.mc-mahjong-house-pdp #content_area tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #content_area tr.mc-unified-pdp-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{column-gap:24px!important;gap:24px!important;justify-content:center!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{max-width:620px!important;padding-right:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{width:440px!important;max-width:440px!important;min-width:420px!important;padding-left:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td img#product_photo,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media img#product_photo{max-width:min(620px,100%)!important;margin-right:0!important}}" +
+      "@media (max-width:991px){html body.mc-mahjong-house-pdp #content_area,html body.mc-mahjong-house-pdp #v65-product-parent{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important;box-sizing:border-box!important}html body.mc-mahjong-house-pdp #v65-product-parent>tbody,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{display:block!important;width:100%!important;max-width:100%!important}html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row>td,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row>td,html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media,html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important}html body.mc-mahjong-house-pdp #product_photo,html body.mc-mahjong-house-pdp a#product_photo_zoom_url{width:100%!important;max-width:650px!important;height:auto!important;margin-left:auto!important;margin-right:auto!important}html body.mc-mahjong-house-pdp #mc-mahjong-purchase-stack{width:100%!important;max-width:100%!important;box-sizing:border-box!important}}";
   }
 
   function findMahjongDescriptionSource() {
@@ -2271,6 +2309,213 @@
     }
   }
 
+  function ensureMahjongPricePurchaseAndRelated(infoColumn) {
+    if (!isMahjongHousePdpPage() || !infoColumn) return;
+    var root = global.document.getElementById("v65-product-parent") || global.document;
+
+    var priceHost = global.document.getElementById("mc-mahjong-price-host");
+    if (!priceHost) {
+      var nativePrice = Array.prototype.find.call(
+        root.querySelectorAll(".product_productprice, .product_sale_price, .product_saleprice, #priceWithOptions"),
+        function (node) {
+          return !node.closest("#v65-product-related, #related_products_content");
+        }
+      );
+      var amount = nativePrice
+        ? String(nativePrice.textContent || "").replace(/\s+/g, " ").trim().replace(/^:\s*/, "").replace(/\.00\b/, "")
+        : "";
+      if (amount) {
+        priceHost = global.document.createElement("div");
+        priceHost.id = "mc-mahjong-price-host";
+        priceHost.className = "mc-mahjong-price-host";
+        priceHost.textContent = amount;
+      }
+    }
+    if (priceHost) {
+      var title = global.document.getElementById("mc-pdp-title-right");
+      if (priceHost.parentNode !== infoColumn) {
+        try {
+          if (title && title.parentNode === infoColumn) {
+            infoColumn.insertBefore(priceHost, title.nextElementSibling);
+          } else {
+            infoColumn.insertBefore(priceHost, infoColumn.firstChild);
+          }
+        } catch (ePriceMount) {}
+      }
+      try {
+        if (title && title.parentNode === infoColumn && title.nextElementSibling !== priceHost) {
+          infoColumn.insertBefore(priceHost, title.nextElementSibling);
+        }
+      } catch (ePriceOrder) {}
+      priceHost.style.setProperty("display", "block", "important");
+      priceHost.style.setProperty("width", "100%", "important");
+      priceHost.style.setProperty("margin", "0 0 14px", "important");
+      priceHost.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+      priceHost.style.setProperty("font-size", "16px", "important");
+      priceHost.style.setProperty("line-height", "1.4", "important");
+      priceHost.style.setProperty("color", "#444", "important");
+    }
+
+    function placeMahjongDesktopTitleAbovePurchase() {
+      try {
+        if (global.matchMedia && !global.matchMedia("(min-width: 992px)").matches) return;
+        var desktopTitle = global.document.getElementById("mc-pdp-title-right");
+        if (!desktopTitle || desktopTitle.parentNode !== infoColumn) return;
+        var desktopLogo = global.document.getElementById("mc-pdp-brand-logo");
+        var titleAnchor =
+          desktopLogo && desktopLogo.parentNode === infoColumn
+            ? desktopLogo.nextElementSibling
+            : infoColumn.firstElementChild;
+        if (titleAnchor !== desktopTitle) infoColumn.insertBefore(desktopTitle, titleAnchor);
+      } catch (eDesktopTitleOrder) {}
+    }
+
+    function placeMahjongPriceBelowTitle() {
+      try {
+        var currentTitle = global.document.getElementById("mc-pdp-title-right");
+        if (
+          priceHost &&
+          currentTitle &&
+          currentTitle.parentNode === infoColumn &&
+          currentTitle.nextElementSibling !== priceHost
+        ) {
+          infoColumn.insertBefore(priceHost, currentTitle.nextElementSibling);
+        }
+      } catch (ePriceLateOrder) {}
+    }
+    placeMahjongDesktopTitleAbovePurchase();
+    placeMahjongPriceBelowTitle();
+
+    var atc = root.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]');
+    if (atc) {
+      var atcWrap = atc.closest(".mc-atc-button-wrap") || wrapAtcButton(atc);
+      var qty = root.querySelector('input.v65-productdetail-cartqty, input[name^="QTY."], input[name="QTY"], input[name="quantity"]');
+      var stack = global.document.getElementById("mc-mahjong-purchase-stack");
+      if (!stack) {
+        stack = global.document.createElement("div");
+        stack.id = "mc-mahjong-purchase-stack";
+        stack.className = "mc-mahjong-purchase-stack";
+      }
+      var qtyRow = global.document.getElementById("mc-mahjong-qty-row");
+      if (!qtyRow) {
+        qtyRow = global.document.createElement("div");
+        qtyRow.id = "mc-mahjong-qty-row";
+        qtyRow.className = "mc-mahjong-qty-row";
+      }
+      var nativeQtyWrap = qty && qty.closest ? qty.closest(".vol-cartqty__wrap") : null;
+      if (qty && !qtyRow.contains(qty)) {
+        try { qtyRow.appendChild(qty); } catch (eQtyMove) {}
+      }
+      if (nativeQtyWrap && nativeQtyWrap !== qtyRow) {
+        try { nativeQtyWrap.style.setProperty("display", "none", "important"); } catch (eHideNativeQty) {}
+      }
+      if (qty && qtyRow.parentNode !== stack) stack.appendChild(qtyRow);
+      if (atcWrap && atcWrap.parentNode !== stack) stack.appendChild(atcWrap);
+      var accordion = global.document.getElementById("mc-pdp-accordion");
+      if (stack.parentNode !== infoColumn) {
+        try {
+          if (accordion && accordion.parentNode === infoColumn && accordion.nextSibling) {
+            infoColumn.insertBefore(stack, accordion.nextSibling);
+          } else {
+            infoColumn.appendChild(stack);
+          }
+        } catch (eStackMount) {}
+      }
+      stack.style.setProperty("display", "flex", "important");
+      stack.style.setProperty("flex-direction", "column", "important");
+      stack.style.setProperty("align-items", "stretch", "important");
+      stack.style.setProperty("gap", "12px", "important");
+      stack.style.setProperty("width", "100%", "important");
+      stack.style.setProperty("max-width", "100%", "important");
+      stack.style.setProperty("margin", "18px 0 0", "important");
+      stack.style.setProperty("box-sizing", "border-box", "important");
+      qtyRow.style.setProperty("display", "flex", "important");
+      qtyRow.style.setProperty("justify-content", "center", "important");
+      qtyRow.style.setProperty("width", "100%", "important");
+      if (qty) {
+        qty.style.setProperty("display", "block", "important");
+        qty.style.setProperty("width", "58px", "important");
+        qty.style.setProperty("height", "38px", "important");
+        qty.style.setProperty("margin", "0", "important");
+        qty.style.setProperty("text-align", "center", "important");
+      }
+      if (atcWrap) {
+        atcWrap.style.setProperty("display", "flex", "important");
+        atcWrap.style.setProperty("width", "100%", "important");
+        atcWrap.style.setProperty("max-width", "100%", "important");
+      }
+      atc.style.setProperty("width", "100%", "important");
+      atc.style.setProperty("max-width", "100%", "important");
+      atc.style.setProperty("min-height", "48px", "important");
+      atc.style.setProperty("box-sizing", "border-box", "important");
+    }
+
+    function hideMahjongNativePurchaseBox() {
+      infoColumn.querySelectorAll("table.colors_pricebox").forEach(function (nativeBox) {
+        try {
+          var managed =
+            nativeBox.contains(priceHost) ||
+            nativeBox.contains(global.document.getElementById("mc-mahjong-purchase-stack")) ||
+            nativeBox.contains(global.document.getElementById("mc-pdp-accordion"));
+          if (!managed && /(?:\$\s*\d|quantity)/i.test(String(nativeBox.textContent || ""))) {
+            if (nativeBox.style.getPropertyValue("display") !== "none") {
+              nativeBox.style.setProperty("display", "none", "important");
+              nativeBox.style.setProperty("visibility", "hidden", "important");
+              nativeBox.style.setProperty("height", "0", "important");
+              nativeBox.style.setProperty("margin", "0", "important");
+              nativeBox.style.setProperty("padding", "0", "important");
+              nativeBox.style.setProperty("overflow", "hidden", "important");
+            }
+          }
+        } catch (eNativeBox) {}
+      });
+    }
+    hideMahjongNativePurchaseBox();
+
+    function revealMahjongRelated() {
+      var related = global.document.getElementById("related_products_content");
+      if (!related) return;
+      try {
+        related.style.setProperty("display", "table-cell", "important");
+        related.style.setProperty("visibility", "visible", "important");
+        related.style.setProperty("opacity", "1", "important");
+        related.style.setProperty("height", "auto", "important");
+        related.style.setProperty("width", "100%", "important");
+        var relatedRoot = global.document.getElementById("v65-product-related");
+        if (relatedRoot) {
+          relatedRoot.style.setProperty("display", "table", "important");
+          relatedRoot.style.setProperty("visibility", "visible", "important");
+          relatedRoot.style.setProperty("width", "100%", "important");
+        }
+      } catch (eRelated) {}
+    }
+    revealMahjongRelated();
+    var related = global.document.getElementById("related_products_content");
+    if (related && !related.dataset.mcMahjongRelatedRevealBound) {
+      related.dataset.mcMahjongRelatedRevealBound = "1";
+      [0, 250, 900].forEach(function (delay) {
+        global.setTimeout(revealMahjongRelated, delay);
+      });
+      try {
+        var purchaseObserver = new global.MutationObserver(function () {
+          placeMahjongDesktopTitleAbovePurchase();
+          placeMahjongPriceBelowTitle();
+          hideMahjongNativePurchaseBox();
+        });
+        purchaseObserver.observe(infoColumn, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["style"]
+        });
+        var relatedObserver = new global.MutationObserver(function () {
+          if (related.style.getPropertyValue("display") === "none") revealMahjongRelated();
+        });
+        relatedObserver.observe(related, { attributes: true, attributeFilter: ["style"] });
+      } catch (eMahjongLateOverride) {}
+    }
+  }
+
   function ensureMahjongHousePdpCorrections() {
     if (!isMahjongHousePdpPage()) return;
     try {
@@ -2297,6 +2542,7 @@
           tmhCol.style.setProperty("text-align", "left", "important");
           tmhCol.style.setProperty("box-sizing", "border-box", "important");
         } catch (eTmhCol) {}
+        ensureMahjongPricePurchaseAndRelated(tmhCol);
       }
       hideMahjongHeroManufacturerLogo();
       syncPdpDescriptionViewMore();
@@ -2993,9 +3239,7 @@
     global.__MC_PDP_ATC_BLACK_LOCK__ = VERSION;
     [80, 250, 700, 1400, 2600, 5000, 9000].forEach(function (ms) {
       global.setTimeout(function () {
-        try {
-          fixAddToCartChrome();
-        } catch (eAtcLock) {}
+        try { fixAddToCartChrome(); } catch (eAtcLock) {}
       }, ms);
     });
     try {
@@ -3007,28 +3251,16 @@
             if (shouldRun) return;
             var t = m.target;
             if (!t || !t.matches) return;
-            if (
-              t.matches(".mc-atc-button-wrap, input[name='btnaddtocart'], button[name='btnaddtocart'], input.vCSS_input_addtocart, input.mc-unified-atc-btn") ||
-              (t.closest && t.closest(".mc-atc-button-wrap"))
-            ) {
-              shouldRun = true;
-            }
+            if (t.matches(".mc-atc-button-wrap, input[name='btnaddtocart'], button[name='btnaddtocart'], input.vCSS_input_addtocart, input.mc-unified-atc-btn") || (t.closest && t.closest(".mc-atc-button-wrap"))) shouldRun = true;
           });
           if (!shouldRun || pending) return;
           pending = true;
           global.requestAnimationFrame(function () {
             pending = false;
-            try {
-              fixAddToCartChrome();
-            } catch (eMoAtc) {}
+            try { fixAddToCartChrome(); } catch (eMoAtc) {}
           });
         });
-        global.__MC_PDP_ATC_BLACK_MO__.observe(global.document.documentElement, {
-          subtree: true,
-          childList: true,
-          attributes: true,
-          attributeFilter: ["class", "style"]
-        });
+        global.__MC_PDP_ATC_BLACK_MO__.observe(global.document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style"] });
       }
     } catch (eAtcMo) {}
   }
@@ -3060,6 +3292,7 @@
       "font-family:Inter,Arial,sans-serif!important;font-size:15px!important;font-weight:400!important;line-height:1.2!important;" +
       "letter-spacing:0.16em!important;text-transform:uppercase!important;color:#777!important;text-align:left!important;" +
       "margin:0!important;padding:0!important;margin-left:0!important}" +
+      "@media (max-width:991px){body.productdetails #mc-pdp-brand-logo+#mc-pdp-title-right,body.mc-product-page #mc-pdp-brand-logo+#mc-pdp-title-right{margin-top:14px!important}}" +
       "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.mc-product-page #mc-pdp-price-stack-host .product_list_price," +
       "body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt{" +
       "font-family:Inter,Arial,sans-serif!important;font-size:16px!important;font-weight:400!important;line-height:1.55!important;" +
@@ -3308,29 +3541,209 @@
     return false;
   }
 
+  /* Volusion leaves these image-only table cells behind after the useful PDP
+     controls are moved into the custom column. They are purely decorative
+     PBox/OBox corners and render as the two small grey squares. */
+  function hideLegacyPdpFrameBits() {
+    if (!isBeanBagPdpPage() && !isSaranoniPdpPage()) return;
+    global.document
+      .querySelectorAll(
+        '#v65-product-parent img[src*="PBox_Border_"], #v65-product-parent img[src*="OBox_Border_"]'
+      )
+      .forEach(function (img) {
+        var cell = img.parentNode;
+        try {
+          img.style.setProperty("display", "none", "important");
+        } catch (eFrameImage) {}
+        if (!cell || cell.tagName !== "TD" || cell.children.length !== 1 || cell.firstElementChild !== img) return;
+        try {
+          cell.style.setProperty("display", "none", "important");
+          cell.style.setProperty("width", "0", "important");
+          cell.style.setProperty("padding", "0", "important");
+          cell.style.setProperty("background", "none", "important");
+        } catch (eFrameCell) {}
+      });
+  }
+
+  /* Match the verified mobile Bean Bag offset on the actual table cells after
+     the purchase column has been assembled. This avoids depending on a broad
+     stylesheet selector racing the legacy table layout. */
+  function applyBeanBagMobilePurchaseOffset(infoColumn) {
+    if (!infoColumn || !global.matchMedia || !global.matchMedia("(max-width: 991px)").matches) return;
+    var root = global.document.getElementById("content_area");
+    if (!root) return;
+    var targets = [infoColumn];
+    root.querySelectorAll("td").forEach(function (cell) {
+      if (cell === infoColumn || !cell.querySelector(".colors_pricebox, #priceWithOptions")) return;
+      targets.push(cell);
+    });
+    targets.forEach(function (cell) {
+      try {
+        cell.style.setProperty("padding-top", "78px", "important");
+        cell.style.setProperty("margin-top", "-280px", "important");
+      } catch (eMobileOffset) {}
+    });
+  }
+
+  function removeBeanBagLargerPhotoGlyph() {
+    if (!isBeanBagPdpPage()) return;
+    global.document.querySelectorAll("#product_photo_zoom_url2 .btn-icon-zoom").forEach(function (icon) {
+      if (icon.parentNode) icon.parentNode.removeChild(icon);
+    });
+  }
+
+  /* The native Bean Bag price box contains the real shipping icon and
+     availability text, but also its obsolete border-image frame.  Move only
+     those two pieces into the existing purchase column before retiring that
+     now-empty frame. */
+  function moveBeanBagShippingInfo(infoColumn) {
+    if (!infoColumn) return null;
+    var host = global.document.getElementById("mc-bb-shipping-info");
+    var offers = global.document.querySelectorAll('#v65-product-parent [itemprop="offers"]');
+    var offer = null;
+    var oi;
+    for (oi = 0; oi < offers.length; oi++) {
+      var candidate = offers[oi];
+      var hasShipping = candidate.querySelector("img.vCSS_img_icon_free_shipping");
+      var labels = candidate.querySelectorAll("b");
+      var li;
+      var hasAvailability = false;
+      for (li = 0; li < labels.length; li++) {
+        if (/^availability::?$/i.test(String(labels[li].textContent || "").replace(/\s+/g, " ").trim())) {
+          hasAvailability = true;
+          break;
+        }
+      }
+      if (hasShipping && hasAvailability) {
+        offer = candidate;
+        break;
+      }
+    }
+    if (!host) {
+      host = global.document.createElement("div");
+      host.id = "mc-bb-shipping-info";
+      host.className = "mc-bb-shipping-info";
+    }
+    if (offer) {
+      var icon = offer.querySelector("img.vCSS_img_icon_free_shipping");
+      var shippingLink = icon && icon.closest ? icon.closest("a") : (icon ? icon.parentNode : null);
+      var availabilityLabel = null;
+      var allLabels = offer.querySelectorAll("b");
+      var bi;
+      for (bi = 0; bi < allLabels.length; bi++) {
+        if (/^availability::?$/i.test(String(allLabels[bi].textContent || "").replace(/\s+/g, " ").trim())) {
+          availabilityLabel = allLabels[bi];
+          break;
+        }
+      }
+      var availabilityText = availabilityLabel ? availabilityLabel.nextSibling : null;
+      if (shippingLink && !host.contains(shippingLink)) host.appendChild(shippingLink);
+      if (availabilityLabel && !host.contains(availabilityLabel)) host.appendChild(availabilityLabel);
+      if (availabilityText && availabilityText.nodeType === 3) {
+        var availabilityValue = global.document.createElement("span");
+        availabilityValue.className = "mc-bb-shipping-info__availability";
+        availabilityValue.textContent = String(availabilityText.nodeValue || "").replace(/\s+/g, " ").trim();
+        if (availabilityValue.textContent) host.appendChild(availabilityValue);
+        if (availabilityText.parentNode) availabilityText.parentNode.removeChild(availabilityText);
+      }
+      /* Only remove the legacy frame once its content has been retained in
+         the purchase column.  This frame has no form controls. */
+      if (host.querySelector("img.vCSS_img_icon_free_shipping") && host.querySelector("b")) {
+        var legacyFrame = offer.closest ? offer.closest("table.colors_pricebox") : null;
+        if (legacyFrame && !legacyFrame.querySelector("input, select, button")) {
+          try {
+            legacyFrame.style.setProperty("display", "none", "important");
+          } catch (eLegacyFrame) {}
+        }
+      }
+    }
+    try {
+      host.style.setProperty("display", "block", "important");
+      host.style.setProperty("width", "100%", "important");
+      host.style.setProperty("margin", "0 0 12px 0", "important");
+      host.style.setProperty("padding", "0", "important");
+      host.querySelectorAll("a, b, .mc-bb-shipping-info__availability").forEach(function (node) {
+        node.style.setProperty("display", "block", "important");
+      });
+    } catch (eShippingStyle) {}
+    return host;
+  }
+
   function appendBeanBagInfoColumnOrder() {
     if (!isBeanBagPdpPage()) return;
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
+    hideLegacyPdpFrameBits();
+    /* Bean Bag-only: Volusion's remaining PBox/OBox corner images are the
+       two small grey squares above the Cordaroys logo.  They are decorative
+       frame fragments, never product controls. */
+    global.document
+      .querySelectorAll(
+        '#v65-product-parent img[src*="PBox_Border"], #v65-product-parent img[src*="OBox_Border"]'
+      )
+      .forEach(function (img) {
+        if (img.closest("#mc-pdp-brand-logo,#mc-pdp-purchase-stack,#mc-pdp-qty-row")) return;
+        try {
+          img.style.setProperty("display", "none", "important");
+        } catch (eBbFrameImg) {}
+        var cell = img.parentNode;
+        if (!cell || cell.tagName !== "TD" || cell.children.length !== 1) return;
+        try {
+          cell.style.setProperty("display", "none", "important");
+          cell.style.setProperty("width", "0", "important");
+          cell.style.setProperty("padding", "0", "important");
+        } catch (eBbFrameCell) {}
+      });
+    applyBeanBagMobilePurchaseOffset(infoColumn);
+    removeBeanBagLargerPhotoGlyph();
+    /* A stale legacy helper writes a 301px minimum height on the native offers
+       block.  It is an empty spacer, not product content, and pushes the logo
+       and purchase column far below the hero image. */
+    global.document.querySelectorAll('#v65-product-parent [itemprop="offers"]').forEach(function (offer) {
+      var text = String(offer.textContent || "");
+      if (!offer.querySelector(".option_pricing") || !/availability/i.test(text)) return;
+      try {
+        offer.style.setProperty("min-height", "0", "important");
+      } catch (eOfferSpacer) {}
+    });
+    /* This is the duplicate native price-only frame. It has the old PBox
+       corner images (the two grey squares) but no options or controls. The
+       real price is already retained in #mc-pdp-price-stack-host. */
+    global.document.querySelectorAll("#v65-product-parent table.colors_pricebox").forEach(function (table) {
+      if (!global.document.getElementById("mc-pdp-price-stack-host")) return;
+      if (!table.querySelector(".option_pricing") || table.querySelector("input, select, button")) return;
+      if (table.contains(infoColumn)) return;
+      try {
+        table.style.setProperty("display", "none", "important");
+        table.style.setProperty("visibility", "hidden", "important");
+        table.style.setProperty("height", "0", "important");
+        table.style.setProperty("overflow", "hidden", "important");
+        table.style.setProperty("margin", "0", "important");
+        table.style.setProperty("padding", "0", "important");
+      } catch (eDuplicatePriceFrame) {}
+    });
     var brandElement = global.document.getElementById("mc-pdp-brand-logo");
     var titleElement = global.document.getElementById("mc-pdp-title-right");
     var priceElement = global.document.getElementById("mc-pdp-price-stack-host");
+    var shippingElement = moveBeanBagShippingInfo(infoColumn);
     var klarnaElement = global.document.getElementById("messaging-element");
     var sizeOptionsElement = resolveBeanBagSizeOptionsElement();
     var coverOptionsElement = global.document.getElementById("beanbag-swatch-wrapper");
     var purchaseElement = resolveBeanBagPurchaseElement(infoColumn);
     var featuresElement = global.document.getElementById("mc-pdp-features");
     var descriptionElement = global.document.getElementById("mc-pdp-description-below-features");
+    var accordionElement = ensureBeanBagPdpAccordion();
     var ordered = [
       brandElement,
       titleElement,
       priceElement,
+      shippingElement,
       klarnaElement,
       sizeOptionsElement,
       coverOptionsElement,
-      featuresElement,
+      accordionElement || featuresElement,
       purchaseElement,
-      descriptionElement,
+      accordionElement ? null : descriptionElement,
     ];
     var allowedIds = {};
     var oi;
@@ -3355,10 +3768,44 @@
         } catch (eAppend) {}
       }
     });
+    applyBeanBagMobilePurchaseOffset(infoColumn);
     try {
       hideBeanBagNativeOptionsTable();
     } catch (eHideNative) {}
     consolidateBeanBagPurchaseBlocks(infoColumn, purchaseElement);
+    /* Keep the real native quantity input in the one Bean Bag purchase stack,
+       immediately before its existing Add to Cart control. */
+    ensureQuantityAboveAtc();
+    var bbPurchase = resolveBeanBagPurchaseElement(infoColumn);
+    var bbQty = global.document.getElementById("mc-pdp-qty-row");
+    var bbAtc =
+      bbPurchase &&
+      bbPurchase.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]');
+    if (bbPurchase && bbQty && bbAtc) {
+      try {
+        if (bbQty.parentNode !== bbPurchase || bbQty.nextElementSibling !== bbAtc) {
+          bbPurchase.insertBefore(bbQty, bbAtc);
+        }
+        bbQty.style.setProperty("display", "inline-flex", "important");
+        bbQty.style.setProperty("visibility", "visible", "important");
+        bbQty.style.setProperty("opacity", "1", "important");
+        bbQty.style.setProperty("height", "auto", "important");
+        var bbQtyInput = bbQty.querySelector(
+          'input.v65-productdetail-cartqty, input[name^="QTY."], input[name="QTY"], input[name="quantity"]'
+        );
+        if (bbQtyInput) {
+          /* The Bean Bag stack may be full-width; the quantity field itself
+             must remain the compact, centered control used on other PDPs. */
+          bbQtyInput.style.setProperty("display", "inline-block", "important");
+          bbQtyInput.style.setProperty("width", "58px", "important");
+          bbQtyInput.style.setProperty("min-width", "58px", "important");
+          bbQtyInput.style.setProperty("max-width", "58px", "important");
+          bbQtyInput.style.setProperty("height", "48px", "important");
+          bbQtyInput.style.setProperty("flex", "0 0 58px", "important");
+          bbQtyInput.style.setProperty("margin", "0 auto", "important");
+        }
+      } catch (eBbQty) {}
+    }
     relocateVariantSwatchesFromMediaColumn();
     infoColumn.querySelectorAll(":scope > table, :scope > div").forEach(function (node) {
       if (node.id && /^(mc-pdp-|beanbag-|messaging|mc-bb-)/.test(node.id)) return;
@@ -3422,6 +3869,16 @@
   }
 
   function resolveSaranoniInfoColumn() {
+    /* Saranoni's native price markup contains several nested table cells.  The
+       prior generic resolver selected the innermost one, which is offset well
+       inside the actual right-hand product column and made the entire purchase
+       stack jump right whenever this routine re-ran.  Use the direct product-row
+       cell so the media and features columns share one stable frame. */
+    var row = global.document.querySelector(
+      "#v65-product-parent tr.mc-pdp-main-row, #content_area tr.mc-pdp-main-row"
+    );
+    var directColumn = row && row.querySelector(":scope > td.vol-product__top--right");
+    if (directColumn) return directColumn;
     return findPdpHeroColumnTd();
   }
 
@@ -3684,6 +4141,53 @@
     return acc;
   }
 
+  /* Bean Bag PDPs already own their Features and optional description nodes.
+     Mount those existing nodes in the same accessible accordion component used by
+     the other soft-goods PDPs; do not duplicate or rewrite their content. */
+  function ensureBeanBagPdpAccordion() {
+    if (!isBeanBagPdpPage()) return null;
+    var infoColumn = findPdpHeroColumnTd();
+    var features = global.document.getElementById("mc-pdp-features");
+    var description = global.document.getElementById("mc-pdp-description-below-features");
+    if (!infoColumn || (!features && !description)) return null;
+
+    var acc = global.document.getElementById("mc-pdp-accordion");
+    if (!acc) {
+      acc = global.document.createElement("div");
+      acc.id = "mc-pdp-accordion";
+      acc.className = "mc-pdp-accordion mc-bean-bag-accordion";
+    }
+    var rows = [];
+    if (features && String(features.textContent || "").replace(/\s+/g, "").length) {
+      rows.push({ id: "features", label: "FEATURES", host: features });
+    }
+    if (description && String(description.textContent || "").replace(/\s+/g, "").length) {
+      rows.push({ id: "details", label: "PRODUCT DETAILS", host: description });
+    }
+    if (!rows.length) return null;
+
+    var signature = rows.map(function (row) { return row.id; }).join("|");
+    var existingRows = rows.every(function (row) {
+      return !!acc.querySelector("#mc-acc-row-" + row.id + " .mc-acc-panel");
+    });
+    if (existingRows) {
+      /* Preserve the mounted Bean Bag rows and their open state on later PDP
+         passes. Rebuilding them was replacing the Features panel during hover. */
+      rows.forEach(function (row) {
+        var panel = acc.querySelector("#mc-acc-row-" + row.id + " .mc-acc-panel");
+        if (panel && row.host.parentNode !== panel) panel.appendChild(row.host);
+      });
+      acc.dataset.mcBeanBagRows = signature;
+    } else {
+      while (acc.firstChild) acc.removeChild(acc.firstChild);
+      rows.forEach(function (row) { acc.appendChild(buildSaranoniAccordionRow(row.id, row.label, row.host)); });
+      acc.dataset.mcBeanBagRows = signature;
+    }
+    var purchase = resolveBeanBagPurchaseElement(infoColumn);
+    if (purchase && purchase.parentNode === infoColumn) infoColumn.insertBefore(acc, purchase);
+    else if (acc.parentNode !== infoColumn) infoColumn.appendChild(acc);
+    return acc;
+  }
   function ensurePdpAccordionVisible() {
     var acc = global.document.getElementById("mc-pdp-accordion");
     if (!acc) return;
@@ -3718,16 +4222,16 @@
     if (!isSaranoniPdpPage()) return;
     var mainImg = global.document.getElementById("product_photo");
     if (!mainImg) return;
-    // Give the hero image a real, capped intrinsic width. width:auto avoids the
-    // circular dependency that width:100% has against the (auto-width) photo cell,
-    // and these inline styles beat the high-specificity custom-safe.css rule that
-    // otherwise pins #product_photo to max-width:800px/max-height:100%.
+    // The media chain is flattened before this runs, so the hero can fill that
+    // column up to 650px. Right alignment keeps the visual gap to the details
+    // column fixed even on wide desktop viewports.
     try {
-      mainImg.style.setProperty("width", "auto", "important");
+      mainImg.style.setProperty("width", "100%", "important");
       mainImg.style.setProperty("max-width", "min(650px, 100%)", "important");
       mainImg.style.setProperty("height", "auto", "important");
       mainImg.style.setProperty("max-height", "none", "important");
-      mainImg.style.setProperty("margin-left", "0", "important");
+      mainImg.style.setProperty("margin-left", "auto", "important");
+      mainImg.style.setProperty("margin-right", "0", "important");
     } catch (eHeroSize) {}
     var pc = resolveConfiguredColorProductCode(null);
     var cur = mainImg.getAttribute("src") || "";
@@ -3902,7 +4406,7 @@
     var col = resolveSaranoniInfoColumn();
     if (!col) return;
     try {
-      col.style.setProperty("margin-left", "20px", "important");
+      col.style.setProperty("margin-left", "0", "important");
       col.style.setProperty("padding-left", "0", "important");
       col.style.setProperty("padding-right", "0", "important");
       col.style.setProperty("text-align", "left", "important");
@@ -4121,6 +4625,8 @@
     try {  
   
       if (!isSaranoniPdpPage()) return;
+
+      hideLegacyPdpFrameBits();
   
       expandSaranoniHeroNestedTables();
   
@@ -4209,6 +4715,7 @@
     } catch (eRmLinks) {}
     var infoColumn = resolveSaranoniInfoColumn();
     if (!infoColumn) return;
+    hideLegacyPdpFrameBits();
     expandSaranoniHeroNestedTables();
     ensureSaranoniHeroImage();
     mountPdpFeaturesBlock();
@@ -4960,6 +5467,12 @@
     try {
       block.style.removeProperty("display");
     } catch (eShow) {}
+    /* Bean Bag features are owned by their existing accordion once it exists.
+       Do not reinsert that node as a loose sibling on a later PDP pass. */
+    if (isBeanBagPdpPage() && global.document.getElementById("mc-pdp-accordion")) {
+      ensureBeanBagPdpAccordion();
+      return;
+    }
     var insertParent = findPdpHeroInsertParent();
     var insertAfter = findPdpHeroInsertAfter(insertParent);
     if (!insertParent) return;
@@ -5717,17 +6230,31 @@
       }
       walk = walk.parentNode;
     }
+    var desktopTwoCol = false;
+    try {
+      desktopTwoCol = !!(
+        global.matchMedia &&
+        global.matchMedia("(min-width: 992px)").matches
+      );
+    } catch (eMq) {}
     row.querySelectorAll("td.mc-pdp-media-td").forEach(function (cell) {
       try {
         if (cell.parentNode === row) {
           // mc-pdp-media-td is itself the flex media column (direct child of the
-          // product row) — size it as the 55% flex item.
+          // product row) — size it as the 55% flex item on desktop; full-bleed on mobile.
           cell.style.setProperty("display", "block", "important");
-          cell.style.setProperty("flex", "1 1 55%", "important");
-          cell.style.setProperty("flex-basis", "55%", "important");
-          cell.style.setProperty("max-width", "58%", "important");
+          if (desktopTwoCol) {
+            cell.style.setProperty("flex", "1 1 55%", "important");
+            cell.style.setProperty("flex-basis", "55%", "important");
+            cell.style.setProperty("max-width", "58%", "important");
+            cell.style.setProperty("width", "auto", "important");
+          } else {
+            cell.style.setProperty("flex", "0 0 auto", "important");
+            cell.style.setProperty("flex-basis", "auto", "important");
+            cell.style.setProperty("max-width", "100%", "important");
+            cell.style.setProperty("width", "100%", "important");
+          }
           cell.style.setProperty("min-width", "0", "important");
-          cell.style.setProperty("width", "auto", "important");
           cell.style.setProperty("box-sizing", "border-box", "important");
         } else {
           // mc-pdp-media-td is the native photo cell nested inside the media
@@ -5747,12 +6274,25 @@
     row.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
       try {
         cell.style.setProperty("display", "block", "important");
-        cell.style.setProperty("flex", "0 0 460px", "important");
-        cell.style.setProperty("flex-basis", "460px", "important");
-        cell.style.setProperty("flex-shrink", "0", "important");
-        cell.style.setProperty("min-width", "460px", "important");
-        cell.style.setProperty("max-width", "460px", "important");
-        cell.style.setProperty("width", "460px", "important");
+        // Desktop keeps a fixed info column; mobile must drop the 460px lock or the
+        // accordion / purchase stack compresses to ~160px beside the hero.
+        if (desktopTwoCol) {
+          cell.style.setProperty("flex", "0 0 min(428px, 38vw)", "important");
+          cell.style.setProperty("flex-basis", "min(428px, 38vw)", "important");
+          cell.style.setProperty("flex-shrink", "0", "important");
+          cell.style.setProperty("min-width", "0", "important");
+          cell.style.setProperty("max-width", "428px", "important");
+          cell.style.setProperty("width", "min(428px, 38vw)", "important");
+          cell.style.setProperty("padding-left", "0", "important");
+          cell.style.setProperty("padding-right", "0", "important");
+        } else {
+          cell.style.setProperty("flex", "0 0 auto", "important");
+          cell.style.setProperty("flex-basis", "auto", "important");
+          cell.style.setProperty("flex-shrink", "1", "important");
+          cell.style.setProperty("min-width", "0", "important");
+          cell.style.setProperty("max-width", "100%", "important");
+          cell.style.setProperty("width", "100%", "important");
+        }
         cell.style.setProperty("box-sizing", "border-box", "important");
       } catch (eOpt) {}
     });
@@ -5761,8 +6301,72 @@
         tbl.style.setProperty("width", "100%", "important");
         tbl.style.setProperty("max-width", "100%", "important");
         tbl.style.setProperty("box-sizing", "border-box", "important");
+        if (!desktopTwoCol) {
+          tbl.style.setProperty("min-width", "0", "important");
+          tbl.style.setProperty("display", "block", "important");
+        }
       } catch (eTbl) {}
     });
+    if (!desktopTwoCol) {
+      row.querySelectorAll("td.mc-pdp-options-td, td.mc-pdp-options-td table, td.mc-pdp-options-td tbody, td.mc-pdp-options-td tr, td.mc-pdp-options-td td").forEach(function (node) {
+        try {
+          node.style.setProperty("width", "100%", "important");
+          node.style.setProperty("max-width", "100%", "important");
+          node.style.setProperty("min-width", "0", "important");
+          node.style.setProperty("box-sizing", "border-box", "important");
+          node.style.setProperty("padding-left", "0", "important");
+          node.style.setProperty("padding-right", "0", "important");
+          node.style.setProperty("margin-left", "0", "important");
+          node.style.setProperty("margin-right", "0", "important");
+        } catch (eNest) {}
+      });
+      // Accordion may sit inside a nested colors_pricebox/table chain; walk parents up to the main-row cell.
+      var accNode = global.document.getElementById("mc-pdp-accordion");
+      var walk = accNode;
+      while (walk && walk !== row) {
+        try {
+          if (walk.tagName === "TABLE" || walk.tagName === "TBODY" || walk.tagName === "TR" || walk.tagName === "TD" || walk.tagName === "DIV") {
+            walk.style.setProperty("width", "100%", "important");
+            walk.style.setProperty("max-width", "100%", "important");
+            walk.style.setProperty("min-width", "0", "important");
+            walk.style.setProperty("box-sizing", "border-box", "important");
+          }
+        } catch (eAccWalk) {}
+        walk = walk.parentElement;
+      }
+      // Remove Volusion spacer gutters that keep the options column ~160px on phones.
+      row.querySelectorAll('td').forEach(function (cell) {
+        try {
+          var kids = cell.children;
+          if (
+            kids &&
+            kids.length === 1 &&
+            kids[0].tagName === "IMG" &&
+            /clear1x1/i.test(kids[0].getAttribute("src") || "")
+          ) {
+            cell.style.setProperty("display", "none", "important");
+            cell.style.setProperty("width", "0", "important");
+            cell.style.setProperty("max-width", "0", "important");
+            cell.style.setProperty("padding", "0", "important");
+          }
+        } catch (eSpacer) {}
+      });
+      row.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
+        try {
+          var qtyRow = cell.parentElement;
+          if (qtyRow && qtyRow.tagName === "TR") {
+            qtyRow.querySelectorAll("td").forEach(function (sib) {
+              if (sib === cell) return;
+              var txt = String(sib.textContent || "").replace(/\s+/g, " ").trim();
+              if (!txt || /^quantity:?$/i.test(txt)) {
+                sib.style.setProperty("display", "none", "important");
+                sib.style.setProperty("width", "0", "important");
+              }
+            });
+          }
+        } catch (eQty) {}
+      });
+    }
     try {
       if (row.parentElement && row.parentElement.tagName === "TBODY") {
         row.parentElement.style.setProperty("display", "block", "important");
@@ -5777,6 +6381,44 @@
       row.style.setProperty("align-items", "flex-start", "important");
       row.style.setProperty("gap", "0", "important");
       row.style.setProperty("column-gap", "0", "important");
+
+      /* Desktop Saranoni uses the approved Monterey PDP frame: a 690px media
+         column, 400px information column, and 28px separation.  This replaces
+         the older fluid 55%/460px Saranoni sizing that made the image and
+         features land at different horizontal coordinates from Steve Silver. */
+      if (desktopTwoCol) {
+        var directMedia = row.querySelector(":scope > td.vol-product__top--left");
+        var directInfo = row.querySelector(":scope > td.vol-product__top--right");
+        row.style.setProperty("width", "1128px", "important");
+        row.style.setProperty("max-width", "100%", "important");
+        row.style.setProperty("margin-left", "auto", "important");
+        row.style.setProperty("margin-right", "auto", "important");
+        row.style.setProperty("justify-content", "center", "important");
+        row.style.setProperty("gap", "28px", "important");
+        row.style.setProperty("column-gap", "28px", "important");
+        if (directMedia) {
+          directMedia.style.setProperty("display", "flex", "important");
+          directMedia.style.setProperty("flex", "0 0 690px", "important");
+          directMedia.style.setProperty("flex-basis", "690px", "important");
+          directMedia.style.setProperty("flex-shrink", "0", "important");
+          directMedia.style.setProperty("width", "690px", "important");
+          directMedia.style.setProperty("min-width", "690px", "important");
+          directMedia.style.setProperty("max-width", "690px", "important");
+          directMedia.style.setProperty("padding", "0 16px", "important");
+          directMedia.style.setProperty("box-sizing", "border-box", "important");
+        }
+        if (directInfo) {
+          directInfo.style.setProperty("display", "block", "important");
+          directInfo.style.setProperty("flex", "0 0 400px", "important");
+          directInfo.style.setProperty("flex-basis", "400px", "important");
+          directInfo.style.setProperty("flex-shrink", "0", "important");
+          directInfo.style.setProperty("width", "400px", "important");
+          directInfo.style.setProperty("min-width", "400px", "important");
+          directInfo.style.setProperty("max-width", "400px", "important");
+          directInfo.style.setProperty("padding", "0 16px", "important");
+          directInfo.style.setProperty("box-sizing", "border-box", "important");
+        }
+      }
     } catch (eRow) {}
   }
 
@@ -7596,7 +8238,41 @@
     } catch (eClamp) {}
   }
 
+  /* Some native Steve Silver records expose an otherwise empty media-description
+     shell. The shared clamp then leaves its lone "View more" control beneath the
+     hero. Remove only shells whose complete rendered text is exactly that label;
+     real product descriptions remain untouched. */
+  function removeStrayMediaViewMore() {
+    if (!isProductPdp()) return;
+    var normalize = function (value) {
+      return String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
+    };
+    global.document
+      .querySelectorAll(
+        "td.mc-unified-pdp-media .mc-unified-pdp-description--media, td.mc-pdp-media-td .mc-unified-pdp-description--media"
+      )
+      .forEach(function (shell) {
+        if (normalize(shell.textContent) === "view more") {
+          try {
+            shell.remove();
+          } catch (eRemoveShell) {}
+        }
+      });
+    global.document
+      .querySelectorAll(
+        "td.mc-unified-pdp-media .mc-pdp-description-view-more, td.mc-pdp-media-td .mc-pdp-description-view-more"
+      )
+      .forEach(function (toggle) {
+        if (normalize(toggle.textContent) === "view more") {
+          try {
+            toggle.remove();
+          } catch (eRemoveToggle) {}
+        }
+      });
+  }
+
   function syncPdpDescriptionViewMore() {
+    removeStrayMediaViewMore();
     if (!shouldUseDescriptionBelowFeaturesLayout()) return;
     var host = global.document.getElementById("mc-pdp-description-below-features");
     if (!host || !String(host.textContent || "").replace(/\s+/g, " ").trim()) return;
@@ -8176,24 +8852,42 @@
   // OptionID → image filename for Faux Fur Bean Bag covers.
   // Source: Volusion product data. Do not infer by position or text guessing.
   var BB_COVER_IMAGE_BY_OPTION_ID = {
-    "799": "bb-fauxfur-navy.jpg",
-    "801": "bb-fauxfur-pink.jpg",
-    "803": "bb-fauxfur-cow.jpg",
-    "805": "bb-fauxfur-tan.jpg",
-    "807": "bb-fauxfur-white.jpg",
-    "809": "bb-fauxfur-gray.jpg",
-    "811": "bb-fauxfur-black.jpg"
+    "799": "https://cordaroys.com/cdn/shop/files/FC-FUR-NV.jpg?v=1763914701",
+    "801": "https://cordaroys.com/cdn/shop/files/FC-FUR-PK.jpg?v=1763914701",
+    "803": "https://cordaroys.com/cdn/shop/files/FC-FUR-COW.jpg?v=1763914701",
+    "805": "https://cordaroys.com/cdn/shop/files/FC-FUR-TN.jpg?v=1762183620",
+    "807": "https://cordaroys.com/cdn/shop/files/FC-FUR-WH.jpg?v=1762183620",
+    "809": "https://cordaroys.com/cdn/shop/files/FC-FUR-GR.jpg?v=1762183620",
+    "811": "https://cordaroys.com/cdn/shop/files/FC-FUR-BK.jpg?v=1762183620"
   };
-  var BB_COVER_IMAGE_BY_LABEL = {
-    navy: "bb-fauxfur-navy.jpg",
-    pink: "bb-fauxfur-pink.jpg",
-    cow: "bb-fauxfur-cow.jpg",
-    tan: "bb-fauxfur-tan.jpg",
-    white: "bb-fauxfur-white.jpg",
-    gray: "bb-fauxfur-gray.jpg",
-    grey: "bb-fauxfur-gray.jpg",
-    black: "bb-fauxfur-black.jpg"
+  var BB_COVER_ASSET_BY_LABEL = {
+    "faux fur|pink": ["https://cordaroys.com/cdn/shop/files/FC-FUR-PK.jpg?v=1763914701", "https://cordaroys.com/cdn/shop/files/faux-fur-pink.jpg?v=1759932371&width=80"],
+    "faux fur|navy": ["https://cordaroys.com/cdn/shop/files/FC-FUR-NV.jpg?v=1763914701", "https://cordaroys.com/cdn/shop/files/faux-fur-navy.jpg?v=1759932371&width=80"],
+    "faux fur|gray": ["https://cordaroys.com/cdn/shop/files/FC-FUR-GR.jpg?v=1762183620", "https://cordaroys.com/cdn/shop/files/faux-fur-gray.jpg?v=1759932371&width=80"],
+    "faux fur|grey": ["https://cordaroys.com/cdn/shop/files/FC-FUR-GR.jpg?v=1762183620", "https://cordaroys.com/cdn/shop/files/faux-fur-gray.jpg?v=1759932371&width=80"],
+    "faux fur|cow": ["https://cordaroys.com/cdn/shop/files/FC-FUR-COW.jpg?v=1763914701", "https://cordaroys.com/cdn/shop/files/faux-fur-cow.jpg?v=1759932371&width=80"],
+    "faux fur|tan": ["https://cordaroys.com/cdn/shop/files/FC-FUR-TN.jpg?v=1762183620", "https://cordaroys.com/cdn/shop/files/faux-fur-tan.jpg?v=1759932371&width=80"],
+    "faux fur|black": ["https://cordaroys.com/cdn/shop/files/FC-FUR-BK.jpg?v=1762183620", "https://cordaroys.com/cdn/shop/files/faux-fur-black.jpg?v=1759932371&width=80"],
+    "faux fur|white": ["https://cordaroys.com/cdn/shop/files/FC-FUR-WH.jpg?v=1762183620", "https://cordaroys.com/cdn/shop/files/faux-fur-white.jpg?v=1759932371&width=80"],
+    "chenille|charcoal": ["https://cordaroys.com/cdn/shop/files/FC-CH-CH.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-charcoal.jpg?v=1759932371&width=80"],
+    "chenille|navy": ["https://cordaroys.com/cdn/shop/files/FC-CH-NV.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-navy.jpg?v=1759932371&width=80"],
+    "chenille|espresso": ["https://cordaroys.com/cdn/shop/files/FC-CH-EX.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-espresso.jpg?v=1759932370&width=80"],
+    "chenille|very peri": ["https://cordaroys.com/cdn/shop/files/FC-CH-VP.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-very-peri-purple.jpg?v=1759932371&width=80"],
+    "chenille|tan": ["https://cordaroys.com/cdn/shop/files/FC-CH-TN.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-tan.jpg?v=1759932370&width=80"],
+    "chenille|rainforest": ["https://cordaroys.com/cdn/shop/files/FC-CH-RF.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-rainforest.jpg?v=1759932371&width=80"],
+    "chenille|moss": ["https://cordaroys.com/cdn/shop/files/FC-CH-MO.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-moss.jpg?v=1759932370&width=80"]
   };
+
+  function bbCoverAsset(label) {
+    var normalized = String(label || "").toLowerCase().replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
+    var color = normalized.split("/").pop().replace(/^faux fur\s+/i, "").replace(/^chenille\s+/i, "").trim();
+    var codeEl = global.document.querySelector('input[name="ProductCode"],input[name="productcode"]');
+    var code = String(global.global_Current_ProductCode || (codeEl && codeEl.value) || "");
+    var family = /chenille/i.test(normalized) || /CHENILLE/i.test(code) ? "chenille" : "faux fur";
+    var pair = BB_COVER_ASSET_BY_LABEL[family + "|" + color];
+    return pair ? { hero: pair[0], thumb: pair[1] } : null;
+  }
+  global.__MC_BB_COVER_ASSET__ = bbCoverAsset;
 
   function initBeanBagImageSync() {
     if (!isBeanBagPdpPage()) return;
@@ -8229,15 +8923,15 @@
     }
 
     function bbImageForSwatchLabel(label) {
-      var colorKey = bbColorFromSwatchLabel(label);
-      return colorKey ? BB_COVER_IMAGE_BY_LABEL[colorKey] || null : null;
+      var asset = bbCoverAsset(label);
+      return asset ? asset.hero : null;
     }
 
     function applyBbImage(imgFile) {
       var mainImg = global.document.getElementById("product_photo");
       if (!mainImg) return;
       activeBbImageFile = imgFile;
-      var targetSrc = "/v/vspfiles/images/" + imgFile;
+      var targetSrc = /^(?:https?:)?\/\//i.test(imgFile) ? imgFile : "/v/vspfiles/images/" + imgFile;
       try {
         if (mainImg.getAttribute("src") !== targetSrc) mainImg.src = targetSrc;
         // A stale srcset lets the browser re-pick the previous cover; remove it.
@@ -8274,7 +8968,7 @@
       if (mainImg && typeof global.MutationObserver === "function") {
         var bbObs = new global.MutationObserver(function (mutations, obs) {
           var src = mainImg.getAttribute("src") || "";
-          if (src.indexOf("bb-fauxfur") === -1) {
+          if (src !== imgFile && src !== imgFile.replace(/^https:/, "")) {
             applyBbImage(imgFile);
           }
           obs.disconnect();
@@ -8606,24 +9300,13 @@
     global.setTimeout(function () {
       try {
         if (isStalePdpAuthRun()) return;
-        if (isSaranoniPdpPage() && global.document.body) {
-          global.document.body.classList.remove("mc-bean-bag-pdp");
-        }
-        ensureSaranoniBrandLogo();
-        ensureSaranoniVariantUi();
-        hideSaranoniHeroAltviews();
-        removeSaranoniDuplicateColorPicker();
-        finalizeSaranoniInfoColumnOrder();
-        markSaranoniPdpReady();
+        if (isSaranoniPdpPage() && global.document.body) global.document.body.classList.remove("mc-bean-bag-pdp");
+        ensureSaranoniBrandLogo(); ensureSaranoniVariantUi(); hideSaranoniHeroAltviews(); removeSaranoniDuplicateColorPicker(); finalizeSaranoniInfoColumnOrder(); markSaranoniPdpReady();
       } catch (eSarRepair) {}
     }, 200);
     [900, 1800, 3500].forEach(function (ms) {
       global.setTimeout(function () {
-        try {
-          if (!isSaranoniPdpPage() || isStalePdpAuthRun()) return;
-          removeLegacySaranoniTemplatePickers();
-          removeSaranoniDuplicateColorPicker();
-        } catch (eLegacySweep) {}
+        try { if (!isSaranoniPdpPage() || isStalePdpAuthRun()) return; removeLegacySaranoniTemplatePickers(); removeSaranoniDuplicateColorPicker(); } catch (eLegacySweep) {}
       }, ms);
     });
   }
@@ -8641,17 +9324,9 @@
     if (!isBeanBagPdpPage()) return;
     if (global.__MC_BB_OPTION_REPAIR_VER__ === VERSION) return;
     global.__MC_BB_OPTION_REPAIR_VER__ = VERSION;
-    [120, 600].forEach(function (ms) {
+    [120, 600, 1800].forEach(function (ms) {
       global.setTimeout(function () {
-        try {
-          initBeanBagImageSync();
-          ensureBeanBagSizeRow();
-          markBeanBagCoverSwatchesReady();
-          appendBeanBagInfoColumnOrder();
-          hideBeanBagNativeOptionsTable();
-          sanitizeBeanBagAltviews();
-          applyPdpMainImageCap();
-        } catch (eBbRepair) {}
+        try { initBeanBagImageSync(); ensureBeanBagSizeRow(); markBeanBagCoverSwatchesReady(); ensureBeanBagBrandLogo(); ensureBeanBagPdpAccordion(); appendBeanBagInfoColumnOrder(); hideBeanBagNativeOptionsTable(); sanitizeBeanBagAltviews(); applyPdpMainImageCap(); } catch (eBbRepair) {}
       }, ms);
     });
   }
@@ -8660,25 +9335,19 @@
     if (!isSteveSilverPdpPage() && !isCloseoutPdpPage()) return;
     if (global.__MC_SS_LAYOUT_REPAIR_VER__ === VERSION) return;
     global.__MC_SS_LAYOUT_REPAIR_VER__ = VERSION;
-    [120, 700, 1800, 3500].forEach(function (ms) {
-      global.setTimeout(function () {
-        try {
-          markCloseoutPdpPage();
-          prepareDeferredUnifiedPdpHero();
-          hideNativeVolusionTabPanels();
-          mountPdpFeaturesBlock();
-          mountDescriptionBelowFeatures();
-          ensureSaranoniPdpAccordion();
-          appendSteveSilverInfoColumnOrder();
-          ensurePdpAccordionVisible();
-          syncPdpDescriptionViewMore();
-          ensureUnifiedPdpLayout();
-          if (typeof global.mcNormalizePdpLayout === "function") {
-            global.mcNormalizePdpLayout();
-          }
-        } catch (eSsRepair) {}
-      }, ms);
-    });
+    try {
+      markCloseoutPdpPage();
+      prepareDeferredUnifiedPdpHero();
+      hideNativeVolusionTabPanels();
+      mountPdpFeaturesBlock();
+      mountDescriptionBelowFeatures();
+      ensureSaranoniPdpAccordion();
+      appendSteveSilverInfoColumnOrder();
+      ensurePdpAccordionVisible();
+      syncPdpDescriptionViewMore();
+      ensureUnifiedPdpLayout();
+      if (typeof global.mcNormalizePdpLayout === "function") global.mcNormalizePdpLayout();
+    } catch (eSsRepair) {}
   }
 
   function scheduleMahjongHouseLayoutRepair() {
@@ -8686,16 +9355,12 @@
     if (!shouldDeferToUnifiedPdpLayout()) return;
     if (global.__MC_TMH_LAYOUT_REPAIR_VER__ === VERSION) return;
     global.__MC_TMH_LAYOUT_REPAIR_VER__ = VERSION;
-    [120, 700, 1500].forEach(function (ms) {
-      global.setTimeout(function () {
-        if (global.__MC_MAHJONG_PDP_READY__) return;
-        try {
-          ensureMahjongHousePdpCorrections();
-          appendMahjongHouseInfoColumnOrder();
-          syncPdpDescriptionViewMore();
-        } catch (eTmhRepair) {}
-      }, ms);
-    });
+    if (global.__MC_MAHJONG_PDP_READY__) return;
+    try {
+      ensureMahjongHousePdpCorrections();
+      appendMahjongHouseInfoColumnOrder();
+      syncPdpDescriptionViewMore();
+    } catch (eTmhRepair) {}
   }
 
   function installPdpStackApiGuards() {
@@ -9615,11 +10280,6 @@
       } catch (eNorm) {}
     }
     attempt();
-    [80, 200, 500, 1200, 2400].forEach(function (ms) {
-      global.setTimeout(function () {
-        if (!isUnifiedPdpReady()) attempt();
-      }, ms);
-    });
   }
 
   function ensureUnifiedPdpLayout() {
@@ -9889,61 +10549,12 @@
     }
   })();
 
+  /* The page markup is server-rendered.  One pass after DOM readiness is the
+     sole layout owner; delayed re-runs and a subtree observer caused scroll
+     reflows and could replace a customer’s current variant selection. */
   runPatch();
   global.document.addEventListener("DOMContentLoaded", runPatch);
   global.addEventListener("load", runPatch);
-  // Settle the layout only during the brief async window where Volusion injects
-  // the options table / price. After ~1.5s we STOP re-running on a timer so the
-  // Add-to-Cart block and surrounding layout never move again while the customer
-  // is reading or interacting. Genuinely late async injections are still caught
-  // once by the throttled, pause-aware MutationObserver below.
-  [0, 50, 200, 600, 1500].forEach(function (ms) {
-    global.setTimeout(function () {
-      if (isUnifiedPdpReady()) return;
-      installPdpStackApiGuards();
-      runPatch();
-    }, ms);
-  });
-
-  if (typeof MutationObserver !== "undefined") {
-    var scheduled = false;
-    var moLastRun = 0;
-    var mo = new MutationObserver(function () {
-      if (isStalePdpAuthRun()) return;
-      if (isUnifiedPdpReady()) return;
-      if (scheduled) return;
-      if (global.__MC_PDP_MO_PAUSE__) return;
-      // Throttle on every page (not just sectional). Once the hero is built,
-      // third-party widgets (Klarna/Affirm) keep mutating the DOM; reacting to
-      // each one re-runs the full patch and causes a visible reflow flash.
-      var minGap = isSectionalPdpPage()
-        ? 2500
-        : global.__MC_PDP_HERO_READY_LOCKED__
-        ? 1500
-        : 400;
-      var now = Date.now();
-      if (now - moLastRun < minGap) return;
-      moLastRun = now;
-      scheduled = true;
-      global.requestAnimationFrame(function () {
-        scheduled = false;
-        installPdpStackApiGuards();
-        runPatch();
-      });
-    });
-    var root =
-      global.document.getElementById("v65-product-parent") ||
-      global.document.getElementById("mcConfigurationBlock") ||
-      global.document.body;
-    if (root) {
-      mo.observe(root, {
-        childList: true,
-        subtree: true,
-        characterData: false,
-      });
-    }
-    global.__MC_PDP_LAYOUT_MO__ = mo;
-  }
 })(window);
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
@@ -10064,7 +10675,10 @@
   function ensureAltViews(code, mediaCell, zoom) {
     var altSlot = 2;
     var alt = d.getElementById("altviews") || d.querySelector("span#altviews");
-    var altBuilt = alt && alt.getAttribute("data-mc-ss-alt-built") === code;
+    var altBuilt =
+      alt &&
+      alt.getAttribute("data-mc-ss-alt-built") === code &&
+      alt.querySelector("img.vCSS_img_alternate_product_photo");
     if (!alt) {
       alt = d.createElement("span");
       alt.id = "altviews";
@@ -10073,15 +10687,20 @@
     if (!altBuilt) {
       alt.setAttribute("data-mc-ss-alt-built", code);
       alt.innerHTML =
-        '<a href="' + photo(code, altSlot, false) + '" data-mc-ss-alt="' + altSlot + '">' +
+        '<button type="button" data-mc-ss-alt="' + altSlot + '" aria-label="Room scene">' +
         '<img id="alternate_product_photo_' + altSlot + '" class="vCSS_img_alternate_product_photo" src="' + photo(code, altSlot, true) + '" alt="Room scene" />' +
-        "</a>";
+        "</button>";
     }
 
     if (g.__MC_SS_ALT_LAYOUT_VER__ === SS_ALT_VER) {
-      alt.querySelectorAll("a").forEach(function (a) {
-        if (a.__mcSsAltClickBound) return;
+      alt.querySelectorAll("[data-mc-ss-alt]").forEach(function (a) {
         a.__mcSsAltClickBound = true;
+        a.onpointerdown = a.onmousedown = function () {
+          setHero(code, altSlot);
+          [0, 50, 200, 600].forEach(function (ms) {
+            g.setTimeout(function () { setHero(code, altSlot); }, ms);
+          });
+        };
         a.onclick = function (ev) {
           if (ev) ev.preventDefault();
           setHero(code, altSlot);
@@ -10137,12 +10756,21 @@
     alt.style.setProperty("float", "none", "important");
     alt.style.setProperty("position", "static", "important");
 
-    alt.querySelectorAll("a").forEach(function (a) {
+    alt.querySelectorAll("[data-mc-ss-alt]").forEach(function (a) {
       a.style.setProperty("display", "block", "important");
       a.style.setProperty("width", "72px", "important");
       a.style.setProperty("height", "72px", "important");
-      if (a.__mcSsAltClickBound) return;
+      a.style.setProperty("padding", "0", "important");
+      a.style.setProperty("border", "0", "important");
+      a.style.setProperty("background", "transparent", "important");
+      a.style.setProperty("cursor", "pointer", "important");
       a.__mcSsAltClickBound = true;
+      a.onpointerdown = a.onmousedown = function () {
+        setHero(code, altSlot);
+        [0, 50, 200, 600].forEach(function (ms) {
+          g.setTimeout(function () { setHero(code, altSlot); }, ms);
+        });
+      };
       a.onclick = function (ev) {
         if (ev) ev.preventDefault();
         setHero(code, altSlot);
@@ -10162,12 +10790,15 @@
     var zoom = d.querySelector("a#product_photo_zoom_url") || d.querySelector("a#product_photo_zoom_url2");
     var full = photo(code, n, false);
     if (img) {
+      if (n === 1 && img.__mcSsUserSelectedAlt) return;
+      if (n !== 1) img.__mcSsUserSelectedAlt = true;
       setPhotoSrcIfChanged(img, full);
       if (img.onload) img.onload = null;
       if (!img.__mcSsHeroLock) {
         img.__mcSsHeroLock = true;
         try {
           new g.MutationObserver(function () {
+            if (img.__mcSsUserSelectedAlt) return;
             var cur = img.getAttribute("src") || "";
             if (/-2T\.|-2\.jpg/i.test(cur)) {
               setPhotoSrcIfChanged(img, full);
@@ -10226,6 +10857,7 @@
     if (!isSteveSilverCode(code)) return;
     var img = d.querySelector("img#product_photo");
     if (!img) return;
+    if (img.__mcSsUserSelectedAlt) return;
     var full = photo(code, 1, false);
     var cur = String(img.getAttribute("src") || img.src || "");
     if (/-2T\.|-2\.jpg/i.test(cur) || normalizePhotoUrl(cur) !== normalizePhotoUrl(full)) {
@@ -10239,9 +10871,27 @@
     run();
   }
 
+  if (!g.__MC_SS_ALT_WINDOW_CAPTURE__) {
+    g.__MC_SS_ALT_WINDOW_CAPTURE__ = true;
+    g.addEventListener("click", function (event) {
+      var target = event.target && event.target.closest ? event.target.closest("#altviews [data-mc-ss-alt]") : null;
+      if (!target) return;
+      var code = productCode();
+      if (!isSteveSilverCode(code)) return;
+      var slot = parseInt(target.getAttribute("data-mc-ss-alt"), 10);
+      if (!slot) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setHero(code, slot);
+    }, true);
+  }
+
   runOnce();
-  [500, 2000].forEach(function (ms) {
-    g.setTimeout(retryHeroIfWrong, ms);
+  [500, 2000, 7600, 9000].forEach(function (ms) {
+    g.setTimeout(function () {
+      run();
+      retryHeroIfWrong();
+    }, ms);
   });
   if (d.readyState === "loading") {
     d.addEventListener("DOMContentLoaded", runOnce);
@@ -10539,7 +11189,9 @@ try {
   }
 
   function setImportant(el, prop, value) {
-    if (el && el.style) el.style.setProperty(prop, value, "important");
+    if (!el || !el.style) return;
+    if (el.style.getPropertyValue(prop) === value && el.style.getPropertyPriority(prop) === "important") return;
+    el.style.setProperty(prop, value, "important");
   }
 
   function normalizeSteveSilverMedia() {
@@ -10627,7 +11279,7 @@ try {
         g.clearTimeout(g.__MC_SS_MEDIA_CONTAIN_TIMER__);
         g.__MC_SS_MEDIA_CONTAIN_TIMER__ = g.setTimeout(normalizeSteveSilverMedia, 120);
       });
-      mo.observe(d.documentElement || d.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style"] });
+      mo.observe(d.getElementById("v65-product-parent") || d.body, { childList: true, subtree: true });
     } catch (eMo) {}
   }
 })(window, document);
@@ -10689,40 +11341,89 @@ try {
   function repairMahjongAccordion() {
     if (!isTmhPdp()) return;
     if (!g.matchMedia || !g.matchMedia("(min-width: 992px)").matches) return;
+    var root = d.getElementById("v65-product-parent");
+    var img = d.getElementById("product_photo");
     var acc = d.querySelector("#mc-pdp-accordion,.mc-pdp-accordion");
-    if (!acc) return;
+    if (!root || !img || !acc) return;
     var logo = d.getElementById("mc-pdp-brand-logo");
-    var rightCol = acc.closest("td.vol-product__top--right") || acc.closest("td");
-    if (rightCol) {
-      setImportant(rightCol, "position", "relative");
-      setImportant(rightCol, "left", "-148px");
-      setImportant(rightCol, "width", "500px");
-      setImportant(rightCol, "max-width", "500px");
-      setImportant(rightCol, "min-width", "420px");
-      setImportant(rightCol, "overflow", "visible");
+    var mainRow = null;
+    Array.prototype.some.call(root.querySelectorAll(":scope > tbody > tr"), function (row) {
+      if (row.contains(img) && row.contains(acc)) {
+        mainRow = row;
+        return true;
+      }
+      return false;
+    });
+    if (!mainRow) return;
+    var mediaCol = null;
+    var infoCol = null;
+    Array.prototype.forEach.call(mainRow.children || [], function (cell) {
+      if (cell.contains(img)) mediaCol = cell;
+      if (cell.contains(acc)) infoCol = cell;
+    });
+    if (!mediaCol || !infoCol) return;
+
+    setImportant(root, "display", "block");
+    setImportant(root, "width", "1200px");
+    setImportant(root, "max-width", "1200px");
+    setImportant(root, "min-width", "0px");
+    setImportant(root, "margin-left", "auto");
+    setImportant(root, "margin-right", "auto");
+    setImportant(root, "padding", "0px");
+    setImportant(root, "overflow", "visible");
+    setImportant(mainRow, "display", "flex");
+    setImportant(mainRow, "width", "1110px");
+    setImportant(mainRow, "max-width", "1110px");
+    setImportant(mainRow, "margin-left", "auto");
+    setImportant(mainRow, "margin-right", "auto");
+    setImportant(mainRow, "gap", "40px");
+    setImportant(mainRow, "align-items", "flex-start");
+    [mediaCol, infoCol].forEach(function (cell) {
+      setImportant(cell, "display", "flex");
+      setImportant(cell, "flex-direction", "column");
+      setImportant(cell, "position", "static");
+      setImportant(cell, "left", "auto");
+      setImportant(cell, "padding", "0px");
+      setImportant(cell, "margin", "0px");
+      setImportant(cell, "min-width", "0px");
+      setImportant(cell, "box-sizing", "border-box");
+      setImportant(cell, "overflow", "visible");
+    });
+    setImportant(mediaCol, "flex", "0 0 650px");
+    setImportant(mediaCol, "width", "650px");
+    setImportant(mediaCol, "max-width", "650px");
+    setImportant(infoCol, "flex", "0 0 420px");
+    setImportant(infoCol, "width", "420px");
+    setImportant(infoCol, "max-width", "420px");
+
+    var node = img.parentElement;
+    while (node && node !== mediaCol) {
+      setImportant(node, "display", "block");
+      setImportant(node, "width", "650px");
+      setImportant(node, "max-width", "650px");
+      setImportant(node, "min-width", "0px");
+      setImportant(node, "padding", "0px");
+      setImportant(node, "margin", "0px");
+      setImportant(node, "box-sizing", "border-box");
+      node = node.parentElement;
     }
-    var pricebox = acc.closest("table.colors_pricebox") || acc.closest("table");
-    if (pricebox) {
-      setImportant(pricebox, "display", "block");
-      setImportant(pricebox, "width", "440px");
-      setImportant(pricebox, "max-width", "440px");
-      setImportant(pricebox, "min-width", "420px");
-      setImportant(pricebox, "margin-left", "0");
-      setImportant(pricebox, "margin-right", "0");
-      setImportant(pricebox, "overflow", "visible");
-      pricebox.querySelectorAll("table,tbody,tr,td").forEach(function (el) {
-        setImportant(el, "position", "static");
-        setImportant(el, "left", "auto");
-        setImportant(el, "width", "100%");
-        setImportant(el, "max-width", "100%");
-        setImportant(el, "min-width", "0");
-        setImportant(el, "box-sizing", "border-box");
-        setImportant(el, "overflow", "visible");
-      });
+    setImportant(img, "display", "block");
+    setImportant(img, "width", "650px");
+    setImportant(img, "max-width", "650px");
+    setImportant(img, "height", "auto");
+    setImportant(img, "margin", "0px");
+
+    var alt = d.querySelector("#altviews,span#altviews,.altviews");
+    if (alt && mediaCol.contains(alt)) {
+      setImportant(alt, "display", "flex");
+      setImportant(alt, "width", "650px");
+      setImportant(alt, "max-width", "650px");
+      setImportant(alt, "margin", "12px 0 0 0");
+      setImportant(alt, "justify-content", "flex-start");
     }
     [acc, logo].forEach(function (el) {
       if (!el) return;
-      setImportant(el, "position", "relative");
+      setImportant(el, "position", "static");
       setImportant(el, "left", "0");
       setImportant(el, "display", "block");
       setImportant(el, "width", "420px");
@@ -10742,12 +11443,14 @@ try {
 
   function repairBeanBagHero() {
     if (!isBeanBagPdp()) return;
+    var desktop = !!(g.matchMedia && g.matchMedia("(min-width: 992px)").matches);
     var img = d.getElementById("product_photo");
     var row = img && img.closest("tr.mc-pdp-main-row,tr.mc-unified-pdp-row");
     if (row) {
-      show(row, g.matchMedia && g.matchMedia("(min-width: 992px)").matches ? "flex" : "table-row");
+      show(row, "flex");
+      setImportant(row, "flex-direction", desktop ? "row" : "column");
       setImportant(row, "align-items", "flex-start");
-      setImportant(row, "gap", "32px");
+      setImportant(row, "gap", desktop ? "40px" : "12px");
       setImportant(row, "width", "100%");
     }
     if (row) {
@@ -10759,16 +11462,19 @@ try {
     var info = d.querySelector("td.mc-pdp-options-td,td.mc-unified-pdp-info");
     if (media) {
       show(media, "flex");
-      setImportant(media, "flex", "0 0 600px");
-      setImportant(media, "width", "600px");
-      setImportant(media, "max-width", "600px");
+      setImportant(media, "flex", desktop ? "0 0 650px" : "0 0 auto");
+      setImportant(media, "width", desktop ? "650px" : "100%");
+      setImportant(media, "max-width", desktop ? "650px" : "100%");
+      setImportant(media, "padding", "0");
     }
     if (info) {
       show(info, "flex");
-      setImportant(info, "flex", "0 0 420px");
-      setImportant(info, "width", "420px");
-      setImportant(info, "max-width", "420px");
+      setImportant(info, "flex", desktop ? "0 0 420px" : "0 0 auto");
+      setImportant(info, "width", desktop ? "420px" : "100%");
+      setImportant(info, "max-width", desktop ? "420px" : "100%");
+      setImportant(info, "padding", "0");
       setImportant(info, "flex-direction", "column");
+
     }
     d.querySelectorAll("#mc-pdp-features,#mc-pdp-features *").forEach(function (el) {
       show(el, el.id === "mc-pdp-features" ? "block" : "");
@@ -10776,13 +11482,14 @@ try {
     if (img) {
       show(img, "block");
       setImportant(img, "width", "100%");
-      setImportant(img, "max-width", "600px");
+      setImportant(img, "max-width", desktop ? "650px" : "100%");
       setImportant(img, "height", "auto");
     }
     var zoom = d.getElementById("product_photo_zoom_url");
     if (zoom) {
       show(zoom, "block");
-      setImportant(zoom, "max-width", "600px");
+      setImportant(zoom, "width", "100%");
+      setImportant(zoom, "max-width", desktop ? "650px" : "100%");
     }
   }
 
@@ -10792,9 +11499,9 @@ try {
     if (!wrap) return;
     show(wrap, "block");
     setImportant(wrap, "width", "100%");
-    setImportant(wrap, "max-width", "440px");
+    setImportant(wrap, "max-width", "100%");
     setImportant(wrap, "margin", "12px 0 8px 0");
-    setImportant(wrap, "padding", "0 0 0 14px");
+    setImportant(wrap, "padding", "0");
     var list = wrap.querySelector(".beanbag-swatches");
     if (list) {
       show(list, "flex");
@@ -10806,15 +11513,21 @@ try {
     }
     wrap.querySelectorAll("img.beanbag-swatch").forEach(function (swatch) {
       var src = swatch.getAttribute("src") || "";
-      var broken = /\/swatches\/corduroy\//i.test(src) || (swatch.complete && !swatch.naturalWidth);
+      var label = swatch.getAttribute("data-option") || swatch.getAttribute("alt") || "";
+      var asset = typeof g.__MC_BB_COVER_ASSET__ === "function" ? g.__MC_BB_COVER_ASSET__(label) : null;
+      if (asset && asset.thumb && src !== asset.thumb) {
+        swatch.setAttribute("src", asset.thumb);
+        src = asset.thumb;
+      }
+      var broken = !asset && swatch.complete && !swatch.naturalWidth;
       if (!broken) {
         setImportant(swatch, "display", "inline-block");
         setImportant(swatch, "width", "54px");
         setImportant(swatch, "height", "54px");
         setImportant(swatch, "object-fit", "cover");
+        setImportant(swatch, "border-radius", "50%");
         return;
       }
-      var label = swatch.getAttribute("data-option") || swatch.getAttribute("alt") || "";
       var shortLabel = label.replace(/^Faux\s+Fur\s*\/?\s*/i, "").replace(/^Faux\s+Fur\s+/i, "").trim() || label;
       var btn = d.createElement("button");
       btn.type = "button";
@@ -10881,21 +11594,8 @@ try {
     hideBeanBagStrayPriceBoxes();
   }
 
-  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", runRepair);
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", runRepair, { once: true });
   else runRepair();
-  g.addEventListener("load", runRepair);
-  [100, 400, 1200, 2500, 5000].forEach(function (ms) {
-    g.setTimeout(runRepair, ms);
-  });
-  if (g.MutationObserver) {
-    try {
-      var mo = new g.MutationObserver(function () {
-        g.clearTimeout(g.__MC_TMH_BB_REPAIR_TIMER__);
-        g.__MC_TMH_BB_REPAIR_TIMER__ = g.setTimeout(runRepair, 140);
-      });
-      mo.observe(d.documentElement || d.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style"] });
-    } catch (eMo) {}
-  }
 })(window, document);
 
 /* MC_WINDSOR_HERO_FIX_20260620 — live CDN still caches 4MB slideshow at windsor.mp4; use windsor-home.mp4 */
@@ -11280,6 +11980,334 @@ try {
     g.document.addEventListener("DOMContentLoaded", killLegacyStabilizer);
   }
 })(window);
+
+/* MC_UNIFIED_PDP_WIDTH_CHAIN_20260713
+   Keep Saranoni, bean-bag and Steve Silver PDPs on one mobile geometry.
+   Observe inserted nodes only; watching our own style writes caused scroll
+   reflows and variant-selection jitter on phones. */
+(function (g) {
+  "use strict";
+
+  var doc = g.document;
+  if (!doc || !g.MutationObserver || !g.matchMedia) return;
+
+  function isUnifiedFamilyPdp() {
+    var path = String((g.location && g.location.pathname) || "").toLowerCase();
+    if (/\/product-p\/(?:sar-|bb-|ss-)/.test(path)) return true;
+    var body = doc.body;
+    return !!(
+      body &&
+      (body.classList.contains("mc-saranoni-pdp") ||
+        body.classList.contains("mc-saranoni-product") ||
+        body.classList.contains("mc-bean-bag-pdp") ||
+        body.classList.contains("mc-steve-silver-pdp"))
+    );
+  }
+
+  function setImportant(el, prop, value) {
+    if (!el || !el.style) return;
+    if (
+      el.style.getPropertyValue(prop) === value &&
+      el.style.getPropertyPriority(prop) === "important"
+    ) return;
+    el.style.setProperty(prop, value, "important");
+  }
+
+  function flatten(node) {
+    if (!node || !node.tagName) return;
+    var tag = node.tagName;
+    setImportant(node, "width", "100%");
+    setImportant(node, "max-width", "100%");
+    setImportant(node, "min-width", "0px");
+    setImportant(node, "box-sizing", "border-box");
+    setImportant(node, "margin-left", "0px");
+    setImportant(node, "margin-right", "0px");
+    if (tag === "TABLE" || tag === "TBODY" || tag === "TR" || tag === "TD") {
+      setImportant(node, "display", "block");
+      setImportant(node, "padding-left", "0px");
+      setImportant(node, "padding-right", "0px");
+      setImportant(node, "float", "none");
+      setImportant(node, "transform", "none");
+    }
+  }
+
+  function repairMobileWidthChain() {
+    if (!isUnifiedFamilyPdp() || !g.matchMedia("(max-width: 991px)").matches) return;
+    var root = doc.getElementById("v65-product-parent");
+    if (!root) return;
+
+    [
+      doc.querySelector("section.content_area-wrapper"),
+      doc.getElementById("content_area"),
+      root,
+    ].forEach(function (node) {
+      if (!node) return;
+      flatten(node);
+      setImportant(node, "padding-left", "0px");
+      setImportant(node, "padding-right", "0px");
+    });
+
+    root.querySelectorAll(
+      "#product_photo, #product_photo_zoom_url, " +
+        "#mc-saranoni-size-thumbs, #mc-configured-color-swatch-wrapper, " +
+        "#beanbag-swatch-wrapper, #mc-bb-size-section, #mc-pdp-features, " +
+        "#mc-pdp-accordion, #mc-pdp-purchase-stack, .mc-pdp-purchase-controls"
+    ).forEach(function (start) {
+      var node = start;
+      while (node && node !== root) {
+        flatten(node);
+        node.setAttribute("data-mc-pdp-mobile-wide", "1");
+        node = node.parentElement;
+      }
+    });
+
+    var row = root.querySelector("tr.mc-pdp-main-row,tr.mc-unified-pdp-row");
+    if (row) {
+      flatten(row);
+      setImportant(row, "display", "flex");
+      setImportant(row, "flex-direction", "column");
+      setImportant(row, "align-items", "stretch");
+      setImportant(row, "gap", "12px");
+      setImportant(row, "flex", "0 0 auto");
+      setImportant(row, "flex-basis", "auto");
+      Array.prototype.forEach.call(row.children || [], function (cell) {
+        flatten(cell);
+        setImportant(cell, "display", "flex");
+        setImportant(cell, "flex", "0 0 auto");
+        setImportant(cell, "flex-direction", "column");
+        setImportant(cell, "align-items", "stretch");
+        setImportant(cell, "padding", "0px");
+      });
+    }
+
+    var hero = doc.getElementById("product_photo");
+    var zoom = doc.getElementById("product_photo_zoom_url");
+    [hero, zoom].forEach(function (node) {
+      if (!node) return;
+      setImportant(node, "display", "block");
+      setImportant(node, "width", "100%");
+      setImportant(node, "max-width", "100%");
+      setImportant(node, "height", "auto");
+      setImportant(node, "margin-left", "auto");
+      setImportant(node, "margin-right", "auto");
+    });
+  }
+
+  function scheduleRepair() {
+    if (g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__) return;
+    g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__ = true;
+    var run = function () {
+      g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__ = false;
+      repairMobileWidthChain();
+      installTargetObservers();
+    };
+    if (typeof g.queueMicrotask === "function") g.queueMicrotask(run);
+    else g.setTimeout(run, 0);
+  }
+
+  function installTargetObservers() {
+    if (!isUnifiedFamilyPdp()) return;
+    try {
+      var observer = g.__MC_UNIFIED_PDP_WIDTH_OBSERVER__;
+      if (!observer) {
+        observer = new g.MutationObserver(scheduleRepair);
+        g.__MC_UNIFIED_PDP_WIDTH_OBSERVER__ = observer;
+      }
+      observer.disconnect();
+      var root = doc.getElementById("v65-product-parent");
+      var row = root && root.querySelector("tr.mc-pdp-main-row,tr.mc-unified-pdp-row");
+      var targets = [
+        doc.querySelector("section.content_area-wrapper"),
+        doc.getElementById("content_area"),
+        root,
+        row,
+      ];
+      if (row) Array.prototype.push.apply(targets, Array.prototype.slice.call(row.children || []));
+      targets.forEach(function (node) {
+        if (node) observer.observe(node, { attributes: true, attributeFilter: ["style", "class"] });
+      });
+      if (root) observer.observe(root, { childList: true, subtree: true });
+    } catch (eObserve) {}
+  }
+
+  scheduleRepair();
+  doc.addEventListener("DOMContentLoaded", scheduleRepair);
+  g.addEventListener("load", scheduleRepair);
+  g.addEventListener("resize", scheduleRepair);
+  // The currently baked stable helper has a final 7s pass. Reassert twice
+  // after that finite window, then stop; no scroll-time polling is needed.
+  [100, 400, 1000, 2500, 5000, 7600, 9000].forEach(function (ms) {
+    g.setTimeout(scheduleRepair, ms);
+  });
+})(window);
+
+/* MC_SS_ALT_CLICK_FINAL_20260713
+   Window-capture ownership runs before legacy document-level thumbnail hooks,
+   so a deliberate room-scene selection cannot be reset to photo 1. */
+(function (g, d) {
+  "use strict";
+  if (!g || !d || g.__MC_SS_ALT_CLICK_FINAL_20260713__) return;
+  g.__MC_SS_ALT_CLICK_FINAL_20260713__ = true;
+  if (d.documentElement) d.documentElement.setAttribute("data-mc-ss-alt-click-final", "1");
+  g.addEventListener("click", function (event) {
+    var link = event.target && event.target.closest ? event.target.closest("#altviews [data-mc-ss-alt]") : null;
+    if (!link) return;
+    var field = d.querySelector('input[name="ProductCode"],input[name="productcode"]');
+    var code = String(g.global_Current_ProductCode || (field && field.value) || "").trim().toUpperCase();
+    if (!/^SS-/.test(code)) return;
+    var slot = parseInt(link.getAttribute("data-mc-ss-alt"), 10);
+    var hero = d.getElementById("product_photo");
+    if (!slot || !hero) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    d.documentElement.setAttribute("data-mc-ss-last-alt", String(slot));
+    hero.__mcSsUserSelectedAlt = true;
+    var full = "/v/vspfiles/photos/" + code + "-" + slot + ".jpg";
+    function holdSelection() {
+      hero.__mcSsUserSelectedAlt = true;
+      hero.setAttribute("src", full);
+      hero.removeAttribute("srcset");
+    }
+    holdSelection();
+    [0, 50, 200, 600, 1200].forEach(function (ms) { g.setTimeout(holdSelection, ms); });
+    var zoom = d.getElementById("product_photo_zoom_url") || d.getElementById("product_photo_zoom_url2");
+    if (zoom) zoom.setAttribute("href", full);
+  }, true);
+})(window, document);
+
+/* MC_RETIRED_MEMBER_UI_20260713
+   Member pricing has been retired. Hide both the former custom member-price
+   nodes and Volusion's anonymous-account warning if stale code adds them. */
+(function (g, d) {
+  "use strict";
+  if (!g || !d || g.__MC_RETIRED_MEMBER_UI_20260713__) return;
+  g.__MC_RETIRED_MEMBER_UI_20260713__ = true;
+  var selectors = [
+    ".mc-pdp-member-pricing", ".mc-pdp-member-line", ".mc-member-price-caption",
+    ".mc-planner-login-gate", ".mc-pdp-login-gate", "[data-mc-member-price]",
+    "[data-mc-open-login].mc-pdp-member-cta"
+  ].join(",");
+  function root() {
+    return d.getElementById("v65-product-parent") || d.getElementById("content_area");
+  }
+  function hide(node) {
+    if (!node || !node.style) return;
+    node.setAttribute("data-mc-retired-member-ui", "1");
+    [
+      ["display", "none"], ["visibility", "hidden"], ["height", "0px"],
+      ["min-height", "0px"], ["margin", "0px"], ["padding", "0px"],
+      ["overflow", "hidden"], ["pointer-events", "none"]
+    ].forEach(function (pair) { node.style.setProperty(pair[0], pair[1], "important"); });
+  }
+  function cleanup() {
+    var host = root();
+    if (!host) return;
+    host.querySelectorAll(selectors).forEach(hide);
+    var warnings = Array.prototype.filter.call(host.querySelectorAll("div,table,tbody,tr,td,font,span"), function (node) {
+      var text = String(node.textContent || "").replace(/\s+/g, " ").trim();
+      return text.length > 0 && text.length < 260 &&
+        /to access your account/i.test(text) && /e-?mail address/i.test(text) && /password/i.test(text);
+    });
+    warnings.sort(function (a, b) { return String(a.textContent || "").length - String(b.textContent || "").length; });
+    if (!warnings.length) return;
+    var box = warnings[0];
+    while (box.parentElement && box.parentElement !== host &&
+      /to access your account/i.test(box.parentElement.textContent || "") &&
+      (box.parentElement.getBoundingClientRect().width || 0) < 520) box = box.parentElement;
+    hide(box);
+  }
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", cleanup, { once: true });
+  else cleanup();
+})(window, document);
+
+/* MC_EMPTY_NUMBERED_ALT_RESTORE_20260713
+   Restore numbered Volusion product photos only when the gallery is empty.
+   Mahjong's working eight-image gallery and bean-bag swatches are untouched. */
+(function (g, d) {
+  "use strict";
+  if (!g || !d || g.__MC_EMPTY_NUMBERED_ALT_RESTORE_20260713__) return;
+  g.__MC_EMPTY_NUMBERED_ALT_RESTORE_20260713__ = true;
+  function code() {
+    var field = d.querySelector('input[name="ProductCode"],input[name="productcode"]');
+    return String(g.global_Current_ProductCode || (field && field.value) || "").trim().toUpperCase();
+  }
+  function full(productCode, slot) {
+    return "/v/vspfiles/photos/" + productCode + "-" + slot + ".jpg";
+  }
+  function thumb(productCode, slot) {
+    return "/v/vspfiles/photos/" + productCode + "-" + slot + "T.jpg";
+  }
+  function setHero(productCode, slot) {
+    var hero = d.getElementById("product_photo");
+    if (!hero) return;
+    hero.setAttribute("src", full(productCode, slot));
+    hero.removeAttribute("srcset");
+    var zoom = d.getElementById("product_photo_zoom_url") || d.getElementById("product_photo_zoom_url2");
+    if (zoom) zoom.setAttribute("href", full(productCode, slot));
+  }
+  function restore() {
+    var productCode = code();
+    var hero = d.getElementById("product_photo");
+    var root = d.getElementById("v65-product-parent");
+    if (!root || !productCode || !hero || /^(?:TMH-|BB-|SS-)/.test(productCode)) return;
+    var alt = d.getElementById("altviews") || d.querySelector("span#altviews,.altviews");
+    if (alt && alt.querySelector("img")) return;
+    if (!alt) {
+      alt = d.createElement("span");
+      alt.id = "altviews";
+      var mediaCell = hero.closest("td");
+      if (!mediaCell) return;
+      mediaCell.appendChild(alt);
+    }
+    if (alt.querySelector("[data-mc-numbered-alt]")) return;
+    alt.setAttribute("data-mc-numbered-alt-building", productCode);
+    alt.classList.remove("mc-altviews-empty");
+    alt.classList.add("altviews", "mc-restored-numbered-altviews");
+    alt.style.setProperty("display", "none", "important");
+    alt.style.setProperty("width", "100%", "important");
+    alt.style.setProperty("max-width", "650px", "important");
+    alt.style.setProperty("flex-wrap", "wrap", "important");
+    alt.style.setProperty("gap", "8px", "important");
+    alt.style.setProperty("margin", "12px 0 0", "important");
+    alt.style.setProperty("padding", "0", "important");
+    var current = String(hero.getAttribute("src") || hero.src || "");
+    var match = current.match(/-(\d+)(?:T)?\.(?:jpe?g|png|webp)(?:[?#]|$)/i);
+    var currentSlot = match ? parseInt(match[1], 10) : 0;
+    for (var slot = 1; slot <= 8; slot += 1) {
+      if (slot === currentSlot) continue;
+      (function (photoSlot) {
+        var link = d.createElement("a");
+        var image = d.createElement("img");
+        link.href = full(productCode, photoSlot);
+        link.setAttribute("data-mc-numbered-alt", String(photoSlot));
+        link.style.setProperty("display", "none", "important");
+        image.className = "vCSS_img_alternate_product_photo";
+        image.alt = "Alternate view";
+        image.src = thumb(productCode, photoSlot);
+        image.style.setProperty("width", "88px", "important");
+        image.style.setProperty("height", "88px", "important");
+        image.style.setProperty("object-fit", "cover", "important");
+        image.onload = function () {
+          link.style.setProperty("display", "inline-flex", "important");
+          alt.style.setProperty("display", "flex", "important");
+        };
+        image.onerror = function () {
+          if (link.parentNode) link.parentNode.removeChild(link);
+          if (!alt.querySelector("img")) alt.style.setProperty("display", "none", "important");
+        };
+        link.onclick = function (event) {
+          if (event) event.preventDefault();
+          setHero(productCode, photoSlot);
+          return false;
+        };
+        link.appendChild(image);
+        alt.appendChild(link);
+      })(slot);
+    }
+  }
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", restore, { once: true });
+  else restore();
+})(window, document);
 
 /* MC_PDP_RELATED_FIX_20260630 — NoPhoto thumbs + visible prices when template rail is still native table */
 (function (g) {

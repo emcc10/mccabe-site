@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260706c";
+  var VERSION = "20260714home4";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -300,7 +300,7 @@
     var current = [];
     rows.forEach(function (tr) {
       current.push(tr);
-      if (/Grid_Single_Divider_Horiz/i.test(tr.innerHTML || "")) {
+      if (/(?:Grid_Single_Divider_Horiz|v65-productRow-divider)/i.test(tr.innerHTML || "")) {
         if (current.length) blocks.push(current);
         current = [];
       }
@@ -309,6 +309,46 @@
     return blocks;
   }
 
+  /* A v65-productRow-divider ends a three-product Volusion row.  Keep the
+     title/detail/photo cells in their original column before making cards. */
+  function legacyProductGroups(blockRows) {
+    var productCount = 0;
+    var groups = [];
+    var i;
+    for (i = 0; i < blockRows.length; i++) {
+      productCount = blockRows[i].querySelectorAll("a.productnamecolor, a.colors_productname").length;
+      if (productCount) break;
+    }
+    for (i = 0; i < productCount; i++) {
+      var holder = document.createElement("div");
+      var rowIndex;
+      for (rowIndex = 0; rowIndex < blockRows.length; rowIndex++) {
+        var cells = Array.prototype.filter.call(blockRows[rowIndex].cells || [], function (cell) {
+          return !/v65-product(?:Row|Column)-(?:divider|rowspan)|v65-product-colspan/i.test(cell.className || "");
+        });
+        if (cells[i]) holder.appendChild(cells[i].cloneNode(true));
+      }
+      var title = holder.querySelector("a.productnamecolor, a.colors_productname");
+      var imageLink = legacyProductImageLink(holder);
+      if (title && imageLink) groups.push(holder);
+    }
+    return groups;
+  }
+  function legacyProductImageLink(group) {
+    if (!group) return null;
+    var images = group.querySelectorAll('a[href*="product-p/"] img, a[href*="-p/"] img');
+    var i;
+    for (i = 0; i < images.length; i++) {
+      if (!isProductPhoto(images[i])) continue;
+      if (images[i].parentElement && images[i].parentElement.tagName === "A") return images[i].parentElement;
+    }
+    return null;
+  }
+
+  function legacyProductPriceHtml(group) {
+    var price = group && group.querySelector(".product_productprice, .product_saleprice, .colors_productprice");
+    return price && price.closest("td") ? price.closest("td").innerHTML : "";
+  }
   function legacySkuFromRows(blockRows) {
     var html = "";
     var i;
@@ -380,8 +420,8 @@
   function scoreLegacyProductTable(tbl) {
     if (!tbl || tbl.querySelector(".v-product-grid")) return 0;
     var html = tbl.innerHTML || "";
-    if (!/Grid_Single_Divider/i.test(html)) return 0;
-    var horiz = (html.match(/Grid_Single_Divider_Horiz/gi) || []).length;
+    if (!/(?:Grid_Single_Divider|v65-productRow-divider)/i.test(html)) return 0;
+    var horiz = (html.match(/(?:Grid_Single_Divider_Horiz|v65-productRow-divider)/gi) || []).length;
     var rows = 0;
     try {
       var tbody = tbl.tBodies[0] || tbl;
@@ -579,6 +619,7 @@
       "html[data-mc-category-plp='1'] #content_area .v-product-grid{" +
       "display:block!important;width:100%!important;max-width:100%!important;" +
       "margin:0!important;padding:0!important;clear:both!important}" +
+      "@media(max-width:575px){html.category #content_area .v-product-grid .v-product,html[data-mc-category-plp='1'] #content_area .v-product-grid .v-product{display:block!important;width:100%!important;max-width:100%!important;margin:0 0 28px!important}}" +
       "html.category #content_area table.v65-productDisplay:has(.v-product-grid)," +
       "html[data-mc-category-plp='1'] #content_area table.v65-productDisplay:has(.v-product-grid)," +
       "html.category #content_area table[cellpadding='8']:has(.v-product-grid)," +
@@ -592,6 +633,18 @@
       "html.category #mc-cat-luxe-comforts," +
       "html[data-mc-category-plp='1'] #mc-cat-luxe-comforts{" +
       "max-width:100%!important;overflow:hidden!important}" +
+      "html.category #content_area .v-product-grid .v-product__title," +
+      "html[data-mc-category-plp='1'] #content_area .v-product-grid .v-product__title," +
+      "html.category #content_area .v-product-grid .productnamecolor," +
+      "html[data-mc-category-plp='1'] #content_area .v-product-grid .productnamecolor{" +
+      "display:block!important;width:100%!important;text-align:center!important}" +
+      "html.category #content_area .v-product-grid .v-product__price," +
+      "html[data-mc-category-plp='1'] #content_area .v-product-grid .v-product__price," +
+      "html.category #content_area .v-product-grid .product_productprice," +
+      "html[data-mc-category-plp='1'] #content_area .v-product-grid .product_productprice," +
+      "html.category #content_area .v-product-grid .colors_productprice," +
+      "html[data-mc-category-plp='1'] #content_area .v-product-grid .colors_productprice{" +
+      "width:100%!important;text-align:center!important;justify-content:center!important}" +
       "html.category .footer," +
       "html[data-mc-category-plp='1'] .footer," +
       "html.category footer.footer," +
@@ -862,22 +915,103 @@
     return grid;
   }
 
+  /* Some Volusion category tables use parallel image and detail rows instead
+     of divider blocks. Match each card by its product URL, never by position. */
+  function convertParallelLegacyProductTable(root) {
+    root = root || document.getElementById("content_area");
+    if (!root || root.querySelector(".v-product-grid")) return false;
+    var tables = root.querySelectorAll("table.v65-productDisplay");
+    var table = null;
+    var bestCount = 0;
+    var ti;
+    for (ti = 0; ti < tables.length; ti++) {
+      if (tables[ti].querySelector("table.v65-productDisplay")) continue;
+      var titles = tables[ti].querySelectorAll("a.productnamecolor, a.colors_productname");
+      var images = tables[ti].querySelectorAll('a[href*="product-p/"] img, a[href*="-p/"] img');
+      var productImages = 0;
+      var ii;
+      for (ii = 0; ii < images.length; ii++) if (isProductPhoto(images[ii])) productImages += 1;
+      if (titles.length > bestCount && titles.length === productImages) {
+        table = tables[ti];
+        bestCount = titles.length;
+      }
+    }
+    if (!table || bestCount < 1) return false;
+
+    var imageLinks = {};
+    table.querySelectorAll('a[href*="product-p/"] img, a[href*="-p/"] img').forEach(function (image) {
+      if (!isProductPhoto(image) || !image.parentElement || image.parentElement.tagName !== "A") return;
+      var href = image.parentElement.href || image.parentElement.getAttribute("href") || "";
+      if (!href || imageLinks[href]) return;
+      imageLinks[href] = image.parentElement;
+    });
+    var titleLinks = Array.prototype.slice.call(table.querySelectorAll("a.productnamecolor, a.colors_productname"));
+    var grid = document.createElement("div");
+    grid.className = "v-product-grid";
+    var sourceLinks = [];
+    titleLinks.forEach(function (title) {
+      var href = title.href || title.getAttribute("href") || "";
+      var imageLink = imageLinks[href];
+      if (!href || !imageLink) return;
+      sourceLinks.push(href);
+      var card = document.createElement("div");
+      card.className = "v-product";
+      var imageCopy = imageLink.cloneNode(true);
+      imageCopy.className = (imageCopy.className + " v-product__img mc-plp-image-box").trim();
+      var imageEl = imageCopy.querySelector("img");
+      if (imageEl) imageEl.className = (imageEl.className + " mc-plp-img-fit").trim();
+      card.appendChild(imageCopy);
+      var titleCopy = title.cloneNode(true);
+      titleCopy.className = (titleCopy.className + " v-product__title").trim();
+      card.appendChild(titleCopy);
+      var detailCell = title.closest("td");
+      var priceSource = detailCell && detailCell.querySelector(".product_productprice");
+      if (priceSource) {
+        var price = document.createElement("div");
+        price.className = "v-product__price";
+        price.appendChild(priceSource.cloneNode(true));
+        var shipping = detailCell.querySelector(".vol-free-shipping-icon");
+        if (shipping) price.appendChild(shipping.cloneNode(true));
+        card.appendChild(price);
+      }
+      grid.appendChild(card);
+    });
+    var generatedLinks = Array.prototype.map.call(grid.querySelectorAll("a.v-product__title"), function (a) {
+      return a.href || a.getAttribute("href") || "";
+    });
+    var sourceCounts = {};
+    var generatedCounts = {};
+    sourceLinks.forEach(function (href) { sourceCounts[href] = (sourceCounts[href] || 0) + 1; });
+    generatedLinks.forEach(function (href) { generatedCounts[href] = (generatedCounts[href] || 0) + 1; });
+    var verified = sourceLinks.length === bestCount && generatedLinks.length === bestCount;
+    sourceLinks.forEach(function (href) {
+      if (sourceCounts[href] !== 1 || generatedCounts[href] !== 1) verified = false;
+    });
+    if (!verified) {
+      if (global.console && global.console.warn) global.console.warn("MC parallel PLP converter left native table visible: product count/link verification failed.");
+      return false;
+    }
+    tagProductGridAnchor(grid);
+    table.parentNode.replaceChild(grid, table);
+    injectVolusionProductGridStyle();
+    injectLegacyPlpLayoutFixCss();
+    collapsePlpGridGap(root);
+    return true;
+  }
+
   /** Rebaked categories sometimes lose div.v-product-grid and fall back to Grid_Single table rows. */
   function convertLegacyGridSingleToProductGrid() {
     var root = document.getElementById("content_area");
     if (!root) return false;
 
     var table = findLegacyGridSingleProductTable(root);
-    var expected = 0;
-    if (table) {
-      expected = (table.innerHTML.match(/Grid_Single_Divider_Horiz/gi) || []).length;
-      if (!expected) {
-        expected = (table.innerHTML.match(/VCompare\s*\(/gi) || []).length;
-      }
-    }
+    var expected = table
+      ? table.querySelectorAll("a.productnamecolor, a.colors_productname").length
+      : 0;
 
     var have = countGridProducts(root);
     if (!table) {
+      if (convertParallelLegacyProductTable(root)) return true;
       if (have > 0) global.__MC_LEGACY_GRID_CONVERTED__ = true;
       return false;
     }
@@ -900,40 +1034,53 @@
     var grid = document.createElement("div");
     grid.className = "v-product-grid";
 
+    var sourceLinks = [];
     blocks.forEach(function (blockRows) {
-      var card = document.createElement("div");
-      card.className = "v-product";
+      legacyProductGroups(blockRows).forEach(function (group) {
+        var titleA = group.querySelector("a.productnamecolor, a.colors_productname");
+        var imgA = legacyProductImageLink(group);
+        if (!titleA || !imgA) return;
+        var href = titleA.href || titleA.getAttribute("href") || "";
+        if (!href) return;
+        sourceLinks.push(href);
 
-      var imgA = findLegacyImageLink(blockRows);
-      if (imgA) {
+        var card = document.createElement("div");
+        card.className = "v-product";
         var newImgA = imgA.cloneNode(true);
         newImgA.className = (newImgA.className + " v-product__img").trim();
         card.appendChild(newImgA);
-      }
 
-      var titleA = findLegacyTitleLink(blockRows);
-      if (titleA) {
         var newTitle = titleA.cloneNode(true);
         newTitle.className = (newTitle.className + " v-product__title").trim();
         card.appendChild(newTitle);
-      }
 
-      var priceHtml = extractLegacyPriceHtml(blockRows);
-      if (priceHtml) {
-        var priceDiv = document.createElement("div");
-        priceDiv.innerHTML = priceHtml;
-        card.appendChild(priceDiv);
-      }
-
-      var vScript = findLegacyVCompareScript(blockRows);
-      if (vScript) card.appendChild(vScript.cloneNode(true));
-
-      if (card.childNodes.length) grid.appendChild(card);
+        var priceHtml = legacyProductPriceHtml(group);
+        if (priceHtml) {
+          var priceDiv = document.createElement("div");
+          priceDiv.innerHTML = priceHtml;
+          card.appendChild(priceDiv);
+        }
+        var vScript = findLegacyVCompareScript([group]);
+        if (vScript) card.appendChild(vScript.cloneNode(true));
+        grid.appendChild(card);
+      });
     });
 
     var made = grid.querySelectorAll(".v-product").length;
-    if (!made) return false;
-
+    var generatedLinks = Array.prototype.map.call(
+      grid.querySelectorAll("a.v-product__title"),
+      function (a) { return a.href || a.getAttribute("href") || ""; }
+    );
+    var sourceCounts = {};
+    var generatedCounts = {};
+    sourceLinks.forEach(function (href) { sourceCounts[href] = (sourceCounts[href] || 0) + 1; });
+    generatedLinks.forEach(function (href) { generatedCounts[href] = (generatedCounts[href] || 0) + 1; });
+    var verified = made === expected && made === sourceLinks.length && sourceLinks.length === generatedLinks.length;
+    sourceLinks.forEach(function (href) { if (sourceCounts[href] !== 1 || generatedCounts[href] !== 1) verified = false; });
+    if (!verified) {
+      if (global.console && global.console.warn) global.console.warn("MC PLP converter left native table visible: product count/link verification failed.", { expected: expected, source: sourceLinks.length, generated: generatedLinks.length });
+      return false;
+    }
     tagProductGridAnchor(grid);
     table.parentNode.replaceChild(grid, table);
     unwrapProductGridShell(grid);
@@ -945,6 +1092,97 @@
 
   function countGridProducts(root) {
     return root.querySelectorAll(".v-product-grid .v-product").length;
+  }
+
+  /* The homepage uses the same three-row Volusion product blocks as legacy
+     category pages, but it is intentionally excluded from category routing.
+     Convert just that featured-products table into the existing card markup. */
+  function injectHomeFeaturedGridCss() {
+    if (document.getElementById("mc-home-featured-grid-css")) return;
+    var style = document.createElement("style");
+    style.id = "mc-home-featured-grid-css";
+    style.textContent =
+      "body.is-home #content_area .mc-home-featured-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:24px!important;width:100%!important;margin:0!important;padding:0!important;clear:both!important}" +
+      "body.is-home #content_area .mc-home-featured-grid .v-product{display:flex!important;flex-direction:column!important;align-items:center!important;min-width:0!important;margin:0!important;padding:0!important;box-sizing:border-box!important;text-align:center!important}" +
+      "body.is-home #content_area .mc-home-featured-grid .v-product__img{display:flex!important;order:1!important;align-items:center!important;justify-content:center!important;width:100%!important;height:280px!important;margin:0!important;padding:0!important;overflow:hidden!important}" +
+      "body.is-home #content_area .mc-home-featured-grid .v-product__img img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center center!important;margin:0!important}" +
+      "body.is-home #content_area .mc-home-featured-grid .v-product__title{display:block!important;order:2!important;width:100%!important;margin:12px 0 4px!important;text-align:center!important;text-decoration:none!important}" +
+      "body.is-home #content_area .mc-home-featured-grid .v-product__price{display:block!important;order:3!important;width:100%!important;text-align:center!important}" +
+      "@media(max-width:575px){body.is-home #content_area .mc-home-featured-grid{grid-template-columns:1fr!important;gap:28px!important}body.is-home #content_area .mc-home-featured-grid .v-product__img{height:280px!important}}";
+    (document.head || document.documentElement).appendChild(style);
+  }
+
+  function convertHomeFeaturedProducts() {
+    if (!isHome()) return false;
+    var root = document.getElementById("content_area");
+    if (!root || root.querySelector(".mc-home-featured-grid")) return false;
+    var tables = root.querySelectorAll("table.v65-productDisplay");
+    var table = null;
+    var expected = 0;
+    var ti;
+    for (ti = 0; ti < tables.length; ti++) {
+      var count = tables[ti].querySelectorAll("a.productnamecolor, a.colors_productname").length;
+      if (count > expected) {
+        table = tables[ti];
+        expected = count;
+      }
+    }
+    if (!table || expected < 1) return false;
+
+    var blocks = splitGridSingleBlocks(table);
+    if (!blocks.length) return false;
+    var grid = document.createElement("div");
+    grid.className = "v-product-grid mc-home-featured-grid";
+    var sourceLinks = [];
+    blocks.forEach(function (blockRows) {
+      legacyProductGroups(blockRows).forEach(function (group) {
+        var title = group.querySelector("a.productnamecolor, a.colors_productname");
+        var imageLink = legacyProductImageLink(group);
+        if (!title || !imageLink) return;
+        var href = title.href || title.getAttribute("href") || "";
+        if (!href) return;
+        sourceLinks.push(href);
+        var card = document.createElement("div");
+        card.className = "v-product";
+        var image = imageLink.cloneNode(true);
+        image.className = (image.className + " v-product__img mc-plp-image-box").trim();
+        var imageEl = image.querySelector("img");
+        if (imageEl) imageEl.className = (imageEl.className + " mc-plp-img-fit").trim();
+        card.appendChild(image);
+        var titleCopy = title.cloneNode(true);
+        titleCopy.className = (titleCopy.className + " v-product__title").trim();
+        card.appendChild(titleCopy);
+        var priceHtml = legacyProductPriceHtml(group);
+        if (priceHtml) {
+          var price = document.createElement("div");
+          price.className = "v-product__price";
+          price.innerHTML = priceHtml;
+          card.appendChild(price);
+        }
+        grid.appendChild(card);
+      });
+    });
+
+    var generated = grid.querySelectorAll(".v-product").length;
+    var generatedLinks = Array.prototype.map.call(grid.querySelectorAll("a.v-product__title"), function (a) {
+      return a.href || a.getAttribute("href") || "";
+    });
+    var sourceCounts = {};
+    var generatedCounts = {};
+    sourceLinks.forEach(function (href) { sourceCounts[href] = (sourceCounts[href] || 0) + 1; });
+    generatedLinks.forEach(function (href) { generatedCounts[href] = (generatedCounts[href] || 0) + 1; });
+    var verified = generated === expected && sourceLinks.length === expected && generatedLinks.length === expected;
+    sourceLinks.forEach(function (href) {
+      if (sourceCounts[href] !== 1 || generatedCounts[href] !== 1) verified = false;
+    });
+    if (!verified) {
+      if (global.console && global.console.warn) global.console.warn("MC home featured-products converter left native table visible: product count/link verification failed.");
+      return false;
+    }
+    injectVolusionProductGridStyle();
+    injectHomeFeaturedGridCss();
+    table.parentNode.replaceChild(grid, table);
+    return true;
   }
 
   function photoUrlFromAnySrc(src) {
@@ -1368,7 +1606,27 @@
       });
   }
 
+  function restoreHomeHeaderState() {
+    if (!isHome()) return;
+    var html = document.documentElement;
+    if (html) {
+      html.classList.remove("category", "is-category-or-listing-page");
+      html.classList.add("home", "mc-allow-home-hero");
+      html.setAttribute("data-mc-category-plp", "0");
+    }
+    if (document.body) {
+      document.body.classList.remove("category", "is-category-or-listing-page");
+      document.body.classList.add("is-home");
+      document.body.setAttribute("data-mc-category-plp", "0");
+    }
+  }
+
   function run() {
+    if (isHome()) {
+      restoreHomeHeaderState();
+      convertHomeFeaturedProducts();
+      return;
+    }
     if (!isCategoryPlp()) return;
     markCategory();
     repairCategoryPageShell();
@@ -1540,7 +1798,14 @@
     }
   }
 
-  var PDP_AUTH_WANT = "20260625sarrepair2";
+  /* Must match VERSION in mc-pdp-auth-cta-fix.js — that is the string that script writes into
+     global.__MC_PDP_AUTH_CTA_FIX_VER__. This constant had drifted out of sync (was
+     "20260625sarrepair2", then briefly "20260708sarmob1" which was itself stale/incorrect),
+     which permanently broke the version-match guard below and caused loadPdpAuthCtaFix() to
+     re-inject the script on every call. Confirmed against the live deployed script on
+     20260713 — update this if mc-pdp-auth-cta-fix.js's VERSION is bumped again.
+     MC_PDP_AUTH_VERSION_GUARD_FIX_20260713 */
+  var PDP_AUTH_WANT = "20260714sarvariant2";
 
   function isSaranoniPdpPage() {
     try {
@@ -1565,6 +1830,11 @@
         (b && b.classList.contains("productdetails")) ||
         !!global.document.getElementById("v65-product-parent");
       if (!onPdp) return;
+      /* template_266.html already loads mc-pdp-auth-cta-fix.js on every PDP via its own
+         head-boot + fallback loaders. If a copy is already present, do not remove it and
+         inject another — that produced multiple live copies of the same ~11k-line script
+         running concurrently on the same PDP. MC_PDP_AUTH_DUPLICATE_LOAD_FIX_20260713 */
+      if (global.document.querySelector('script[src*="mc-pdp-auth-cta-fix.js"]')) return;
       if (String(global.__MC_PDP_AUTH_CTA_FIX_VER__ || "") === PDP_AUTH_WANT) return;
       global.document
         .querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]')
