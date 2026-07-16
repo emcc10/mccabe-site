@@ -21,9 +21,10 @@ def targets() -> list[str]:
     for path in PHOTOS.glob("TMH-*-1.jpg"):
         code = path.name[:-6]
         names.add(f"{code}-1.jpg")
-        thumb = PHOTOS / f"{code}-2T.jpg"
-        if thumb.is_file():
-            names.add(f"{code}-2T.jpg")
+        for suf in ("-2T.jpg", "-1T.jpg"):
+            thumb = PHOTOS / f"{code}{suf}"
+            if thumb.is_file():
+                names.add(f"{code}{suf}")
     return sorted(names)
 
 
