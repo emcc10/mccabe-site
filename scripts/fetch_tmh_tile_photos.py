@@ -17,6 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / "vspfiles" / "photos"
 TMP = ROOT / "tmp" / "tmh-tile-downloads"
 MAIN_MAX = 1946
+# Both -1 and -2T are used as PDP main/thumb; never keep sources under this width.
+MIN_WIDTH = 650
 
 # Volusion ProductCode -> official Shopify CDN image
 TILE_PRODUCTS: dict[str, str] = {
@@ -102,8 +104,15 @@ def save_main(data: bytes, dest: Path) -> tuple[int, int]:
         if im.mode not in ("RGB", "L"):
             im = im.convert("RGB")
         w, h = im.size
+        if w < MIN_WIDTH:
+            raise ValueError(f"source width {w}px < {MIN_WIDTH}px minimum")
         if max(w, h) > MAIN_MAX:
             im.thumbnail((MAIN_MAX, MAIN_MAX), Image.Resampling.LANCZOS)
+            w, h = im.size
+            if w < MIN_WIDTH:
+                raise ValueError(
+                    f"after resize width {w}px < {MIN_WIDTH}px minimum"
+                )
         im.save(dest, "JPEG", quality=93, optimize=True)
         return im.size
 
@@ -117,6 +126,7 @@ def write_product(code: str, url: str) -> tuple[int, int]:
     data = download(url)
     raw.write_bytes(data)
     size = save_main(data, main_dest)
+    # PDP hero often points at -2T; keep it full-size like -1 (never a 320px thumb).
     shutil.copy2(main_dest, thumb_dest)
     return size
 

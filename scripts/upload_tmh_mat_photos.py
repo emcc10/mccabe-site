@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Upload TMH mahjong mat -1.jpg and -2T.jpg files to Volusion SFTP."""
+"""Upload TMH -1.jpg and -2T.jpg files to Volusion SFTP.
+
+Volusion PDPs use {ProductCode}-2T.jpg as #product_photo for Mahjong House,
+so both -1 and -2T must be full-size (>=650px wide), never 320px thumbs.
+"""
 from __future__ import annotations
 
 import os
@@ -8,24 +12,32 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
+MIN_WIDTH = 650
 sys.path.insert(0, str(ROOT / "scripts"))
 
 
 def targets() -> list[str]:
     names: set[str] = set()
-    for pattern in (
-        "TMH-MAT-*-1.jpg",
-        "TMH-TRV-*-1.jpg",
-        "TMH-TILE-*-1.jpg",
-        "TMH-RACK-*-1.jpg",
-    ):
-        for path in PHOTOS.glob(pattern):
-            code = path.name[:-6]
-            names.add(f"{code}-1.jpg")
-            thumb = PHOTOS / f"{code}-2T.jpg"
-            if thumb.is_file():
-                names.add(f"{code}-2T.jpg")
+    for path in PHOTOS.glob("TMH-*-1.jpg"):
+        code = path.name[:-6]
+        names.add(f"{code}-1.jpg")
+        thumb = PHOTOS / f"{code}-2T.jpg"
+        if thumb.is_file():
+            names.add(f"{code}-2T.jpg")
     return sorted(names)
+
+
+def assert_min_width(path: Path) -> tuple[int, int]:
+    try:
+        from PIL import Image
+    except ImportError as exc:
+        raise SystemExit("Pillow required: pip install Pillow") from exc
+
+    with Image.open(path) as im:
+        w, h = im.size
+    if w < MIN_WIDTH:
+        raise ValueError(f"{path.name} is {w}px wide (min {MIN_WIDTH})")
+    return w, h
 
 
 def main() -> int:
@@ -42,8 +54,11 @@ def main() -> int:
 
     files = targets()
     if not files:
-        print("No TMH-MAT photos found", file=sys.stderr)
+        print("No TMH photos found", file=sys.stderr)
         return 1
+
+    for name in files:
+        assert_min_width(PHOTOS / name)
 
     transport = connect_paramiko_transport(
         os.environ["FTP_SERVER"],
@@ -70,7 +85,7 @@ def main() -> int:
     finally:
         transport.close()
 
-    print(f"Uploaded {ok}/{len(files)} TMH mat/travel photo(s); failed {fail}")
+    print(f"Uploaded {ok}/{len(files)} TMH photo(s); failed {fail}")
     return 1 if fail else 0
 
 

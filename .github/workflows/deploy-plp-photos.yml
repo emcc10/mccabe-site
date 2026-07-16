@@ -52,7 +52,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y lftp openssh-client python3-pip
-          pip3 install paramiko
+          pip3 install paramiko Pillow
 
       - name: Detect changed photos (push only)
         if: github.event_name == 'push'
@@ -71,7 +71,7 @@ jobs:
             printf '%s\n' "$changed_files"
             echo "EOF"
           } >> "$GITHUB_ENV"
-          if grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|TMH-TILE-|TMH-RACK-|\.tmh-mat-fullsize)' <<< "$changed_files"; then
+          if grep -qE 'vspfiles/photos/(TMH-MAT-|TMH-TRV-|TMH-TILE-|TMH-RACK-|TMH-ACC-|\.tmh-mat-fullsize)' <<< "$changed_files"; then
             echo "UPLOAD_TMH_MATS=1" >> "$GITHUB_ENV"
           fi
 
@@ -124,7 +124,7 @@ jobs:
             fi
           done
 
-      - name: Upload all TMH mat and travel photos (full-size sync)
+      - name: Upload all TMH photos (full-size -1 and -2T sync)
         if: env.UPLOAD_TMH_MATS == '1' || (github.event_name == 'workflow_dispatch' && inputs.scope == 'full')
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
@@ -144,19 +144,33 @@ jobs:
           python3 scripts/upload_recliner_plp_photos.py
           python3 scripts/upload_missing_stock_photos.py
 
-      - name: Verify TMH mat photos on live CDN
+      - name: Verify TMH photos on live CDN (min 650px wide)
         if: env.UPLOAD_TMH_MATS == '1' || (github.event_name == 'workflow_dispatch' && inputs.scope == 'full')
         run: |
           set -e
-          for f in TMH-MAT-PINK-MAT-1.jpg TMH-MAT-PINK-MAT-2T.jpg TMH-TRV-AMETHYST-GEM-MAT-1.jpg; do
-            local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
-            live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s)" | wc -c | tr -d ' ')
-            echo "$f local=$local live=$live"
-            if [ "$live" -lt "$((local / 2))" ]; then
-              echo "::error::Mat photo not synced to CDN: $f (local=$local live=$live)"
-              exit 1
-            fi
-          done
+          python3 - <<'PY'
+          import io, urllib.request
+          from PIL import Image
+          samples = [
+            "TMH-MAT-PINK-MAT-2T.jpg",
+            "TMH-TRV-ISLAND-TILES-GREEN-2T.jpg",
+            "TMH-ACC-CARRYALL-PINK-2T.jpg",
+            "TMH-TILE-TORTOISE-CREAM-1.jpg",
+            "TMH-TRV-ISLAND-TILES-PINK-1.jpg",
+          ]
+          base = "https://www.mccabestheaterandliving.com/v/vspfiles/photos/"
+          ua = {"User-Agent": "Mozilla/5.0"}
+          for name in samples:
+            data = urllib.request.urlopen(
+              urllib.request.Request(base + name + "?v=verify", headers=ua), timeout=60
+            ).read()
+            im = Image.open(io.BytesIO(data))
+            w, h = im.size
+            print(f"{name}: {w}x{h} bytes={len(data)}")
+            if w < 650:
+              raise SystemExit(f"::error::{name} still under 650px wide ({w}x{h})")
+          print("TMH sample photos OK (>=650px)")
+          PY
 
       - name: Verify sample photos on live CDN
         run: |
