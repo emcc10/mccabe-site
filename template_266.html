@@ -1497,50 +1497,6 @@ document.addEventListener("DOMContentLoaded", function () {
   <!-- mc-pdp-auth-cta-fix-v21.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
        A second static ?mcrd=live tag used to live here; it cached an old copy whose stabilizer
        fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260624B -->
-  <script id="mc-mahjong-title-above-atc-fix-20260716">
-  (function () {
-    /* MC_MAHJONG_TITLE_ABOVE_ATC_FIX_20260716 (additive only; does not edit mc-pdp-auth-cta-fix-v21.js
-       or mc-unified-pdp-layout.js). Root cause: the visible Add to Cart controls live in
-       .mc-unified-purchase-controls, which the Mahjong info-column reorder logic does not track
-       (it only tracks the hidden #mc-pdp-purchase-stack), so the title can end up rendered below it.
-       This just re-asserts title-before-purchase-controls order, scoped to Mahjong PDPs only. */
-    function fixMahjongTitleAboveAtc() {
-      var body = document.body;
-      if (!body || !body.classList.contains("mc-mahjong-house-pdp")) return;
-      var col = document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td");
-      var title = document.getElementById("mc-pdp-title-right");
-      if (!col || !title || title.parentNode !== col) return;
-
-      var logo = document.getElementById("mc-pdp-brand-logo");
-      var purchase =
-        col.querySelector(":scope > .mc-unified-purchase-controls") ||
-        document.getElementById("mc-pdp-purchase-stack");
-      var accordion = document.getElementById("mc-pdp-accordion");
-
-      var titleAnchor = logo && logo.parentNode === col ? logo.nextSibling : col.firstChild;
-      if (titleAnchor !== title) {
-        try { col.insertBefore(title, titleAnchor); } catch (eIns) {}
-      }
-
-      if (purchase && purchase.parentNode === col) {
-        var after =
-          (accordion && accordion.parentNode === col) ? accordion :
-          (document.getElementById("mc-pdp-price-stack-host") || title);
-        if (after && after.parentNode === col && after.nextElementSibling !== purchase) {
-          try {
-            if (after.nextSibling) col.insertBefore(purchase, after.nextSibling);
-            else col.appendChild(purchase);
-          } catch (eMove) {}
-        }
-      }
-    }
-    fixMahjongTitleAboveAtc();
-    [200, 600, 1200, 2000].forEach(function (ms) {
-      setTimeout(fixMahjongTitleAboveAtc, ms);
-    });
-    document.addEventListener("DOMContentLoaded", fixMahjongTitleAboveAtc);
-  })();
-  </script>
   <style id="mc-ss-hero-critical-20260701">
 @media (min-width:992px){
   html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #v65-product-parent>tbody>tr:nth-of-type(2)>td:first-child,
