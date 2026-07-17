@@ -4,12 +4,10 @@ Volusion-ready import CSVs, reusing known existing Option IDs where the
 color = 1048 everywhere), and only minting new IDs for genuinely new values.
 
 Outputs to catalog/saranoni-imports/_batch-20260716/:
-  - Options_Import.csv (id,optioncatid,optionsdesc,pricediff,applytoproductcodes)
-    -- a single additive Options import; applytoproductcodes assigns each new
-    option value directly to the right products in the same import (matches
-    the format already used in saranoni_options_import_current.csv), so there
-    is no separate Products import step and nothing to merge in Excel.
-  - README.md with import instructions and the out-of-stock findings
+  - Options_Import.csv   (id,optioncatid,optionsdesc,pricediff)  -- additive only
+  - Products_APPEND_ids.csv (productcode,append_optionids)       -- IDs to MERGE
+    into each product's existing optionids list (NOT a full replacement)
+  - README.md with exact merge instructions and the out-of-stock findings
 """
 from __future__ import annotations
 
@@ -63,11 +61,10 @@ def main() -> None:
     with MISSING_CSV.open(newline="", encoding="utf-8") as f:
         missing_rows = list(csv.DictReader(f))
 
-    # Assign/reuse an ID per unique (optioncatid, optionsdesc, pricediff) value,
-    # and collect every product code that value should apply to.
+    # Assign/reuse an ID per unique (optioncatid, optionsdesc, pricediff) value.
     value_to_id: dict[tuple[str, str, str], int] = {}
-    value_products: dict[tuple[str, str, str], list[str]] = {}
-    option_order: list[tuple[str, str, str]] = []
+    options_out: list[dict[str, str]] = []
+    product_ids: dict[str, list[int]] = {}
     reused, minted = 0, 0
 
     for row in missing_rows:
@@ -86,27 +83,29 @@ def main() -> None:
                 value_to_id[key] = next_id
                 next_id += 1
                 minted += 1
-            option_order.append(key)
-        value_products.setdefault(key, []).append(code)
-
-    options_path = OUT_DIR / "Options_Import.csv"
-    with options_path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(
-            f, fieldnames=["id", "optioncatid", "optionsdesc", "pricediff", "applytoproductcodes"]
-        )
-        w.writeheader()
-        for key in option_order:
-            cat, desc, pricediff = key
-            codes = sorted(set(value_products[key]))
-            w.writerow({
+            options_out.append({
                 "id": str(value_to_id[key]),
                 "optioncatid": cat,
                 "optionsdesc": desc,
                 "pricediff": pricediff,
-                "applytoproductcodes": ",".join(codes),
             })
-    print(f"Wrote {options_path} ({len(option_order)} unique option rows; "
+        product_ids.setdefault(code, []).append(value_to_id[key])
+
+    options_path = OUT_DIR / "Options_Import.csv"
+    with options_path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["id", "optioncatid", "optionsdesc", "pricediff"])
+        w.writeheader()
+        w.writerows(options_out)
+    print(f"Wrote {options_path} ({len(options_out)} unique option rows; "
           f"{reused} reused existing IDs, {minted} newly minted from {NEXT_NEW_ID_START})")
+
+    products_path = OUT_DIR / "Products_APPEND_ids.csv"
+    with products_path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["productcode", "append_optionids"])
+        for code, ids in sorted(product_ids.items()):
+            w.writerow([code, ",".join(str(i) for i in sorted(set(ids)))])
+    print(f"Wrote {products_path} ({len(product_ids)} products)")
 
     # Out-of-stock-on-Saranoni option VALUES that are already live on McCabe (recommend removal).
     oos_existing_rows: list[dict[str, str]] = []
@@ -152,26 +151,35 @@ def main() -> None:
         "endpoint, including per-variant `available` stock flags) against the",
         "options currently rendered on each McCabe PDP.",
         "",
-        "## 1. Options_Import.csv (single-step, safe / additive)",
+        "## 1. Options_Import.csv (safe / purely additive)",
         "",
-        "Import via **Inventory → Import/Export → Options**. Columns:",
-        "`id,optioncatid,optionsdesc,pricediff,applytoproductcodes` — the same",
-        "format as `saranoni_options_import_current.csv`. The `applytoproductcodes`",
-        "column assigns each new option value directly to the listed ProductCodes",
-        "in this same import, so there is **no separate Products import step and",
-        "nothing to merge by hand.** It only adds this new value to each listed",
-        "product; it does not touch or remove any option that product already has.",
+        "Import via **Inventory → Import/Export → Options**. Creates option rows",
+        "only; does not attach them to any product. Values that already exist",
+        "elsewhere in the catalog under the same Option Category with $0 price",
+        "diff reuse the existing ID (matches `saranoni_options_import_current.csv`",
+        f"/ `Saranoni_Options_PriceDiff_Import.csv`); brand-new values were minted",
+        f"starting at id {NEXT_NEW_ID_START}. **Before importing, re-export your",
+        "current Options list from Volusion and confirm none of the minted IDs",
+        "are already in use** (this repo does not have live read access to the",
+        "full Volusion option-ID range, only to prior export snapshots).",
         "",
-        "Values that already exist elsewhere in the catalog under the same Option",
-        "Category with a $0 price diff reuse the existing ID (matches",
-        "`saranoni_options_import_current.csv` / `Saranoni_Options_PriceDiff_Import.csv`);",
-        f"brand-new values were minted starting at id {NEXT_NEW_ID_START}.",
-        "**Before importing, re-export your current Options list from Volusion and",
-        "confirm none of the minted IDs are already in use** (this repo only has",
-        "prior export snapshots, not live read access to the full Volusion",
-        "option-ID range).",
+        "## 2. Products_APPEND_ids.csv — DO NOT IMPORT AS-IS",
         "",
-        "## 2. Existing_Options_Out_Of_Stock_On_Saranoni.csv",
+        "This file lists, per product code, the option IDs that need to be added.",
+        "Volusion's Products import `optionids` column **replaces** a product's",
+        "full option list, it does not merge. Before importing:",
+        "",
+        "1. Export current Products (Inventory → Import/Export → Export →",
+        "   Products, include the `OptionIDs` column) for every ProductCode in",
+        "   this file.",
+        "2. For each row, combine the **existing** OptionIDs with the",
+        "   `append_optionids` from this file into one comma-separated list.",
+        "3. Import that merged list back via Products import.",
+        "",
+        "Skipping step 1–2 and importing this file directly risks wiping out",
+        "colors/sizes a product already has assigned.",
+        "",
+        "## 3. Existing_Options_Out_Of_Stock_On_Saranoni.csv",
         "",
         "Option values that are **already live and purchasable on McCabe today**",
         "but show `available: false` for every matching variant on saranoni.com.",
@@ -180,7 +188,7 @@ def main() -> None:
         "that ProductCode), or set the product to backorder/hidden if the whole",
         "line is out.",
         "",
-        "## 3. Fully out-of-stock products (saranoni_fully_out_of_stock_products.csv)",
+        "## 4. Fully out-of-stock products (saranoni_fully_out_of_stock_products.csv)",
         "",
         "Every variant is unavailable on saranoni.com for these product codes.",
         "Recommended action: set `HideProduct=Y` (or otherwise disable",
