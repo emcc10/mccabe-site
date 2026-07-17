@@ -2357,8 +2357,12 @@
     }
 
     function placeMahjongDesktopTitleAbovePurchase() {
+      /* MC_MAHJONG_TITLE_ORDER_MOBILE_20260716 (re-applied — was lost when this
+         file was re-synced to the live baseline): the desktop-only matchMedia
+         gate meant mobile never got the title-above-purchase repositioning,
+         leaving the product name under the ATC button there. The logic itself
+         is viewport-independent; run it everywhere. */
       try {
-        if (global.matchMedia && !global.matchMedia("(min-width: 992px)").matches) return;
         var desktopTitle = global.document.getElementById("mc-pdp-title-right");
         if (!desktopTitle || desktopTitle.parentNode !== infoColumn) return;
         var desktopLogo = global.document.getElementById("mc-pdp-brand-logo");
@@ -9352,16 +9356,65 @@
     });
   }
 
+  /* MC_BEANBAG_RELATED_REVEAL_20260716: the related-items section renders on
+     Mahjong PDPs (revealMahjongRelated forces it visible + an observer keeps
+     it that way) but there is NO equivalent on Bean Bag PDPs, so something
+     leaves #related_products_content collapsed there and nothing un-collapses
+     it. The live HTML has exactly ONE clean related table with 5 unique
+     products (no duplicates), so a plain reveal is safe. This ONLY touches the
+     two related-section elements — no ancestor walking, no dedup — so it
+     cannot affect the features column or any other part of the page. */
+  function revealBeanBagRelated() {
+    if (!isBeanBagPdpPage()) return;
+    var related = global.document.getElementById("related_products_content");
+    var relatedRoot = global.document.getElementById("v65-product-related");
+    if (!related && !relatedRoot) return;
+    try {
+      if (related) {
+        related.style.setProperty("display", "table-cell", "important");
+        related.style.setProperty("visibility", "visible", "important");
+        related.style.setProperty("opacity", "1", "important");
+        related.style.setProperty("height", "auto", "important");
+        related.style.setProperty("width", "100%", "important");
+      }
+      if (relatedRoot) {
+        relatedRoot.style.setProperty("display", "table", "important");
+        relatedRoot.style.setProperty("visibility", "visible", "important");
+        relatedRoot.style.setProperty("width", "100%", "important");
+        relatedRoot.style.setProperty("height", "auto", "important");
+      }
+    } catch (eBbRelated) {}
+    if (related && !related.dataset.mcBbRelatedRevealBound) {
+      related.dataset.mcBbRelatedRevealBound = "1";
+      try {
+        var relatedObserver = new global.MutationObserver(function () {
+          if (related.style.getPropertyValue("display") === "none") revealBeanBagRelated();
+        });
+        relatedObserver.observe(related, { attributes: true, attributeFilter: ["style"] });
+      } catch (eBbRelObs) {}
+    }
+  }
+
   function scheduleBeanBagOptionRepair() {
     if (!isBeanBagPdpPage()) return;
     /* This must run even when an earlier Bean Bag initializer has already
        claimed the page; that earlier initializer hides the real quantity row. */
     global.setTimeout(finalizeBeanBagQuantityControl, 2400);
+    /* MC_BEANBAG_RELATED_LATE_SWAP_20260716: the 120/600/1800ms batch below
+       ends before Volusion's late related-items content swap (verified
+       earlier in a controlled repro: reveals that stopped at 2800ms lost the
+       race every time; retrying well past it stuck permanently). The swap can
+       also REPLACE the observed cell node, killing the MutationObserver bound
+       to the old node — each retry rebinds to whatever node exists then.
+       Scheduled outside the version guard so it re-arms on every load. */
+    [3500, 6000, 9000, 12000, 16000].forEach(function (msLate) {
+      global.setTimeout(revealBeanBagRelated, msLate);
+    });
     if (global.__MC_BB_OPTION_REPAIR_VER__ === VERSION) return;
     global.__MC_BB_OPTION_REPAIR_VER__ = VERSION;
     [120, 600, 1800].forEach(function (ms) {
       global.setTimeout(function () {
-        try { initBeanBagImageSync(); ensureBeanBagSizeRow(); markBeanBagCoverSwatchesReady(); ensureBeanBagBrandLogo(); ensureBeanBagPdpAccordion(); appendBeanBagInfoColumnOrder(); hideBeanBagNativeOptionsTable(); sanitizeBeanBagAltviews(); applyPdpMainImageCap(); } catch (eBbRepair) {}
+        try { initBeanBagImageSync(); ensureBeanBagSizeRow(); markBeanBagCoverSwatchesReady(); ensureBeanBagBrandLogo(); ensureBeanBagPdpAccordion(); appendBeanBagInfoColumnOrder(); hideBeanBagNativeOptionsTable(); sanitizeBeanBagAltviews(); applyPdpMainImageCap(); revealBeanBagRelated(); } catch (eBbRepair) {}
       }, ms);
     });
   }
