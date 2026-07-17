@@ -31,7 +31,7 @@ SS_INVENTORY = ROOT / "tmp" / "altview-inventory" / "steve_silver_alt_inventory.
 UA = {"User-Agent": "Mozilla/5.0 (McCabe altview fetch)"}
 MIN_WIDTH = 650
 MAIN_MAX = 2000
-MAX_ALTVIEWS = 8
+MAX_ALTVIEWS = 24
 JPEG_QUALITY = 92
 SLEEP_S = 0.45
 
