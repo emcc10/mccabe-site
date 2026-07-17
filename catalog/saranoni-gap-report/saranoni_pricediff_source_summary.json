@@ -1,0 +1,113 @@
+{
+  "wearable-blanket": {
+    "base": 59,
+    "axes": {
+      "Size": {
+        "Small Minky": 0,
+        "Medium Minky": 3,
+        "Small Faux Fur": 0,
+        "Medium Faux Fur": 3
+      },
+      "Color": {
+        "Feather": 0,
+        "Cream": 0,
+        "Hazel": 0
+      }
+    }
+  },
+  "cozy-bamboni-robe": {
+    "base": 125,
+    "axes": {
+      "Size": {
+        "Small/Medium": 0,
+        "Large/XL": 0
+      },
+      "Color": {
+        "Taupe": 0,
+        "Ivory": 0,
+        "Gray": 0,
+        "French Rose": 0,
+        "Tori Halford": 10
+      }
+    }
+  },
+  "snuggler": {
+    "base": 65,
+    "axes": {
+      "Size": {
+        "Youth": 0,
+        "Teen": 10,
+        "Adult": 20
+      },
+      "Color": {
+        "Snow Leopard": 0,
+        "Rose Dust": 0,
+        "Charcoal": 0,
+        "Hunter": 0,
+        "Oatmeal": 0,
+        "Navy": 0,
+        "Classic Leopard": 0
+      }
+    }
+  },
+  "grand-faux-fur-throw-blankets-new": {
+    "base": 149,
+    "axes": {
+      "Color": {
+        "Arctic Hare": 0,
+        "Fawn": 0,
+        "Timberwolf": 20,
+        "Chinchilla": 20,
+        "Midnight Plaid": 20,
+        "Truffle Plaid": 20
+      }
+    }
+  },
+  "stretchy-swaddle": {
+    "base": 15,
+    "axes": {
+      "Size": {
+        "Swaddle": 14,
+        "Hat": 0,
+        "Bow": 0
+      },
+      "Color": {
+        "Over the Rainbow": 0,
+        "Sweet Alyssum": 0,
+        "Vintage Floral": 0,
+        "Olive Mudcloth": 0,
+        "Taupe Stripe": 0,
+        "Denim Triangle": 0,
+        "Dusty Rose": 0,
+        "Ash": 0,
+        "Juniper": 0
+      }
+    }
+  },
+  "justice-league-snuggler": {
+    "base": 75,
+    "axes": {
+      "Size": {
+        "Youth": 0,
+        "Teen": 10,
+        "Adult": 20
+      },
+      "Color": {
+        "Superman": 0,
+        "Wonder Woman": 0,
+        "Batman": 0
+      }
+    }
+  },
+  "harry-potter-icons-minky-lush": {
+    "base": 32,
+    "axes": {
+      "Size": {
+        "Mini": 0,
+        "Receiving": 33,
+        "Toddler": 63,
+        "XL": 147
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+id,optioncatid,optionsdesc,pricediff,applytoproductcodes,notes
+1411,58,Small Minky,0,SAR-WEARABLE,Wearable size — was incorrectly priced from Shopify cents
+1412,58,Medium Minky,3,SAR-WEARABLE,Was +$187 (cent diff); correct retail upcharge vs $59 base is +$3
+1413,58,Small Faux Fur,0,SAR-WEARABLE,Wearable size — was incorrectly priced from Shopify cents
+1414,58,Medium Faux Fur,3,SAR-WEARABLE,Was +$187 (cent diff); correct retail upcharge vs $59 base is +$3
+1341,23,Tori Halford,10,SAR-COZY-BMB-ROBES,Was +$1000; correct is +$10
+1349,58,Teen,10,"SAR-SNUGGLER,SAR-JL-JL-SNUGGLER",Was +$1000; correct is +$10
+1350,58,Adult,20,"SAR-SNUGGLER,SAR-JL-JL-SNUGGLER",Was +$2000; correct is +$20
+1408,58,Swaddle,14,SAR-STRETCHY-SWADDLES-HATS,Was +$1613; correct is +$14
+1352,23,Snow Fox,0,SAR-GRAND-FX-FUR,Was +$1551; Snow Fox is not a current throw color — zero pending removal from product OptionIDs

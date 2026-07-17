@@ -212,7 +212,25 @@ def option_axis(product: dict) -> dict[str, list[str]]:
     return axis
 
 
-def price_diffs(product: dict, axis: dict[str, list[str]], product_code: str) -> dict[str, dict[str, int]]:
+def shopify_money(raw) -> float:
+    """Normalize Shopify prices to dollars (json dollar strings vs js integer cents)."""
+    if raw is None or raw == "":
+        return 0.0
+    if isinstance(raw, str):
+        return float(raw)
+    if isinstance(raw, int):
+        return raw / 100.0
+    return float(raw)
+
+
+def variant_money(v: dict) -> float:
+    compare = v.get("compare_at_price")
+    if compare not in (None, "", 0, "0"):
+        return shopify_money(compare)
+    return shopify_money(v.get("price"))
+
+
+def price_diffs(product: dict, axis: dict[str, list[str]], product_code: str) -> dict[str, dict[str, float]]:
     variants = product.get("variants") or []
     options = product.get("options") or []
     if not variants:
@@ -226,11 +244,11 @@ def price_diffs(product: dict, axis: dict[str, list[str]], product_code: str) ->
     elif color_idx is None and size_idx is None and len(opt_names) == 1:
         size_idx = 0
 
-    base = min(float(v["price"]) for v in variants)
-    out: dict[str, dict[str, int]] = {k: {} for k in axis}
+    base = min(variant_money(v) for v in variants)
+    out: dict[str, dict[str, float]] = {k: {} for k in axis}
 
     for v in variants:
-        price = float(v["price"])
+        price = variant_money(v)
         opts = [
             v.get("option1"),
             v.get("option2"),
@@ -240,12 +258,14 @@ def price_diffs(product: dict, axis: dict[str, list[str]], product_code: str) ->
             label = opts[color_idx]
             if label in axis[COLOR_OPTION_ID]:
                 cur = out[COLOR_OPTION_ID].get(label, 10**9)
-                out[COLOR_OPTION_ID][label] = min(cur, int(round(price - base)))
+                diff = round(price - base, 2)
+                out[COLOR_OPTION_ID][label] = min(cur, diff)
         if size_idx is not None and SIZE_OPTION_ID in axis:
             label = opts[size_idx]
             if label in axis[SIZE_OPTION_ID]:
                 cur = out[SIZE_OPTION_ID].get(label, 10**9)
-                out[SIZE_OPTION_ID][label] = min(cur, int(round(price - base)))
+                diff = round(price - base, 2)
+                out[SIZE_OPTION_ID][label] = min(cur, diff)
 
     for cat, vals in axis.items():
         for label in vals:
@@ -262,10 +282,10 @@ def price_diffs(product: dict, axis: dict[str, list[str]], product_code: str) ->
 
 def build_rows(
     axis: dict[str, list[str]],
-    diffs: dict[str, dict[str, int]],
+    diffs: dict[str, dict[str, float]],
     missing: dict[str, bool],
-) -> list[tuple[str, str, int]]:
-    rows: list[tuple[str, str, int]] = []
+) -> list[tuple[str, str, float]]:
+    rows: list[tuple[str, str, float]] = []
     for option_id in (COLOR_OPTION_ID, SIZE_OPTION_ID):
         if not missing.get(option_id):
             continue

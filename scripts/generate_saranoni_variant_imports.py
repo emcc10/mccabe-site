@@ -87,7 +87,28 @@ def variant_axis(product: dict) -> tuple[str, list[dict]]:
     else:
         raise ValueError(f"unsupported options: {[o.get('name') for o in options]}")
 
-    base = min(float(v["price"]) for v in variants)
+    def shopify_money(raw) -> float:
+        """Normalize Shopify prices to dollars.
+
+        product.json returns dollar strings like \"65.00\".
+        product.js / some APIs return integer cents like 6500.
+        Writing cent diffs into Volusion pricediff caused +$187 / +$1000 bugs.
+        """
+        if raw is None or raw == "":
+            return 0.0
+        if isinstance(raw, str):
+            return float(raw)
+        if isinstance(raw, int):
+            return raw / 100.0
+        return float(raw)
+
+    def money(v: dict) -> float:
+        compare = v.get("compare_at_price")
+        if compare not in (None, "", 0, "0"):
+            return shopify_money(compare)
+        return shopify_money(v.get("price"))
+
+    base = min(money(v) for v in variants)
     rows: list[dict] = []
     seen: set[str] = set()
     for v in variants:
@@ -99,14 +120,20 @@ def variant_axis(product: dict) -> tuple[str, list[dict]]:
         if not label or label in seen:
             continue
         seen.add(label)
-        diff = int(round(float(v["price"]) - base))
+        price = money(v)
+        diff = round(price - base, 2)
+        # Prefer whole dollars when clean; keep decimals otherwise (e.g. 1.87).
+        if float(diff) == int(diff):
+            diff_out: int | float = int(diff)
+        else:
+            diff_out = diff
         img = ""
         if v.get("image_id"):
             for i in product.get("images") or []:
                 if i.get("id") == v["image_id"]:
                     img = i.get("src") or ""
                     break
-        rows.append({"label": label, "pricediff": diff, "price": v["price"], "image": img})
+        rows.append({"label": label, "pricediff": diff_out, "price": price, "image": img})
     return cat, rows
 
 

@@ -1,0 +1,14 @@
+ProductCode,Handle,OptionID,OptionLabel,LiveWrongPriceDiff,CorrectPriceDiff,BaseRetail,RootCause
+SAR-WEARABLE,wearable-blanket,1412,Medium Minky,187,3,59,Shopify cent-diff written as Volusion dollar pricediff
+SAR-WEARABLE,wearable-blanket,1414,Medium Faux Fur,187,3,59,Shopify cent-diff written as Volusion dollar pricediff
+SAR-WEARABLE,wearable-blanket,1411,Small Minky,0,0,59,OK
+SAR-WEARABLE,wearable-blanket,1413,Small Faux Fur,0,0,59,OK
+SAR-COZY-BMB-ROBES,cozy-bamboni-robe,1341,Tori Halford,1000,10,125,Shopify cent-diff written as Volusion dollar pricediff
+SAR-SNUGGLER,snuggler,1349,Teen,1000,10,65,Shopify cent-diff written as Volusion dollar pricediff
+SAR-JL-JL-SNUGGLER,justice-league-snuggler,1349,Teen,1000,10,75,Shopify cent-diff written as Volusion dollar pricediff
+SAR-JL-JL-SNUGGLER,justice-league-snuggler,1350,Adult,2000,20,75,Shopify cent-diff written as Volusion dollar pricediff
+SAR-STRETCHY-SWADDLES-HATS,stretchy-swaddle,1408,Swaddle,1613,14,15,Shopify cent-diff written as Volusion dollar pricediff
+SAR-GRAND-FX-FUR,grand-faux-fur-throw-blankets-new,1352,Snow Fox,1551,0,149,Stale/wrong option (Snow Fox not on current throw colors); zero pricediff pending removal
+SAR-HP-HP-ICONS-MNKY-LUSH,harry-potter-icons-minky-lush,1203,Receiving,33,33,32,OK — real dollar upcharge
+SAR-HP-HP-ICONS-MNKY-LUSH,harry-potter-icons-minky-lush,1204,Toddler,63,63,32,OK — real dollar upcharge
+SAR-HP-HP-ICONS-MNKY-LUSH,harry-potter-icons-minky-lush,1205,XL,147,147,32,OK — real dollar upcharge
