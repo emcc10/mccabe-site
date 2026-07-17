@@ -119,6 +119,15 @@ jobs:
           SFTP_PORT: "2222"
         run: python3 scripts/upload_altview_photos.py
 
+      - name: Upload missing Saranoni option/alt photos (targeted)
+        if: ${{ always() && !cancelled() && (github.event_name == 'workflow_dispatch' || contains(env.DEPLOY_CHANGED_FILES, '.variant-reupload') || contains(env.DEPLOY_CHANGED_FILES, 'SAR-GRAND-FX-FUR-135') || contains(env.DEPLOY_CHANGED_FILES, 'SAR-HP-HP-MSLN-NRS-altview')) }}
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_saranoni_missing_option_photos.py
+
       - name: Upload Steve Silver bedroom photos (manual full deploy retry)
         if: github.event_name == 'workflow_dispatch' && inputs.scope == 'full'
         env:
