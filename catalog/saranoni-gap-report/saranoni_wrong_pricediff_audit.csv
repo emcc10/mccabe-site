@@ -1,0 +1,22 @@
+ProductCode,ProductName,OptionID,OptionLabel,LiveWrongPriceDiff,CorrectPriceDiff,McCabeBase,SaranoniVariantPrice,Notes
+SAR-HP-HP-MSLN-NRS,Harry Potter Muslin Nursery,1362,Muslin/Lush Mini,700,7,25,32,Baby product you called out (+$700)
+SAR-HP-HP-MSLN-NRS,Harry Potter Muslin Nursery,1365,Changing Cover,700,7,25,32,Same product
+SAR-HP-HP-MSLN-NRS,Harry Potter Muslin Nursery,1364,Crib Sheet,1700,17,25,42,
+SAR-HP-HP-MSLN-NRS,Harry Potter Muslin Nursery,1366,Muslin/Lush Quilt,5000,50,25,75,
+SAR-JL-JL-MSLN-LUSH,Justice League Muslin/Lush,1367,Quilt,4300,43,32,75,
+SAR-JL-JL-MSLN-LUSH,Justice League Muslin/Lush,1368,XL,15700,157,32,189,
+SAR-WEARABLE,Wearable Blanket,1412,Medium Minky,187,3,59,62,Using McCabe retail base $59 / Saranoni compare-at $62
+SAR-WEARABLE,Wearable Blanket,1414,Medium Faux Fur,187,3,59,62,
+SAR-COZY-BMB-ROBES,Cozy Bamboni Robe,1341,Tori Halford,1000,10,125,135,
+SAR-SNUGGLER,Snuggler,1349,Teen,1000,10,65,75,
+SAR-SNUGGLER,Snuggler,1350,Adult,2000,20,65,85,
+SAR-JL-JL-SNUGGLER,Justice League Snuggler,1349,Teen,1000,10,75,85,Shares option ID 1349 with SAR-SNUGGLER
+SAR-JL-JL-SNUGGLER,Justice League Snuggler,1350,Adult,2000,20,75,95,Shares option ID 1350 with SAR-SNUGGLER
+SAR-STRETCHY-SWADDLES-HATS,Stretchy Swaddles/Hats,1408,Swaddle,1613,14,15,29,
+SAR-GRAND-FX-FUR,Grand Faux Fur Throw,1352,Snow Fox,1551,0,149,,Stale option — not on current Saranoni throw list
+SAR-BATMAN-MNKY-LUSH,Batman Minky/Lush,1204,Toddler,63,63,32,95,OK — leave alone
+SAR-BATMAN-MNKY-LUSH,Batman Minky/Lush,1205,XL,147,147,32,179,OK — leave alone
+SAR-SUPERMAN-MNKY-LUSH,Superman Minky/Lush,1204,Toddler,63,63,32,95,OK — leave alone
+SAR-SUPERMAN-MNKY-LUSH,Superman Minky/Lush,1205,XL,147,147,32,179,OK — leave alone
+SAR-WIZARDIN-WORLD-CHARM,Wizardin World Charm,1204,Toddler,63,63,32,95,OK — leave alone
+SAR-WIZARDIN-WORLD-CHARM,Wizardin World Charm,1205,XL,147,147,32,179,OK — leave alone

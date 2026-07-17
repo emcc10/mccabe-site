@@ -1,0 +1,16 @@
+id,optioncatid,optionsdesc,pricediff,applytoproductcodes,live_wrong_pricediff,saranoni_variant_price,mccabe_base_price,correct_pricediff_formula
+1362,58,Muslin/Lush Mini,7,SAR-HP-HP-MSLN-NRS,700,32,25,32-25=7
+1365,58,Changing Cover,7,SAR-HP-HP-MSLN-NRS,700,32,25,32-25=7
+1364,58,Crib Sheet,17,SAR-HP-HP-MSLN-NRS,1700,42,25,42-25=17
+1366,58,Muslin/Lush Quilt,50,SAR-HP-HP-MSLN-NRS,5000,75,25,75-25=50
+1367,58,Quilt,43,SAR-JL-JL-MSLN-LUSH,4300,75,32,75-32=43
+1368,58,XL,157,SAR-JL-JL-MSLN-LUSH,15700,189,32,189-32=157
+1412,58,Medium Minky,3,SAR-WEARABLE,187,62,59,62-59=3 (retail/compare-at)
+1414,58,Medium Faux Fur,3,SAR-WEARABLE,187,62,59,62-59=3 (retail/compare-at)
+1411,58,Small Minky,0,SAR-WEARABLE,0,59,59,59-59=0
+1413,58,Small Faux Fur,0,SAR-WEARABLE,0,59,59,59-59=0
+1341,23,Tori Halford,10,SAR-COZY-BMB-ROBES,1000,135,125,135-125=10
+1349,58,Teen,10,"SAR-SNUGGLER,SAR-JL-JL-SNUGGLER",1000,75,65,75-65=10 (snuggler base 65; JL base 75 still +10 vs youth)
+1350,58,Adult,20,"SAR-SNUGGLER,SAR-JL-JL-SNUGGLER",2000,85,65,85-65=20
+1408,58,Swaddle,14,SAR-STRETCHY-SWADDLES-HATS,1613,29,15,29-15=14
+1352,23,Snow Fox,0,SAR-GRAND-FX-FUR,1551,,149,Not on current Saranoni throw colors — set 0 / remove from product
