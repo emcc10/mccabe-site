@@ -22,6 +22,12 @@ TARGETS = [
     "SAR-GRAND-FX-FUR-XL-LG-1351-S.jpg",
     "SAR-GRAND-FX-FUR-XL-LG-1353-T.jpg",
     "SAR-GRAND-FX-FUR-XL-LG-1353-S.jpg",
+    "SAR-STUFFED-ANML-ROCKERS-Puppy-T.jpg",
+    "SAR-STUFFED-ANML-ROCKERS-Puppy-S.jpg",
+    "SAR-STUFFED-ANML-ROCKERS-Bear-T.jpg",
+    "SAR-STUFFED-ANML-ROCKERS-Bear-S.jpg",
+    "SAR-STUFFED-ANML-ROCKERS-Elephant-T.jpg",
+    "SAR-STUFFED-ANML-ROCKERS-Elephant-S.jpg",
 ]
 
 
