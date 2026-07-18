@@ -6,8 +6,10 @@ on:
       - main
     paths:
       - "vspfiles/photos/**"
+      - "vspfiles/swatches/**"
       - "scripts/upload_missing_stock_photos.py"
       - "scripts/upload_altview_photos.py"
+      - "scripts/upload_beanbag_swatches.py"
       - "scripts/upload_recliner_plp_photos.py"
       - "scripts/fetch_recliner_plp_photos.py"
       - "scripts/upload_tmh_mat_photos.py"
@@ -65,7 +67,7 @@ jobs:
           fi
           changed_files=""
           if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-            changed_files="$(git diff --name-only "$BEFORE" "${{ github.sha }}" -- 'vspfiles/photos/' || true)"
+            changed_files="$(git diff --name-only "$BEFORE" "${{ github.sha }}" -- 'vspfiles/photos/' 'vspfiles/swatches/' || true)"
           fi
           {
             echo "DEPLOY_CHANGED_ONLY=1"
@@ -127,6 +129,15 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_PORT: "2222"
         run: python3 scripts/upload_saranoni_missing_option_photos.py
+
+      - name: Upload bean bag cover swatches (corduroy/)
+        if: ${{ always() && !cancelled() && (github.event_name == 'workflow_dispatch' || contains(env.DEPLOY_CHANGED_FILES, 'vspfiles/swatches/') || contains(env.DEPLOY_CHANGED_FILES, '.bb-swatch-reupload')) }}
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_beanbag_swatches.py
 
       - name: Upload Steve Silver bedroom photos (manual full deploy retry)
         if: github.event_name == 'workflow_dispatch' && inputs.scope == 'full'
