@@ -114,7 +114,7 @@ def scrape_vol_options(code):
         req = urllib.request.Request(url, headers=ua)
         with urllib.request.urlopen(req, timeout=15) as resp:
             html = resp.read().decode("utf-8", "replace")
-            matches = re.findall(r'<option[^>]*value="(\d+)"[^>]*>(.*?)</option>', html, re.I | re.S)
+            matches = re.findall(r'<option[^>]*value=\"(\d+)\"[^>]*>(.*?)</option>', html, re.I | re.S)
             options = []
             for val, desc in matches:
                 desc = htmlmod.unescape(re.sub(r"<[^>]+>", "", desc)).strip()
@@ -124,20 +124,13 @@ def scrape_vol_options(code):
     except: return []
 
 def main():
-    # Use cached audit results if available, otherwise fetch
-    # Since I'm in a turn and Saranoni blocks me, I'll use the results I just fetched for some
-    # and the old results for others, but I'll fix the logic.
-    
     try:
         with open("tmp/saranoni_full_audit_results.json", "r") as f:
             old_results = json.load(f)
     except: old_results = []
     
-    # Map by code for easy lookup
     results_map = {item["code"]: item for item in old_results}
     
-    # MANUAL FIX for SAR-MNKY-LUSH from browser fetch
-    # I already have the JSON for minky-lush-xl-blankets
     xl_json = {
         "variants": [
             {"title": "Ivy", "price": 118.30, "available": True},
@@ -152,8 +145,7 @@ def main():
     }
     
     products_rows = []
-    options_rows = []
-    
+    options_map = {} # ID -> PriceDiff to ensure uniqueness
     processed_codes = set()
     
     for handle, code in HANDLE_TO_CODE.items():
@@ -170,12 +162,9 @@ def main():
         vol_options = scrape_vol_options(code)
         
         in_stock_ids = []
-        
         for vopt in vol_options:
             v_id = vopt["id"]
             v_desc = vopt["desc"]
-            
-            # Map name
             mapped_name = VARIANT_MAP.get(v_desc, v_desc)
             
             match = None
@@ -187,39 +176,35 @@ def main():
             
             if match:
                 price_diff = round(norm_price(match["price"]) - base_price, 2)
-                options_rows.append({"ID": v_id, "PriceDiff": price_diff})
+                options_map[v_id] = price_diff
                 if match.get("available", True):
                     in_stock_ids.append(v_id)
-            else:
-                # No match found in current variants, keep it in OptionIDs if it was there?
-                # Actually, if it's not on Saranoni, we should probably hide it.
-                pass
-
+        
         products_rows.append({
             "ProductCode": code,
             "ProductPrice": base_price,
-            "OptionIDs": ",".join(in_stock_ids),
+            "OptionIDs": ", ".join(in_stock_ids), # Added space to help Excel treat as text
             "HideProduct": "Y" if not any(v.get("available", True) for v in variants) else "N"
         })
-        
         print(f"Processed {code}: {len(in_stock_ids)} in-stock variants.")
 
-    # Write files
+    options_rows = [{"ID": k, "PriceDiff": v} for k, v in options_map.items()]
+
     out_dir = Path("catalog/saranoni-gap-report")
     out_dir.mkdir(parents=True, exist_ok=True)
     
-    # Use v2 to avoid lock
     try:
-        with (out_dir / "volusion_products_import_v2.csv").open("w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=["ProductCode", "ProductPrice", "OptionIDs", "HideProduct"])
+        # Write Products - ensure OptionIDs is quoted by the writer
+        with (out_dir / "volusion_products_import_v3.csv").open("w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=["ProductCode", "ProductPrice", "OptionIDs", "HideProduct"], quoting=csv.QUOTE_ALL)
             writer.writeheader()
             writer.writerows(products_rows)
             
-        with (out_dir / "volusion_options_import_v2.csv").open("w", newline="") as f:
+        with (out_dir / "volusion_options_import_v3.csv").open("w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=["ID", "PriceDiff"])
             writer.writeheader()
             writer.writerows(options_rows)
-        print("Success! Wrote files to _v2 versions.")
+        print("Success! Wrote files to _v3 versions.")
     except PermissionError:
         print("ERROR: CSV files are STILL open. Please close all Excel/CSV windows.")
 
