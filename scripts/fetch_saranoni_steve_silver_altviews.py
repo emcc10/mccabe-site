@@ -91,6 +91,7 @@ CODE_TO_HANDLE.update(
         "SAR-BMBU-RYN-MSLN-QUEEN-KING": "bamboo-rayon-muslin-queen-king-4-layer-quilt",
         "SAR-BMBU-RYN-MSLN-PILLOWCA": "bamboo-rayon-muslin-pillowcase-set",
         "SAR-COTTON-MSLN-4-LAYER": "cotton-muslin-4-layer-quilt",
+        "SAR-HEIRLOOM-COTTON-KNT-SETS": "heirloom-cotton-knit-sets",
         "SAR-GRAND-FX-FUR": "grand-faux-fur-throw-blankets-new",
         "SAR-GRAND-FX-FUR-XL-LG": "grand-faux-fur-xl-throw-blankets-new",
         "SAR-GRAND-FX-FUR-KING": "grand-faux-fur-king-blanket",
