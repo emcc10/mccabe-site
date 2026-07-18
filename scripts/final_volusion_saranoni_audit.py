@@ -101,6 +101,13 @@ VARIANT_MAP = {
     "Muslin/Lush Quilt": "Quilt"
 }
 
+# A Shopify product's minimum variant price is not always its default product
+# configuration. This product defaults to a Swaddle ($18.13); Hats and Bows
+# are the lower-priced option and must be represented as negative PriceDiffs.
+PRODUCT_BASE_PRICE_OVERRIDES = {
+    "SAR-STRETCHY-SWADDLES-HATS": 18.13,
+}
+
 def norm_price(p):
     if p is None or p == "": return 0.0
     if isinstance(p, str): return float(p)
@@ -158,7 +165,9 @@ def main():
         variants = item.get("variants", [])
         if not variants: continue
         
-        base_price = item.get("shopify_base_price", 0.0)
+        base_price = PRODUCT_BASE_PRICE_OVERRIDES.get(
+            code, item.get("shopify_base_price", 0.0)
+        )
         vol_options = scrape_vol_options(code)
         
         in_stock_ids = []
