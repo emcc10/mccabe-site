@@ -30,6 +30,19 @@ TARGETS = [
     "SAR-STUFFED-ANML-ROCKERS-Elephant-S.jpg",
 ]
 
+# The script will also upload any files that match the missing audit report
+import json
+AUDIT_PATH = ROOT / "tmp" / "missing_variant_images_audit.json"
+
+def get_audit_targets():
+    if not AUDIT_PATH.is_file():
+        return []
+    try:
+        with open(AUDIT_PATH, "r") as f:
+            report = json.load(f)
+            return [e["target_name"] for e in report]
+    except:
+        return []
 
 def main() -> int:
     os.chdir(ROOT)
@@ -43,7 +56,13 @@ def main() -> int:
 
     import paramiko
 
+    audit_targets = get_audit_targets()
     files = [n for n in TARGETS if (PHOTOS / n).is_file()]
+    
+    # Add files from audit report if they exist locally
+    for name in audit_targets:
+        if (PHOTOS / name).is_file() and name not in files:
+            files.append(name)
     # Also include any HP nursery altviews 9-24 present locally
     for i in range(1, 25):
         name = f"SAR-HP-HP-MSLN-NRS-altview{i}.jpg"
