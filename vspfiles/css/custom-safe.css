@@ -16841,9 +16841,15 @@ html body.mc-product-page a#product_photo_zoom_url2 {
 
 html body.mc-saranoni-pdp .mc-saranoni-swatches,
 html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches {
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   gap: 12px !important;
-  overflow-x: visible !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 0 6px !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: smooth !important;
 }
 
 html body.mc-saranoni-pdp .mc-configured-color-swatch-label {
@@ -23468,3 +23474,307 @@ html body.mc-product-page #related_products_content {
     overflow: visible !important;
   }
 }
+/* Targeted price-box spacing adjustment. */
+table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(3) {
+  margin-top: -70px !important;
+}
+/* BEGIN REMOVABLE: product-page static header positioning (20260717) */
+body:has(#v65-product-parent) header,
+body:has(#v65-product-parent) .header,
+body:has(#v65-product-parent) #header,
+body:has(#v65-product-parent) .site-header,
+body:has(#v65-product-parent) #site-header {
+  position: static !important;
+  top: auto !important;
+  margin-top: 25px !important;
+  margin-bottom: -100px !important;
+}
+/* END REMOVABLE: product-page static header positioning (20260717) */
+/* BEGIN REMOVABLE: PDP container/header stabilization (20260717) */
+@media (min-width: 992px) {
+  html body.mc-product-page #v65-product-parent tr.mc-pdp-main-row,
+  html body.productdetails #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-product-page #v65-product-parent tr.mc-unified-pdp-row,
+  html body.productdetails #v65-product-parent tr.mc-unified-pdp-row {
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    justify-content: flex-start !important;
+    gap: 40px !important;
+  }
+
+  html body.mc-product-page header.header,
+  html body.productdetails header.header {
+    position: static !important;
+    top: auto !important;
+  }
+
+  html body.mc-product-page header.header #display_menu_1#display_menu_1,
+  html body.productdetails header.header #display_menu_1#display_menu_1 {
+    position: static !important;
+    top: auto !important;
+    margin: 0 auto !important;
+    transform: none !important;
+  }
+}
+/* END REMOVABLE: PDP container/header stabilization (20260717) */
+/* BEGIN REMOVABLE: restore approved PDP header typography/logo margin (20260717) */
+@media (min-width: 992px) {
+  html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > a,
+  html body header.header #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a,
+  html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > ul a,
+  html body header.header #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > ul a {
+    font-family: Inter, Arial, sans-serif !important;
+  }
+
+  html body.mc-saranoni-pdp .vCSS_img_mfg_logo {
+    margin-left: 100px !important;
+    margin-right: 0 !important;
+  }
+}
+/* END REMOVABLE: restore approved PDP header typography/logo margin (20260717) */
+/* BEGIN REMOVABLE: Bean Bag accordion/price label correction (20260718) */
+html body.mc-bean-bag-pdp #mc-pdp-accordion,
+html body.mc-bean-bag-pdp .mc-bean-bag-accordion {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+html body.mc-bean-bag-pdp .colors_pricebox > tbody > tr > td > table > tbody > tr > td > table font.option_pricing {
+  display: none !important;
+  visibility: hidden !important;
+}
+/* END REMOVABLE: Bean Bag accordion/price label correction (20260718) */
+/* BEGIN REMOVABLE: main menu font only (20260718) */
+@media (min-width: 992px) {
+  html body #display_menu_1#display_menu_1 a,
+  html body #display_menu_1#display_menu_1 .vnav__link,
+  html body #display_menu_1#display_menu_1 .vnav--level1 > li > a,
+  html body #display_menu_1#display_menu_1 .vnav--level2 a,
+  html body #display_menu_1#display_menu_1 .vnav--level3 a {
+    font-family: Inter, Arial, sans-serif !important;
+  }
+}
+/* END REMOVABLE: main menu font only (20260718) */
+/* BEGIN REMOVABLE: approved Cormorant main-menu font only (20260718) */
+@media (min-width: 992px) {
+  html body #display_menu_1#display_menu_1 a,
+  html body #display_menu_1#display_menu_1 .vnav__link,
+  html body #display_menu_1#display_menu_1 .vnav--level1 > li > a,
+  html body #display_menu_1#display_menu_1 .vnav--level2 a,
+  html body #display_menu_1#display_menu_1 .vnav--level3 a {
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  }
+}
+/* END REMOVABLE: approved Cormorant main-menu font only (20260718) */
+/* BEGIN REMOVABLE: mobile category bar in normal document flow (20260718) */
+@media (max-width: 991px) {
+  html body header.header .header__section--bottom,
+  html body header.header .header__section--bottom.visible-xs {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    transform: none !important;
+    z-index: 1000 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+}
+/* END REMOVABLE: mobile category bar in normal document flow (20260718) */
+/* BEGIN REMOVABLE: Saranoni PDP image-column width correction (20260718) */
+@media (min-width: 992px) {
+  body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row {
+    width: 100% !important;
+    max-width: 1580px !important;
+  }
+
+  body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row > td.mc-pdp-media-td {
+    flex: 0 0 700px !important;
+    width: 700px !important;
+    max-width: 700px !important;
+    box-sizing: border-box !important;
+  }
+
+  body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row > td.mc-pdp-options-td {
+    flex: 1 1 360px !important;
+    width: auto !important;
+    max-width: 360px !important;
+  }
+}
+/* END REMOVABLE: Saranoni PDP image-column width correction (20260718) */
+/* BEGIN REMOVABLE: Steve Silver PDP image-column width correction (20260718) */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-steve-silver-altview-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-steve-silver-altview-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-steve-silver-altview-pdp #v65-product-parent tr.mc-unified-pdp-row,
+  html body.mc-closeout-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-closeout-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-closeout-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-closeout-pdp #v65-product-parent tr.mc-unified-pdp-row {
+    width: 100% !important;
+    max-width: 1128px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    gap: 28px !important;
+    justify-content: flex-start !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp #content_area tr.mc-pdp-main-row > td.mc-pdp-media-td,
+  html body.mc-steve-silver-altview-pdp #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-steve-silver-altview-pdp #v65-product-parent tr.mc-pdp-main-row > td.mc-pdp-media-td,
+  html body.mc-steve-silver-altview-pdp #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-closeout-pdp #content_area tr.mc-pdp-main-row > td.mc-pdp-media-td,
+  html body.mc-closeout-pdp #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-closeout-pdp #v65-product-parent tr.mc-pdp-main-row > td.mc-pdp-media-td,
+  html body.mc-closeout-pdp #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media {
+    flex: 0 0 690px !important;
+    width: 690px !important;
+    min-width: 690px !important;
+    max-width: 690px !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-steve-silver-altview-pdp #content_area tr.mc-pdp-main-row > td.mc-pdp-options-td,
+  html body.mc-steve-silver-altview-pdp #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-steve-silver-altview-pdp #v65-product-parent tr.mc-pdp-main-row > td.mc-pdp-options-td,
+  html body.mc-steve-silver-altview-pdp #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-closeout-pdp #content_area tr.mc-pdp-main-row > td.mc-pdp-options-td,
+  html body.mc-closeout-pdp #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-closeout-pdp #v65-product-parent tr.mc-pdp-main-row > td.mc-pdp-options-td,
+  html body.mc-closeout-pdp #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    flex: 0 0 400px !important;
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+    box-sizing: border-box !important;
+  }
+}
+/* END REMOVABLE: Steve Silver PDP image-column width correction (20260718) */
+/* BEGIN REMOVABLE: Saranoni ATC text alignment correction (20260718) */
+body.mc-saranoni-pdp #content_area input.mc-unified-atc-btn,
+body.mc-saranoni-pdp #v65-product-parent input.mc-unified-atc-btn {
+  text-align: center !important;
+}
+/* END REMOVABLE: Saranoni ATC text alignment correction (20260718) */
+/* BEGIN REMOVABLE: Saranoni variant horizontal scroll rail (20260718) */
+html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,
+html body.mc-saranoni-pdp .mc-saranoni-swatches,
+html body.mc-saranoni-pdp #mc-saranoni-size-thumbs {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  gap: 12px !important;
+  padding: 0 0 6px !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: smooth !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,
+html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar,
+html body.mc-saranoni-pdp #mc-saranoni-size-thumbs::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+html body.mc-saranoni-pdp .mc-configured-color-swatch,
+html body.mc-saranoni-pdp .mc-saranoni-size-thumb {
+  flex: 0 0 auto !important;
+}
+/* END REMOVABLE: Saranoni variant horizontal scroll rail (20260718) */
+/* BEGIN REMOVABLE: PDP alt-view row stable placement/no visible scrollbar (20260718) */
+html body #mc-pdp-alt-view-row {
+  display: flex !important;
+  position: relative !important;
+  clear: both !important;
+  float: none !important;
+  z-index: 1 !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html body #mc-pdp-alt-view-row::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+html body #mc-pdp-alt-view-row a,
+html body #mc-pdp-alt-view-row img {
+  float: none !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+/* END REMOVABLE: PDP alt-view row stable placement/no visible scrollbar (20260718) */
+/* BEGIN REMOVABLE: Saranoni variant scroll arrows (20260718) */
+html body.mc-saranoni-pdp .mc-saranoni-scroll-host {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-scroll-host .mc-saranoni-scroll-rail {
+  padding-left: 28px !important;
+  padding-right: 28px !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-scroll-host .mc-saranoni-scroll-rail::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 5 !important;
+  width: 22px !important;
+  height: 38px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.96) !important;
+  color: #444 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font: 700 18px/1 Arial, sans-serif !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08) !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow--prev {
+  left: 0 !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow--next {
+  right: 0 !important;
+}
+
+html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow[disabled] {
+  opacity: .25 !important;
+  pointer-events: none !important;
+}
+/* END REMOVABLE: Saranoni variant scroll arrows (20260718) */

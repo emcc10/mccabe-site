@@ -4318,6 +4318,7 @@
     "mc-pdp-price-stack-host",
     "messaging-element",
     "mc-configured-color-swatch-wrapper",
+    "mc-saranoni-size-label",
     "mc-saranoni-size-thumbs",
     "mc-pdp-option-block",
     "mc-pdp-accordion",
@@ -4762,6 +4763,7 @@
   function ensureSaranoniSizeThumbsInInfoColumn() {
     var row = global.document.getElementById("mc-saranoni-size-thumbs");
     if (!row) return;
+    var label = global.document.getElementById("mc-saranoni-size-label");
     var mediaTd = findPdpMediaTd();
     var infoColumn = resolveSaranoniInfoColumn();
     if (!infoColumn) return;
@@ -4779,6 +4781,13 @@
           infoColumn.appendChild(row);
         }
       } catch (eHoist) {}
+    }
+    if (label) {
+      try {
+        if (label.parentNode !== infoColumn || label.nextElementSibling !== row) {
+          infoColumn.insertBefore(label, row);
+        }
+      } catch (eLabelHoist) {}
     }
   }
 
@@ -5634,6 +5643,11 @@
       new global.MutationObserver(function () {
         if (!isSaranoniPdpPage()) return;
         var cur = img.getAttribute("src") || "";
+        var altOverride = "";
+        try {
+          altOverride = String(global.__MC_PDP_ALT_VIEW_ACTIVE_SRC__ || "");
+        } catch (eAltOverride) {}
+        if (altOverride && cur === altOverride && configuredColorImageBelongsToProduct(cur, pc)) return;
         if (isSaranoniBadHeroSrc(cur)) return;
         if (configuredColorActiveSrc && cur === configuredColorActiveSrc) return;
         if (configuredColorImageBelongsToProduct(cur, pc)) return;
@@ -6273,6 +6287,25 @@
           cell.style.setProperty("min-width", "0", "important");
           cell.style.setProperty("box-sizing", "border-box", "important");
         }
+
+        /* Saranoni's hero table includes an empty companion cell after the
+           photo cell.  It consumes a fixed sliver of the media column and
+           keeps the hero image below its approved width.  Remove only that
+           empty companion cell; leave any populated gallery/content cells
+           untouched. */
+        if (isSaranoniPdpPage() && cell.parentNode && cell.parentNode.children) {
+          Array.prototype.forEach.call(cell.parentNode.children, function (sibling) {
+            if (sibling === cell || sibling.tagName !== "TD") return;
+            if (sibling.querySelector("img, a, input, select, button, video")) return;
+            if ((sibling.textContent || "").trim()) return;
+            sibling.style.setProperty("display", "none", "important");
+            sibling.style.setProperty("width", "0", "important");
+            sibling.style.setProperty("min-width", "0", "important");
+            sibling.style.setProperty("max-width", "0", "important");
+            sibling.style.setProperty("padding", "0", "important");
+            sibling.style.setProperty("border", "0", "important");
+          });
+        }
       } catch (eMedia) {}
     });
     row.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
@@ -6440,8 +6473,95 @@
       "html body.mc-saranoni-pdp #mc-pdp-option-block{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;pointer-events:none!important}";
   }
 
+  /*
+   * Volusion sometimes leaves the rebuilt information column inside an extra
+   * price-table/quantity-cell chain.  That chain is not part of the rebuilt
+   * PDP UI, but table layout still reserves its first cell and pushes the real
+   * information column right (and, on Bean Bags, down).  Flatten only that
+   * exact nested legacy chain.  A direct information column, such as Steve
+   * Silver's, is deliberately a no-op here.
+   */
+  function normalizeLegacyPdpInfoWrapper() {
+    if (!isProductPdp()) return;
+    try {
+      if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
+      var info = global.document.querySelector(
+        "#v65-product-parent td.mc-pdp-options-td, #v65-product-parent td.mc-unified-pdp-info"
+      );
+      if (!info) return;
+      var outer = info.closest && info.closest("td.vol-product__top--right");
+      if (!outer || info.parentElement === outer) return;
+
+      var priceHost = global.document.getElementById("mc-pdp-price-stack-host");
+      if (priceHost) {
+        outer.querySelectorAll("table.colors_pricebox").forEach(function (table) {
+          if (table.contains(info) || !table.querySelector(".option_pricing")) return;
+          if (table.querySelector("input, select, button")) return;
+          table.style.setProperty("display", "none", "important");
+          table.style.setProperty("visibility", "hidden", "important");
+          table.style.setProperty("height", "0", "important");
+          table.style.setProperty("max-height", "0", "important");
+          table.style.setProperty("margin", "0", "important");
+          table.style.setProperty("padding", "0", "important");
+          table.style.setProperty("overflow", "hidden", "important");
+          var next = table.nextElementSibling;
+          while (
+            next &&
+            (next.tagName === "BR" ||
+              (next.tagName === "IMG" && /clear1x1/i.test(next.getAttribute("src") || "")))
+          ) {
+            next.style.setProperty("display", "none", "important");
+            next = next.nextElementSibling;
+          }
+        });
+      }
+
+      outer.querySelectorAll("#product_options_heading").forEach(function (heading) {
+        if (heading.contains(info) || info.contains(heading)) return;
+        heading.style.setProperty("display", "none", "important");
+        heading.style.setProperty("height", "0", "important");
+        heading.style.setProperty("margin", "0", "important");
+        heading.style.setProperty("padding", "0", "important");
+      });
+
+      var infoRow = info.parentElement;
+      if (infoRow && infoRow.tagName === "TR") {
+        Array.prototype.forEach.call(infoRow.children, function (cell) {
+          if (cell === info) return;
+          if (!cell.querySelector(".vol-cartqty__toggle")) return;
+          if (cell.querySelector('input[name^="QTY"], input[name="quantity"], input[name="btnaddtocart"], button[name="btnaddtocart"]')) return;
+          cell.style.setProperty("display", "none", "important");
+          cell.style.setProperty("width", "0", "important");
+          cell.style.setProperty("min-width", "0", "important");
+          cell.style.setProperty("padding", "0", "important");
+          cell.style.setProperty("margin", "0", "important");
+          cell.style.setProperty("overflow", "hidden", "important");
+        });
+      }
+
+      var node = info.parentElement;
+      while (node && node !== outer) {
+        if (/^(TABLE|TBODY|TR|TD)$/.test(node.tagName || "")) {
+          node.style.setProperty("display", "block", "important");
+          node.style.setProperty("width", "100%", "important");
+          node.style.setProperty("max-width", "100%", "important");
+          node.style.setProperty("min-width", "0", "important");
+          node.style.setProperty("margin", "0", "important");
+          node.style.setProperty("padding", "0", "important");
+          node.style.setProperty("box-sizing", "border-box", "important");
+        }
+        node = node.parentElement;
+      }
+      info.style.setProperty("width", "100%", "important");
+      info.style.setProperty("max-width", "100%", "important");
+      info.style.setProperty("min-width", "0", "important");
+      info.style.setProperty("box-sizing", "border-box", "important");
+    } catch (eNormalizeLegacyPdpInfo) {}
+  }
+
   function ensureSaranoniSizeVariantCss() {
     ensureSaranoniPdpLayoutCss();
+    ensureSaranoniScrollArrowCss();
     var st = global.document.getElementById("mc-saranoni-size-variant-css");
     if (!st) {
       st = global.document.createElement("style");
@@ -6449,10 +6569,12 @@
       (global.document.head || global.document.documentElement).appendChild(st);
     }
     st.textContent =
-      ".mc-saranoni-size-thumbs{display:flex!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important;max-width:650px!important;margin:12px 0 0!important;padding:0!important}" +
-      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:90px!important;padding:4px!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important}" +
+      ".mc-saranoni-size-thumbs{display:flex!important;flex-wrap:nowrap!important;gap:10px!important;width:100%!important;max-width:100%!important;margin:12px 0 0!important;padding:0 0 6px!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
+      ".mc-saranoni-size-thumbs::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
+      ".mc-saranoni-size-label{display:block!important;margin:12px 0 6px!important;font:500 13px/1.3 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;color:#444!important;text-transform:none!important}" +
+      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:90px!important;padding:4px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important}" +
       ".mc-saranoni-size-thumb img{display:block!important;width:82px!important;height:82px!important;object-fit:cover!important;border:0!important;border-radius:2px!important}" +
-      ".mc-saranoni-size-thumb.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
+      ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}" +
       ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important;margin-top:4px!important;white-space:normal!important;word-break:break-word!important;max-width:86px!important}";
   }
 
@@ -6525,6 +6647,16 @@
           infoColumn.appendChild(row);
         }
       }
+    }
+    var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
+    if (!sizeLabel) {
+      sizeLabel = global.document.createElement("div");
+      sizeLabel.id = "mc-saranoni-size-label";
+      sizeLabel.className = "mc-saranoni-size-label";
+      sizeLabel.textContent = "Size";
+    }
+    if (sizeLabel.parentNode !== infoColumn || sizeLabel.nextElementSibling !== row) {
+      infoColumn.insertBefore(sizeLabel, row);
     }
     var signature =
       ctx.productCode + "|" + ctx.entries.map(function (e) { return e.optionId; }).join(",");
@@ -6843,6 +6975,14 @@
       var mainImg = global.document.getElementById("product_photo");
       if (!mainImg) return;
       var cur = mainImg.getAttribute("src") || "";
+      var altOverride = "";
+      try {
+        altOverride = String(global.__MC_PDP_ALT_VIEW_ACTIVE_SRC__ || "");
+      } catch (eAltOverride) {}
+      if (altOverride && configuredColorImageBelongsToProduct(altOverride, pc)) {
+        if (cur !== altOverride) setConfiguredColorPhotoSrc(altOverride, "", pc);
+        return;
+      }
       if (cur !== configuredColorActiveSrc) {
         setConfiguredColorPhotoSrc(
           configuredColorActiveSrc,
@@ -7381,6 +7521,7 @@
   }
 
   function ensureConfiguredColorSwatchCss() {
+    ensureSaranoniScrollArrowCss();
     var st = global.document.getElementById("mc-configured-color-swatch-css");
     if (!st) {
       st = global.document.createElement("style");
@@ -7391,13 +7532,93 @@
       ".mc-configured-color-swatch-wrapper{display:block!important;width:100%!important;max-width:460px!important;margin:12px 0 0!important}" +
       ".mc-configured-color-swatch-label{display:block!important;margin-bottom:8px!important;font:700 12px/1.4 Inter,Arial,sans-serif!important;letter-spacing:.03em!important;text-transform:none!important;color:#444!important}" +
       ".mc-configured-color-swatch-label span{font-weight:600!important;letter-spacing:.03em!important;text-transform:none!important}" +
-      ".mc-configured-color-swatches,.mc-saranoni-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
+      ".mc-configured-color-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
+      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,html body.mc-saranoni-pdp .mc-saranoni-swatches{display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;max-width:100%!important;padding:0 0 6px!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
+      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
       ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important}" +
       ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}" +
       ".mc-configured-color-swatch.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
       ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:72px!important;min-height:36px!important;border-radius:4px!important;padding:6px 12px!important}" +
       ".mc-configured-color-swatch__text{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;white-space:normal!important;text-align:center!important}" +
       ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}";
+  }
+
+  function ensureSaranoniScrollArrowCss() {
+    var st = global.document.getElementById("mc-saranoni-scroll-arrow-css");
+    if (!st) {
+      st = global.document.createElement("style");
+      st.id = "mc-saranoni-scroll-arrow-css";
+      (global.document.head || global.document.documentElement).appendChild(st);
+    }
+    st.textContent =
+      "html body.mc-saranoni-pdp .mc-saranoni-scroll-host{position:relative!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}" +
+      "html body.mc-saranoni-pdp .mc-saranoni-scroll-host .mc-saranoni-scroll-rail{padding-left:28px!important;padding-right:28px!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
+      "html body.mc-saranoni-pdp .mc-saranoni-scroll-host .mc-saranoni-scroll-rail::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
+      "html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow{appearance:none!important;-webkit-appearance:none!important;position:absolute!important;top:50%!important;transform:translateY(-50%)!important;z-index:5!important;width:22px!important;height:38px!important;border:1px solid #ddd!important;border-radius:999px!important;background:rgba(255,255,255,.96)!important;color:#444!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font:700 18px/1 Arial,sans-serif!important;cursor:pointer!important;box-shadow:0 1px 3px rgba(0,0,0,.08)!important}" +
+      "html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow--prev{left:0!important}" +
+      "html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow--next{right:0!important}" +
+      "html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow[disabled]{opacity:.25!important;pointer-events:none!important}";
+  }
+
+  function ensureSaranoniRailArrows() {
+    if (!isSaranoniPdpPage()) return;
+    ensureSaranoniScrollArrowCss();
+    [
+      global.document.querySelector(".mc-configured-color-swatches.mc-saranoni-swatches"),
+      global.document.getElementById("mc-saranoni-size-thumbs")
+    ].forEach(function (rail) {
+      if (!rail || !rail.parentNode) return;
+      var host = rail.parentNode;
+      host.classList.add("mc-saranoni-scroll-host");
+      rail.classList.add("mc-saranoni-scroll-rail");
+      var id = rail.id || rail.getAttribute("data-mc-rail-id") || ("mc-saranoni-rail-" + Math.random().toString(36).slice(2));
+      rail.setAttribute("data-mc-rail-id", id);
+
+      function makeButton(dir) {
+        var cls = "mc-saranoni-scroll-arrow--" + (dir < 0 ? "prev" : "next");
+        var btn = host.querySelector(":scope > ." + cls);
+        if (!btn) {
+          btn = global.document.createElement("button");
+          btn.type = "button";
+          btn.className = "mc-saranoni-scroll-arrow " + cls;
+          btn.setAttribute("aria-label", dir < 0 ? "Scroll variants left" : "Scroll variants right");
+          btn.textContent = dir < 0 ? "‹" : "›";
+          if (dir < 0) host.insertBefore(btn, rail);
+          else host.insertBefore(btn, rail.nextSibling);
+        }
+        btn.onclick = function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          var amount = Math.max(Math.round((rail.clientWidth || 220) * 0.72), 150);
+          try {
+            rail.scrollBy({ left: dir * amount, behavior: "smooth" });
+          } catch (eScrollBy) {
+            rail.scrollLeft += dir * amount;
+          }
+          global.setTimeout(refresh, 180);
+        };
+        return btn;
+      }
+
+      var prev = makeButton(-1);
+      var next = makeButton(1);
+      function refresh() {
+        var max = Math.max(0, rail.scrollWidth - rail.clientWidth - 2);
+        var hasOverflow = max > 4;
+        prev.style.setProperty("display", hasOverflow ? "flex" : "none", "important");
+        next.style.setProperty("display", hasOverflow ? "flex" : "none", "important");
+        prev.disabled = !hasOverflow || rail.scrollLeft <= 2;
+        next.disabled = !hasOverflow || rail.scrollLeft >= max;
+      }
+      if (rail.dataset.mcSaranoniArrowBound !== "1") {
+        rail.dataset.mcSaranoniArrowBound = "1";
+        rail.addEventListener("scroll", refresh, { passive: true });
+        global.addEventListener("resize", refresh, { passive: true });
+      }
+      refresh();
+      global.setTimeout(refresh, 250);
+      global.setTimeout(refresh, 900);
+    });
   }
 
   function mountSaranoniSwatchWrapper(wrap) {
@@ -7423,6 +7644,7 @@
       wrap.style.setProperty("margin", "12px 0 8px 0", "important");
       wrap.style.setProperty("padding", "0", "important");
     } catch (eWrapStyle) {}
+    ensureSaranoniRailArrows();
   }
 
   function finishDataDrivenSaranoniSwatchProbe(wrap, select, ctx, probeState) {
@@ -9305,7 +9527,7 @@
       try {
         if (isStalePdpAuthRun()) return;
         if (isSaranoniPdpPage() && global.document.body) global.document.body.classList.remove("mc-bean-bag-pdp");
-        ensureSaranoniBrandLogo(); ensureSaranoniVariantUi(); hideSaranoniHeroAltviews(); removeSaranoniDuplicateColorPicker(); finalizeSaranoniInfoColumnOrder(); markSaranoniPdpReady();
+        ensureSaranoniBrandLogo(); ensureSaranoniVariantUi(); hideSaranoniHeroAltviews(); removeSaranoniDuplicateColorPicker(); finalizeSaranoniInfoColumnOrder(); ensureSaranoniRailArrows(); markSaranoniPdpReady();
       } catch (eSarRepair) {}
     }, 200);
     [900, 1800, 3500].forEach(function (ms) {
@@ -9414,7 +9636,7 @@
     global.__MC_BB_OPTION_REPAIR_VER__ = VERSION;
     [120, 600, 1800].forEach(function (ms) {
       global.setTimeout(function () {
-        try { initBeanBagImageSync(); ensureBeanBagSizeRow(); markBeanBagCoverSwatchesReady(); ensureBeanBagBrandLogo(); ensureBeanBagPdpAccordion(); appendBeanBagInfoColumnOrder(); hideBeanBagNativeOptionsTable(); sanitizeBeanBagAltviews(); applyPdpMainImageCap(); revealBeanBagRelated(); } catch (eBbRepair) {}
+        try { initBeanBagImageSync(); ensureBeanBagSizeRow(); markBeanBagCoverSwatchesReady(); ensureBeanBagBrandLogo(); ensureBeanBagPdpAccordion(); appendBeanBagInfoColumnOrder(); hideBeanBagNativeOptionsTable(); sanitizeBeanBagAltviews(); applyPdpMainImageCap(); normalizeLegacyPdpInfoWrapper(); revealBeanBagRelated(); } catch (eBbRepair) {}
       }, ms);
     });
   }
@@ -10523,11 +10745,13 @@
       injectPdpTopGapCss();
       scheduleSteveSilverLayoutRepair();
       scheduleMahjongHouseLayoutRepair();
+      normalizeLegacyPdpInfoWrapper();
       installDescriptionViewMoreResize();
       syncPdpDescriptionViewMore();
       if (isSaranoniPdpPage()) {
         try {
           finalizeSaranoniInfoColumnOrder();
+          ensureSaranoniRailArrows();
         } catch (eSarFinal) {}
       }
       if (isMahjongHousePdpPage()) {
@@ -12524,4 +12748,3 @@ try {
     } catch (eMo) {}
   }
 })(window);
-

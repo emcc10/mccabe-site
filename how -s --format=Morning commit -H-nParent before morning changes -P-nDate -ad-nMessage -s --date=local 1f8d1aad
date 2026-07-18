@@ -1,0 +1,40 @@
+e6a4fb4c | HEAD@{Thu Jul 16 11:05:33 2026} | Thu Jul 16 11:05:33 2026 | commit: Restore pre-change template CSS and JS backups
+c70e634b | HEAD@{Thu Jul 16 10:48:33 2026} | Thu Jul 16 10:48:33 2026 | commit: Restore website files to pre-Cursor and pre-Codex state
+bc680419 | HEAD@{Thu Jul 16 10:47:30 2026} | Thu Jul 16 10:07:17 2026 | checkout: moving from main to main
+bc680419 | HEAD@{Thu Jul 16 10:07:17 2026} | Thu Jul 16 10:07:17 2026 | commit: Restore July 15 working template from local backup
+e97347dc | HEAD@{Thu Jul 16 10:03:58 2026} | Thu Jul 16 10:03:58 2026 | commit: Trigger deploy of July 15 recovery
+9afa9ae9 | HEAD@{Thu Jul 16 10:01:22 2026} | Wed Jul 15 09:26:51 2026 | reset: moving to 9afa9ae9
+6ba589b1 | HEAD@{Thu Jul 16 10:01:10 2026} | Thu Jul 16 09:03:33 2026 | checkout: moving from rescue-july16-current to main
+10330931 | HEAD@{Thu Jul 16 10:00:57 2026} | Thu Jul 16 10:00:57 2026 | commit: Rescue July 16 state before restoring working site
+6ba589b1 | HEAD@{Thu Jul 16 10:00:42 2026} | Thu Jul 16 09:03:33 2026 | checkout: moving from main to rescue-july16-current
+6ba589b1 | HEAD@{Thu Jul 16 09:09:56 2026} | Thu Jul 16 09:03:33 2026 | reset: moving to origin/main
+a2a5d4d6 | HEAD@{Thu Jul 16 09:09:53 2026} | Sun Jul 5 19:28:55 2026 | checkout: moving from fix-saranoni-pdp-swatches to main
+6ba589b1 | HEAD@{Thu Jul 16 09:09:22 2026} | Thu Jul 16 09:03:33 2026 | cherry-pick: Fix Saranoni PDP layout by stopping PLP enforcer on product pages.
+6cc3bd24 | HEAD@{Thu Jul 16 09:09:22 2026} | Thu Jul 16 09:06:27 2026 | checkout: moving from main to fix-saranoni-pdp-swatches
+a2a5d4d6 | HEAD@{Thu Jul 16 09:09:20 2026} | Sun Jul 5 19:28:55 2026 | rebase (abort): returning to refs/heads/main
+6cc3bd24 | HEAD@{Thu Jul 16 09:08:52 2026} | Thu Jul 16 09:06:27 2026 | pull --rebase origin main (start): checkout 6cc3bd2408d88ce42802cbcba864bdbaa64fa006
+a2a5d4d6 | HEAD@{Thu Jul 16 09:08:48 2026} | Sun Jul 5 19:28:55 2026 | rebase (abort): returning to refs/heads/main
+a2a5d4d6 | HEAD@{Thu Jul 16 09:08:48 2026} | Sun Jul 5 19:28:55 2026 | rebase (abort): returning to refs/heads/main
+97a32d93 | HEAD@{Thu Jul 16 09:08:24 2026} | Thu Jul 16 09:03:33 2026 | reset: moving to HEAD
+97a32d93 | HEAD@{Thu Jul 16 09:03:33 2026} | Thu Jul 16 09:03:33 2026 | commit: Fix Saranoni PDP layout by stopping PLP enforcer on product pages.
+0d156778 | HEAD@{Thu Jul 16 08:40:26 2026} | Thu Jul 16 08:40:26 2026 | commit: Add Mahjong House PDP alt view gallery
+9afa9ae9 | HEAD@{Thu Jul 16 08:40:00 2026} | Wed Jul 15 09:26:51 2026 | reset: moving to HEAD~1
+1f8d1aad | HEAD@{Thu Jul 16 08:39:40 2026} | Thu Jul 16 08:39:40 2026 | commit: Add Mahjong House PDP alt view gallery
+9afa9ae9 | HEAD@{Wed Jul 15 09:26:51 2026} | Wed Jul 15 09:26:51 2026 | commit: Re-upload corrected Snuggler Snow Leopard variant photos.
+a2a5d4d6 | HEAD@{Mon Jul 6 14:24:23 2026} | Sun Jul 5 19:28:55 2026 | checkout: moving from 149c527222247b9471bc5c6d4978efe49d40f226 to main
+149c5272 | HEAD@{Sun Jul 5 19:29:11 2026} | Thu Jul 2 12:39:53 2026 | pull --rebase origin main (start): checkout 149c527222247b9471bc5c6d4978efe49d40f226
+a2a5d4d6 | HEAD@{Sun Jul 5 19:28:55 2026} | Sun Jul 5 19:28:55 2026 | commit: Fix cart page layout and deploy menu/PLP CSS to live
+3a5e2171 | HEAD@{Wed Jul 1 12:30:01 2026} | Wed Jul 1 12:07:29 2026 | reset: moving to HEAD
+3a5e2171 | HEAD@{Wed Jul 1 12:22:53 2026} | Wed Jul 1 12:07:29 2026 | reset: moving to HEAD
+3a5e2171 | HEAD@{Wed Jul 1 12:21:50 2026} | Wed Jul 1 12:07:29 2026 | reset: moving to HEAD
+3a5e2171 | HEAD@{Wed Jul 1 12:21:49 2026} | Wed Jul 1 12:07:29 2026 | reset: moving to 3a5e2171b1a35b9c8342280dbcb9e080a0044896
+3a5e2171 | HEAD@{Wed Jul 1 12:21:20 2026} | Wed Jul 1 12:07:29 2026 | reset: moving to HEAD
+3a5e2171 | HEAD@{Wed Jul 1 12:07:29 2026} | Wed Jul 1 12:07:29 2026 | commit: Repair bean bag PDP cleanup
+f6dfd3c4 | HEAD@{Wed Jul 1 12:04:57 2026} | Wed Jul 1 11:46:24 2026 | pull --ff-only: Fast-forward
+69691ec4 | HEAD@{Wed Jul 1 12:00:35 2026} | Tue Jun 30 22:19:04 2026 | reset: moving to HEAD~2
+f6dfd3c4 | HEAD@{Wed Jul 1 11:46:24 2026} | Wed Jul 1 11:46:24 2026 | commit: Repair Mahjong and bean bag PDP layout
+62ce5523 | HEAD@{Wed Jul 1 11:28:42 2026} | Wed Jul 1 11:28:42 2026 | commit: Fix Steve Silver PDP media overlap
+69691ec4 | HEAD@{Tue Jun 30 22:19:04 2026} | Tue Jun 30 22:19:04 2026 | commit: Audit Saranoni variant images and replace 38 duplicate color photos with unique Shopify sources.
+08db9f65 | HEAD@{Tue Jun 30 14:35:09 2026} | Tue Jun 30 14:35:09 2026 | commit: Detect closeout PDPs by live product slugs
+19de786d | HEAD@{Tue Jun 30 14:19:46 2026} | Tue Jun 30 14:19:46 2026 | commit: Fix live template and v21 PDP layout path
+721758d3 | HEAD@{Tue Jun 30 13:11:10 2026} | Tue Jun 30 13:11:10 2026 | commit: Fix PDP and category layout regressions

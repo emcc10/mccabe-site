@@ -3308,10 +3308,117 @@
     return false;
   }
 
+  /* Keep Bean Bag feature content in the one existing accordion.  This is
+     deliberately Bean Bag-only: late Volusion content updates can otherwise
+     leave the feature node outside, or remove it from, the visible column. */
+  function ensureBeanBagPdpAccordion() {
+    if (!isBeanBagPdpPage()) return null;
+    try {
+      /* The shared inline anti-flicker rule hides accordions unless the page
+         has claimed the accordion-PDP state. Bean Bags were missing that
+         state class even though their accordion was fully built. */
+      global.document.body.classList.add("mc-pdp-accordion-pdp");
+    } catch (eBeanBagAccordionState) {}
+    var infoColumn = findPdpHeroColumnTd();
+    var features = global.document.getElementById("mc-pdp-features");
+    var description = global.document.getElementById("mc-pdp-description-below-features");
+    if (!infoColumn || (!features && !description)) return null;
+    var acc = global.document.getElementById("mc-pdp-accordion");
+    if (!acc) {
+      acc = global.document.createElement("div");
+      acc.id = "mc-pdp-accordion";
+      acc.className = "mc-pdp-accordion mc-bean-bag-accordion";
+    }
+    var rows = [];
+    if (features && String(features.textContent || "").replace(/\s+/g, "").length) {
+      rows.push({ id: "features", label: "FEATURES", host: features });
+    }
+    if (description && String(description.textContent || "").replace(/\s+/g, "").length) {
+      rows.push({ id: "details", label: "PRODUCT DETAILS", host: description });
+    }
+    if (!rows.length) return null;
+    try {
+      acc.style.setProperty("display", "block", "important");
+      acc.style.setProperty("visibility", "visible", "important");
+      acc.style.setProperty("opacity", "1", "important");
+      acc.style.setProperty("width", "100%", "important");
+      acc.style.setProperty("border-top", "1px solid #e2dfd8", "important");
+      acc.querySelectorAll(".mc-acc-row").forEach(function (rowNode) {
+        rowNode.style.setProperty("display", "block", "important");
+        rowNode.style.setProperty("visibility", "visible", "important");
+        rowNode.style.setProperty("border-bottom", "1px solid #e2dfd8", "important");
+      });
+    } catch (eBeanBagAccordionStyle) {}
+    var existingRows = rows.every(function (row) {
+      return !!acc.querySelector("#mc-acc-row-" + row.id + " .mc-acc-panel");
+    });
+    if (existingRows) {
+      rows.forEach(function (row) {
+        var panel = acc.querySelector("#mc-acc-row-" + row.id + " .mc-acc-panel");
+        if (panel && row.host.parentNode !== panel) panel.appendChild(row.host);
+      });
+    } else {
+      while (acc.firstChild) acc.removeChild(acc.firstChild);
+      rows.forEach(function (row) {
+        acc.appendChild(buildSaranoniAccordionRow(row.id, row.label, row.host));
+      });
+    }
+    try {
+      acc.querySelectorAll(".mc-acc-row").forEach(function (rowNode) {
+        rowNode.style.setProperty("display", "block", "important");
+        rowNode.style.setProperty("visibility", "visible", "important");
+        rowNode.style.setProperty("border-bottom", "1px solid #e2dfd8", "important");
+        var header = rowNode.querySelector(".mc-acc-header");
+        if (header) {
+          header.style.setProperty("display", "flex", "important");
+          header.style.setProperty("visibility", "visible", "important");
+          header.style.setProperty("background", "transparent", "important");
+        }
+      });
+    } catch (eBeanBagAccordionRows) {}
+    var purchase = resolveBeanBagPurchaseElement(infoColumn);
+    if (purchase && purchase.parentNode === infoColumn) infoColumn.insertBefore(acc, purchase);
+    else if (acc.parentNode !== infoColumn) infoColumn.appendChild(acc);
+    return acc;
+  }
+
+  function hideBeanBagStandalonePriceLabel(infoColumn) {
+    if (!isBeanBagPdpPage() || !infoColumn) return;
+    infoColumn.querySelectorAll(":scope > div, :scope > span, :scope > font").forEach(function (node) {
+      if (node.id && /^(mc-pdp-|messaging|beanbag-|mc-bb-)/.test(node.id)) return;
+      var text = String(node.textContent || "").replace(/\s+/g, " ").trim();
+      if (!/^price$/i.test(text) && !/^price with selected options$/i.test(text)) return;
+      try {
+        node.style.setProperty("display", "none", "important");
+        node.style.setProperty("visibility", "hidden", "important");
+        node.style.setProperty("height", "0", "important");
+        node.style.setProperty("margin", "0", "important");
+        node.style.setProperty("padding", "0", "important");
+        node.style.setProperty("overflow", "hidden", "important");
+      } catch (eBeanBagPriceLabel) {}
+    });
+  }
+
   function appendBeanBagInfoColumnOrder() {
     if (!isBeanBagPdpPage()) return;
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
+    mountBeanBagSwatchesAboveFeatures();
+    extractSwatchesIntoCol();
+    var swatchWrap = global.document.getElementById("beanbag-swatch-wrapper");
+    if (swatchWrap) {
+      try {
+        swatchWrap.style.setProperty("display", "block", "important");
+        swatchWrap.style.setProperty("visibility", "visible", "important");
+        swatchWrap.style.setProperty("opacity", "1", "important");
+        swatchWrap.querySelectorAll(".beanbag-swatch, .beanbag-swatch img, img").forEach(function (swatch) {
+          swatch.style.setProperty("display", "inline-block", "important");
+          swatch.style.setProperty("visibility", "visible", "important");
+          swatch.style.setProperty("opacity", "1", "important");
+        });
+      } catch (eBeanBagSwatchVisibility) {}
+    }
+    hideBeanBagStandalonePriceLabel(infoColumn);
     var brandElement = global.document.getElementById("mc-pdp-brand-logo");
     var titleElement = global.document.getElementById("mc-pdp-title-right");
     var priceElement = global.document.getElementById("mc-pdp-price-stack-host");
@@ -3321,6 +3428,8 @@
     var purchaseElement = resolveBeanBagPurchaseElement(infoColumn);
     var featuresElement = global.document.getElementById("mc-pdp-features");
     var descriptionElement = global.document.getElementById("mc-pdp-description-below-features");
+    var accordionElement = ensureBeanBagPdpAccordion();
+    ensurePdpAccordionVisible();
     var ordered = [
       brandElement,
       titleElement,
@@ -3328,9 +3437,9 @@
       klarnaElement,
       sizeOptionsElement,
       coverOptionsElement,
-      featuresElement,
+      accordionElement || featuresElement,
       purchaseElement,
-      descriptionElement,
+      accordionElement ? null : descriptionElement,
     ];
     var allowedIds = {};
     var oi;
@@ -4123,6 +4232,7 @@
       if (!isSaranoniPdpPage()) return;
   
       expandSaranoniHeroNestedTables();
+      lockSaranoniDesktopMainRowWidth();
   
       ensureSaranoniHeroImage();
   
@@ -4163,6 +4273,10 @@
       hideSaranoniLeftoverNativeShell(infoColumn);
   
       ensureSaranoniHeroImage();
+
+      /* This finalizer writes the nested legacy table geometry above.  Flatten
+         that now-unused wrapper only after those writes have completed. */
+      normalizeLegacyPdpInfoWrapper();
   
       markSaranoniPdpReady();
   
@@ -4210,6 +4324,7 @@
     var infoColumn = resolveSaranoniInfoColumn();
     if (!infoColumn) return;
     expandSaranoniHeroNestedTables();
+    lockSaranoniDesktopMainRowWidth();
     ensureSaranoniHeroImage();
     mountPdpFeaturesBlock();
     mountDescriptionBelowFeatures();
@@ -4245,6 +4360,7 @@
     applySaranoniInfoColumnAlignment();
     hideSaranoniLeftoverNativeShell(infoColumn);
     ensureSaranoniHeroImage();
+    normalizeLegacyPdpInfoWrapper();
     markSaranoniPdpReady();
   }
 
@@ -5758,6 +5874,30 @@
         }
       } catch (eMedia) {}
     });
+    /* Saranoni's native photo cell can be nested inside the first flex
+       column. Size that direct flex column explicitly; the nested photo
+       cell remains a table-cell so the hero image resolves against it. */
+    if (isSaranoniPdpPage() && desktopTwoCol) {
+      try {
+        var saranoniMediaColumn = null;
+        Array.prototype.some.call(row.children || [], function (child) {
+          if (child && child.tagName === "TD" && child.querySelector("td.mc-pdp-media-td")) {
+            saranoniMediaColumn = child;
+            return true;
+          }
+          return false;
+        });
+        if (saranoniMediaColumn) {
+          saranoniMediaColumn.style.setProperty("display", "block", "important");
+          saranoniMediaColumn.style.setProperty("flex", "0 0 700px", "important");
+          saranoniMediaColumn.style.setProperty("flex-basis", "700px", "important");
+          saranoniMediaColumn.style.setProperty("width", "700px", "important");
+          saranoniMediaColumn.style.setProperty("min-width", "700px", "important");
+          saranoniMediaColumn.style.setProperty("max-width", "700px", "important");
+          saranoniMediaColumn.style.setProperty("box-sizing", "border-box", "important");
+        }
+      } catch (eSaranoniMediaColumn) {}
+    }
     row.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
       try {
         cell.style.setProperty("display", "block", "important");
@@ -5877,10 +6017,130 @@
       (global.document.head || global.document.documentElement).appendChild(st);
     }
     st.textContent =
-      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #v65-product-parent tbody:has(>tr.mc-pdp-main-row){display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:0!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 650px!important;flex-basis:650px!important;max-width:650px!important;min-width:0!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;min-width:460px!important;max-width:460px!important;width:460px!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp.mc-saranoni-pdp-ready tr.mc-pdp-main-row>td:last-child table.colors_pricebox:not(:has(#mc-pdp-option-block)):not(:has(#mc-pdp-accordion)):not(:has(#mc-pdp-features)):not(:has(#mc-pdp-purchase-stack)):not(:has(#mc-pdp-price-stack-host)):not(:has(#mc-pdp-title-right)):not(:has(#messaging-element)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}html body.mc-saranoni-pdp td.mc-pdp-media-td{display:table-cell!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;width:460px!important;max-width:460px!important;min-width:460px!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:auto!important;max-width:min(650px,100%)!important;height:auto!important;max-height:none!important;display:block!important;margin-left:0!important;margin-right:auto!important}}" +
+      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #v65-product-parent tbody:has(>tr.mc-pdp-main-row){display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:0!important;width:100%!important;max-width:1160px!important;margin-left:auto!important;margin-right:auto!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 650px!important;flex-basis:650px!important;max-width:650px!important;min-width:0!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;min-width:460px!important;max-width:460px!important;width:460px!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp.mc-saranoni-pdp-ready tr.mc-pdp-main-row>td:last-child table.colors_pricebox:not(:has(#mc-pdp-option-block)):not(:has(#mc-pdp-accordion)):not(:has(#mc-pdp-features)):not(:has(#mc-pdp-purchase-stack)):not(:has(#mc-pdp-price-stack-host)):not(:has(#mc-pdp-title-right)):not(:has(#messaging-element)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}html body.mc-saranoni-pdp td.mc-pdp-media-td{display:table-cell!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;width:460px!important;max-width:460px!important;min-width:460px!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:auto!important;max-width:min(650px,100%)!important;height:auto!important;max-height:none!important;display:block!important;margin-left:0!important;margin-right:auto!important}}" +
       "html body.mc-saranoni-pdp td.mc-pdp-options-td>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-unified-pdp-info>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-pdp-options-td>#options_table:not(#mc-pdp-option-block #options_table),html body.mc-saranoni-pdp td.mc-pdp-options-td>table:has(>#options_table):not(:has(#mc-pdp-option-block)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-brand-logo,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-price-stack-host,html body.mc-saranoni-pdp #messaging-element,html body.mc-saranoni-pdp #mc-pdp-accordion,html body.mc-saranoni-pdp #mc-pdp-option-block,html body.mc-saranoni-pdp #mc-pdp-features,html body.mc-saranoni-pdp #mc-pdp-description-below-features,html body.mc-saranoni-pdp #mc-pdp-purchase-stack{order:unset!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-option-block{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;pointer-events:none!important}";
+  }
+
+  /* The legacy template geometry writer continues to assign max-width:100%
+     inline to every PDP row.  Limit only Saranoni's rebuilt two-column hero
+     row after that write so the media and information columns retain their
+     established 650px/460px desktop geometry. */
+  function lockSaranoniDesktopMainRowWidth() {
+    if (!isSaranoniPdpPage()) return;
+    try {
+      if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
+      var row = global.document.querySelector(
+        "#content_area tr.mc-pdp-main-row, #v65-product-parent tr.mc-pdp-main-row"
+      );
+      if (!row) return;
+      var apply = function () {
+        try {
+          if (row.style.getPropertyValue("max-width") !== "1160px") {
+            row.style.setProperty("max-width", "1160px", "important");
+          }
+          if (row.style.getPropertyValue("margin-left") !== "auto") {
+            row.style.setProperty("margin-left", "auto", "important");
+          }
+          if (row.style.getPropertyValue("margin-right") !== "auto") {
+            row.style.setProperty("margin-right", "auto", "important");
+          }
+        } catch (eSaranoniRowWidthApply) {}
+      };
+      apply();
+      if (row.dataset.mcSaranoniRowWidthBound === "1") return;
+      row.dataset.mcSaranoniRowWidthBound = "1";
+      if (global.MutationObserver) {
+        new global.MutationObserver(function () {
+          apply();
+        }).observe(row, { attributes: true, attributeFilter: ["style"] });
+      }
+    } catch (eSaranoniRowWidth) {}
+  }
+
+  /* Flatten only the unused legacy table/quantity wrapper that encloses a
+     rebuilt PDP information column.  Direct product columns are untouched. */
+  function normalizeLegacyPdpInfoWrapper() {
+    if (!isProductPdp()) return;
+    try {
+      if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
+      var info = global.document.querySelector(
+        "#v65-product-parent td.mc-pdp-options-td, #v65-product-parent td.mc-unified-pdp-info"
+      );
+      if (!info) return;
+      var outer = info.closest && info.closest("td.vol-product__top--right");
+      /* Some live templates omit the right-column class.  In that case, the
+         direct main-row cell containing the rebuilt info column is the same
+         wrapper and is the only safe fallback. */
+      if (!outer) {
+        var mainRow = info.closest && info.closest("tr.mc-pdp-main-row, tr.mc-unified-pdp-row");
+        if (mainRow) {
+          Array.prototype.some.call(mainRow.children || [], function (cell) {
+            if (cell && cell.tagName === "TD" && cell.contains(info)) {
+              outer = cell;
+              return true;
+            }
+            return false;
+          });
+        }
+      }
+      if (!outer || info.parentElement === outer) return;
+
+      var priceHost = global.document.getElementById("mc-pdp-price-stack-host");
+      if (priceHost) {
+        outer.querySelectorAll("table.colors_pricebox").forEach(function (table) {
+          if (table.contains(info) || !table.querySelector(".option_pricing")) return;
+          if (table.querySelector("input, select, button")) return;
+          ["display", "visibility", "height", "max-height", "margin", "padding", "overflow"].forEach(function (prop) {
+            var value = prop === "display" ? "none" : (prop === "visibility" ? "hidden" : (prop === "overflow" ? "hidden" : "0"));
+            table.style.setProperty(prop, value, "important");
+          });
+          var next = table.nextElementSibling;
+          while (next && (next.tagName === "BR" || (next.tagName === "IMG" && /clear1x1/i.test(next.getAttribute("src") || "")))) {
+            next.style.setProperty("display", "none", "important");
+            next = next.nextElementSibling;
+          }
+        });
+      }
+
+      outer.querySelectorAll("#product_options_heading").forEach(function (heading) {
+        if (heading.contains(info) || info.contains(heading)) return;
+        heading.style.setProperty("display", "none", "important");
+        heading.style.setProperty("height", "0", "important");
+        heading.style.setProperty("margin", "0", "important");
+        heading.style.setProperty("padding", "0", "important");
+      });
+
+      var infoRow = info.parentElement;
+      if (infoRow && infoRow.tagName === "TR") {
+        Array.prototype.forEach.call(infoRow.children, function (cell) {
+          if (cell === info || !cell.querySelector(".vol-cartqty__toggle")) return;
+          if (cell.querySelector('input[name^="QTY"], input[name="quantity"], input[name="btnaddtocart"], button[name="btnaddtocart"]')) return;
+          ["display", "width", "min-width", "padding", "margin", "overflow"].forEach(function (prop) {
+            cell.style.setProperty(prop, prop === "display" ? "none" : (prop === "overflow" ? "hidden" : "0"), "important");
+          });
+        });
+      }
+
+      var node = info.parentElement;
+      while (node && node !== outer) {
+        if (/^(TABLE|TBODY|TR|TD)$/.test(node.tagName || "")) {
+          node.style.setProperty("display", "block", "important");
+          node.style.setProperty("width", "100%", "important");
+          node.style.setProperty("max-width", "100%", "important");
+          node.style.setProperty("min-width", "0", "important");
+          node.style.setProperty("margin", "0", "important");
+          node.style.setProperty("padding", "0", "important");
+          node.style.setProperty("box-sizing", "border-box", "important");
+        }
+        node = node.parentElement;
+      }
+      info.style.setProperty("width", "100%", "important");
+      info.style.setProperty("max-width", "100%", "important");
+      info.style.setProperty("min-width", "0", "important");
+      info.style.setProperty("box-sizing", "border-box", "important");
+    } catch (eNormalizeLegacyPdpInfo) {}
   }
 
   function ensureSaranoniSizeVariantCss() {
@@ -5896,7 +6156,8 @@
       ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:90px!important;padding:4px!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important}" +
       ".mc-saranoni-size-thumb img{display:block!important;width:82px!important;height:82px!important;object-fit:cover!important;border:0!important;border-radius:2px!important}" +
       ".mc-saranoni-size-thumb.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
-      ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important;margin-top:4px!important;white-space:normal!important;word-break:break-word!important;max-width:86px!important}";
+      ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important;margin-top:4px!important;white-space:normal!important;word-break:break-word!important;max-width:86px!important}" +
+      "html body.mc-saranoni-pdp #options_table > tbody > tr:not(.vol-option-heading) > td:last-child{white-space:nowrap!important}";
   }
 
   function updateSaranoniSizeThumbUi(optionId) {
@@ -8726,8 +8987,49 @@
     } catch (eCls) {}
   }
 
+  /* Volusion replaces this related-items cell after the initial PDP pass.
+     Re-show only the two Bean Bag related containers; no ancestors, product
+     cards, or other PDP types are changed. */
+  function revealBeanBagRelated() {
+    if (!isBeanBagPdpPage()) return;
+    var related = global.document.getElementById("related_products_content");
+    var relatedRoot = global.document.getElementById("v65-product-related");
+    if (!related && !relatedRoot) return;
+    try {
+      if (related) {
+        related.style.setProperty("display", "table-cell", "important");
+        related.style.setProperty("visibility", "visible", "important");
+        related.style.setProperty("opacity", "1", "important");
+        related.style.setProperty("height", "auto", "important");
+        related.style.setProperty("width", "100%", "important");
+      }
+      if (relatedRoot) {
+        relatedRoot.style.setProperty("display", "table", "important");
+        relatedRoot.style.setProperty("visibility", "visible", "important");
+        relatedRoot.style.setProperty("width", "100%", "important");
+        relatedRoot.style.setProperty("height", "auto", "important");
+      }
+      var node = related;
+      while (node && node !== global.document.body) {
+        if (node.tagName === "TD") {
+          node.style.setProperty("display", "table-cell", "important");
+          node.style.setProperty("visibility", "visible", "important");
+          node.style.setProperty("height", "auto", "important");
+        } else if (node.tagName === "TR") {
+          node.style.setProperty("display", "table-row", "important");
+          node.style.setProperty("visibility", "visible", "important");
+          node.style.setProperty("height", "auto", "important");
+        }
+        node = node.parentElement;
+      }
+    } catch (eBeanBagRelated) {}
+  }
+
   function scheduleBeanBagOptionRepair() {
     if (!isBeanBagPdpPage()) return;
+    [3500, 6000, 9000, 12000, 16000].forEach(function (ms) {
+      global.setTimeout(revealBeanBagRelated, ms);
+    });
     if (global.__MC_BB_OPTION_REPAIR_VER__ === VERSION) return;
     global.__MC_BB_OPTION_REPAIR_VER__ = VERSION;
     [120, 600].forEach(function (ms) {
@@ -8736,10 +9038,14 @@
           initBeanBagImageSync();
           ensureBeanBagSizeRow();
           markBeanBagCoverSwatchesReady();
+          mountPdpFeaturesBlock();
+          ensureBeanBagPdpAccordion();
           appendBeanBagInfoColumnOrder();
           hideBeanBagNativeOptionsTable();
           sanitizeBeanBagAltviews();
           applyPdpMainImageCap();
+          normalizeLegacyPdpInfoWrapper();
+          revealBeanBagRelated();
         } catch (eBbRepair) {}
       }, ms);
     });
@@ -9533,6 +9839,7 @@
       mountPdpFeaturesBlock();
     } else if (isSaranoniPdpPage()) {
       ensureSaranoniPdpLayoutCss();
+      lockSaranoniDesktopMainRowWidth();
       ensureSaranoniBrandLogo();
       ensureSaranoniVariantOptionBlock();
       mountPdpFeaturesBlock();
@@ -9864,6 +10171,7 @@
       injectPdpTopGapCss();
       scheduleSteveSilverLayoutRepair();
       scheduleMahjongHouseLayoutRepair();
+      normalizeLegacyPdpInfoWrapper();
       installDescriptionViewMoreResize();
       syncPdpDescriptionViewMore();
       if (isSaranoniPdpPage()) {

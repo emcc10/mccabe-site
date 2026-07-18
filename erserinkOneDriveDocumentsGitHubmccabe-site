@@ -1,0 +1,30 @@
+6ba589b1  Thu Jul 16 09:03:33 2026  emcc10  Fix Saranoni PDP layout by stopping PLP enforcer on product pages.
+6cc3bd24  Thu Jul 16 09:06:27 2026  emcc10  Restore pre-regression PDP enforcer
+d1e708f4  Thu Jul 16 09:05:35 2026  emcc10  Restore PDP layout before stability override
+41276493  Thu Jul 16 09:05:23 2026  emcc10  On main: wip-before-swatch-fix-push
+f797d6a4  Thu Jul 16 09:05:23 2026  emcc10  index on main: 97a32d93 Fix Saranoni PDP layout by stopping PLP enforcer on product pages.
+2ccf3cae  Thu Jul 16 09:05:23 2026  emcc10  untracked files on main: 97a32d93 Fix Saranoni PDP layout by stopping PLP enforcer on product pages.
+97a32d93  Thu Jul 16 09:03:33 2026  emcc10  Fix Saranoni PDP layout by stopping PLP enforcer on product pages.
+3ab7666b  Thu Jul 16 08:55:33 2026  emcc10  Stop conflicting global PDP layout loader
+bf71c07b  Thu Jul 16 08:40:26 2026  emcc10  Add Mahjong House PDP alt view gallery
+0d156778  Thu Jul 16 08:40:26 2026  emcc10  Add Mahjong House PDP alt view gallery
+9afa9ae9  Wed Jul 15 09:26:51 2026  emcc10  Re-upload corrected Snuggler Snow Leopard variant photos.
+407c70d6  Mon Jul 13 08:38:16 2026  emcc10  Fix related-items table not filling 1200px PDP shell
+a71c867a  Sun Jul 12 20:05:15 2026  emcc10  Gate template.min.js desktop content-area padder to mobile only
+e1e791d4  Sat Jul 11 10:16:39 2026  emcc10  Add Minky Stretch XL color variants with saranoni images and swatches.
+75931848  Sat Jul 11 09:04:50 2026  emcc10  Add Peter Rabbit Boy/Girl color options with saranoni variant images.
+a2a5d4d6  Sun Jul 5 19:28:55 2026  emcc10  Fix cart page layout and deploy menu/PLP CSS to live
+149c5272  Thu Jul 2 12:39:53 2026  emcc10  Update product grid styles and media queries
+35d657bc  Thu Jul 2 12:09:50 2026  emcc10  Refactor category grid styles for improved specificity
+3a5e2171  Wed Jul 1 12:07:29 2026  emcc10  Repair bean bag PDP cleanup
+f6dfd3c4  Wed Jul 1 11:46:24 2026  emcc10  Repair Mahjong and bean bag PDP layout
+62ce5523  Wed Jul 1 11:28:42 2026  emcc10  Fix Steve Silver PDP media overlap
+3aecb3b9  Wed Jul 1 11:05:43 2026  Claude  Fix bean bag PDP broken: update PDP_AUTH_WANT to match deployed script version
+69691ec4  Tue Jun 30 22:19:04 2026  emcc10  Audit Saranoni variant images and replace 38 duplicate color photos with unique Shopify sources.
+3a8e47c5  Tue Jun 30 22:02:54 2026  emcc10  Fix Steve Silver image size and accordion width via JS
+1fef6ffe  Tue Jun 30 21:56:51 2026  emcc10  Fix Steve Silver PDP: image 650px, info column 420px
+d685e38f  Tue Jun 30 21:53:05 2026  emcc10  Fix closeout accordion: extend Steve Silver detection in unified layout
+b2757418  Tue Jun 30 21:43:09 2026  emcc10  Set product image width to 650px via Volusion template selector
+2be7a39b  Tue Jun 30 21:39:16 2026  emcc10  Fix image width to exactly 650px and hide TechSpecs with CSS
+e97bff2e  Tue Jun 30 21:35:08 2026  emcc10  Mount ProductDetail_ProductDetails_div for Steve Silver closeout
+fa85a83e  Tue Jun 30 21:21:50 2026  emcc10  Override inline display:none on TechSpecs with !important

@@ -8,6 +8,7 @@
   var MAX_ALT_VIEWS = 24;
   var discoveredByCode = {};
   var probeInFlight = {};
+  var stickyHeroTimer = null;
 
   function productCode() {
     var field = document.querySelector('input[name="ProductCode"],input[name="productcode"]');
@@ -37,12 +38,23 @@
     return /\/product-p\//i.test(path) || /productdetails\.asp/i.test(path) || !!document.getElementById("v65-product-parent");
   }
 
+  function isAnyProductPage() {
+    var path = String(window.location.pathname || "");
+    return /\/product-p\//i.test(path) || /productdetails\.asp/i.test(path) || !!document.getElementById("v65-product-parent");
+  }
+
   function heroImage() {
     return document.querySelector("img#product_photo,img#main-image");
   }
 
   function mediaCellFor(hero) {
-    return hero && hero.closest("td.mc-pdp-media-td,td.mc-unified-pdp-media,#product_photo_td,td");
+    if (!hero || !hero.closest) return null;
+    return (
+      hero.closest("td.mc-pdp-media-td") ||
+      hero.closest("td.mc-unified-pdp-media") ||
+      hero.closest("#product_photo_td") ||
+      hero.closest("td")
+    );
   }
 
   function directChild(parent, node) {
@@ -61,18 +73,28 @@
     }
   }
 
+  function probeImage(src, onload, onerror) {
+    var tester = document.createElement("img");
+    tester.onload = onload;
+    tester.onerror = onerror;
+    tester.src = src;
+    return tester;
+  }
+
   function canonicalUrl(value) {
     return absoluteUrl(value).replace(/^https?:\/\/[^/]+/i, "").replace(/[?#].*$/, "").toLowerCase();
   }
 
   function altViewSlot(value) {
     var match = String(value || "").match(/-altview(\d+)\.(?:jpe?g|png|webp)(?:[?#]|$)/i);
-    return match ? parseInt(match[1], 10) : 0;
+    if (match) return parseInt(match[1], 10);
+    match = String(value || "").match(/-(\d+)T?\.(?:jpe?g|png|webp)(?:[?#]|$)/i);
+    return match ? 100 + parseInt(match[1], 10) : 0;
   }
 
-  function addItem(items, seen, full, altText) {
+  function addItem(items, seen, full, altText, explicitSlot) {
     var fullUrl = absoluteUrl(full);
-    var slot = altViewSlot(fullUrl);
+    var slot = explicitSlot || altViewSlot(fullUrl);
     var key = canonicalUrl(fullUrl);
     if (!key || !slot || seen[key]) return;
     seen[key] = true;
@@ -110,19 +132,67 @@
     }
 
     Array.prototype.forEach.call(discoveredByCode[code] || [], function (item) {
-      addItem(items, seen, item.full, item.alt);
+      addItem(items, seen, item.full, item.alt, item.slot);
     });
     items.sort(function (a, b) { return a.slot - b.slot; });
     return items;
   }
 
+  function publishActiveHero(full) {
+    if (!full) return;
+    try {
+      window.__MC_PDP_ALT_VIEW_ACTIVE_SRC__ = absoluteUrl(full);
+      window.__MC_PDP_ALT_VIEW_ACTIVE_AT__ = Date.now();
+    } catch (error) {}
+  }
+
   function setHero(full) {
     var hero = heroImage();
     if (!hero || !full) return;
-    hero.setAttribute("src", full);
+    var next = absoluteUrl(full);
+    publishActiveHero(next);
+    hero.setAttribute("src", next);
     hero.removeAttribute("srcset");
     var zoom = document.getElementById("product_photo_zoom_url") || document.getElementById("product_photo_zoom_url2");
-    if (zoom) zoom.setAttribute("href", full);
+    if (zoom) zoom.setAttribute("href", next);
+    try {
+      if (window.vZoom && typeof window.vZoom.add === "function") window.vZoom.add(hero, next);
+    } catch (eZoom) {}
+  }
+
+  function holdHero(full) {
+    var started = Date.now();
+    setHero(full);
+    window.clearInterval(stickyHeroTimer);
+    stickyHeroTimer = window.setInterval(function () {
+      var active = "";
+      try {
+        active = String(window.__MC_PDP_ALT_VIEW_ACTIVE_SRC__ || "");
+      } catch (error) {}
+      if (!active || active !== absoluteUrl(full) || Date.now() - started > 10000) {
+        window.clearInterval(stickyHeroTimer);
+        stickyHeroTimer = null;
+        return;
+      }
+      var hero = heroImage();
+      if (hero && (hero.getAttribute("src") || "") !== active) setHero(active);
+    }, 120);
+  }
+
+  function variantHeroFromClickTarget(target) {
+    if (!target || !target.closest) return "";
+    var btn = target.closest(".mc-configured-color-swatch,.mc-saranoni-color-picker__thumbs a,[data-main-image]");
+    if (!btn) return "";
+    var main = btn.getAttribute("data-main-image") || "";
+    var optionId = btn.getAttribute("data-option-id") || "";
+    var code = productCode();
+    if (main) {
+      if (/^(?:https?:)?\/\//i.test(main) || main.charAt(0) === "/") return absoluteUrl(main);
+      return absoluteUrl("/v/vspfiles/photos/" + main);
+    }
+    if (code && optionId) return absoluteUrl("/v/vspfiles/photos/" + code + "-" + optionId + "-T.jpg");
+    var img = btn.querySelector ? btn.querySelector("img") : null;
+    return img ? absoluteUrl(img.currentSrc || img.getAttribute("src") || "") : "";
   }
 
   function hasWorkingNativeRow(hero) {
@@ -160,8 +230,7 @@
     for (var slot = 1; slot <= MAX_ALT_VIEWS; slot += 1) {
       (function (photoSlot) {
         var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
-        var tester = new window.Image();
-        tester.onload = function () {
+        probeImage(src, function () {
           discoveredByCode[code].push({
             slot: photoSlot,
             full: src,
@@ -169,25 +238,70 @@
           });
           schedule();
           completeOne();
-        };
-        tester.onerror = completeOne;
-        tester.src = src;
+        }, completeOne);
       })(slot);
     }
   }
 
-  /* MC_SARANONI_ALT_VIEW_ROW_20260716: Saranoni photos use {CODE}-2.jpg /
-     {CODE}-2T.jpg style numbered secondary shots, not {CODE}-altviewN.jpg.
-     Probe slots 2..6 (1 is always the main hero, already shown) in both the
-     full-size and "T" (thumb) suffix forms; whichever resolves for a given
-     slot is used for both the row thumbnail and the hero swap target. */
+  function probeGenericAltViews(code) {
+    if (!code || probeInFlight[code] || discoveredByCode[code]) return;
+    probeInFlight[code] = true;
+    discoveredByCode[code] = [];
+    var remaining = MAX_ALT_VIEWS + (MAX_ALT_VIEWS - 1) * 2;
+
+    function completeOne() {
+      remaining -= 1;
+      if (remaining <= 0) {
+        probeInFlight[code] = false;
+        render();
+      }
+    }
+
+    function addItem(slot, src, labelPrefix) {
+      var already = discoveredByCode[code].some(function (item) {
+        return item.slot === slot || canonicalUrl(item.full) === canonicalUrl(src);
+      });
+      if (already) return;
+      discoveredByCode[code].push({
+        slot: slot,
+        full: src,
+        alt: labelPrefix + " " + slot
+      });
+      schedule();
+    }
+
+    for (var altSlot = 1; altSlot <= MAX_ALT_VIEWS; altSlot += 1) {
+      (function (photoSlot) {
+        var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
+        probeImage(src, function () {
+          addItem(photoSlot, src, "Alternate product view");
+          completeOne();
+        }, completeOne);
+      })(altSlot);
+    }
+
+    for (var slot = 2; slot <= MAX_ALT_VIEWS; slot += 1) {
+      ["", "T"].forEach(function (suffix) {
+        var photoSlot = slot;
+        var legacySrc = "/v/vspfiles/photos/" + code + "-" + photoSlot + suffix + ".jpg";
+        probeImage(legacySrc, function () {
+          addItem(100 + photoSlot, legacySrc, "Alternate product view");
+          completeOne();
+        }, completeOne);
+      });
+    }
+  }
+
+  /* MC_SARANONI_ALT_VIEW_ROW_20260718: Saranoni gallery assets use the shared
+     {CODE}-altviewN.jpg convention. Keep the older -2/-2T probes as a
+     fallback for legacy Saranoni products. */
   var MAX_SAR_ALT_SLOT = 24;
 
   function probeSaranoniAltViews(code) {
     if (!code || probeInFlight[code] || discoveredByCode[code]) return;
     probeInFlight[code] = true;
     discoveredByCode[code] = [];
-    var remaining = (MAX_SAR_ALT_SLOT - 1) * 2;
+    var remaining = MAX_SAR_ALT_SLOT + (MAX_SAR_ALT_SLOT - 1) * 2;
 
     function completeOne() {
       remaining -= 1;
@@ -197,12 +311,10 @@
       render();
     }
 
-    for (var slot = 2; slot <= MAX_SAR_ALT_SLOT; slot += 1) {
-      ["", "T"].forEach(function (suffix) {
-        var photoSlot = slot;
-        var src = "/v/vspfiles/photos/" + code + "-" + photoSlot + suffix + ".jpg";
-        var tester = new window.Image();
-        tester.onload = function () {
+    for (var altSlot = 1; altSlot <= MAX_SAR_ALT_SLOT; altSlot += 1) {
+      (function (photoSlot) {
+        var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
+        probeImage(src, function () {
           var already = discoveredByCode[code].some(function (item) { return item.slot === photoSlot; });
           if (!already) {
             discoveredByCode[code].push({
@@ -213,9 +325,26 @@
             schedule();
           }
           completeOne();
-        };
-        tester.onerror = completeOne;
-        tester.src = src;
+        }, completeOne);
+      })(altSlot);
+    }
+
+    for (var slot = 2; slot <= MAX_SAR_ALT_SLOT; slot += 1) {
+      ["", "T"].forEach(function (suffix) {
+        var photoSlot = slot;
+        var src = "/v/vspfiles/photos/" + code + "-" + photoSlot + suffix + ".jpg";
+        probeImage(src, function () {
+          var already = discoveredByCode[code].some(function (item) { return item.slot === photoSlot; });
+          if (!already) {
+            discoveredByCode[code].push({
+              slot: photoSlot,
+              full: src,
+              alt: "Alternate product view " + photoSlot
+            });
+            schedule();
+          }
+          completeOne();
+        }, completeOne);
       });
     }
   }
@@ -223,7 +352,9 @@
   function render() {
     var code = productCode();
     var isSaranoni = isSaranoniProductPage(code);
-    if (!isMahjongProductPage(code) && !isSaranoni) return;
+    var isMahjong = isMahjongProductPage(code);
+    var isGenericPdp = isAnyProductPage() && !!code && !isSaranoni && !isMahjong;
+    if (!isMahjong && !isSaranoni && !isGenericPdp) return;
     var hero = heroImage();
     var mediaCell = mediaCellFor(hero);
     if (!hero || !mediaCell) return;
@@ -241,16 +372,20 @@
       return;
     }
 
-    if (hasWorkingNativeRow(hero)) {
-      if (row) row.style.setProperty("display", "none", "important");
-      return;
-    }
-
     var items = collectItems(code);
     if (!items.length) {
       if (row) row.style.setProperty("display", "none", "important");
-      probeAltViews(code);
+      if (isGenericPdp) probeGenericAltViews(code);
+      else probeAltViews(code);
       return;
+    }
+
+    var nativeAlt = nativeAltContainer();
+    if (nativeAlt && nativeAlt.id !== ROW_ID && !nativeAlt.contains(row)) {
+      nativeAlt.style.setProperty("display", "none", "important");
+      nativeAlt.style.setProperty("visibility", "hidden", "important");
+      nativeAlt.style.setProperty("height", "0", "important");
+      nativeAlt.style.setProperty("overflow", "hidden", "important");
     }
 
     renderRow(hero, mediaCell, row, items);
@@ -260,6 +395,7 @@
      (-2/-2T probe) paths — builds/positions the thumbnail row and wires up
      hero-swap clicks. Nothing here is product-type-specific. */
   function renderRow(hero, mediaCell, row, items) {
+    ensureAltRowCss();
     if (!row) {
       row = document.createElement("div");
       row.id = ROW_ID;
@@ -290,10 +426,13 @@
     row.style.setProperty("clear", "both", "important");
     row.style.setProperty("float", "none", "important");
     row.style.setProperty("position", "relative", "important");
+    row.style.setProperty("z-index", "1", "important");
     row.style.setProperty("visibility", "visible", "important");
     row.style.setProperty("height", "auto", "important");
     row.style.setProperty("scroll-behavior", "smooth", "important");
     row.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
+    row.style.setProperty("scrollbar-width", "none", "important");
+    row.style.setProperty("-ms-overflow-style", "none", "important");
 
     var signature = items.map(function (item) { return canonicalUrl(item.full); }).join("|");
     if (row.getAttribute("data-mc-items") === signature) return;
@@ -316,9 +455,7 @@
       link.style.setProperty("box-sizing", "border-box", "important");
       link.addEventListener("click", function (event) {
         event.preventDefault();
-        [0, 80, 250, 700].forEach(function (delay) {
-          window.setTimeout(function () { setHero(item.full); }, delay);
-        });
+        holdHero(item.full);
       });
       image.src = item.full;
       image.alt = item.alt;
@@ -336,6 +473,18 @@
     });
   }
 
+  function ensureAltRowCss() {
+    var id = "mc-pdp-alt-view-row-css";
+    if (document.getElementById(id)) return;
+    var st = document.createElement("style");
+    st.id = id;
+    st.textContent =
+      "#mc-pdp-alt-view-row{display:flex!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
+      "#mc-pdp-alt-view-row::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
+      "#mc-pdp-alt-view-row a,#mc-pdp-alt-view-row img{float:none!important;position:relative!important;z-index:1!important}";
+    (document.head || document.documentElement).appendChild(st);
+  }
+
   function schedule() {
     window.clearTimeout(schedule.timer);
     schedule.timer = window.setTimeout(render, 80);
@@ -343,6 +492,12 @@
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", schedule);
   else schedule();
+  document.addEventListener("click", function (event) {
+    if (!isSaranoniProductPage(productCode())) return;
+    var full = variantHeroFromClickTarget(event.target);
+    if (!full) return;
+    holdHero(full);
+  }, true);
   window.addEventListener("load", schedule);
   window.addEventListener("resize", schedule);
   [300, 900, 1800, 3500, 7000, 11000].forEach(function (delay) {

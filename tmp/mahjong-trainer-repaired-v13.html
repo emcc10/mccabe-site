@@ -1,0 +1,2857 @@
+<style>
+#mc-mahjong-page {
+  --mc-black: #111;
+  --mc-text: #383838;
+  --mc-muted: #777;
+  --mc-soft: #f7f7f5;
+  --mc-line: #e5e5e2;
+  --mc-white: #fff;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  background: var(--mc-white);
+  color: var(--mc-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: .01em;
+  overflow: hidden;
+}
+
+#mc-mahjong-page,
+#mc-mahjong-page * { box-sizing: border-box; }
+
+#mc-mahjong-page img {
+  display: block;
+  max-width: 100%;
+}
+
+#mc-mahjong-page a { color: inherit; }
+
+#mc-mahjong-page button,
+#mc-mahjong-page select { font: inherit; }
+
+#mc-mahjong-page .mc-wrap {
+  width: min(1180px, calc(100% - 44px));
+  margin: 0 auto;
+}
+
+#mc-mahjong-page .mc-eyebrow {
+  margin: 0 0 11px;
+  color: var(--mc-muted);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+#mc-mahjong-page h1,
+#mc-mahjong-page h2,
+#mc-mahjong-page h3,
+#mc-mahjong-page p { margin-top: 0; }
+
+#mc-mahjong-page h1,
+#mc-mahjong-page h2,
+#mc-mahjong-page h3 {
+  font-family: inherit;
+  font-weight: 400;
+  color: var(--mc-black);
+}
+
+#mc-mahjong-page h1 {
+  margin-bottom: 17px;
+  font-size: clamp(27px, 3vw, 32px);
+  line-height: 1.24;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+#mc-mahjong-page h2 {
+  margin-bottom: 14px;
+  font-size: clamp(21px, 2.4vw, 27px);
+  line-height: 1.3;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+#mc-mahjong-page h3 {
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.42;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+#mc-mahjong-page p { margin-bottom: 17px; }
+
+#mc-mahjong-page .mc-lead {
+  max-width: 680px;
+  color: #555;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+#mc-mahjong-page .mc-btn {
+  display: inline-flex;
+  min-height: 45px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 23px;
+  border: 1px solid var(--mc-black);
+  border-radius: 0;
+  background: var(--mc-black);
+  color: #fff;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+
+#mc-mahjong-page .mc-btn:hover {
+  background: #333;
+  border-color: #333;
+}
+
+#mc-mahjong-page .mc-btn--outline {
+  background: transparent;
+  color: var(--mc-black);
+}
+
+#mc-mahjong-page .mc-btn--outline:hover {
+  background: var(--mc-black);
+  color: #fff;
+}
+
+#mc-mahjong-page .mc-text-link {
+  display: inline-block;
+  padding-bottom: 2px;
+  border-bottom: 1px solid currentColor;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+#mc-mahjong-page .mc-section { padding: 70px 0; }
+#mc-mahjong-page .mc-section--soft { background: var(--mc-soft); }
+
+#mc-mahjong-page .mc-section-head {
+  max-width: 760px;
+  margin: 0 auto 34px;
+  text-align: center;
+}
+
+/* Smaller category-page hero */
+#mc-mahjong-page .mc-hero-shell {
+  padding: 28px 0 34px;
+  border-bottom: 1px solid var(--mc-line);
+}
+
+#mc-mahjong-page .mc-hero {
+  display: grid;
+  grid-template-columns: minmax(340px, .85fr) minmax(0, 1.15fr);
+  min-height: 365px;
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 38px 48px 38px 0;
+}
+
+#mc-mahjong-page .mc-hero-copy .mc-lead {
+  margin-bottom: 24px;
+}
+
+#mc-mahjong-page .mc-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+#mc-mahjong-page .mc-hero-media {
+  height: 365px;
+  overflow: hidden;
+  background: #eee;
+}
+
+#mc-mahjong-page .mc-hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Sales-first category cards */
+#mc-mahjong-page .mc-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+#mc-mahjong-page .mc-shop-card {
+  display: block;
+  text-decoration: none;
+}
+
+#mc-mahjong-page .mc-shop-card__image {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  margin-bottom: 15px;
+  background: #fafafa;
+  border: 1px solid var(--mc-line);
+}
+
+#mc-mahjong-page .mc-shop-card__image--split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--mc-line);
+}
+
+#mc-mahjong-page .mc-shop-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .25s ease;
+}
+
+#mc-mahjong-page .mc-shop-card:hover .mc-shop-card__image img {
+  transform: scale(1.025);
+}
+
+#mc-mahjong-page .mc-shop-card p {
+  min-height: 60px;
+  color: var(--mc-muted);
+  font-size: 12px;
+}
+
+/* Buying guide */
+#mc-mahjong-page .mc-buy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--mc-line);
+  border-bottom: 1px solid var(--mc-line);
+}
+
+#mc-mahjong-page .mc-buy-card {
+  min-height: 195px;
+  padding: 28px 26px;
+  border-right: 1px solid var(--mc-line);
+}
+
+#mc-mahjong-page .mc-buy-card:last-child { border-right: 0; }
+
+#mc-mahjong-page .mc-buy-card__number {
+  display: block;
+  margin-bottom: 22px;
+  color: #aaa;
+  font-size: 11px;
+  letter-spacing: .16em;
+}
+
+#mc-mahjong-page .mc-buy-card p {
+  color: #666;
+  font-size: 12px;
+}
+
+/* Trainer */
+#mc-mahjong-page .mc-trainer {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 32px;
+  padding: 32px;
+  border: 1px solid var(--mc-line);
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-trainer-controls {
+  padding-right: 30px;
+  border-right: 1px solid var(--mc-line);
+}
+
+#mc-mahjong-page .mc-field { margin-bottom: 17px; }
+
+#mc-mahjong-page .mc-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #555;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+#mc-mahjong-page .mc-field select {
+  width: 100%;
+  min-height: 43px;
+  padding: 9px 12px;
+  border: 1px solid #ccc;
+  border-radius: 0;
+  background: #fff;
+  color: #333;
+}
+
+#mc-mahjong-page .mc-trainer-stat {
+  margin-top: 18px;
+  color: var(--mc-muted);
+  font-size: 11px;
+}
+
+#mc-mahjong-page .mc-results-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 17px;
+}
+
+#mc-mahjong-page .mc-disclaimer {
+  max-width: 390px;
+  color: var(--mc-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#mc-mahjong-page .mc-pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+#mc-mahjong-page .mc-pattern {
+  min-width: 0;
+  min-height: 208px;
+  padding: 17px;
+  border: 1px solid var(--mc-line);
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-pattern__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+#mc-mahjong-page .mc-pattern__tag,
+#mc-mahjong-page .mc-pattern__level {
+  color: var(--mc-muted);
+  font-size: 10px;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+#mc-mahjong-page .mc-tile-strip {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  width: 100%;
+  margin-bottom: 13px;
+  overflow: hidden;
+}
+
+#mc-mahjong-page .mc-tile-strip img {
+  width: calc((100% - 26px) / 14);
+  min-width: 18px;
+  height: auto;
+  aspect-ratio: 86 / 112;
+  object-fit: contain;
+}
+
+#mc-mahjong-page .mc-pattern p {
+  margin-bottom: 0;
+  color: #666;
+  font-size: 12px;
+}
+
+#mc-mahjong-page .mc-empty {
+  grid-column: 1 / -1;
+  padding: 35px;
+  border: 1px dashed #ccc;
+  color: var(--mc-muted);
+  text-align: center;
+}
+
+#mc-mahjong-page .mc-more-wrap {
+  margin-top: 22px;
+  text-align: center;
+}
+
+#mc-mahjong-page .mc-more-wrap[hidden] { display: none; }
+
+/* Supplementary lifestyle content */
+#mc-mahjong-page .mc-lifestyle-grid {
+  display: grid;
+  grid-template-columns: 1.1fr .95fr .95fr;
+  gap: 18px;
+}
+
+#mc-mahjong-page .mc-lifestyle-card {
+  position: relative;
+  min-height: 350px;
+  overflow: hidden;
+  background: #eee;
+}
+
+#mc-mahjong-page .mc-lifestyle-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#mc-mahjong-page .mc-lifestyle-copy {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 21px;
+  color: #fff;
+  background: linear-gradient(transparent, rgba(0,0,0,.72));
+}
+
+#mc-mahjong-page .mc-lifestyle-copy h3 {
+  margin-bottom: 5px;
+  color: #fff;
+}
+
+#mc-mahjong-page .mc-lifestyle-copy p {
+  margin-bottom: 0;
+  font-size: 12px;
+}
+
+/* FAQ */
+#mc-mahjong-page .mc-faq {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+#mc-mahjong-page details {
+  padding: 19px 0;
+  border-top: 1px solid var(--mc-line);
+}
+
+#mc-mahjong-page details:last-child {
+  border-bottom: 1px solid var(--mc-line);
+}
+
+#mc-mahjong-page summary {
+  list-style: none;
+  cursor: pointer;
+  color: var(--mc-black);
+  font-size: 13px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+#mc-mahjong-page summary::-webkit-details-marker { display: none; }
+
+#mc-mahjong-page summary::after {
+  content: "+";
+  float: right;
+  font-size: 18px;
+  font-weight: 300;
+}
+
+#mc-mahjong-page details[open] summary::after { content: "−"; }
+
+#mc-mahjong-page details p {
+  max-width: 720px;
+  margin: 14px 0 0;
+  color: var(--mc-muted);
+}
+
+@media (max-width: 1000px) {
+  #mc-mahjong-page .mc-shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #mc-mahjong-page .mc-lifestyle-grid { grid-template-columns: 1fr 1fr; }
+  #mc-mahjong-page .mc-lifestyle-card:first-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 780px) {
+  #mc-mahjong-page .mc-wrap { width: min(100% - 28px, 1180px); }
+  #mc-mahjong-page .mc-section { padding: 56px 0; }
+
+  #mc-mahjong-page .mc-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  #mc-mahjong-page .mc-hero-media {
+    height: 310px;
+    order: -1;
+  }
+
+  #mc-mahjong-page .mc-hero-copy {
+    padding: 34px 0 12px;
+  }
+
+  #mc-mahjong-page .mc-buy-grid { grid-template-columns: 1fr; }
+  #mc-mahjong-page .mc-buy-card {
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--mc-line);
+  }
+  #mc-mahjong-page .mc-buy-card:last-child { border-bottom: 0; }
+
+  #mc-mahjong-page .mc-trainer {
+    grid-template-columns: 1fr;
+    padding: 21px;
+  }
+
+  #mc-mahjong-page .mc-trainer-controls {
+    padding: 0 0 23px;
+    border-right: 0;
+    border-bottom: 1px solid var(--mc-line);
+  }
+
+  #mc-mahjong-page .mc-results-head { display: block; }
+  #mc-mahjong-page .mc-pattern-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  #mc-mahjong-page .mc-shop-grid,
+  #mc-mahjong-page .mc-lifestyle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #mc-mahjong-page .mc-lifestyle-card:first-child { grid-column: auto; }
+  #mc-mahjong-page .mc-lifestyle-card { min-height: 315px; }
+  #mc-mahjong-page .mc-shop-card p { min-height: 0; }
+  #mc-mahjong-page .mc-tile-strip { gap: 1px; }
+}
+</style>
+<style id="mc-mahjong-v5-overrides">
+/* Match the live McCabe's typography and palette */
+#mc-mahjong-page {
+  background: #fff !important;
+  color: #454545 !important;
+  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  letter-spacing: .02em !important;
+}
+
+#mc-mahjong-page,
+#mc-mahjong-page * {
+  font-family: inherit !important;
+}
+
+#mc-mahjong-page .mc-section,
+#mc-mahjong-page .mc-section--soft,
+#mc-mahjong-page .mc-hero-shell,
+#mc-mahjong-page .mc-shop-card__image,
+#mc-mahjong-page .mc-trainer,
+#mc-mahjong-page .mc-pattern {
+  background: #fff !important;
+}
+
+#mc-mahjong-page .mc-wrap {
+  width: min(1080px, calc(100% - 40px)) !important;
+}
+
+#mc-mahjong-page h1 {
+  font-size: 29.6px !important;
+  font-weight: 400 !important;
+  line-height: 1.28 !important;
+  letter-spacing: .10em !important;
+  color: #1a1a1a !important;
+}
+
+#mc-mahjong-page h2 {
+  font-size: 22px !important;
+  font-weight: 400 !important;
+  line-height: 1.35 !important;
+  letter-spacing: .10em !important;
+  color: #1a1a1a !important;
+}
+
+#mc-mahjong-page h3,
+#mc-mahjong-page .mc-eyebrow {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  letter-spacing: .16em !important;
+  color: #777 !important;
+}
+
+#mc-mahjong-page .mc-lead,
+#mc-mahjong-page p {
+  color: #454545 !important;
+  font-size: 13px !important;
+  line-height: 1.7 !important;
+}
+
+#mc-mahjong-page .mc-btn {
+  min-height: 44px !important;
+  border-radius: 0 !important;
+  background: #1a1a1a !important;
+  border-color: #1a1a1a !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: .14em !important;
+}
+
+#mc-mahjong-page .mc-btn--outline {
+  background: #fff !important;
+  color: #1a1a1a !important;
+}
+
+/* Categories closer together horizontally */
+#mc-mahjong-page .mc-shop-grid {
+  max-width: 960px !important;
+  margin: 0 auto !important;
+  gap: 10px !important;
+}
+
+#mc-mahjong-page .mc-shop-card {
+  padding: 0 3px !important;
+}
+
+#mc-mahjong-page .mc-shop-card__image {
+  margin-bottom: 12px !important;
+}
+
+/* Bigger trainer tiles: two rows of seven */
+#mc-mahjong-page .mc-pattern-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+#mc-mahjong-page .mc-pattern {
+  min-height: 320px !important;
+  padding: 18px !important;
+}
+
+#mc-mahjong-page .mc-tile-strip {
+  display: grid !important;
+  grid-template-columns: repeat(7, 50px) !important;
+  justify-content: center !important;
+  gap: 7px 5px !important;
+  width: 100% !important;
+  margin: 0 auto 15px !important;
+  overflow: visible !important;
+}
+
+#mc-mahjong-page .mc-tile-strip img {
+  width: 50px !important;
+  min-width: 50px !important;
+  height: auto !important;
+  aspect-ratio: 86 / 112 !important;
+  object-fit: contain !important;
+}
+
+/* Teacher locator */
+#mc-mahjong-page .mc-teacher-locator {
+  display: grid !important;
+  grid-template-columns: .92fr 1.08fr !important;
+  align-items: stretch !important;
+  border: 1px solid #e5e5e5 !important;
+  background: #fff !important;
+}
+
+#mc-mahjong-page .mc-teacher-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  padding: 38px !important;
+}
+
+#mc-mahjong-page .mc-teacher-form {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 8px !important;
+  margin: 4px 0 14px !important;
+}
+
+#mc-mahjong-page .mc-teacher-form input {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 9px 11px !important;
+  border: 1px solid #c8c8c8 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #1a1a1a !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: .04em !important;
+}
+
+#mc-mahjong-page .mc-teacher-form input:focus {
+  outline: none !important;
+  border-color: #1a1a1a !important;
+  box-shadow: 0 0 0 1px #1a1a1a !important;
+}
+
+#mc-mahjong-page .mc-teacher-links {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 16px !important;
+  margin-top: 4px !important;
+}
+
+#mc-mahjong-page .mc-teacher-image {
+  min-height: 345px !important;
+  overflow: hidden !important;
+}
+
+#mc-mahjong-page .mc-teacher-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+#mc-mahjong-page #mc-teacher-error {
+  color: #9c2f2f !important;
+  font-size: 11px !important;
+  margin: 0 0 12px !important;
+}
+
+@media (max-width: 1040px) {
+  #mc-mahjong-page .mc-tile-strip {
+    grid-template-columns: repeat(7, 44px) !important;
+  }
+
+  #mc-mahjong-page .mc-tile-strip img {
+    width: 44px !important;
+    min-width: 44px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  #mc-mahjong-page .mc-pattern-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  #mc-mahjong-page .mc-pattern {
+    min-height: 0 !important;
+  }
+
+  #mc-mahjong-page .mc-tile-strip {
+    grid-template-columns: repeat(7, 54px) !important;
+  }
+
+  #mc-mahjong-page .mc-tile-strip img {
+    width: 54px !important;
+    min-width: 54px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  #mc-mahjong-page .mc-teacher-locator {
+    grid-template-columns: 1fr !important;
+  }
+
+  #mc-mahjong-page .mc-teacher-image {
+    min-height: 285px !important;
+    order: -1 !important;
+  }
+
+  #mc-mahjong-page .mc-teacher-copy {
+    padding: 28px 22px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  #mc-mahjong-page .mc-shop-grid {
+    gap: 24px !important;
+  }
+
+  #mc-mahjong-page .mc-tile-strip {
+    grid-template-columns: repeat(7, minmax(0, 40px)) !important;
+    gap: 5px 3px !important;
+  }
+
+  #mc-mahjong-page .mc-tile-strip img {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #mc-mahjong-page .mc-teacher-form {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+<style id="mc-mahjong-v6-styles">
+/* Learning-path tabs */
+#mc-mahjong-page .mc-learning-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 760px;
+  margin: 0 auto 34px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-learning-tab {
+  min-height: 52px;
+  padding: 12px 18px;
+  border: 0;
+  border-right: 1px solid #d9d9d9;
+  border-radius: 0;
+  background: #fff;
+  color: #555;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+#mc-mahjong-page .mc-learning-tab:last-child {
+  border-right: 0;
+}
+
+#mc-mahjong-page .mc-learning-tab.is-active {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+#mc-mahjong-page .mc-learning-panel[hidden] {
+  display: none !important;
+}
+
+#mc-mahjong-page .mc-learning-panel {
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-section-head--left {
+  max-width: 760px;
+  margin-right: auto;
+  margin-left: 0;
+  text-align: left;
+}
+
+#mc-mahjong-page .mc-subsection {
+  margin-top: 58px;
+}
+
+/* Beginner tile key */
+#mc-mahjong-page .mc-key-card {
+  margin-bottom: 18px;
+  padding: 26px;
+  border: 1px solid #e3e3e3;
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-key-card > h3 {
+  margin-bottom: 22px;
+}
+
+#mc-mahjong-page .mc-key-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+#mc-mahjong-page .mc-key-group {
+  min-width: 0;
+}
+
+#mc-mahjong-page .mc-key-tiles {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 126px;
+  margin-bottom: 12px;
+}
+
+#mc-mahjong-page .mc-key-tile {
+  width: 64px;
+  margin: 0;
+  text-align: center;
+}
+
+#mc-mahjong-page .mc-key-tile img {
+  width: 64px;
+  height: auto;
+  margin: 0 auto 6px;
+}
+
+#mc-mahjong-page .mc-key-tile figcaption {
+  color: #777;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+#mc-mahjong-page .mc-key-group p {
+  margin-bottom: 0;
+  color: #555;
+  font-size: 12px;
+}
+
+/* Pair/pung/kong/quint examples */
+#mc-mahjong-page .mc-group-examples {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+#mc-mahjong-page .mc-group-example {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #e3e3e3;
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-step-label {
+  display: block;
+  margin-bottom: 14px;
+  color: #777;
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+#mc-mahjong-page .mc-example-tiles {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  min-height: 90px;
+  margin-bottom: 12px;
+}
+
+#mc-mahjong-page .mc-example-tiles img {
+  width: 46px;
+  min-width: 0;
+  height: auto;
+}
+
+#mc-mahjong-page .mc-group-example p {
+  margin-bottom: 0;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Beginner steps */
+#mc-mahjong-page .mc-beginner-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid #e3e3e3;
+  border-left: 1px solid #e3e3e3;
+}
+
+#mc-mahjong-page .mc-beginner-step {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 14px;
+  min-height: 160px;
+  padding: 24px;
+  border-right: 1px solid #e3e3e3;
+  border-bottom: 1px solid #e3e3e3;
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-beginner-step > span {
+  color: #999;
+  font-size: 11px;
+  letter-spacing: .15em;
+}
+
+#mc-mahjong-page .mc-beginner-step p {
+  margin-bottom: 0;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Glossary */
+#mc-mahjong-page .mc-glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid #e3e3e3;
+  border-left: 1px solid #e3e3e3;
+}
+
+#mc-mahjong-page .mc-glossary-grid article {
+  min-height: 142px;
+  padding: 20px;
+  border-right: 1px solid #e3e3e3;
+  border-bottom: 1px solid #e3e3e3;
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-glossary-grid p {
+  margin-bottom: 0;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Beginner shopping bridge */
+#mc-mahjong-page .mc-beginner-shop {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 24px;
+  margin-top: 58px;
+  padding: 28px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-beginner-shop h2 {
+  margin-bottom: 8px;
+}
+
+#mc-mahjong-page .mc-beginner-shop p {
+  margin-bottom: 0;
+}
+
+#mc-mahjong-page .mc-beginner-shop__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Regular-player cues */
+#mc-mahjong-page .mc-regular-cues {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 28px;
+  border-top: 1px solid #e3e3e3;
+  border-left: 1px solid #e3e3e3;
+}
+
+#mc-mahjong-page .mc-regular-cues article {
+  min-height: 150px;
+  padding: 20px;
+  border-right: 1px solid #e3e3e3;
+  border-bottom: 1px solid #e3e3e3;
+}
+
+#mc-mahjong-page .mc-regular-cues p {
+  margin-bottom: 0;
+  color: #666;
+  font-size: 12px;
+}
+
+#mc-mahjong-page .mc-regular-key-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+  padding: 14px 17px;
+  border: 1px solid #e3e3e3;
+}
+
+#mc-mahjong-page .mc-regular-key-link p {
+  margin-bottom: 0;
+}
+
+#mc-mahjong-page .mc-text-button {
+  padding: 0 0 2px;
+  border: 0;
+  border-bottom: 1px solid #1a1a1a;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* Trainer: one pattern per row so tiles cannot overlap */
+#mc-mahjong-page .mc-pattern-grid {
+  grid-template-columns: 1fr !important;
+}
+
+#mc-mahjong-page .mc-pattern {
+  min-height: 0 !important;
+  padding: 20px !important;
+}
+
+#mc-mahjong-page .mc-tile-strip {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 68px)) !important;
+  justify-content: start !important;
+  gap: 8px 7px !important;
+  width: 100% !important;
+  max-width: 560px !important;
+  margin: 0 0 15px !important;
+  overflow: visible !important;
+}
+
+#mc-mahjong-page .mc-tile-strip img {
+  width: 100% !important;
+  max-width: 68px !important;
+  min-width: 0 !important;
+  height: auto !important;
+  aspect-ratio: 86 / 112 !important;
+  object-fit: contain !important;
+}
+
+/* Remove nested section spacing from trainer inside regular tab */
+#mc-mahjong-page #mc-regular-panel > .mc-trainer-section,
+#mc-mahjong-page #mc-regular-panel > section {
+  padding: 0 !important;
+  border-top: 0 !important;
+}
+
+#mc-mahjong-page #mc-regular-panel .mc-section-head:first-child {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  #mc-mahjong-page .mc-key-row,
+  #mc-mahjong-page .mc-group-examples,
+  #mc-mahjong-page .mc-glossary-grid,
+  #mc-mahjong-page .mc-regular-cues {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #mc-mahjong-page .mc-beginner-shop {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  #mc-mahjong-page .mc-learning-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  #mc-mahjong-page .mc-learning-tab {
+    border-right: 0;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  #mc-mahjong-page .mc-learning-tab:last-child {
+    border-bottom: 0;
+  }
+
+  #mc-mahjong-page .mc-beginner-steps {
+    grid-template-columns: 1fr;
+  }
+
+  #mc-mahjong-page .mc-tile-strip {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    max-width: 100% !important;
+    gap: 6px 4px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  #mc-mahjong-page .mc-key-row,
+  #mc-mahjong-page .mc-group-examples,
+  #mc-mahjong-page .mc-glossary-grid,
+  #mc-mahjong-page .mc-regular-cues {
+    grid-template-columns: 1fr;
+  }
+
+  #mc-mahjong-page .mc-key-card {
+    padding: 20px;
+  }
+
+  #mc-mahjong-page .mc-key-tiles {
+    flex-wrap: wrap;
+    min-height: 0;
+  }
+
+  #mc-mahjong-page .mc-key-tile {
+    width: 58px;
+  }
+
+  #mc-mahjong-page .mc-key-tile img {
+    width: 58px;
+  }
+
+  #mc-mahjong-page .mc-beginner-step {
+    grid-template-columns: 34px 1fr;
+    padding: 20px;
+  }
+
+  #mc-mahjong-page .mc-regular-key-link {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  #mc-mahjong-page .mc-beginner-shop__actions {
+    flex-direction: column;
+  }
+
+  #mc-mahjong-page .mc-beginner-shop__actions .mc-btn {
+    width: 100%;
+  }
+}
+</style>
+<style id="mc-mahjong-v7-fixes">
+/* V7: restore always-visible trainer and tighten vertical spacing */
+#mc-mahjong-page .mc-section {
+  padding-top: 46px !important;
+  padding-bottom: 46px !important;
+}
+
+#mc-mahjong-page .mc-hero-shell {
+  padding-top: 14px !important;
+  padding-bottom: 20px !important;
+}
+
+#mc-mahjong-page .mc-section-head {
+  margin-bottom: 24px !important;
+}
+
+#mc-mahjong-page .mc-subsection {
+  margin-top: 34px !important;
+}
+
+#mc-mahjong-page .mc-learning-tabs {
+  margin-bottom: 24px !important;
+}
+
+#mc-mahjong-page .mc-key-card {
+  margin-bottom: 13px !important;
+  padding: 22px !important;
+}
+
+#mc-mahjong-page .mc-key-card > h3 {
+  margin-bottom: 17px !important;
+}
+
+#mc-mahjong-page .mc-beginner-shop {
+  margin-top: 36px !important;
+}
+
+#mc-mahjong-page .mc-teacher-copy {
+  padding-top: 30px !important;
+  padding-bottom: 30px !important;
+}
+
+/* Keep regular-player heading visible now that trainer is outside the tab */
+#mc-mahjong-page #mc-regular-panel > .mc-section-head:first-child {
+  display: block !important;
+}
+
+/* Always-visible trainer section */
+#mc-mahjong-page #mc-mahjong-trainer {
+  display: block !important;
+  background: #fff !important;
+}
+
+#mc-mahjong-page #mc-mahjong-trainer > .mc-wrap {
+  width: min(1080px, calc(100% - 40px)) !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+#mc-mahjong-page .mc-regular-trainer-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 22px;
+  padding: 18px 20px;
+  border: 1px solid #e3e3e3;
+  background: #fff;
+}
+
+#mc-mahjong-page .mc-regular-trainer-link p {
+  margin-bottom: 0 !important;
+}
+
+#mc-mahjong-page .mc-trainer {
+  margin-top: 0 !important;
+}
+
+/* Tile images remain readable and cannot overlap */
+#mc-mahjong-page .mc-pattern-grid {
+  grid-template-columns: 1fr !important;
+}
+
+#mc-mahjong-page .mc-pattern {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+#mc-mahjong-page .mc-tile-strip {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(46px, 68px)) !important;
+  justify-content: start !important;
+  gap: 8px 7px !important;
+  width: 100% !important;
+  max-width: 560px !important;
+  overflow: visible !important;
+}
+
+#mc-mahjong-page .mc-tile-strip img {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 68px !important;
+  height: auto !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+}
+
+@media (max-width: 760px) {
+  #mc-mahjong-page .mc-section {
+    padding-top: 38px !important;
+    padding-bottom: 38px !important;
+  }
+
+  #mc-mahjong-page #mc-mahjong-trainer > .mc-wrap {
+    width: min(100% - 26px, 1080px) !important;
+  }
+
+  #mc-mahjong-page .mc-regular-trainer-link {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  #mc-mahjong-page .mc-tile-strip {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    max-width: 100% !important;
+    gap: 6px 4px !important;
+  }
+}
+</style>
+<style id="mc-mahjong-live-trainer-v8">
+#mc-mahjong-page .mc-live-trainer{margin:0 0 34px;padding:28px;border:1px solid #ded8d0;background:#fff}
+#mc-mahjong-page .mc-live-trainer__head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:20px}
+#mc-mahjong-page .mc-live-trainer__head h3,#mc-mahjong-page .mc-live-advisor__heading h3{margin:0!important;font-family:inherit!important;font-weight:400!important;letter-spacing:.055em!important;text-transform:uppercase!important;color:#2d2722!important}
+#mc-mahjong-page .mc-live-trainer__head h3{font-size:21px!important;line-height:1.25!important}
+#mc-mahjong-page .mc-live-trainer__head p{max-width:760px;margin:10px 0 0!important;font-size:13px!important;line-height:1.65!important;color:#62574e!important}
+#mc-mahjong-page .mc-live-trainer__count{flex:0 0 auto;padding:9px 12px;border:1px solid #d8d1c8;background:#f7f4ef;color:#62574e;font-size:10px;font-weight:700;line-height:1;letter-spacing:.13em}
+#mc-mahjong-page .mc-live-trainer__controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:12px}
+#mc-mahjong-page .mc-live-trainer__controls button{min-height:42px;padding:0 18px;border:1px solid #111;border-radius:0;background:#111;color:#fff;font:600 11px/1 inherit;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+#mc-mahjong-page .mc-live-trainer__controls button:nth-child(2),#mc-mahjong-page .mc-live-trainer__controls button:nth-child(3){background:#fff;color:#111}
+#mc-mahjong-page .mc-live-trainer__controls button:disabled{border-color:#d7d2cb;background:#eeeae5;color:#9b938b;cursor:not-allowed}
+#mc-mahjong-page .mc-live-trainer__status{min-height:21px;margin:0 0 14px!important;color:#554b43!important;font-size:12px!important;font-weight:600!important;line-height:1.55!important}
+#mc-mahjong-page .mc-live-rack{display:flex;align-items:flex-end;gap:5px;width:100%;min-height:104px;padding:15px 12px 11px;overflow-x:auto;border:1px solid #ddd7cf;background:#f7f4ef;scrollbar-width:thin}
+#mc-mahjong-page .mc-live-tile{position:relative;flex:0 0 58px;width:58px;padding:0;border:0;background:transparent;cursor:default;transition:transform .14s ease}
+#mc-mahjong-page .mc-live-rack.is-discarding .mc-live-tile{cursor:pointer}
+#mc-mahjong-page .mc-live-tile.is-selected{transform:translateY(-11px)}
+#mc-mahjong-page .mc-live-tile img{display:block!important;width:58px!important;height:auto!important;aspect-ratio:86/112;object-fit:contain!important;border:0!important;background:#fff;box-shadow:0 2px 8px rgba(46,38,31,.09)}
+#mc-mahjong-page .mc-live-tile.is-drawn::after{content:"DRAWN";position:absolute;right:2px;bottom:2px;padding:3px 4px;background:#111;color:#fff;font-size:7px;font-weight:700;line-height:1;letter-spacing:.08em}
+#mc-mahjong-page .mc-live-advisor{margin-top:24px;padding-top:22px;border-top:1px solid #ded8d0}
+#mc-mahjong-page .mc-live-advisor__heading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:14px}
+#mc-mahjong-page .mc-live-advisor__heading h3{font-size:18px!important;line-height:1.25!important}
+#mc-mahjong-page .mc-live-advisor__heading>p{max-width:420px;margin:0!important;text-align:right;color:#5c5148!important;font-size:12px!important;font-weight:600!important;line-height:1.5!important}
+#mc-mahjong-page .mc-live-suggestions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#mc-mahjong-page .mc-live-suggestion{padding:16px;border:1px solid #ded8d0;background:#fff}
+#mc-mahjong-page .mc-live-suggestion__top{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px}
+#mc-mahjong-page .mc-live-suggestion__top strong{color:#2d2722;font-size:12px;line-height:1.35;letter-spacing:.07em;text-transform:uppercase}
+#mc-mahjong-page .mc-live-suggestion__score{flex:0 0 auto;color:#766a5f;font-size:10px;font-weight:700;line-height:1.35;letter-spacing:.08em}
+#mc-mahjong-page .mc-live-suggestion p{margin:0 0 9px!important;color:#62574e!important;font-size:12px!important;line-height:1.55!important}
+#mc-mahjong-page .mc-live-missing-label{margin-bottom:6px;color:#7b7168;font-size:9px;font-weight:700;line-height:1.2;letter-spacing:.11em;text-transform:uppercase}
+#mc-mahjong-page .mc-live-missing{display:flex;flex-wrap:wrap;gap:4px}
+#mc-mahjong-page .mc-live-missing img{display:block!important;width:28px!important;height:auto!important;aspect-ratio:86/112;object-fit:contain!important;border:0!important}
+#mc-mahjong-page .mc-live-complete{color:#2d2722;font-size:11px;font-weight:700;line-height:1.5}
+#mc-mahjong-page .mc-live-trainer__disclaimer{margin:16px 0 0!important;color:#7b7168!important;font-size:10px!important;line-height:1.55!important}
+#mc-mahjong-page .mc-section-head--pattern-library{margin-top:38px!important}
+@media(max-width:900px){#mc-mahjong-page .mc-live-suggestions{grid-template-columns:1fr}#mc-mahjong-page .mc-live-advisor__heading{display:block}#mc-mahjong-page .mc-live-advisor__heading>p{margin-top:8px!important;text-align:left}}
+@media(max-width:560px){#mc-mahjong-page .mc-live-trainer{padding:18px 12px}#mc-mahjong-page .mc-live-trainer__head{display:block}#mc-mahjong-page .mc-live-trainer__count{display:inline-block;margin-top:12px}#mc-mahjong-page .mc-live-trainer__controls{display:grid;grid-template-columns:1fr}#mc-mahjong-page .mc-live-trainer__controls button{width:100%}#mc-mahjong-page .mc-live-rack{padding-left:8px;padding-right:8px}#mc-mahjong-page .mc-live-tile,#mc-mahjong-page .mc-live-tile img{width:49px!important;flex-basis:49px}}
+</style>
+
+
+<style id="mc-mahjong-no-random-photo-fix-v12">
+/* V12: remove random lifestyle photos and use clean Mahjong tile/product visuals only. */
+#mc-mahjong-page .mc-teacher-tile-panel,
+#mc-mahjong-page .mc-practical-card {
+  background: #f7f7f5 !important;
+  border: 1px solid #e5e5e2 !important;
+  box-shadow: none !important;
+}
+#mc-mahjong-page .mc-teacher-tile-panel {
+  min-height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 34px 24px !important;
+}
+#mc-mahjong-page .mc-teacher-tile-inner {
+  width: 100% !important;
+  max-width: 360px !important;
+  text-align: center !important;
+}
+#mc-mahjong-page .mc-practical-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+#mc-mahjong-page .mc-practical-card {
+  padding: 28px !important;
+  min-height: 230px !important;
+}
+#mc-mahjong-page .mc-mini-tile-strip,
+#mc-mahjong-page .mc-teacher-tile-strip {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  margin-bottom: 18px !important;
+  align-items: center !important;
+}
+#mc-mahjong-page .mc-teacher-tile-strip {
+  justify-content: center !important;
+  margin-bottom: 22px !important;
+}
+#mc-mahjong-page .mc-mini-tile-strip img,
+#mc-mahjong-page .mc-teacher-tile-strip img {
+  width: 42px !important;
+  height: auto !important;
+  display: block !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  clip-path: inset(8% 8% 8% 8% round 7%) !important;
+}
+#mc-mahjong-page .mc-teacher-tile-strip img {
+  width: 54px !important;
+}
+#mc-mahjong-page .mc-practical-card h3,
+#mc-mahjong-page .mc-teacher-tile-inner h3 {
+  margin: 0 0 8px !important;
+  color: #111 !important;
+  font-size: 15px !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+}
+#mc-mahjong-page .mc-practical-card p,
+#mc-mahjong-page .mc-teacher-tile-inner p {
+  margin: 0 !important;
+  color: #555 !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+}
+@media (max-width: 900px) {
+  #mc-mahjong-page .mc-practical-grid { grid-template-columns: 1fr !important; }
+  #mc-mahjong-page .mc-teacher-tile-panel { min-height: 260px !important; }
+}
+</style>
+<style id="mc-mahjong-final-layout-fixes">
+#mc-mahjong-page .mc-top-category-tabs{display:flex;align-items:stretch;justify-content:center;width:min(1080px,calc(100% - 40px));margin:14px auto 0;border:1px solid #dedede;background:#fff;overflow-x:auto;scrollbar-width:none}
+#mc-mahjong-page .mc-top-category-tabs::-webkit-scrollbar{display:none}
+#mc-mahjong-page .mc-top-category-tabs a{flex:1 0 auto;min-width:150px;padding:14px 18px;border-right:1px solid #dedede;color:#383838!important;font-size:11px!important;font-weight:500!important;line-height:1.25!important;letter-spacing:.12em!important;text-align:center;text-decoration:none!important;text-transform:uppercase;white-space:nowrap}
+#mc-mahjong-page .mc-top-category-tabs a:last-child{border-right:0}
+#mc-mahjong-page .mc-top-category-tabs a[aria-current="page"]{background:#1a1a1a;color:#fff!important}
+#mc-mahjong-page .mc-hero-shell{padding-top:18px!important;padding-bottom:22px!important}
+#mc-mahjong-page #mc-shop-categories{padding-top:34px!important;padding-bottom:36px!important}
+#mc-mahjong-page #mc-mahjong-trainer{padding-top:30px!important;padding-bottom:38px!important}
+#mc-mahjong-page #mc-mahjong-trainer .mc-section-head{margin-bottom:18px!important}
+#mc-mahjong-page #mc-mahjong-trainer .mc-live-trainer{margin-top:0!important}
+@media(max-width:760px){
+  #mc-mahjong-page{font-size:12px!important;line-height:1.55!important}
+  #mc-mahjong-page .mc-wrap{width:calc(100% - 26px)!important}
+  #mc-mahjong-page .mc-top-category-tabs{justify-content:flex-start;width:calc(100% - 26px);margin-top:10px}
+  #mc-mahjong-page .mc-top-category-tabs a{min-width:124px;padding:12px 13px;font-size:9px!important;letter-spacing:.09em!important}
+  #mc-mahjong-page h1{font-size:clamp(21px,7vw,25px)!important;line-height:1.2!important;letter-spacing:.055em!important;overflow-wrap:normal!important;word-break:normal!important}
+  #mc-mahjong-page h2{font-size:clamp(18px,5.7vw,21px)!important;line-height:1.25!important;letter-spacing:.055em!important;overflow-wrap:normal!important;word-break:normal!important}
+  #mc-mahjong-page h3{font-size:10px!important;line-height:1.35!important;letter-spacing:.11em!important}
+  #mc-mahjong-page .mc-lead,#mc-mahjong-page p{font-size:12px!important;line-height:1.58!important}
+  #mc-mahjong-page .mc-hero{grid-template-columns:1fr!important;min-height:0!important}
+  #mc-mahjong-page .mc-hero-media{height:260px!important;min-height:0!important;order:-1!important}
+  #mc-mahjong-page .mc-hero-copy{padding:24px 3px 8px!important}
+  #mc-mahjong-page .mc-hero-actions{gap:8px!important}
+  #mc-mahjong-page .mc-btn{min-height:41px!important;padding:0 15px!important;font-size:9px!important;letter-spacing:.1em!important}
+  #mc-mahjong-page .mc-section{padding-top:36px!important;padding-bottom:36px!important}
+  #mc-mahjong-page #mc-shop-categories{padding-top:28px!important;padding-bottom:30px!important}
+  #mc-mahjong-page #mc-mahjong-trainer{padding-top:22px!important;padding-bottom:30px!important}
+  #mc-mahjong-page .mc-section-head{margin-bottom:20px!important}
+}
+@media(max-width:420px){
+  #mc-mahjong-page h1{font-size:21px!important;letter-spacing:.04em!important}
+  #mc-mahjong-page h2{font-size:18px!important;letter-spacing:.04em!important}
+  #mc-mahjong-page .mc-hero-media{height:225px!important}
+}
+</style>
+<style id="mc-mahjong-trainer-top-placement">
+/* Final placement: trainer directly below the Mahjong hero */
+#mc-mahjong-page #mc-mahjong-trainer {
+  margin-top: 0 !important;
+  padding-top: 24px !important;
+  padding-bottom: 42px !important;
+}
+#mc-mahjong-page .mc-hero-shell {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+@media (max-width: 760px) {
+  #mc-mahjong-page #mc-mahjong-trainer {
+    padding-top: 18px !important;
+    padding-bottom: 32px !important;
+  }
+}
+</style><div data-mc-mahjong-version="v12-no-random-photos" id="mc-mahjong-page">
+<nav aria-label="Mahjong categories" class="mc-top-category-tabs">
+<a aria-current="page" href="https://www.mccabestheaterandliving.com/category-s/201.htm">Mahjong</a>
+<a href="https://www.mccabestheaterandliving.com/category-s/202.htm">Tile Sets</a>
+<a href="https://www.mccabestheaterandliving.com/category-s/203.htm">Mats &amp; Racks</a>
+<a href="https://www.mccabestheaterandliving.com/category-s/204.htm">Accessories</a>
+</nav>
+<section class="mc-hero-shell">
+<div class="mc-wrap">
+<div class="mc-hero">
+<div class="mc-hero-copy">
+<p class="mc-eyebrow">Mahjong</p>
+<h1>Tile Sets, Mats, Racks &amp; More</h1>
+<p class="mc-lead">Shop a complete Mahjong setup for home or travel, then use the guides and interactive tools below to compare what you need and get more from every game.</p>
+<div class="mc-hero-actions">
+<a class="mc-btn" href="https://www.mccabestheaterandliving.com/category-s/202.htm">Shop tile sets</a>
+<a class="mc-btn mc-btn--outline" href="#mc-shop-categories">Browse categories</a>
+</div>
+</div>
+<div class="mc-hero-media">
+<img alt="Four women playing Mahjong together in a bright room" class="mc-mahjong-landing-image" data-mc-landing-src="/v/vspfiles/mahjong/hero-community.webp" decoding="async" loading="eager" src="/v/vspfiles/mahjong/hero-community.webp" style="background-image:url('/v/vspfiles/mahjong/hero-community.webp');background-size:cover;background-position:center;background-repeat:no-repeat"/>
+</div>
+</div>
+</div>
+</section><section class="mc-section" id="mc-mahjong-trainer"><div class="mc-wrap">
+<div class="mc-section-head">
+<p class="mc-eyebrow">Interactive practice</p>
+<h2>Draw, Analyze &amp; Discard</h2>
+<p class="mc-lead">Deal a 13-tile rack, draw a 14th tile, select a discard, and compare the closest original practice directions. Use the visual combination library below for more focused study.</p>
+</div>
+<div class="mc-live-trainer" id="mc-live-trainer">
+<div class="mc-live-trainer__head">
+<div>
+<p class="mc-eyebrow">Live hand practice</p>
+<h3>Practice A Real 13-Tile Rack</h3>
+<p>The trainer deals 13 tiles, updates its suggested practice directions after every draw, and lets you select and discard one tile to return to 13.</p>
+</div>
+<div aria-live="polite" class="mc-live-trainer__count" id="mc-live-count">13 TILES</div>
+</div>
+<div class="mc-live-trainer__controls">
+<button id="mc-live-auto-deal" type="button">Auto deal 13 tiles</button>
+<button id="mc-live-draw" type="button">Draw tile</button>
+<button disabled="" id="mc-live-discard" type="button">Discard selected</button>
+</div>
+<p aria-live="polite" class="mc-live-trainer__status" id="mc-live-status"></p>
+<div aria-label="Your Mahjong rack" class="mc-live-rack" id="mc-live-rack"></div>
+<div class="mc-live-advisor">
+<div class="mc-live-advisor__heading">
+<div>
+<p class="mc-eyebrow">Live hand advisor</p>
+<h3>Suggested Pattern Directions</h3>
+</div>
+<p id="mc-live-discard-advice">Draw one tile to receive a discard recommendation.</p>
+</div>
+<div class="mc-live-suggestions" id="mc-live-suggestions"></div>
+</div>
+<p class="mc-live-trainer__disclaimer">The suggestions are original pattern-recognition exercises. They do not reproduce an official National Mah Jongg League card or replace the current card used at your table.</p>
+</div>
+<div class="mc-section-head mc-section-head--pattern-library">
+<p class="mc-eyebrow">Visual combination library</p>
+<h2>Filter Practice Patterns</h2>
+<p class="mc-lead">Choose a focus, number of suits, and skill level. Every combination is shown with actual tile images.</p>
+</div>
+<div class="mc-trainer">
+<div class="mc-trainer-controls">
+<div class="mc-field">
+<label for="mc-strength">Pattern focus</label>
+<select id="mc-strength">
+<option value="any">Show all focuses</option>
+<option value="pairs">Pairs</option>
+<option value="runs">Runs &amp; sequences</option>
+<option value="repeats">Repeated numbers</option>
+<option value="honors">Winds &amp; dragons</option>
+<option value="flowers">Flowers</option>
+</select>
+</div>
+<div class="mc-field">
+<label for="mc-suits">Number of suits</label>
+<select id="mc-suits">
+<option value="any">Any number of suits</option>
+<option value="1">One suit</option>
+<option value="2">Two suits</option>
+<option value="3">Three suits</option>
+</select>
+</div>
+<div class="mc-field">
+<label for="mc-level">Practice level</label>
+<select id="mc-level">
+<option value="any">Any level</option>
+<option value="beginner">Beginner</option>
+<option value="intermediate">Intermediate</option>
+<option value="advanced">Advanced</option>
+</select>
+</div>
+<button class="mc-btn" id="mc-find-patterns" type="button">Find combinations</button>
+<p class="mc-trainer-stat"><strong id="mc-pattern-total">24</strong> original practice combinations included.</p>
+</div>
+<div class="mc-trainer-results">
+<div class="mc-results-head">
+<div>
+<p class="mc-eyebrow">Visual examples</p>
+<h3 id="mc-results-title">Showing Recommended Combinations</h3>
+</div>
+<p class="mc-disclaimer">These are original teaching examples, not official card hands. Use the current card selected by your group during actual play.</p>
+</div>
+<div class="mc-pattern-grid" id="mc-pattern-grid"></div>
+<div class="mc-more-wrap" id="mc-more-wrap">
+<button class="mc-btn mc-btn--outline" id="mc-show-more" type="button">Show more combinations</button>
+</div>
+</div>
+</div>
+</div></section>
+<section class="mc-section" id="mc-shop-categories">
+<div class="mc-wrap">
+<div class="mc-section-head">
+<p class="mc-eyebrow">Shop by category</p>
+<h2>Find The Right Mahjong Setup</h2>
+<p class="mc-lead">Choose the pieces you need now, then add coordinating mats, racks, storage, and travel options when you are ready.</p>
+</div>
+<div class="mc-shop-grid">
+<a class="mc-shop-card" href="https://www.mccabestheaterandliving.com/category-s/202.htm">
+<div class="mc-shop-card__image">
+<img alt="Classic American Mahjong tile set" class="mc-mahjong-landing-image" data-mc-landing-src="/v/vspfiles/mahjong/category-tiles.webp" decoding="async" loading="eager" src="/v/vspfiles/mahjong/category-tiles.webp" style="background-image:url('/v/vspfiles/mahjong/category-tiles.webp');background-size:cover;background-position:center;background-repeat:no-repeat"/>
+</div>
+<h3>Full-Size Tile Sets</h3>
+<p>Substantial everyday sets for regular home games and weekly groups.</p>
+<span class="mc-text-link">Shop tile sets</span>
+</a>
+<a class="mc-shop-card" href="https://www.mccabestheaterandliving.com/SearchResults.asp?Search=travel+mahjong+tiles">
+<div class="mc-shop-card__image">
+<img alt="Pink travel Mahjong tiles" class="mc-mahjong-landing-image" data-mc-landing-src="/v/vspfiles/mahjong/category-travel.webp" decoding="async" loading="eager" src="/v/vspfiles/mahjong/category-travel.webp" style="background-image:url('/v/vspfiles/mahjong/category-travel.webp');background-size:cover;background-position:center;background-repeat:no-repeat"/>
+</div>
+<h3>Travel Tile Sets</h3>
+<p>Thinner, lighter sets made for trips, smaller spaces, and portable game nights.</p>
+<span class="mc-text-link">Shop travel sets</span>
+</a>
+<a class="mc-shop-card" href="https://www.mccabestheaterandliving.com/category-s/203.htm">
+<div class="mc-shop-card__image mc-shop-card__image--split">
+<img alt="Colorful reversible Mahjong mat" class="mc-mahjong-landing-image" data-mc-landing-src="/v/vspfiles/mahjong/category-mat.webp" decoding="async" loading="eager" src="/v/vspfiles/mahjong/category-mat.webp" style="background-image:url('/v/vspfiles/mahjong/category-mat.webp');background-size:cover;background-position:center;background-repeat:no-repeat"/>
+<img alt="Clear acrylic Mahjong racks" class="mc-mahjong-landing-image" data-mc-landing-src="/v/vspfiles/mahjong/category-racks.webp" decoding="async" loading="eager" src="/v/vspfiles/mahjong/category-racks.webp" style="background-image:url('/v/vspfiles/mahjong/category-racks.webp');background-size:cover;background-position:center;background-repeat:no-repeat"/>
+</div>
+<h3>Mats &amp; Racks</h3>
+<p>Protect the table, soften tile noise, and give every player a clean place to organize.</p>
+<span class="mc-text-link">Shop mats &amp; racks</span>
+</a>
+<a class="mc-shop-card" href="https://www.mccabestheaterandliving.com/category-s/204.htm">
+<div class="mc-shop-card__image">
+<img alt="Mahjong tile storage box" class="mc-mahjong-landing-image" data-mc-landing-src="/v/vspfiles/mahjong/category-accessories.webp" decoding="async" loading="eager" src="/v/vspfiles/mahjong/category-accessories.webp" style="background-image:url('/v/vspfiles/mahjong/category-accessories.webp');background-size:cover;background-position:center;background-repeat:no-repeat"/>
+</div>
+<h3>Storage &amp; Accessories</h3>
+<p>Carrying pieces, storage, scorekeeping tools, and useful table extras.</p>
+<span class="mc-text-link">Shop accessories</span>
+</a>
+</div>
+</div>
+</section>
+<section class="mc-section">
+<div class="mc-wrap">
+<div class="mc-section-head">
+<p class="mc-eyebrow">A simple buying guide</p>
+<h2>Build A Complete Table</h2>
+</div>
+<div class="mc-buy-grid">
+<article class="mc-buy-card">
+<span class="mc-buy-card__number">01</span>
+<h3>Start With The Tiles</h3>
+<p>Choose full-size tiles for regular home play or travel tiles when portability matters most.</p>
+<a class="mc-text-link" href="https://www.mccabestheaterandliving.com/category-s/202.htm">Compare tile sets</a>
+</article>
+<article class="mc-buy-card">
+<span class="mc-buy-card__number">02</span>
+<h3>Add A Mat &amp; Racks</h3>
+<p>A mat reduces noise and protects the surface. Racks make every hand easier to read and manage.</p>
+<a class="mc-text-link" href="https://www.mccabestheaterandliving.com/category-s/203.htm">Shop table pieces</a>
+</article>
+<article class="mc-buy-card">
+<span class="mc-buy-card__number">03</span>
+<h3>Finish With Storage</h3>
+<p>Keep tiles and accessories together so setting up the next game takes minutes instead of a scavenger hunt.</p>
+<a class="mc-text-link" href="https://www.mccabestheaterandliving.com/category-s/204.htm">Shop storage</a>
+</article>
+</div>
+</div>
+</section>
+<section class="mc-section mc-learning-section" id="mc-learning-paths">
+<div class="mc-wrap">
+<div class="mc-section-head">
+<p class="mc-eyebrow">Choose your experience level</p>
+<h2>Learn At The Level That Fits You</h2>
+<p class="mc-lead">New players get the true ABCs and 123s. Regular players can skip straight to visual combinations and strategy filters.</p>
+</div>
+<div aria-label="Mahjong experience level" class="mc-learning-tabs" role="tablist">
+<button aria-controls="mc-beginner-panel" aria-selected="true" class="mc-learning-tab is-active" data-learning-tab="beginner" id="mc-beginner-tab" role="tab" type="button">
+          I’m New To Mahjong
+        </button>
+<button aria-controls="mc-regular-panel" aria-selected="false" class="mc-learning-tab" data-learning-tab="regular" id="mc-regular-tab" role="tab" type="button">
+          I’m A Regular Player
+        </button>
+</div>
+<div aria-labelledby="mc-beginner-tab" class="mc-learning-panel is-active" data-learning-panel="beginner" id="mc-beginner-panel" role="tabpanel">
+<div class="mc-section-head mc-section-head--left">
+<p class="mc-eyebrow">Start here</p>
+<h2>Mahjong ABCs &amp; 123s</h2>
+<p class="mc-lead">This is the no-assumed-knowledge version: what the tiles are, what the words mean, and what actually happens during a game.</p>
+</div>
+<div class="mc-key-card">
+<h3>The Three Numbered Suits</h3>
+<div class="mc-key-row">
+<div class="mc-key-group">
+<div class="mc-key-tiles">
+<figure class="mc-key-tile"><img alt="1 Dot" src="/v/vspfiles/mahjong/tiles/tile-d1.png"/><figcaption>1 Dot</figcaption></figure>
+<figure class="mc-key-tile"><img alt="5 Dot" src="/v/vspfiles/mahjong/tiles/tile-d5.png"/><figcaption>5 Dot</figcaption></figure>
+<figure class="mc-key-tile"><img alt="9 Dot" src="/v/vspfiles/mahjong/tiles/tile-d9.png"/><figcaption>9 Dot</figcaption></figure>
+</div>
+<p><strong>Dots</strong>, also called circles, are numbered 1 through 9.</p>
+</div>
+<div class="mc-key-group">
+<div class="mc-key-tiles">
+<figure class="mc-key-tile"><img alt="1 Bam" src="/v/vspfiles/mahjong/tiles/tile-b1.png"/><figcaption>1 Bam</figcaption></figure>
+<figure class="mc-key-tile"><img alt="5 Bam" src="/v/vspfiles/mahjong/tiles/tile-b5.png"/><figcaption>5 Bam</figcaption></figure>
+<figure class="mc-key-tile"><img alt="9 Bam" src="/v/vspfiles/mahjong/tiles/tile-b9.png"/><figcaption>9 Bam</figcaption></figure>
+</div>
+<p><strong>Bam</strong> tiles, short for bamboo, are numbered 1 through 9.</p>
+</div>
+<div class="mc-key-group">
+<div class="mc-key-tiles">
+<figure class="mc-key-tile"><img alt="1 Crak" src="/v/vspfiles/mahjong/tiles/tile-c1.png"/><figcaption>1 Crak</figcaption></figure>
+<figure class="mc-key-tile"><img alt="5 Crak" src="/v/vspfiles/mahjong/tiles/tile-c5.png"/><figcaption>5 Crak</figcaption></figure>
+<figure class="mc-key-tile"><img alt="9 Crak" src="/v/vspfiles/mahjong/tiles/tile-c9.png"/><figcaption>9 Crak</figcaption></figure>
+</div>
+<p><strong>Crak</strong> tiles, short for characters, are numbered 1 through 9.</p>
+</div>
+</div>
+</div>
+<div class="mc-key-card">
+<h3>Winds, Dragons, Flowers &amp; Jokers</h3>
+<div class="mc-key-row mc-key-row--special">
+<div class="mc-key-group">
+<div class="mc-key-tiles">
+<figure class="mc-key-tile"><img alt="East Wind" src="/v/vspfiles/mahjong/tiles/tile-east.png"/><figcaption>East Wind</figcaption></figure>
+<figure class="mc-key-tile"><img alt="South Wind" src="/v/vspfiles/mahjong/tiles/tile-south.png"/><figcaption>South Wind</figcaption></figure>
+<figure class="mc-key-tile"><img alt="West Wind" src="/v/vspfiles/mahjong/tiles/tile-west.png"/><figcaption>West Wind</figcaption></figure>
+<figure class="mc-key-tile"><img alt="North Wind" src="/v/vspfiles/mahjong/tiles/tile-north.png"/><figcaption>North Wind</figcaption></figure>
+</div>
+<p><strong>Winds</strong> are East, South, West, and North. They are not numbered suits.</p>
+</div>
+<div class="mc-key-group">
+<div class="mc-key-tiles">
+<figure class="mc-key-tile"><img alt="Red Dragon" src="/v/vspfiles/mahjong/tiles/tile-red.png"/><figcaption>Red Dragon</figcaption></figure>
+<figure class="mc-key-tile"><img alt="Green Dragon" src="/v/vspfiles/mahjong/tiles/tile-green.png"/><figcaption>Green Dragon</figcaption></figure>
+<figure class="mc-key-tile"><img alt="White Dragon" src="/v/vspfiles/mahjong/tiles/tile-white.png"/><figcaption>White Dragon</figcaption></figure>
+</div>
+<p><strong>Dragons</strong> are red, green, and white. The white dragon is often called “soap.”</p>
+</div>
+<div class="mc-key-group">
+<div class="mc-key-tiles">
+<figure class="mc-key-tile"><img alt="Flower" src="/v/vspfiles/mahjong/tiles/tile-flower-1.png?v=20260717flowers8"/><figcaption>Flower</figcaption></figure>
+<figure class="mc-key-tile"><img alt="Joker" src="/v/vspfiles/mahjong/tiles/tile-joker.png"/><figcaption>Joker</figcaption></figure>
+</div>
+<p><strong>Flowers</strong> are special tiles. <strong>Jokers</strong> may substitute in certain groups, but not singles or pairs.</p>
+</div>
+</div>
+</div>
+<div class="mc-subsection">
+<div class="mc-section-head mc-section-head--left">
+<p class="mc-eyebrow">How groups are named</p>
+<h2>Pair, Pung, Kong &amp; Quint</h2>
+</div>
+<div class="mc-group-examples">
+<article class="mc-group-example">
+<span class="mc-step-label">Pair</span>
+<div aria-label="Pair of 5 Dot" class="mc-example-tiles"><img alt="Pair of 5 Dot" src="/v/vspfiles/mahjong/tiles/tile-d5.png"/><img alt="Pair of 5 Dot" src="/v/vspfiles/mahjong/tiles/tile-d5.png"/></div>
+<p>Two identical tiles.</p>
+</article>
+<article class="mc-group-example">
+<span class="mc-step-label">Pung</span>
+<div aria-label="Pung of 3 Bam" class="mc-example-tiles"><img alt="Pung of 3 Bam" src="/v/vspfiles/mahjong/tiles/tile-b3.png"/><img alt="Pung of 3 Bam" src="/v/vspfiles/mahjong/tiles/tile-b3.png"/><img alt="Pung of 3 Bam" src="/v/vspfiles/mahjong/tiles/tile-b3.png"/></div>
+<p>Three identical tiles.</p>
+</article>
+<article class="mc-group-example">
+<span class="mc-step-label">Kong</span>
+<div aria-label="Kong of 7 Crak" class="mc-example-tiles"><img alt="Kong of 7 Crak" src="/v/vspfiles/mahjong/tiles/tile-c7.png"/><img alt="Kong of 7 Crak" src="/v/vspfiles/mahjong/tiles/tile-c7.png"/><img alt="Kong of 7 Crak" src="/v/vspfiles/mahjong/tiles/tile-c7.png"/><img alt="Kong of 7 Crak" src="/v/vspfiles/mahjong/tiles/tile-c7.png"/></div>
+<p>Four identical tiles.</p>
+</article>
+<article class="mc-group-example">
+<span class="mc-step-label">Quint</span>
+<div aria-label="Quint of 8 Dot with a Joker" class="mc-example-tiles"><img alt="Quint of 8 Dot with a Joker" src="/v/vspfiles/mahjong/tiles/tile-d8.png"/><img alt="Quint of 8 Dot with a Joker" src="/v/vspfiles/mahjong/tiles/tile-d8.png"/><img alt="Quint of 8 Dot with a Joker" src="/v/vspfiles/mahjong/tiles/tile-d8.png"/><img alt="Quint of 8 Dot with a Joker" src="/v/vspfiles/mahjong/tiles/tile-d8.png"/><img alt="Quint of 8 Dot with a Joker" src="/v/vspfiles/mahjong/tiles/tile-joker.png"/></div>
+<p>Five identical tiles. A joker is normally needed because only four natural copies exist.</p>
+</article>
+</div>
+</div>
+<div class="mc-subsection">
+<div class="mc-section-head mc-section-head--left">
+<p class="mc-eyebrow">A game from start to finish</p>
+<h2>Six Simple Steps</h2>
+</div>
+<div class="mc-beginner-steps">
+<article class="mc-beginner-step">
+<span>01</span>
+<div>
+<h3>Learn The Tile Families</h3>
+<p>First separate Dot, Bam, and Crak tiles from winds, dragons, flowers, and jokers. You do not need to memorize winning hands yet.</p>
+</div>
+</article>
+<article class="mc-beginner-step">
+<span>02</span>
+<div>
+<h3>Sort Your Rack</h3>
+<p>Place each suit in number order. Keep pairs and repeated numbers together so possible directions are easier to see.</p>
+</div>
+</article>
+<article class="mc-beginner-step">
+<span>03</span>
+<div>
+<h3>Use The Card Like A Recipe</h3>
+<p>The current American Mahjong card lists the exact combinations that can win. Pick a line your rack is naturally moving toward instead of forcing one immediately.</p>
+</div>
+</article>
+<article class="mc-beginner-step">
+<span>04</span>
+<div>
+<h3>Pass During The Charleston</h3>
+<p>Before normal play, players pass groups of three unwanted tiles according to the table’s Charleston sequence. Protect useful pairs and connected groups.</p>
+</div>
+</article>
+<article class="mc-beginner-step">
+<span>05</span>
+<div>
+<h3>Draw One, Discard One</h3>
+<p>On a normal turn, draw a tile, decide whether it helps, and discard one tile. Watch what other players discard and expose.</p>
+</div>
+</article>
+<article class="mc-beginner-step">
+<span>06</span>
+<div>
+<h3>Match One Line Exactly</h3>
+<p>A winning hand contains 14 tiles arranged exactly like one line on the card being used. When complete, call “Mahjong.”</p>
+</div>
+</article>
+</div>
+</div>
+<div class="mc-subsection">
+<div class="mc-section-head mc-section-head--left">
+<p class="mc-eyebrow">Common words at the table</p>
+<h2>Mahjong Terms In Plain English</h2>
+</div>
+<div class="mc-glossary-grid">
+<article><h3>Rack</h3><p>The holder that keeps your tiles standing and organized.</p></article>
+<article><h3>Wall</h3><p>The stacked rows of face-down tiles players draw from.</p></article>
+<article><h3>Charleston</h3><p>The opening exchange in which players pass groups of three tiles before normal turns begin.</p></article>
+<article><h3>Exposure</h3><p>A completed group placed face-up after calling another player’s discard.</p></article>
+<article><h3>Concealed</h3><p>A hand played without calling discards for exposures, except when allowed to claim the winning tile.</p></article>
+<article><h3>Joker Swap</h3><p>Replacing a joker in an exposed group with the exact natural tile it represents.</p></article>
+<article><h3>Call</h3><p>Taking another player’s discard because it completes a legal exposed group or wins the hand.</p></article>
+<article><h3>Mahjong</h3><p>The declaration made when your tiles exactly complete a winning hand on the card being used.</p></article>
+</div>
+</div>
+<div class="mc-beginner-shop">
+<div>
+<p class="mc-eyebrow">Ready to build a starter setup?</p>
+<h2>Begin With Tiles, Racks And A Mat</h2>
+<p>A beginner does not need every accessory on day one. Start with the pieces that make the game playable and comfortable.</p>
+</div>
+<div class="mc-beginner-shop__actions">
+<a class="mc-btn" href="https://www.mccabestheaterandliving.com/category-s/202.htm">Shop tile sets</a>
+<a class="mc-btn mc-btn--outline" href="https://www.mccabestheaterandliving.com/category-s/203.htm">Shop mats &amp; racks</a>
+<a class="mc-btn mc-btn--outline" href="#mc-mahjong-trainer">Practice with tile trainer</a></div>
+</div>
+</div>
+<div aria-labelledby="mc-regular-tab" class="mc-learning-panel" data-learning-panel="regular" hidden="" id="mc-regular-panel" role="tabpanel">
+<div class="mc-section-head mc-section-head--left">
+<p class="mc-eyebrow">For experienced players</p>
+<h2>Pattern Recognition &amp; Strategy</h2>
+<p class="mc-lead">Skip the basic vocabulary and work directly with suit structure, repeated numbers, honors, flowers, difficulty, and defensive judgment.</p>
+</div>
+<div class="mc-regular-cues">
+<article><h3>Stay Flexible Longer</h3><p>Compare at least two plausible card lines until the Charleston and early discards clarify the stronger route.</p></article>
+<article><h3>Read Availability</h3><p>Track discards and exposures before committing to a tile that may already be dead or dangerous.</p></article>
+<article><h3>Protect Joker Value</h3><p>Use jokers where they preserve the most structure, and watch exposed groups for possible swaps.</p></article>
+<article><h3>Shift To Defense</h3><p>When your hand stalls, stop feeding likely hands and prioritize safe discards over wishful drawing.</p></article>
+</div>
+<div class="mc-regular-key-link">
+<p>Need a quick tile or terminology refresher?</p>
+<button class="mc-text-button" data-switch-to-beginner="" type="button">Open the beginner key</button>
+</div>
+<div class="mc-regular-trainer-link"><p>Use the filters below to work through all 24 visual combinations.</p><a class="mc-btn" href="#mc-mahjong-trainer">Open interactive trainer</a></div></div>
+</div>
+</section>
+<section class="mc-section" id="mc-teacher-locator">
+<div class="mc-wrap">
+<div class="mc-teacher-locator">
+<div class="mc-teacher-copy">
+<p class="mc-eyebrow">Find local instruction</p>
+<h2>Mahjong Teacher Locator</h2>
+<p class="mc-lead">Enter a city, state, or ZIP code to search for American Mahjong teachers and lessons nearby.</p>
+<form class="mc-teacher-form" id="mc-teacher-form">
+<input aria-label="City, state, or ZIP code" autocomplete="postal-code" id="mc-teacher-location" inputmode="search" placeholder="City, state, or ZIP code" required="" type="text"/>
+<button class="mc-btn" type="submit">Find teachers</button>
+</form>
+<p hidden="" id="mc-teacher-error" role="alert">Please enter a city, state, or ZIP code.</p>
+<div class="mc-teacher-links">
+<a class="mc-text-link" href="https://mahjongcompare.com/teachers" rel="noopener" target="_blank">Browse teacher directory</a>
+<a class="mc-text-link" href="https://meetformahjong.com/" rel="noopener" target="_blank">Find players &amp; instructors</a>
+</div>
+</div>
+<div class="mc-teacher-image mc-teacher-tile-panel">
+<div class="mc-teacher-tile-inner">
+<div aria-label="Mahjong tile examples" class="mc-teacher-tile-strip">
+<img alt="1 Dot" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-d1.png"/>
+<img alt="5 Bam" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-b5.png"/>
+<img alt="East Wind" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-east.png"/>
+<img alt="Red Dragon" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-red.png"/>
+<img alt="Joker" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-joker.png"/>
+</div>
+<h3>Learn With The Tiles</h3>
+<p>Keep the page focused on Mahjong pieces, patterns, and practical play instead of random stock photos.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="mc-section">
+<div class="mc-wrap">
+<div class="mc-section-head">
+<p class="mc-eyebrow">Better game nights</p>
+<h2>Practical Mahjong Details</h2>
+<p class="mc-lead">No candy photos, no random stock people. Just tile-focused tips that support the shopping and learning sections.</p>
+</div>
+<div class="mc-practical-grid">
+<article class="mc-practical-card">
+<div aria-label="Rack and tile spacing examples" class="mc-mini-tile-strip">
+<img alt="2 Dot" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-d2.png"/>
+<img alt="3 Dot" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-d3.png"/>
+<img alt="4 Dot" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-d4.png"/>
+</div>
+<h3>Allow Enough Table Space</h3>
+<p>Every player needs room for a rack, card, drink, and comfortable tile movement.</p>
+</article>
+<article class="mc-practical-card">
+<div aria-label="Dragon tile examples" class="mc-mini-tile-strip">
+<img alt="Red Dragon" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-red.png"/>
+<img alt="Green Dragon" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-green.png"/>
+<img alt="Soap Dragon" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-white.png"/>
+</div>
+<h3>Protect The Tiles</h3>
+<p>Keep food and drinks away from the rack area so the set stays clean and easier to handle.</p>
+</article>
+<article class="mc-practical-card">
+<div aria-label="Winds and joker examples" class="mc-mini-tile-strip">
+<img alt="East Wind" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-east.png"/>
+<img alt="North Wind" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-north.png"/>
+<img alt="Joker" decoding="async" loading="eager" src="/v/vspfiles/mahjong/tiles/tile-joker.png"/>
+</div>
+<h3>Learn At A Patient Table</h3>
+<p>Real players teach timing, etiquette, and practical strategy better than memorizing rules alone.</p>
+</article>
+</div>
+</div>
+</section>
+<section class="mc-section">
+<div class="mc-wrap mc-faq">
+<div class="mc-section-head">
+<p class="mc-eyebrow">Before you buy</p>
+<h2>Mahjong Shopping FAQ</h2>
+</div>
+<details>
+<summary>What does a beginner need to start playing?</summary>
+<p>A practical starter setup includes an American Mahjong tile set, four racks with pushers, a current card for each player, and a mat or protected playing surface.</p>
+</details>
+<details>
+<summary>Should I buy full-size or travel tiles?</summary>
+<p>Choose full-size tiles for regular home play and a more substantial feel. Travel tiles are thinner and lighter when portability and storage matter more.</p>
+</details>
+<details>
+<summary>Do I really need a Mahjong mat?</summary>
+<p>A mat is not mandatory, but it protects the table, softens the sound of the tiles, and makes shuffling and dealing more comfortable.</p>
+</details>
+<details>
+<summary>Are the pattern-trainer examples official hands?</summary>
+<p>No. They are original visual exercises designed to demonstrate tile relationships without reproducing official card content.</p>
+</details>
+</div>
+</section>
+</div>
+<script id="mc-mahjong-live-draw-discard-v9">
+(function () {
+  "use strict";
+  var root = document.getElementById("mc-mahjong-page");
+  if (!root) return;
+
+  (function initLiveDrawDiscardTrainer() {
+    var liveRoot = root.querySelector("#mc-live-trainer");
+    if (!liveRoot || liveRoot.dataset.mcLiveTrainerBound === "1") return;
+    liveRoot.dataset.mcLiveTrainerBound = "1";
+
+    var asset = "/v/vspfiles/mahjong/tiles";
+    var rackEl = liveRoot.querySelector("#mc-live-rack");
+    var statusEl = liveRoot.querySelector("#mc-live-status");
+    var countEl = liveRoot.querySelector("#mc-live-count");
+    var suggestionsEl = liveRoot.querySelector("#mc-live-suggestions");
+    var discardAdviceEl = liveRoot.querySelector("#mc-live-discard-advice");
+    var autoBtn = liveRoot.querySelector("#mc-live-auto-deal");
+    var drawBtn = liveRoot.querySelector("#mc-live-draw");
+    var discardBtn = liveRoot.querySelector("#mc-live-discard");
+    if (!rackEl || !statusEl || !countEl || !suggestionsEl || !discardAdviceEl || !autoBtn || !drawBtn || !discardBtn) return;
+
+    var rack = [], wall = [], selectedIndex = -1, drawnIndex = -1;
+    var names = {east:"East Wind",south:"South Wind",west:"West Wind",north:"North Wind",red:"Red Dragon",green:"Green Dragon",white:"White Dragon",flower:"Flower",joker:"Joker"};
+    var order = {c:0,d:1,b:2,east:30,south:31,west:32,north:33,red:34,green:35,white:36,flower:37,joker:38};
+    var suitPermutations = [
+      {a:"c",b:"d",c:"b"},{a:"c",b:"b",c:"d"},
+      {a:"d",b:"c",c:"b"},{a:"d",b:"b",c:"c"},
+      {a:"b",b:"c",c:"d"},{a:"b",b:"d",c:"c"}
+    ];
+
+    function repeat(code,n){var out=[];while(n-->0)out.push(code);return out;}
+    function join(){return Array.prototype.concat.apply([],arguments);}
+
+    var livePatterns = [
+      {name:"Even Pung Ladder",tiles:join(["flower","flower"],repeat("a2",3),repeat("a4",3),repeat("a6",3),repeat("a8",3)),note:"Four repeated even-number groups in one suit."},
+      {name:"Odd Pung Ladder",tiles:join(["flower","flower"],repeat("a1",3),repeat("a3",3),repeat("a5",3),repeat("a7",3)),note:"Four repeated odd-number groups in one suit."},
+      {name:"One-Suit Sequence",tiles:join(["a1","a2","a3","a4","a5","a6","a7","a8","a9"],repeat("a9",3),repeat("red",2)),note:"A long same-suit run with a strong end group."},
+      {name:"Two-Suit Ladder",tiles:join(["a1","a2","a3","a4","a5","a6","b7","b8","b9"],repeat("b9",3),["flower","flower"]),note:"Connected low numbers move into a second-suit high block."},
+      {name:"Three-Suit Steps",tiles:join(["a1","a2","a3","b4","b5","b6","c7","c8","c9"],repeat("red",4),["flower"]),note:"Three short runs supported by a dragon group."},
+      {name:"Same Number Across Suits",tiles:join(repeat("a5",4),repeat("b5",4),repeat("c5",4),["flower","flower"]),note:"The same number repeated in all three suits."},
+      {name:"Wind Frame",tiles:join(repeat("east",3),repeat("south",3),repeat("west",3),repeat("north",3),repeat("red",2)),note:"A wind-heavy direction with a dragon pair."},
+      {name:"Dragon Frame",tiles:join(repeat("red",4),repeat("green",4),repeat("white",4),["flower","flower"]),note:"Three strong dragon groups framed by flowers."},
+      {name:"Seven-Pair Study",tiles:join(repeat("a1",2),repeat("a3",2),repeat("a5",2),repeat("b2",2),repeat("b4",2),repeat("c6",2),repeat("red",2)),note:"A pair-heavy direction that rewards patience."},
+      {name:"Consecutive Pairs",tiles:join(repeat("a1",2),repeat("a2",2),repeat("a3",2),repeat("a4",2),repeat("a5",2),repeat("a6",2),["flower","flower"]),note:"Six consecutive pairs in one suit."},
+      {name:"Mirror Numbers",tiles:join(repeat("a1",3),repeat("a9",3),repeat("b1",3),repeat("b9",3),["flower","flower"]),note:"Matching low and high groups across two suits."},
+      {name:"Twin Runs",tiles:join(["a1","a2","a3","a1","a2","a3","b7","b8","b9","b7","b8","b9","flower","flower"]),note:"Two repeated runs in opposite ends of two suits."}
+    ];
+
+    function tileName(code){
+      if(names[code])return names[code];
+      var suit={c:"Crak",d:"Dot",b:"Bam"}[code.charAt(0)]||"Tile";
+      return code.slice(1)+" "+suit;
+    }
+    function tileSortValue(code){
+      if(order[code]!=null)return order[code];
+      return (order[code.charAt(0)]||0)*10+Number(code.slice(1));
+    }
+    function sortRack(list){return list.slice().sort(function(a,b){return tileSortValue(a)-tileSortValue(b);});}
+    function shuffle(list){
+      var out=list.slice();
+      for(var i=out.length-1;i>0;i--){
+        var j=Math.floor(Math.random()*(i+1));
+        var temp=out[i];out[i]=out[j];out[j]=temp;
+      }
+      return out;
+    }
+    function buildWall(){
+      var out=[];
+      ["c","d","b"].forEach(function(s){for(var n=1;n<=9;n++)out=out.concat(repeat(s+n,4));});
+      ["east","south","west","north","red","green","white"].forEach(function(code){out=out.concat(repeat(code,4));});
+      return shuffle(out.concat(repeat("flower",8),repeat("joker",8)));
+    }
+    function countTiles(list){
+      var out={};
+      list.forEach(function(code){out[code]=(out[code]||0)+1;});
+      return out;
+    }
+    function expandPattern(spec,perm){
+      return spec.tiles.map(function(code){
+        var first=code.charAt(0);
+        if((first==="a"||first==="b"||first==="c")&&/\d/.test(code.slice(1)))return perm[first]+code.slice(1);
+        return code;
+      });
+    }
+    function analyzeTarget(target,hand){
+      var targetCounts=countTiles(target),handCounts=countTiles(hand),matched=0,missing=[];
+      Object.keys(targetCounts).forEach(function(code){
+        var exact=Math.min(targetCounts[code],handCounts[code]||0);
+        matched+=exact;
+        for(var i=exact;i<targetCounts[code];i++)missing.push(code);
+      });
+      var jokers=handCounts.joker||0,jokerUsed=0;
+      for(var m=missing.length-1;m>=0&&jokerUsed<jokers;m--){
+        var code=missing[m],groupSize=targetCounts[code]||0;
+        if(code!=="flower"&&code!=="joker"&&groupSize>=3){missing.splice(m,1);jokerUsed++;}
+      }
+      return {matched:matched+jokerUsed,missing:missing,jokerUsed:jokerUsed,target:target};
+    }
+    function rankPatterns(hand){
+      var ranked=livePatterns.map(function(spec){
+        var best=null;
+        suitPermutations.forEach(function(perm){
+          var result=analyzeTarget(expandPattern(spec,perm),hand);
+          result.name=spec.name;result.note=spec.note;
+          if(!best||result.matched>best.matched||(result.matched===best.matched&&result.missing.length<best.missing.length))best=result;
+        });
+        return best;
+      });
+      ranked.sort(function(a,b){
+        if(b.matched!==a.matched)return b.matched-a.matched;
+        if(a.missing.length!==b.missing.length)return a.missing.length-b.missing.length;
+        return a.name.localeCompare(b.name);
+      });
+      return ranked;
+    }
+    function bestDiscardCandidates(hand){
+      if(hand.length!==14)return [];
+      var candidates=hand.map(function(code,index){
+        var test=hand.slice();test.splice(index,1);
+        var ranked=rankPatterns(test);
+        var quality=(ranked[0].matched*100)+(ranked[1].matched*10)+ranked[2].matched;
+        if(code==="joker")quality-=1000;
+        if(code==="flower")quality-=80;
+        return {code:code,index:index,quality:quality};
+      }).sort(function(a,b){return b.quality-a.quality;});
+      var unique=[];
+      candidates.forEach(function(item){if(!unique.some(function(x){return x.code===item.code;}))unique.push(item);});
+      return unique.slice(0,3);
+    }
+    function tileImageSrc(code,flowerNumber){
+      if(code==="flower"){
+        var flowerIndex=((flowerNumber||1)-1)%8+1;
+        return asset+"/tile-flower-"+flowerIndex+".png?v=20260717flowers8";
+      }
+      return asset+"/tile-"+code+".png?v=20260717tiles";
+    }
+    function tileImg(code,loading,flowerNumber){
+      return '<img src="'+tileImageSrc(code,flowerNumber)+'" alt="'+tileName(code)+'" loading="'+(loading||"eager")+'" decoding="async">';
+    }
+    function renderRack(){
+      rackEl.innerHTML="";
+      rackEl.classList.toggle("is-discarding",rack.length===14);
+      var flowerSeen=0;
+      rack.forEach(function(code,index){
+        var tileButton=document.createElement("button");
+        tileButton.type="button";tileButton.className="mc-live-tile";
+        if(index===selectedIndex)tileButton.classList.add("is-selected");
+        if(index===drawnIndex)tileButton.classList.add("is-drawn");
+        tileButton.setAttribute("aria-label",tileName(code)+(rack.length===14?". Select to discard.":""));
+        tileButton.setAttribute("aria-pressed",index===selectedIndex?"true":"false");
+        if(code==="flower")flowerSeen++;
+        tileButton.innerHTML=tileImg(code,"eager",flowerSeen);
+        tileButton.addEventListener("click",function(){
+          if(rack.length!==14)return;
+          selectedIndex=(selectedIndex===index?-1:index);
+          renderLiveTrainer();
+        });
+        rackEl.appendChild(tileButton);
+      });
+    }
+    function compactMissing(missing){
+      var counts=countTiles(missing),ordered=Object.keys(counts).sort(function(a,b){return tileSortValue(a)-tileSortValue(b);}),html=[];
+      var missingFlowerSeen=0;
+      ordered.forEach(function(code){
+        for(var i=0;i<counts[code];i++){
+          if(code==="flower")missingFlowerSeen++;
+          html.push(tileImg(code,"lazy",missingFlowerSeen));
+        }
+      });
+      return html.join("");
+    }
+    function renderSuggestions(ranked){
+      suggestionsEl.innerHTML="";
+      ranked.slice(0,3).forEach(function(item){
+        var card=document.createElement("article");
+        card.className="mc-live-suggestion";
+        var missingHtml=item.missing.length
+          ?'<div class="mc-live-missing-label">Still needed</div><div class="mc-live-missing">'+compactMissing(item.missing)+'</div>'
+          :'<div class="mc-live-complete">This rack already contains the full original practice structure.</div>';
+        card.innerHTML='<div class="mc-live-suggestion__top"><strong>'+item.name+'</strong><span class="mc-live-suggestion__score">'+item.matched+'/14 aligned</span></div><p>'+item.note+'</p>'+missingHtml;
+        suggestionsEl.appendChild(card);
+      });
+    }
+    function renderLiveTrainer(){
+      countEl.textContent=rack.length+" TILE"+(rack.length===1?"":"S");
+      drawBtn.disabled=rack.length!==13;
+      discardBtn.disabled=rack.length!==14||selectedIndex<0;
+      if(rack.length===13)statusEl.textContent="Your 13-tile rack is ready. Draw one tile, then choose a discard.";
+      else if(selectedIndex>=0)statusEl.textContent="Selected "+tileName(rack[selectedIndex])+". Click DISCARD SELECTED to return to 13 tiles.";
+      else statusEl.textContent="You drew "+tileName(rack[drawnIndex])+". Click any tile to choose your discard.";
+
+      var ranked=rankPatterns(rack);
+      renderRack();
+      renderSuggestions(ranked);
+
+      if(rack.length===14){
+        var best=bestDiscardCandidates(rack);
+        discardAdviceEl.textContent=best.length?"Best discard candidates: "+best.map(function(item){return tileName(item.code);}).join(", ")+".":"Choose the tile that helps the fewest suggested directions.";
+      }else{
+        discardAdviceEl.textContent="Draw one tile to receive a discard recommendation.";
+      }
+    }
+    function deal(){
+      wall=buildWall();rack=[];
+      for(var i=0;i<13;i++)rack.push(wall.pop());
+      rack=sortRack(rack);selectedIndex=-1;drawnIndex=-1;renderLiveTrainer();
+    }
+    function drawTile(){
+      if(rack.length!==13)return;
+      if(!wall.length)wall=buildWall();
+      rack.push(wall.pop());drawnIndex=rack.length-1;selectedIndex=-1;renderLiveTrainer();
+    }
+    function discardSelected(){
+      if(rack.length!==14||selectedIndex<0)return;
+      rack.splice(selectedIndex,1);rack=sortRack(rack);selectedIndex=-1;drawnIndex=-1;renderLiveTrainer();
+    }
+
+    autoBtn.addEventListener("click",deal);
+    drawBtn.addEventListener("click",drawTile);
+    discardBtn.addEventListener("click",discardSelected);
+    deal();
+  })();
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+
+  var patterns = [{"type": "pairs", "suits": "2", "level": "beginner", "label": "Pair Ladder", "tiles": ["flower", "flower", "c2", "c2", "d4", "d4", "b6", "b6", "b8", "b8", "b8", "b8", "joker", "joker"], "note": "Protect early pairs, then build one strong four-tile anchor."}, {"type": "runs", "suits": "3", "level": "beginner", "label": "Three-Suit Run", "tiles": ["c1", "c2", "c3", "d4", "d5", "d6", "b7", "b8", "b9", "red", "red", "red", "red", "joker"], "note": "Practice spotting connected groups while keeping one identical group."}, {"type": "repeats", "suits": "2", "level": "intermediate", "label": "Echo Numbers", "tiles": ["c3", "c3", "c3", "d3", "d3", "d3", "b6", "b6", "b6", "b6", "c6", "c6", "joker", "joker"], "note": "Train your eye to repeated numbers appearing across more than one suit."}, {"type": "honors", "suits": "1", "level": "intermediate", "label": "Honor Frame", "tiles": ["north", "north", "north", "east", "east", "east", "c5", "c5", "c5", "red", "red", "red", "red", "joker"], "note": "Use honor-heavy directions only when the winds and dragons are truly strong."}, {"type": "flowers", "suits": "2", "level": "beginner", "label": "Flower Bridge", "tiles": ["flower", "flower", "flower", "flower", "c1", "c2", "c3", "d4", "d5", "d6", "b7", "b7", "b7", "b7"], "note": "Flowers create the frame while short runs shape the middle."}, {"type": "pairs", "suits": "3", "level": "advanced", "label": "Seven-Pair Study", "tiles": ["c1", "c1", "d3", "d3", "b5", "b5", "c7", "c7", "d9", "d9", "red", "red", "flower", "flower"], "note": "A no-joker pair exercise that rewards patience and careful discarding."}, {"type": "runs", "suits": "2", "level": "intermediate", "label": "Split Sequence", "tiles": ["c1", "c2", "c3", "c4", "d5", "d6", "d7", "d8", "b9", "b9", "b9", "red", "red", "red"], "note": "Build two connected blocks, then finish with one repeated number and dragon group."}, {"type": "repeats", "suits": "1", "level": "intermediate", "label": "Single-Suit Rhythm", "tiles": ["flower", "flower", "c2", "c2", "c2", "c4", "c4", "c4", "c6", "c6", "c6", "c8", "c8", "joker"], "note": "A one-suit drill built around repeated even numbers."}, {"type": "runs", "suits": "1", "level": "beginner", "label": "Low Number Sweep", "tiles": ["b1", "b1", "b2", "b2", "b3", "b3", "b4", "b4", "b5", "b5", "b6", "b6", "flower", "flower"], "note": "Practice identifying a low-number direction without forcing exact group sizes."}, {"type": "runs", "suits": "1", "level": "beginner", "label": "High Number Sweep", "tiles": ["d4", "d4", "d5", "d5", "d6", "d6", "d7", "d7", "d8", "d8", "d9", "d9", "flower", "flower"], "note": "The high-number companion to the low-number sweep."}, {"type": "repeats", "suits": "3", "level": "intermediate", "label": "Odd Number Echo", "tiles": ["c1", "c1", "c1", "d3", "d3", "d3", "b5", "b5", "b5", "c7", "c7", "d9", "d9", "joker"], "note": "Spot the odd-number relationship even when the suits change."}, {"type": "repeats", "suits": "3", "level": "intermediate", "label": "Even Number Echo", "tiles": ["c2", "c2", "c2", "d4", "d4", "d4", "b6", "b6", "b6", "c8", "c8", "d8", "d8", "joker"], "note": "A flexible even-number study across three suits."}, {"type": "honors", "suits": "2", "level": "advanced", "label": "Wind Window", "tiles": ["east", "east", "south", "south", "west", "west", "north", "north", "c4", "c4", "d6", "d6", "flower", "flower"], "note": "Use winds as visual anchors while preserving two numbered backup pairs."}, {"type": "honors", "suits": "3", "level": "advanced", "label": "Dragon Trio", "tiles": ["red", "red", "red", "green", "green", "green", "white", "white", "white", "c2", "c2", "d6", "d6", "flower"], "note": "A dragon-recognition drill with two numbered pairs as alternate structure."}, {"type": "flowers", "suits": "1", "level": "intermediate", "label": "Flowered Even Build", "tiles": ["flower", "flower", "flower", "flower", "b2", "b2", "b2", "b4", "b4", "b4", "b6", "b6", "b8", "b8"], "note": "Use flowers to support a single-suit even-number structure."}, {"type": "flowers", "suits": "3", "level": "advanced", "label": "Flowered Mix", "tiles": ["flower", "flower", "c1", "c2", "c3", "d4", "d5", "d6", "b7", "b8", "b9", "red", "red", "joker"], "note": "A broad visual exercise for racks that stay flexible across three suits."}, {"type": "pairs", "suits": "1", "level": "intermediate", "label": "One-Suit Pair Bank", "tiles": ["c1", "c1", "c2", "c2", "c4", "c4", "c5", "c5", "c7", "c7", "c9", "c9", "flower", "flower"], "note": "Keep the pair bank intact until a clearer one-suit direction appears."}, {"type": "repeats", "suits": "2", "level": "advanced", "label": "Double Pung Study", "tiles": ["b3", "b3", "b3", "b3", "d6", "d6", "d6", "d6", "c9", "c9", "c9", "red", "red", "joker"], "note": "Practice seeing two strong identical groups before choosing the finishing block."}, {"type": "runs", "suits": "2", "level": "advanced", "label": "Mirrored Run", "tiles": ["c1", "c2", "c3", "c7", "c8", "c9", "d1", "d2", "d3", "d7", "d8", "d9", "flower", "flower"], "note": "Look for matching low and high runs across two suits."}, {"type": "honors", "suits": "1", "level": "beginner", "label": "Dragon Anchor", "tiles": ["red", "red", "red", "red", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b8", "flower", "joker"], "note": "Use one dragon group as an anchor while evaluating a connected numbered suit."}, {"type": "pairs", "suits": "2", "level": "advanced", "label": "Alternating Pairs", "tiles": ["c2", "c2", "d2", "d2", "c4", "c4", "d4", "d4", "c6", "c6", "d6", "d6", "flower", "flower"], "note": "A two-suit pair drill built around matching even numbers."}, {"type": "runs", "suits": "3", "level": "advanced", "label": "Broken Run Recovery", "tiles": ["c1", "c2", "c4", "d3", "d4", "d6", "b5", "b6", "b8", "flower", "flower", "red", "joker", "joker"], "note": "Practice deciding which gaps are worth repairing and which tiles should be passed."}, {"type": "repeats", "suits": "1", "level": "beginner", "label": "Triple Repeat", "tiles": ["d2", "d2", "d2", "d5", "d5", "d5", "d8", "d8", "d8", "flower", "flower", "red", "red", "joker"], "note": "Three repeated-number groups make the rack easy to scan and compare."}, {"type": "honors", "suits": "2", "level": "intermediate", "label": "Honor And Run", "tiles": ["north", "north", "north", "green", "green", "green", "c1", "c2", "c3", "d7", "d8", "d9", "flower", "joker"], "note": "Balance honor groups against two short numbered runs."}];
+  var root = document.getElementById("mc-mahjong-page");
+  if (!root) return;
+
+  var assetBase = "/v/vspfiles/mahjong";
+  var grid = root.querySelector("#mc-pattern-grid");
+  var title = root.querySelector("#mc-results-title");
+  var strength = root.querySelector("#mc-strength");
+  var suits = root.querySelector("#mc-suits");
+  var level = root.querySelector("#mc-level");
+  var button = root.querySelector("#mc-find-patterns");
+  var moreButton = root.querySelector("#mc-show-more");
+  var moreWrap = root.querySelector("#mc-more-wrap");
+  var total = root.querySelector("#mc-pattern-total");
+
+  var currentResults = patterns.slice();
+  var visibleCount = 4;
+
+  function tileAlt(code) {
+    var labels = {
+      east:"East Wind", south:"South Wind", west:"West Wind", north:"North Wind",
+      red:"Red Dragon", green:"Green Dragon", white:"White Dragon",
+      flower:"Flower", joker:"Joker"
+    };
+    if (labels[code]) return labels[code];
+
+    var suitsMap = {c:"Crak", b:"Bam", d:"Dot"};
+    var first = code.charAt(0);
+    return code.slice(1) + " " + (suitsMap[first] || "Mahjong tile");
+  }
+
+  function tileStrip(tiles) {
+    var flowerSeen = 0;
+    return '<div class="mc-tile-strip">' + tiles.map(function (code) {
+      var src;
+      if (code === "flower") {
+        flowerSeen++;
+        src = assetBase + '/tiles/tile-flower-' + (((flowerSeen - 1) % 8) + 1) + '.png?v=20260717flowers8';
+      } else {
+        src = assetBase + '/tiles/tile-' + code + '.png?v=20260717tiles';
+      }
+      return '<img src="' + src + '" alt="' + tileAlt(code) + '" loading="lazy" decoding="async">';
+    }).join("") + '</div>';
+  }
+
+  function render() {
+    grid.innerHTML = "";
+
+    if (!currentResults.length) {
+      grid.innerHTML = '<div class="mc-empty">No exact match appeared. Widen one filter and try again.</div>';
+      moreWrap.hidden = true;
+      return;
+    }
+
+    currentResults.slice(0, visibleCount).forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "mc-pattern";
+      card.innerHTML =
+        '<div class="mc-pattern__meta">' +
+          '<span class="mc-pattern__tag">' + item.label + '</span>' +
+          '<span class="mc-pattern__level">' + item.level + '</span>' +
+        '</div>' +
+        tileStrip(item.tiles) +
+        '<p>' + item.note + '</p>';
+      grid.appendChild(card);
+    });
+
+    moreWrap.hidden = visibleCount >= currentResults.length;
+    moreButton.textContent = "Show " + Math.min(4, currentResults.length - visibleCount) + " more combinations";
+  }
+
+  function filterPatterns() {
+    var selectedStrength = strength.value;
+    var selectedSuits = suits.value;
+    var selectedLevel = level.value;
+
+    currentResults = patterns.filter(function (item) {
+      return (selectedStrength === "any" || item.type === selectedStrength) &&
+             (selectedSuits === "any" || item.suits === selectedSuits) &&
+             (selectedLevel === "any" || item.level === selectedLevel);
+    });
+
+    visibleCount = 4;
+    title.textContent = currentResults.length
+      ? currentResults.length + (currentResults.length === 1 ? " Matching Combination" : " Matching Combinations")
+      : "Try A Broader Combination";
+    render();
+  }
+
+  button.addEventListener("click", filterPatterns);
+
+  moreButton.addEventListener("click", function () {
+    visibleCount += 4;
+    render();
+  });
+
+  total.textContent = patterns.length;
+  title.textContent = patterns.length + " Practice Combinations";
+  render();
+
+  var teacherForm = root.querySelector("#mc-teacher-form");
+  var teacherLocation = root.querySelector("#mc-teacher-location");
+  var teacherError = root.querySelector("#mc-teacher-error");
+
+  if (teacherForm && teacherLocation) {
+    teacherForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      var location = teacherLocation.value.trim();
+
+      if (!location) {
+        teacherError.hidden = false;
+        teacherLocation.focus();
+        return;
+      }
+
+      teacherError.hidden = true;
+
+      var query = encodeURIComponent(
+        "American Mahjong teacher or lessons near " + location
+      );
+
+      window.open(
+        "https://www.google.com/maps/search/?api=1&query=" + query,
+        "_blank",
+        "noopener"
+      );
+    });
+
+    teacherLocation.addEventListener("input", function () {
+      teacherError.hidden = true;
+    });
+  }
+
+})();
+</script>
+
+<script id="mc-mahjong-landing-image-repair-v11">
+(function () {
+  "use strict";
+
+  function repairMahjongLandingImages() {
+    var root = document.getElementById("mc-mahjong-page");
+    if (!root) return;
+
+    root.querySelectorAll("img[data-mc-landing-src]").forEach(function (img) {
+      var source = img.getAttribute("data-mc-landing-src");
+      if (!source) return;
+
+      img.classList.remove("lazy", "lazyload", "lazyloaded", "v-lazy-image");
+      img.removeAttribute("data-src");
+      img.removeAttribute("data-lazy-src");
+      img.removeAttribute("data-original");
+      img.removeAttribute("srcset");
+      img.setAttribute("loading", "eager");
+      img.setAttribute("decoding", "async");
+
+      if (img.getAttribute("src") !== source) img.setAttribute("src", source);
+
+      img.style.setProperty("display", "block", "important");
+      img.style.setProperty("visibility", "visible", "important");
+      img.style.setProperty("opacity", "1", "important");
+      img.style.setProperty("background-image", "url('" + source.replace(/'/g, "\\'") + "')", "important");
+      img.style.setProperty("background-size", "cover", "important");
+      img.style.setProperty("background-position", "center", "important");
+    });
+  }
+
+  repairMahjongLandingImages();
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", repairMahjongLandingImages, { once: true });
+  }
+
+  window.addEventListener("load", repairMahjongLandingImages, { once: true });
+  window.setTimeout(repairMahjongLandingImages, 350);
+})();
+</script>
+
+<style id="mc-mahjong-mobile-layout-final">
+/* Mobile-only Mahjong trainer improvements */
+@media (max-width: 760px) {
+  /* Use nearly the full phone width instead of a narrow centered column. */
+  #mc-mahjong-page,
+  #mc-mahjong-page .mc-wrap,
+  #mc-mahjong-page #mc-mahjong-trainer,
+  #mc-mahjong-page #mc-mahjong-trainer > .mc-wrap,
+  #mc-mahjong-page .mc-live-trainer {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+
+  #mc-mahjong-page #mc-mahjong-trainer {
+    margin: 0 !important;
+    padding: 12px 6px 24px !important;
+  }
+
+  #mc-mahjong-page #mc-mahjong-trainer > .mc-wrap {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  #mc-mahjong-page .mc-live-trainer {
+    margin: 0 !important;
+    padding: 12px 6px !important;
+  }
+
+  /* Smaller headings and tighter line spacing. */
+  #mc-mahjong-page #mc-mahjong-trainer .mc-section-head {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 10px !important;
+    padding: 0 6px !important;
+  }
+
+  #mc-mahjong-page #mc-mahjong-trainer .mc-section-head h2 {
+    margin: 0 0 5px !important;
+    font-size: 19px !important;
+    line-height: 1.05 !important;
+    letter-spacing: .01em !important;
+  }
+
+  #mc-mahjong-page #mc-mahjong-trainer .mc-section-head .mc-lead {
+    margin: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.28 !important;
+  }
+
+  #mc-mahjong-page .mc-live-trainer__head {
+    display: block !important;
+    margin-bottom: 9px !important;
+    padding: 0 3px !important;
+  }
+
+  #mc-mahjong-page .mc-live-trainer__head h3 {
+    margin: 0 0 4px !important;
+    font-size: 15px !important;
+    line-height: 1.05 !important;
+  }
+
+  #mc-mahjong-page .mc-live-trainer__head p {
+    margin: 0 !important;
+    font-size: 10.5px !important;
+    line-height: 1.25 !important;
+  }
+
+  #mc-mahjong-page .mc-live-trainer__count {
+    display: inline-block !important;
+    margin-top: 6px !important;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+
+  #mc-mahjong-page .mc-live-trainer__controls {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    margin: 0 0 8px !important;
+  }
+
+  #mc-mahjong-page .mc-live-trainer__controls button {
+    min-height: 34px !important;
+    padding: 5px 6px !important;
+    font-size: 9px !important;
+    line-height: 1.05 !important;
+  }
+
+  #mc-mahjong-page .mc-live-trainer__controls button:first-child {
+    grid-column: 1 / -1 !important;
+  }
+
+  #mc-mahjong-page .mc-live-trainer__status {
+    min-height: 0 !important;
+    margin: 0 3px 7px !important;
+    font-size: 10.5px !important;
+    line-height: 1.25 !important;
+  }
+
+  /*
+    Five columns makes each tile substantially larger.
+    Fourteen tiles display as 5 + 5 + 4, all visible with no horizontal scroll.
+  */
+  #mc-mahjong-page .mc-live-rack {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 7px 3px !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
+    white-space: normal !important;
+  }
+
+  #mc-mahjong-page .mc-live-rack::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #mc-mahjong-page .mc-live-tile {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    flex: none !important;
+  }
+
+  #mc-mahjong-page .mc-live-tile img {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  #mc-mahjong-page .mc-live-advisor,
+  #mc-mahjong-page .mc-live-advisor__heading {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  #mc-mahjong-page .mc-live-advisor__heading h3 {
+    font-size: 15px !important;
+    line-height: 1.05 !important;
+  }
+
+  #mc-mahjong-page .mc-live-advisor__heading p,
+  #mc-mahjong-page .mc-live-trainer__disclaimer {
+    font-size: 10px !important;
+    line-height: 1.28 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #mc-mahjong-page .mc-live-rack {
+    gap: 4px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+
+  #mc-mahjong-page #mc-mahjong-trainer .mc-section-head h2 {
+    font-size: 18px !important;
+  }
+}
+</style>
+
+<style id="mc-mahjong-tile-repair-css-v13">
+#mc-mahjong-page .mc-live-tile,
+#mc-mahjong-page .mc-live-tile:hover,
+#mc-mahjong-page .mc-live-tile:focus,
+#mc-mahjong-page .mc-live-tile:focus-visible,
+#mc-mahjong-page .mc-live-tile:active {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+#mc-mahjong-page .mc-live-tile.is-selected {
+  transform: translateY(-11px) !important;
+}
+
+#mc-mahjong-page .mc-live-tile img,
+#mc-mahjong-page .mc-tile-strip img,
+#mc-mahjong-page .mc-key-tile img,
+#mc-mahjong-page .mc-example-tiles img,
+#mc-mahjong-page .mc-mini-tile-strip img,
+#mc-mahjong-page .mc-teacher-tile-strip img,
+#mc-mahjong-page .mc-live-missing img {
+  display: block !important;
+  height: auto !important;
+  max-height: none !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+}
+
+#mc-mahjong-page .mc-pattern,
+#mc-mahjong-page .mc-pattern-grid,
+#mc-mahjong-page .mc-group-example,
+#mc-mahjong-page .mc-key-card,
+#mc-mahjong-page .mc-key-group,
+#mc-mahjong-page .mc-live-trainer {
+  overflow: visible !important;
+}
+</style>
+
+<script id="mc-mahjong-tile-repair-v13">
+(function () {
+  "use strict";
+
+  var root = document.getElementById("mc-mahjong-page");
+  if (!root || root.dataset.mcTileRepairV13 === "1") return;
+  root.dataset.mcTileRepairV13 = "1";
+
+  var OUT_W = 750;
+  var OUT_H = 1000;
+
+  var ALIASES = {
+    "tile-we.png": "tile-east.png",
+    "tile-ws.png": "tile-south.png",
+    "tile-ww.png": "tile-west.png",
+    "tile-wn.png": "tile-north.png",
+    "tile-dr.png": "tile-red.png",
+    "tile-dg.png": "tile-green.png",
+    "tile-ds.png": "tile-white.png"
+  };
+
+  function canonicalSrc(src) {
+    var out = src || "";
+    Object.keys(ALIASES).forEach(function (from) {
+      out = out.replace(from, ALIASES[from]);
+    });
+    return out;
+  }
+
+  function isTileImage(img) {
+    return !!img &&
+      img.tagName === "IMG" &&
+      /\/v\/vspfiles\/mahjong\/tiles\/tile-/.test(img.getAttribute("src") || "");
+  }
+
+  function findVisibleBounds(image) {
+    var canvas = document.createElement("canvas");
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+
+    var ctx = canvas.getContext("2d", { willReadFrequently: true });
+    ctx.drawImage(image, 0, 0);
+
+    var imageData;
+    try {
+      imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    } catch (e) {
+      return null;
+    }
+
+    var d = imageData.data;
+    var w = canvas.width;
+    var h = canvas.height;
+    var seen = new Uint8Array(w * h);
+    var queueX = new Int32Array(w * h);
+    var queueY = new Int32Array(w * h);
+    var head = 0;
+    var tail = 0;
+
+    function nearBackground(x, y) {
+      var p = (y * w + x) * 4;
+      var r = d[p];
+      var g = d[p + 1];
+      var b = d[p + 2];
+      var a = d[p + 3];
+
+      if (a < 20) return true;
+
+      var max = Math.max(r, g, b);
+      var min = Math.min(r, g, b);
+
+      return r >= 238 && g >= 238 && b >= 238 && (max - min) <= 14;
+    }
+
+    function add(x, y) {
+      var i = y * w + x;
+      if (seen[i] || !nearBackground(x, y)) return;
+      seen[i] = 1;
+      queueX[tail] = x;
+      queueY[tail] = y;
+      tail++;
+    }
+
+    for (var x = 0; x < w; x++) {
+      add(x, 0);
+      add(x, h - 1);
+    }
+
+    for (var y = 0; y < h; y++) {
+      add(0, y);
+      add(w - 1, y);
+    }
+
+    while (head < tail) {
+      var qx = queueX[head];
+      var qy = queueY[head];
+      head++;
+
+      if (qx > 0) add(qx - 1, qy);
+      if (qx < w - 1) add(qx + 1, qy);
+      if (qy > 0) add(qx, qy - 1);
+      if (qy < h - 1) add(qx, qy + 1);
+    }
+
+    var left = w;
+    var top = h;
+    var right = -1;
+    var bottom = -1;
+
+    for (var yy = 0; yy < h; yy++) {
+      for (var xx = 0; xx < w; xx++) {
+        var idx = yy * w + xx;
+        var p = idx * 4;
+
+        if (!seen[idx] && d[p + 3] > 20) {
+          if (xx < left) left = xx;
+          if (xx > right) right = xx;
+          if (yy < top) top = yy;
+          if (yy > bottom) bottom = yy;
+        }
+      }
+    }
+
+    if (right < left || bottom < top) return null;
+
+    return {
+      x: left,
+      y: top,
+      w: right - left + 1,
+      h: bottom - top + 1
+    };
+  }
+
+  function normalizeToDataUri(img, src) {
+    var loader = new Image();
+    loader.decoding = "async";
+
+    loader.onload = function () {
+      var bounds = findVisibleBounds(loader);
+      if (!bounds) {
+        img.dataset.mcTileRepairState = "done";
+        return;
+      }
+
+      var output = document.createElement("canvas");
+      output.width = OUT_W;
+      output.height = OUT_H;
+
+      var outCtx = output.getContext("2d");
+      outCtx.clearRect(0, 0, OUT_W, OUT_H);
+      outCtx.imageSmoothingEnabled = true;
+      outCtx.imageSmoothingQuality = "high";
+      outCtx.drawImage(
+        loader,
+        bounds.x, bounds.y, bounds.w, bounds.h,
+        0, 0, OUT_W, OUT_H
+      );
+
+      img.dataset.mcTileRepairState = "done";
+      img.src = output.toDataURL("image/png");
+    };
+
+    loader.onerror = function () {
+      img.dataset.mcTileRepairState = "error";
+    };
+
+    loader.src = src;
+  }
+
+  function processImage(img) {
+    if (!isTileImage(img)) return;
+    if (img.dataset.mcTileRepairState === "loading" || img.dataset.mcTileRepairState === "done") return;
+
+    var current = img.getAttribute("src") || "";
+    var fixed = canonicalSrc(current);
+
+    if (fixed !== current) {
+      img.dataset.mcTileRepairState = "";
+      img.setAttribute("src", fixed);
+      return;
+    }
+
+    if (current.indexOf("data:image/") === 0) {
+      img.dataset.mcTileRepairState = "done";
+      return;
+    }
+
+    img.dataset.mcTileRepairState = "loading";
+    normalizeToDataUri(img, fixed);
+  }
+
+  function scan(scope) {
+    if (!scope) return;
+
+    if (scope.nodeType === 1 && scope.tagName === "IMG") {
+      processImage(scope);
+    }
+
+    if (!scope.querySelectorAll) return;
+
+    Array.prototype.forEach.call(
+      scope.querySelectorAll('img[src*="/v/vspfiles/mahjong/tiles/tile-"]'),
+      processImage
+    );
+  }
+
+  scan(root);
+
+  new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      if (mutation.type === "attributes" && mutation.target.tagName === "IMG") {
+        processImage(mutation.target);
+      }
+
+      Array.prototype.forEach.call(mutation.addedNodes, function (node) {
+        if (node.nodeType === 1) scan(node);
+      });
+    });
+  }).observe(root, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["src"]
+  });
+
+  window.addEventListener("load", function () {
+    scan(root);
+  }, { once: true });
+})();
+</script>
+
+<style id="mc-mahjong-desktop-tweaks-v14">
+/* Auto Deal: keep light text on the filled black button. */
+#mc-mahjong-page #mc-live-auto-deal,
+#mc-mahjong-page #mc-live-auto-deal:hover,
+#mc-mahjong-page #mc-live-auto-deal:focus,
+#mc-mahjong-page #mc-live-auto-deal:focus-visible,
+#mc-mahjong-page #mc-live-auto-deal:active {
+  background: #111 !important;
+  border-color: #111 !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+@media (min-width: 761px) {
+  #mc-mahjong-page .mc-live-tile {
+    flex: 0 0 70px !important;
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: none !important;
+  }
+
+  #mc-mahjong-page .mc-live-tile img {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: none !important;
+  }
+
+  #mc-mahjong-page .mc-tile-strip img {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: none !important;
+  }
+}
+</style>

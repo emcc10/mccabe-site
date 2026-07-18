@@ -1336,3 +1336,11 @@ html.mc-allow-home-hero body.is-home #slideshow-container {
   overflow: hidden !important;
   opacity: 0 !important;
 }
+
+/* Requested PDP brand-logo position correction (20260718). */
+body.productdetails #content_area #mc-pdp-brand-logo,
+body.mc-product-page #content_area #mc-pdp-brand-logo,
+body.mc-theater-seating-pdp #content_area #mc-pdp-brand-logo,
+html.mc-paragon-pdp body #content_area #mc-pdp-brand-logo {
+  margin-top: -85px !important;
+}
