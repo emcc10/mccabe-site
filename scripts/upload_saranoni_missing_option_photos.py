@@ -56,13 +56,17 @@ def main() -> int:
 
     import paramiko
 
-    audit_targets = get_audit_targets()
     files = [n for n in TARGETS if (PHOTOS / n).is_file()]
     
-    # Add files from audit report if they exist locally
-    for name in audit_targets:
-        if (PHOTOS / name).is_file() and name not in files:
-            files.append(name)
+    # Automatically include all SAR- variant images found in vspfiles/photos
+    for p in PHOTOS.glob("SAR-*-S.jpg"):
+        if p.name not in files:
+            files.append(p.name)
+    for p in PHOTOS.glob("SAR-*-T.jpg"):
+        if p.name not in files:
+            files.append(p.name)
+    
+    # Also include any HP nursery altviews 9-24 present locally
     # Also include any HP nursery altviews 9-24 present locally
     for i in range(1, 25):
         name = f"SAR-HP-HP-MSLN-NRS-altview{i}.jpg"
