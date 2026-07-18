@@ -58,11 +58,8 @@ def main() -> int:
 
     files = [n for n in TARGETS if (PHOTOS / n).is_file()]
     
-    # Automatically include all SAR- variant images found in vspfiles/photos
-    for p in PHOTOS.glob("SAR-*-S.jpg"):
-        if p.name not in files:
-            files.append(p.name)
-    for p in PHOTOS.glob("SAR-*-T.jpg"):
+    # Automatically include all SAR- images found in vspfiles/photos
+    for p in PHOTOS.glob("SAR-*.jpg"):
         if p.name not in files:
             files.append(p.name)
     
