@@ -1,4 +1,4 @@
-import json, csv, math, urllib.request, urllib.parse, re, time, html as htmlmod
+import json, csv, math, urllib.error, urllib.request, urllib.parse, re, time, html as htmlmod
 from pathlib import Path
 
 # This script uses the browser to fetch data since Saranoni blocks automated requests.
@@ -113,9 +113,14 @@ def norm_price(p):
     if p > 1000: return p / 100.0
     return float(p)
 
-def import_price(p):
-    """Volusion imports use whole dollars, always rounding fractional prices up."""
+def regular_import_price(p):
+    """Keep regular advertised prices whole-dollar, rounding a fractional price up."""
     return math.ceil(norm_price(p))
+
+
+def sale_import_price(p):
+    """A supplier sale is never rounded up: $15.63 is advertised as $15."""
+    return math.floor(norm_price(p))
 
 def scrape_vol_options(code):
     url = f"https://www.mccabestheaterandliving.com/ProductDetails.asp?ProductCode={code}"
@@ -131,7 +136,132 @@ def scrape_vol_options(code):
                 if val != "0" and desc.lower() not in ["select one", "choose color", "select style"]:
                     options.append({"id": val, "desc": desc})
             return options
-    except: return []
+    except Exception:
+        return []
+
+
+def clean_label(value):
+    return re.sub(r"\s+", " ", re.sub(r"\[(?:Additional|Subtract)[^\]]*\]", "", value or "", flags=re.I)).strip()
+
+
+def label_key(value):
+    return re.sub(r"[^a-z0-9]+", "", clean_label(value).lower())
+
+
+def variant_is_sale(variant):
+    compare = norm_price(variant.get("compare_at_price"))
+    price = norm_price(variant.get("price"))
+    return compare > 0 and price > 0 and price < compare
+
+
+def variant_regular_price(variant):
+    compare = norm_price(variant.get("compare_at_price"))
+    return compare if compare > 0 else norm_price(variant.get("price"))
+
+
+def variant_display_price(variant):
+    price = norm_price(variant.get("price"))
+    return sale_import_price(price) if variant_is_sale(variant) else regular_import_price(price)
+
+
+def fetch_json(url, retries=4):
+    """Fetch Shopify product JSON slowly enough to avoid their transient 503 limit."""
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (McCabe catalog sync)"})
+            with urllib.request.urlopen(req, timeout=45) as response:
+                return json.loads(response.read().decode("utf-8", "replace"))
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, ValueError):
+            if attempt == retries - 1:
+                return None
+            time.sleep(2 ** attempt)
+    return None
+
+
+def find_variant(variants, option_label):
+    """Match a live Volusion option label to one supplier variant without guessing."""
+    wanted = label_key(VARIANT_MAP.get(clean_label(option_label), clean_label(option_label)))
+    if not wanted:
+        return None
+    best = None
+    best_score = 0
+    for variant in variants:
+        labels = [
+            variant.get("option1") or "",
+            variant.get("option2") or "",
+            variant.get("option3") or "",
+            variant.get("title") or "",
+        ]
+        keys = [label_key(label) for label in labels if label]
+        score = 0
+        if wanted in keys:
+            score = 100
+        elif any(wanted in key or key in wanted for key in keys if key):
+            score = 50
+        if score > best_score:
+            best, best_score = variant, score
+    return best if best_score else None
+
+
+def supplier_catalog(audit_results):
+    """Refresh the supplier cache; retain the last verified payload if Shopify throttles."""
+    cache_path = Path("tmp/saranoni_live_supplier_catalog.json")
+    try:
+        cached = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        cached = {}
+
+    handles = {
+        item.get("code"): item.get("handle")
+        for item in audit_results
+        if item.get("code") and item.get("handle")
+    }
+    # The working option-builder map covers records that did not make it into an
+    # earlier audit's handle field.  Keep every active McCabe SAR record in the
+    # import rather than silently dropping those products.
+    try:
+        from build_saranoni_volusion_options import CODE_TO_HANDLE as mapped_handles
+        for code, handle in mapped_handles.items():
+            handles.setdefault(code, handle)
+    except ImportError:
+        pass
+    # The old audit intentionally proxies this retired handle to the current XL record.
+    handles["SAR-MNKY-LUSH"] = "minky-lush-xl-blankets"
+    out = {}
+    for index, (code, handle) in enumerate(sorted(handles.items()), 1):
+        cached_item = cached.get(code) or {}
+        if cached_item.get("product") and time.time() - float(cached_item.get("fetched_at") or 0) < 3600:
+            out[code] = {**cached_item, "verified": True}
+            print(f"[{index}/{len(handles)}] using fresh cache {code}")
+            continue
+        payload = fetch_json("https://saranoni.com/products/" + urllib.parse.quote(handle) + ".json")
+        product = payload.get("product") if payload else None
+        if product:
+            out[code] = {
+                "handle": handle,
+                "product": product,
+                "fetched_at": time.time(),
+                "verified": True,
+            }
+            print(f"[{index}/{len(handles)}] refreshed {code}")
+        elif code in cached:
+            out[code] = cached[code]
+            print(f"[{index}/{len(handles)}] using cached {code}")
+        else:
+            audit_item = next((item for item in audit_results if item.get("code") == code), None)
+            if audit_item and audit_item.get("variants"):
+                out[code] = {
+                    "handle": handle,
+                    "product": {"variants": audit_item["variants"]},
+                    "fetched_at": 0,
+                    "verified": False,
+                }
+                print(f"[{index}/{len(handles)}] using last audit {code}")
+            else:
+                print(f"[{index}/{len(handles)}] unavailable {code}")
+        time.sleep(0.6)
+    cache_path.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+    return out
 
 def main():
     try:
@@ -139,85 +269,101 @@ def main():
             old_results = json.load(f)
     except: old_results = []
     
-    results_map = {item["code"]: item for item in old_results}
-    
-    xl_json = {
-        "variants": [
-            {"title": "Ivy", "price": 118.30, "available": True},
-            {"title": "Bows", "price": 152.10, "available": True},
-            {"title": "Dogs", "price": 152.10, "available": True}
-        ]
-    }
-    results_map["SAR-MNKY-LUSH"] = {
-        "code": "SAR-MNKY-LUSH",
-        "variants": xl_json["variants"],
-        "shopify_base_price": 118.30
-    }
-    
+    source = supplier_catalog(old_results)
     products_rows = []
-    options_map = {} # ID -> PriceDiff to ensure uniqueness
-    processed_codes = set()
-    
-    for handle, code in HANDLE_TO_CODE.items():
-        if code in processed_codes: continue
-        processed_codes.add(code)
-        
-        item = results_map.get(code)
-        if not item: continue
-        
-        variants = item.get("variants", [])
-        if not variants: continue
-        
+    option_diffs = {}
+    option_context = {}
+    sale_data = {}
+
+    for code, source_item in sorted(source.items()):
+        product = source_item.get("product") or {}
+        variants = product.get("variants") or []
+        if not variants:
+            continue
+        available = [variant for variant in variants if variant.get("available", True)]
+        default_candidates = [variant for variant in available if not variant_is_sale(variant)] or available
+        if not default_candidates:
+            default_candidates = variants
         source_base_price = PRODUCT_BASE_PRICE_OVERRIDES.get(
-            code, item.get("shopify_base_price", 0.0)
+            code, min(variant_regular_price(variant) for variant in default_candidates)
         )
-        base_price = import_price(source_base_price)
+        base_price = regular_import_price(source_base_price)
         vol_options = scrape_vol_options(code)
-        
         in_stock_ids = []
+        matched_by_id = {}
         for vopt in vol_options:
             v_id = vopt["id"]
-            v_desc = vopt["desc"]
-            mapped_name = VARIANT_MAP.get(v_desc, v_desc)
-            
-            match = None
-            for sv in variants:
-                sv_title = sv["title"]
-                if mapped_name.lower() == sv_title.lower() or mapped_name.lower() in sv_title.lower() or sv_title.lower() in mapped_name.lower():
-                    match = sv
-                    break
-            
+            match = find_variant(variants, vopt["desc"])
             if match:
-                price_diff = max(0, import_price(match["price"]) - base_price)
-                options_map[v_id] = price_diff
+                price_diff = variant_display_price(match) - base_price
+                option_diffs.setdefault(v_id, set()).add(price_diff)
+                option_context.setdefault(v_id, []).append(code)
+                matched_by_id[v_id] = {
+                    "regular": regular_import_price(variant_regular_price(match)),
+                    "price": variant_display_price(match),
+                    "sale": variant_is_sale(match),
+                }
                 if match.get("available", True):
                     in_stock_ids.append(v_id)
-        
+            elif not source_item.get("verified"):
+                # An unavailable supplier record cannot prove that this existing
+                # option was discontinued, so preserve it pending a source match.
+                in_stock_ids.append(v_id)
+
+        all_available_sale = bool(available) and all(variant_is_sale(variant) for variant in available)
+        default_sale_price = sale_import_price(min(norm_price(v["price"]) for v in available)) if all_available_sale else ""
         products_rows.append({
             "ProductCode": code,
             "ProductPrice": base_price,
+            "SalePrice": default_sale_price,
             "OptionIDs": ", ".join(in_stock_ids), # Added space to help Excel treat as text
-            "HideProduct": "Y" if not any(v.get("available", True) for v in variants) else "N"
+            "HideProduct": "Y" if not available else "N"
         })
+        sale_data[code] = {"regular": base_price, "variants": matched_by_id}
         print(f"Processed {code}: {len(in_stock_ids)} in-stock variants.")
 
-    options_rows = [{"ID": k, "PriceDiff": v} for k, v in options_map.items()]
+    # Option IDs are global in Volusion.  Only import an ID when every product
+    # using it has the same differential.  A conflicting global update would
+    # corrupt otherwise-correct products, so those are emitted for review instead.
+    options_rows = [
+        {"ID": option_id, "PriceDiff": next(iter(diffs))}
+        for option_id, diffs in sorted(option_diffs.items(), key=lambda item: int(item[0]))
+        if len(diffs) == 1
+    ]
+    conflicts = [
+        {
+            "ID": option_id,
+            "PriceDiffs": ", ".join(str(value) for value in sorted(diffs)),
+            "ProductCodes": ", ".join(sorted(set(option_context[option_id]))),
+        }
+        for option_id, diffs in sorted(option_diffs.items(), key=lambda item: int(item[0]))
+        if len(diffs) > 1
+    ]
 
     out_dir = Path("catalog/saranoni-gap-report")
     out_dir.mkdir(parents=True, exist_ok=True)
     
     try:
         # Write Products - ensure OptionIDs is quoted by the writer
-        with (out_dir / "volusion_products_import_v4.csv").open("w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=["ProductCode", "ProductPrice", "OptionIDs", "HideProduct"], quoting=csv.QUOTE_ALL)
+        with (out_dir / "volusion_products_sale_inventory_import.csv").open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=["ProductCode", "ProductPrice", "SalePrice", "OptionIDs", "HideProduct"], quoting=csv.QUOTE_ALL)
             writer.writeheader()
             writer.writerows(products_rows)
             
-        with (out_dir / "volusion_options_import_v4.csv").open("w", newline="") as f:
+        with (out_dir / "volusion_options_sale_pricediff_import.csv").open("w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=["ID", "PriceDiff"])
             writer.writeheader()
             writer.writerows(options_rows)
-        print("Success! Wrote files to _v4 versions.")
+        with (out_dir / "volusion_options_sale_pricediff_conflicts.csv").open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=["ID", "PriceDiffs", "ProductCodes"])
+            writer.writeheader()
+            writer.writerows(conflicts)
+        (Path("vspfiles/js") / "mc-saranoni-sale-data.js").write_text(
+            "/* Generated from current Saranoni supplier data. */\nwindow.MC_SARANONI_VARIANT_PRICING = " +
+            json.dumps(sale_data, separators=(",", ":")) + ";\n",
+            encoding="utf-8"
+        )
+        print("Success! Wrote supplier-aware CSVs, conflict report, and PDP sale data.")
     except PermissionError:
         print("ERROR: CSV files are STILL open. Please close all Excel/CSV windows.")
 

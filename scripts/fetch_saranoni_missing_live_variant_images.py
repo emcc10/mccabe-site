@@ -22,6 +22,8 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
 LABELED = ROOT / "tmp" / "altview-inventory" / "saranoni_missing_variant_images_labeled.csv"
+FULL_AUDIT = ROOT / "saranoni-image-repair-report" / "04_full_variant_audit.csv"
+SUPPLIER_CACHE = ROOT / "tmp" / "saranoni_live_supplier_catalog.json"
 REPORT = ROOT / "tmp" / "altview-inventory" / "saranoni_missing_variant_images_download_report.csv"
 
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -108,7 +110,10 @@ def save_pair(buf: bytes, t_path: Path, s_path: Path) -> tuple[int, int]:
     return w, h
 
 
-def resolve_product(code: str) -> tuple[str, dict] | None:
+def resolve_product(code: str, supplier_cache: dict[str, dict] | None = None) -> tuple[str, dict] | None:
+    cached = (supplier_cache or {}).get(code) or {}
+    if cached.get("product"):
+        return str(cached.get("handle") or ""), cached["product"]
     handle = CODE_TO_HANDLE.get(code)
     if not handle:
         return None
@@ -172,10 +177,25 @@ def variant_image_src(product: dict, label: str) -> tuple[str, str] | None:
 
 
 def main() -> int:
-    if not LABELED.exists():
-        print(f"Missing {LABELED}")
+    repair_all = "--all" in sys.argv[1:]
+    source = FULL_AUDIT if repair_all else LABELED
+    if not source.exists():
+        print(f"Missing {source}")
         return 1
-    rows = list(csv.DictReader(LABELED.open(encoding="utf-8-sig")))
+    raw_rows = list(csv.DictReader(source.open(encoding="utf-8-sig")))
+    rows = [
+        {
+            "ProductCode": row.get("ProductCode", ""),
+            "OptionID": row.get("OptionID", ""),
+            "OptionText": row.get("ColorName", "") if repair_all else row.get("OptionText", ""),
+        }
+        for row in raw_rows
+        if row.get("ProductCode") and row.get("OptionID")
+    ]
+    try:
+        supplier_cache = json.loads(SUPPLIER_CACHE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        supplier_cache = {}
     report: list[dict] = []
     product_cache: dict[str, tuple[str, dict] | None] = {}
 
@@ -187,7 +207,7 @@ def main() -> int:
         s_path = PHOTOS / f"{code}-{oid}-S.jpg"
         print(f"[{i}/{len(rows)}] {code} {oid} {label}")
 
-        if t_path.exists() and s_path.exists():
+        if not repair_all and t_path.exists() and s_path.exists():
             report.append(
                 {
                     "ProductCode": code,
@@ -205,7 +225,7 @@ def main() -> int:
             continue
 
         if code not in product_cache:
-            product_cache[code] = resolve_product(code)
+            product_cache[code] = resolve_product(code, supplier_cache)
             time.sleep(SLEEP)
         resolved = product_cache[code]
         if not resolved:

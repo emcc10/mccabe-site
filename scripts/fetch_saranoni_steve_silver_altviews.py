@@ -27,6 +27,7 @@ PHOTOS = ROOT / "vspfiles" / "photos"
 OUT_REPORT = ROOT / "tmp" / "altview-inventory" / "altview_download_report.csv"
 SAR_INVENTORY = ROOT / "tmp" / "altview-inventory" / "saranoni_alt_inventory.csv"
 SS_INVENTORY = ROOT / "tmp" / "altview-inventory" / "steve_silver_alt_inventory.csv"
+SUPPLIER_CACHE = ROOT / "tmp" / "saranoni_live_supplier_catalog.json"
 
 UA = {"User-Agent": "Mozilla/5.0 (McCabe altview fetch)"}
 MIN_WIDTH = 650
@@ -165,6 +166,12 @@ def save_jpeg(buf: bytes, dest: Path) -> tuple[int, int, str]:
 
 
 def resolve_saranoni_product(code: str) -> tuple[str, dict] | None:
+    try:
+        cached = json.loads(SUPPLIER_CACHE.read_text(encoding="utf-8")).get(code) or {}
+        if cached.get("product"):
+            return str(cached.get("handle") or ""), cached["product"]
+    except (OSError, ValueError, TypeError):
+        pass
     handle = CODE_TO_HANDLE.get(code)
     if not handle:
         return None
