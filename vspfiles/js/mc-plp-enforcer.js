@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260719mahjong1 — cart glyph + Mahjong landing .webp→.jpg remap
+ * MC_PLP_ENFORCER_20260719mahjong2 — cart glyph + Mahjong landing .webp→.jpg remap
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260719mahjong1";
+  var VERSION = "20260719mahjong2";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -2063,8 +2063,21 @@
 
   global.document.addEventListener("DOMContentLoaded", repairMahjongLandingImages);
   global.addEventListener("load", repairMahjongLandingImages);
-  [100, 500, 1500].forEach(function (ms) {
+  [50, 100, 350, 500, 900, 1500, 3000].forEach(function (ms) {
     global.setTimeout(repairMahjongLandingImages, ms);
   });
+  try {
+    if (!global.__MC_MAHJONG_LANDING_REPAIR_IV__) {
+      global.__MC_MAHJONG_LANDING_REPAIR_IV__ = global.setInterval(
+        repairMahjongLandingImages,
+        1000
+      );
+      global.setTimeout(function () {
+        try {
+          global.clearInterval(global.__MC_MAHJONG_LANDING_REPAIR_IV__);
+        } catch (eClr) {}
+      }, 12000);
+    }
+  } catch (eIv) {}
   repairMahjongLandingImages();
 })(window);
