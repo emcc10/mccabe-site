@@ -118,10 +118,6 @@ def regular_import_price(p):
     return math.ceil(norm_price(p))
 
 
-def sale_import_price(p):
-    """A supplier sale is never rounded up: $15.63 is advertised as $15."""
-    return math.floor(norm_price(p))
-
 def scrape_vol_options(code):
     url = f"https://www.mccabestheaterandliving.com/ProductDetails.asp?ProductCode={code}"
     ua = {"User-Agent": "Mozilla/5.0"}
@@ -160,8 +156,8 @@ def variant_regular_price(variant):
 
 
 def variant_display_price(variant):
-    price = norm_price(variant.get("price"))
-    return sale_import_price(price) if variant_is_sale(variant) else regular_import_price(price)
+    """McCabe displays the supplier's regular price outside of promotions."""
+    return regular_import_price(variant_regular_price(variant))
 
 
 def fetch_json(url, retries=4):
@@ -273,7 +269,7 @@ def main():
     products_rows = []
     option_diffs = {}
     option_context = {}
-    sale_data = {}
+    regular_price_data = {}
 
     for code, source_item in sorted(source.items()):
         product = source_item.get("product") or {}
@@ -300,8 +296,6 @@ def main():
                 option_context.setdefault(v_id, []).append(code)
                 matched_by_id[v_id] = {
                     "regular": regular_import_price(variant_regular_price(match)),
-                    "price": variant_display_price(match),
-                    "sale": variant_is_sale(match),
                 }
                 if match.get("available", True):
                     in_stock_ids.append(v_id)
@@ -310,16 +304,15 @@ def main():
                 # option was discontinued, so preserve it pending a source match.
                 in_stock_ids.append(v_id)
 
-        all_available_sale = bool(available) and all(variant_is_sale(variant) for variant in available)
-        default_sale_price = sale_import_price(min(norm_price(v["price"]) for v in available)) if all_available_sale else ""
         products_rows.append({
             "ProductCode": code,
             "ProductPrice": base_price,
-            "SalePrice": default_sale_price,
+            # Explicitly clear any prior supplier sale value in Volusion.
+            "SalePrice": "0",
             "OptionIDs": ", ".join(in_stock_ids), # Added space to help Excel treat as text
             "HideProduct": "Y" if not available else "N"
         })
-        sale_data[code] = {"regular": base_price, "variants": matched_by_id}
+        regular_price_data[code] = {"regular": base_price, "variants": matched_by_id}
         print(f"Processed {code}: {len(in_stock_ids)} in-stock variants.")
 
     # Option IDs are global in Volusion.  Only import an ID when every product
@@ -345,25 +338,25 @@ def main():
     
     try:
         # Write Products - ensure OptionIDs is quoted by the writer
-        with (out_dir / "volusion_products_sale_inventory_import.csv").open("w", newline="", encoding="utf-8") as f:
+        with (out_dir / "volusion_products_regular_inventory_import.csv").open("w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=["ProductCode", "ProductPrice", "SalePrice", "OptionIDs", "HideProduct"], quoting=csv.QUOTE_ALL)
             writer.writeheader()
             writer.writerows(products_rows)
             
-        with (out_dir / "volusion_options_sale_pricediff_import.csv").open("w", newline="", encoding="utf-8") as f:
+        with (out_dir / "volusion_options_regular_pricediff_import.csv").open("w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=["ID", "PriceDiff"])
             writer.writeheader()
             writer.writerows(options_rows)
-        with (out_dir / "volusion_options_sale_pricediff_conflicts.csv").open("w", newline="", encoding="utf-8") as f:
+        with (out_dir / "volusion_options_regular_pricediff_conflicts.csv").open("w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=["ID", "PriceDiffs", "ProductCodes"])
             writer.writeheader()
             writer.writerows(conflicts)
         (Path("vspfiles/js") / "mc-saranoni-sale-data.js").write_text(
             "/* Generated from current Saranoni supplier data. */\nwindow.MC_SARANONI_VARIANT_PRICING = " +
-            json.dumps(sale_data, separators=(",", ":")) + ";\n",
+            json.dumps(regular_price_data, separators=(",", ":")) + ";\n",
             encoding="utf-8"
         )
-        print("Success! Wrote supplier-aware CSVs, conflict report, and PDP sale data.")
+        print("Success! Wrote regular-price CSVs, conflict report, and PDP regular-price data.")
     except PermissionError:
         print("ERROR: CSV files are STILL open. Please close all Excel/CSV windows.")
 

@@ -6000,49 +6000,7 @@
     return "";
   }
 
-  var saranoniSaleDataRequested = false;
-  function ensureSaranoniSaleData() {
-    if (global.MC_SARANONI_VARIANT_PRICING || saranoniSaleDataRequested) return;
-    saranoniSaleDataRequested = true;
-    var script = global.document.createElement("script");
-    script.src = "/v/vspfiles/js/mc-saranoni-sale-data.js?v=20260719";
-    script.async = true;
-    script.onload = function () {
-      [0, 120, 500].forEach(function (delay) {
-        global.setTimeout(syncSaranoniOptionPriceFromVolusion, delay);
-      });
-    };
-    (global.document.head || global.document.documentElement).appendChild(script);
-  }
-
-  function syncSaranoniSaleMarkers(productCode) {
-    var catalog = global.MC_SARANONI_VARIANT_PRICING || {};
-    var product = catalog[productCode];
-    if (!product) return;
-    global.document
-      .querySelectorAll(
-        ".mc-configured-color-swatch[data-option-id], .mc-saranoni-size-thumb[data-option-id]"
-      )
-      .forEach(function (button) {
-        var option = product.variants && product.variants[button.getAttribute("data-option-id")];
-        var marker = button.querySelector(".mc-saranoni-sale-marker");
-        if (option && option.sale) {
-          if (!marker) {
-            marker = global.document.createElement("span");
-            marker.className = "mc-saranoni-sale-marker";
-            marker.textContent = "Sale";
-            button.appendChild(marker);
-          }
-          button.classList.add("mc-saranoni-variant-on-sale");
-        } else {
-          if (marker && marker.parentNode) marker.parentNode.removeChild(marker);
-          button.classList.remove("mc-saranoni-variant-on-sale");
-        }
-      });
-  }
-
   function syncSaranoniOptionPriceFromVolusion() {
-    ensureSaranoniSaleData();
     var pwo =
       global.document.getElementById("priceWithOptions") ||
       global.document.getElementById("priceWithOptionsNoTax");
@@ -6078,11 +6036,9 @@
     if (pricing) {
       var selectedId = getSaranoniSelectedOptionId();
       var selected = selectedId && pricing.variants ? pricing.variants[selectedId] : null;
-      // The native Option PriceDiff is necessarily global in Volusion, while
-      // Saranoni sale prices are product-specific.  The verified supplier value
-      // is therefore the PDP display source for the selected option.
-      amt = selected && selected.price > 0 ? Number(selected.price) : Number(pricing.regular || amt);
-      syncSaranoniSaleMarkers(productCode);
+      // Supplier sale prices are never advertised on Saranoni PDPs.  Use the
+      // regular supplier value until a checkout promotion explicitly applies.
+      amt = selected && selected.regular > 0 ? Number(selected.regular) : Number(pricing.regular || amt);
     }
     if (!(amt > 0)) return;
     var host = global.document.getElementById("mc-pdp-price-stack-host");
@@ -6641,8 +6597,7 @@
       ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:90px!important;padding:4px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important}" +
       ".mc-saranoni-size-thumb img{display:block!important;width:82px!important;height:82px!important;object-fit:cover!important;border:0!important;border-radius:2px!important}" +
       ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}" +
-      ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important;margin-top:4px!important;white-space:normal!important;word-break:break-word!important;max-width:86px!important}" +
-      ".mc-saranoni-variant-on-sale{position:relative!important;overflow:visible!important;margin-bottom:17px!important}.mc-saranoni-sale-marker{position:absolute!important;left:50%!important;bottom:-15px!important;transform:translateX(-50%)!important;font:700 10px/1 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#b42318!important;white-space:nowrap!important}";
+      ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important;margin-top:4px!important;white-space:normal!important;word-break:break-word!important;max-width:86px!important}";
   }
 
   function updateSaranoniSizeThumbUi(optionId) {
@@ -7607,8 +7562,7 @@
       ".mc-configured-color-swatch.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
       ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:72px!important;min-height:36px!important;border-radius:4px!important;padding:6px 12px!important}" +
       ".mc-configured-color-swatch__text{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;white-space:normal!important;text-align:center!important}" +
-      ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}" +
-      ".mc-configured-color-swatch.mc-saranoni-variant-on-sale{position:relative!important;overflow:visible!important;margin-bottom:17px!important}";
+      ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}";
   }
 
   function ensureSaranoniScrollArrowCss() {

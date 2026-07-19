@@ -19117,5 +19117,36 @@ body.mc-product-page #v65-product-related img {
     <script src="/a/j/push-cart.js" defer ></script>
 
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1d69f609819f25b',t:'MTc4NDQzMTU2NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"219322d1a28c40a88da65ab074cf5d58","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<style id="mc-mahjong-mobile-shop-links">
+@media (max-width: 991px) {
+  #mc-mahjong-page .mc-hero-actions a[href],
+  #mc-mahjong-page .mc-shop-card[href],
+  #mc-mahjong-page .mc-buy-card a[href],
+  #mc-mahjong-page .mc-beginner-shop__actions a[href],
+  #mc-mahjong-page .mc-top-category-tabs a[href] {
+    position: relative !important;
+    z-index: 3 !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+}
+</style>
+<script id="mc-mahjong-mobile-shop-navigation">
+(function () {
+  function isMobile() {
+    return window.matchMedia && window.matchMedia("(max-width: 991px)").matches;
+  }
+
+  document.addEventListener("click", function (event) {
+    if (!isMobile() || event.defaultPrevented || event.button > 0) return;
+    var link = event.target.closest && event.target.closest("#mc-mahjong-page a[href]");
+    if (!link || !/\/(?:category-s|SearchResults\.asp)/i.test(link.href || "")) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.location.assign(link.href);
+  }, true);
+})();
+</script>
 </body>
 </html>

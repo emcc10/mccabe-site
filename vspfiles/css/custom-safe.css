@@ -23910,3 +23910,19 @@ html body .mc-cart-float svg.mc-cart-float__icon {
     max-width: 400px !important;
   }
 }
+
+/* Homepage mobile navigation follows the hero in the source HTML, so it must
+   be fixed to the viewport rather than consume a row below the hero video. */
+@media (max-width: 991px) {
+  html.mc-allow-home-hero body.is-home header.header {
+    position: fixed !important;
+    inset: 0 0 auto !important;
+    z-index: 2200 !important;
+    width: 100% !important;
+  }
+
+  html.mc-allow-home-hero body.is-home header.header .header__section--bottom {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+}
