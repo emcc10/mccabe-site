@@ -10869,6 +10869,77 @@
   global.addEventListener("load", runPatch);
 })(window);
 
+/* MC_SS_CLOSEOUT_SARANONI_FRAME_20260719
+   Legacy Steve Silver closeout records are rebuilt by the same generic PDP
+   pass as Saranoni, which later writes a full-width inline row. Restore the
+   approved 690 / 400 / 28 desktop geometry after that pass completes. */
+(function (g, d) {
+  "use strict";
+  if (!g || !d || g.__MC_SS_CLOSEOUT_SARANONI_FRAME_20260719__) return;
+  g.__MC_SS_CLOSEOUT_SARANONI_FRAME_20260719__ = true;
+
+  function applyCloseoutFrame() {
+    if (
+      !d.body ||
+      !d.body.classList.contains("mc-closeout-pdp") ||
+      !g.matchMedia ||
+      !g.matchMedia("(min-width: 992px)").matches
+    ) {
+      return;
+    }
+    var row = d.querySelector(
+      "#v65-product-parent tr.mc-unified-pdp-row, #v65-product-parent tr.mc-pdp-main-row"
+    );
+    if (!row) return;
+    var media = row.querySelector(":scope > td.mc-unified-pdp-media, :scope > td.mc-pdp-media-td");
+    var info = row.querySelector(":scope > td.mc-unified-pdp-info, :scope > td.mc-pdp-options-td");
+    if (!media || !info) return;
+    var parent = row.parentElement;
+    if (parent && parent.tagName === "TBODY") {
+      parent.style.setProperty("display", "block", "important");
+      parent.style.setProperty("width", "100%", "important");
+      parent.style.setProperty("max-width", "100%", "important");
+    }
+    row.style.setProperty("display", "flex", "important");
+    row.style.setProperty("width", "1128px", "important");
+    row.style.setProperty("max-width", "100%", "important");
+    row.style.setProperty("margin-left", "auto", "important");
+    row.style.setProperty("margin-right", "auto", "important");
+    row.style.setProperty("gap", "28px", "important");
+    row.style.setProperty("column-gap", "28px", "important");
+    row.style.setProperty("align-items", "flex-start", "important");
+
+    media.style.setProperty("display", "flex", "important");
+    media.style.setProperty("flex", "0 0 690px", "important");
+    media.style.setProperty("flex-basis", "690px", "important");
+    media.style.setProperty("width", "690px", "important");
+    media.style.setProperty("min-width", "690px", "important");
+    media.style.setProperty("max-width", "690px", "important");
+    media.style.setProperty("box-sizing", "border-box", "important");
+
+    info.style.setProperty("display", "block", "important");
+    info.style.setProperty("flex", "0 0 400px", "important");
+    info.style.setProperty("flex-basis", "400px", "important");
+    info.style.setProperty("width", "400px", "important");
+    info.style.setProperty("min-width", "400px", "important");
+    info.style.setProperty("max-width", "400px", "important");
+    info.style.setProperty("box-sizing", "border-box", "important");
+  }
+
+  function bootCloseoutFrame() {
+    [0, 150, 700, 1800, 3600].forEach(function (ms) {
+      g.setTimeout(applyCloseoutFrame, ms);
+    });
+  }
+
+  if (d.readyState === "loading") {
+    d.addEventListener("DOMContentLoaded", bootCloseoutFrame, { once: true });
+  } else {
+    bootCloseoutFrame();
+  }
+  g.addEventListener("load", bootCloseoutFrame);
+})(window, document);
+
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
   var WANT_FP = "20260624A";

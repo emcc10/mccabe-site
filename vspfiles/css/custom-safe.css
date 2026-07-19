@@ -23854,3 +23854,59 @@ html body .mc-cart-float svg.mc-cart-float__icon {
   opacity: 0 !important;
 }
 /* END REMOVABLE: Mahjong landing lifestyle images (20260719mahjong3) */
+
+/* Game Room landing + Steve Silver closeout PDP geometry (20260719). */
+@media (min-width: 901px) {
+  /* Remove the old negative copy offset and shortened image that crop the
+     Game Room heading and the right edge of its hero artwork. */
+  html body #mc-lp13-200 {
+    height: 430px !important;
+    min-height: 430px !important;
+    max-height: 430px !important;
+  }
+
+  html body #mc-lp13-200 .mc-lp13-copy {
+    margin-top: 0 !important;
+  }
+
+  html body #mc-lp13-200 .mc-lp13-media img {
+    height: 430px !important;
+    min-height: 430px !important;
+    max-height: 430px !important;
+    margin-top: 0 !important;
+  }
+}
+
+@media (min-width: 992px) {
+  /* Match the established 1128px Saranoni PDP media/details geometry on
+     legacy Steve Silver closeout records. */
+  html body.mc-closeout-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-closeout-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-closeout-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-closeout-pdp #v65-product-parent tr.mc-unified-pdp-row {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 1128px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    gap: 28px !important;
+  }
+
+  html body.mc-closeout-pdp tr.mc-pdp-main-row > td.mc-pdp-media-td,
+  html body.mc-closeout-pdp tr.mc-unified-pdp-row > td.mc-unified-pdp-media {
+    display: flex !important;
+    flex: 0 0 700px !important;
+    width: 700px !important;
+    min-width: 700px !important;
+    max-width: 700px !important;
+  }
+
+  html body.mc-closeout-pdp tr.mc-pdp-main-row > td.mc-pdp-options-td,
+  html body.mc-closeout-pdp tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    display: block !important;
+    flex: 0 0 400px !important;
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+  }
+}
