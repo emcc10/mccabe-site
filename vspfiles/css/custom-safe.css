@@ -23802,3 +23802,55 @@ html body .mc-cart-float svg.mc-cart-float__icon {
   height: 0 !important;
 }
 /* END REMOVABLE: mobile cart glyph visible (20260719cart1) */
+
+
+/* BEGIN REMOVABLE: Mahjong landing lifestyle images (20260719mahjong3)
+   Page HTML still points at missing .webp; Volusion HTTP 404s those.
+   Paint live JPG lifestyle photos on the containers instead. */
+#mc-mahjong-page .mc-hero-media {
+  background-image: url("/v/vspfiles/mahjong/hero-community.jpg") !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #eee !important;
+}
+#mc-mahjong-page .mc-hero-media img.mc-mahjong-landing-image {
+  opacity: 0 !important;
+}
+#mc-mahjong-page a.mc-shop-card[href*="/category-s/202"] .mc-shop-card__image,
+#mc-mahjong-page a.mc-shop-card[href*="category-s/202"] .mc-shop-card__image {
+  background-image: url("/v/vspfiles/mahjong/category-tiles.jpg") !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #f3f3f3 !important;
+}
+#mc-mahjong-page a.mc-shop-card[href*="Search=travel"] .mc-shop-card__image {
+  background-image: url("/v/vspfiles/mahjong/category-travel.jpg") !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #f3f3f3 !important;
+}
+#mc-mahjong-page a.mc-shop-card[href*="/category-s/203"] .mc-shop-card__image,
+#mc-mahjong-page a.mc-shop-card[href*="category-s/203"] .mc-shop-card__image {
+  background-image:
+    url("/v/vspfiles/mahjong/category-mat.jpg"),
+    url("/v/vspfiles/mahjong/category-racks.jpg") !important;
+  background-size: 50% 100%, 50% 100% !important;
+  background-position: left center, right center !important;
+  background-repeat: no-repeat, no-repeat !important;
+  background-color: #f3f3f3 !important;
+}
+#mc-mahjong-page a.mc-shop-card[href*="/category-s/204"] .mc-shop-card__image,
+#mc-mahjong-page a.mc-shop-card[href*="category-s/204"] .mc-shop-card__image {
+  background-image: url("/v/vspfiles/mahjong/category-accessories.jpg") !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #f3f3f3 !important;
+}
+#mc-mahjong-page a.mc-shop-card .mc-shop-card__image img.mc-mahjong-landing-image {
+  opacity: 0 !important;
+}
+/* END REMOVABLE: Mahjong landing lifestyle images (20260719mahjong3) */
