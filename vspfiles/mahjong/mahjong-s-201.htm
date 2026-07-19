@@ -3823,7 +3823,7 @@ var SearchParams = 'searching=Y&sort=13&cat=201&show=30&page=1';
 #mc-mahjong-page .mc-live-trainer__disclaimer{margin:16px 0 0!important;color:#7b7168!important;font-size:10px!important;line-height:1.55!important}
 #mc-mahjong-page .mc-section-head--pattern-library{margin-top:38px!important}
 @media(max-width:900px){#mc-mahjong-page .mc-live-suggestions{grid-template-columns:1fr}#mc-mahjong-page .mc-live-advisor__heading{display:block}#mc-mahjong-page .mc-live-advisor__heading>p{margin-top:8px!important;text-align:left}}
-@media(max-width:560px){#mc-mahjong-page .mc-live-trainer{padding:18px 12px}#mc-mahjong-page .mc-live-trainer__head{display:block}#mc-mahjong-page .mc-live-trainer__count{display:inline-block;margin-top:12px}#mc-mahjong-page .mc-live-trainer__controls{display:grid;grid-template-columns:1fr}#mc-mahjong-page .mc-live-trainer__controls button{width:100%}#mc-mahjong-page .mc-live-rack{padding-left:8px;padding-right:8px}#mc-mahjong-page .mc-live-tile,#mc-mahjong-page .mc-live-tile img{width:49px!important;flex-basis:49px}}
+@media(max-width:560px){#mc-mahjong-page .mc-live-trainer{padding:18px 12px}#mc-mahjong-page .mc-live-trainer__head{display:block}#mc-mahjong-page .mc-live-trainer__count{display:inline-block;margin-top:12px}#mc-mahjong-page .mc-live-trainer__controls{display:grid;grid-template-columns:1fr}#mc-mahjong-page .mc-live-trainer__controls button{width:100%}#mc-mahjong-page .mc-live-rack{padding-left:8px;padding-right:8px}#mc-mahjong-page .mc-live-tile,#mc-mahjong-page .mc-live-tile img{width:49px!important;min-width:49px!important;max-width:49px!important;flex:0 0 49px!important;flex-basis:49px;height:64px!important}}
 </style>
 
 
@@ -4594,7 +4594,7 @@ var SearchParams = 'searching=Y&sort=13&cat=201&show=30&page=1';
         tileButton.addEventListener("click",function(){
           if(rack.length!==14)return;
           selectedIndex=(selectedIndex===index?-1:index);
-          renderLiveTrainer();
+          updateSelectionUi();
         });
         rackEl.appendChild(tileButton);
       });
@@ -4622,16 +4622,25 @@ var SearchParams = 'searching=Y&sort=13&cat=201&show=30&page=1';
         suggestionsEl.appendChild(card);
       });
     }
-    function renderLiveTrainer(){
-      countEl.textContent=rack.length+" TILE"+(rack.length===1?"":"S");
-      drawBtn.disabled=rack.length!==13;
+    function updateSelectionUi(){
       discardBtn.disabled=rack.length!==14||selectedIndex<0;
       if(rack.length===13)statusEl.textContent="Your 13-tile rack is ready. Draw one tile, then choose a discard.";
       else if(selectedIndex>=0)statusEl.textContent="Selected "+tileName(rack[selectedIndex])+". Click DISCARD SELECTED to return to 13 tiles.";
       else statusEl.textContent="You drew "+tileName(rack[drawnIndex])+". Click any tile to choose your discard.";
+      Array.prototype.forEach.call(rackEl.children,function(btn,index){
+        var on=index===selectedIndex;
+        btn.classList.toggle("is-selected",on);
+        btn.setAttribute("aria-pressed",on?"true":"false");
+      });
+    }
+    function renderLiveTrainer(){
+      countEl.textContent=rack.length+" TILE"+(rack.length===1?"":"S");
+      drawBtn.disabled=rack.length!==13;
+      updateSelectionUi();
 
       var ranked=rankPatterns(rack);
       renderRack();
+      updateSelectionUi();
       renderSuggestions(ranked);
 
       if(rack.length===14){
@@ -4974,19 +4983,22 @@ var SearchParams = 'searching=Y&sort=13&cat=201&show=30&page=1';
 
   #mc-mahjong-page .mc-live-tile {
     display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+    height: 76px !important;
     margin: 0 !important;
-    flex: none !important;
+    flex: 0 0 58px !important;
+    justify-self: center !important;
   }
 
   #mc-mahjong-page .mc-live-tile img {
     display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+    height: 76px !important;
+    aspect-ratio: 86 / 112 !important;
     object-fit: contain !important;
   }
 
@@ -5037,6 +5049,11 @@ var SearchParams = 'searching=Y&sort=13&cat=201&show=30&page=1';
 
 #mc-mahjong-page .mc-live-tile.is-selected {
   transform: translateY(-11px) !important;
+  width: 58px !important;
+  min-width: 58px !important;
+  max-width: 58px !important;
+  height: 76px !important;
+  flex: 0 0 58px !important;
 }
 
 #mc-mahjong-page .mc-live-tile img,
@@ -5320,13 +5337,15 @@ var SearchParams = 'searching=Y&sort=13&cat=201&show=30&page=1';
     flex: 0 0 70px !important;
     width: 70px !important;
     min-width: 70px !important;
-    max-width: none !important;
+    max-width: 70px !important;
+    height: 91px !important;
   }
 
   #mc-mahjong-page .mc-live-tile img {
     width: 70px !important;
     min-width: 70px !important;
-    max-width: none !important;
+    max-width: 70px !important;
+    height: 91px !important;
   }
 
   #mc-mahjong-page .mc-tile-strip img {

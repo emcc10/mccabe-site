@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260719mahjong2 — cart glyph + Mahjong landing .webp→.jpg remap
+ * MC_PLP_ENFORCER_20260720sel1 — cart glyph + Mahjong landing remap + trainer tile size lock
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260719mahjong2";
+  var VERSION = "20260720sel1";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -2054,6 +2054,162 @@
     }
   }
 
+  /* Inject late so it wins over baked mahjong page style blocks that set
+     width:100% on trainer tiles inside a 5-column 1fr grid. */
+  function stabilizeMahjongTrainerTileSizes() {
+    if (!document.getElementById("mc-mahjong-page")) return;
+    var styleId = "mc-mahjong-trainer-tile-stable-css";
+    var css =
+      "#mc-mahjong-page .mc-live-rack{align-items:flex-end!important}" +
+      "#mc-mahjong-page .mc-live-tile," +
+      "#mc-mahjong-page .mc-live-tile:hover," +
+      "#mc-mahjong-page .mc-live-tile:focus," +
+      "#mc-mahjong-page .mc-live-tile:focus-visible," +
+      "#mc-mahjong-page .mc-live-tile:active," +
+      "#mc-mahjong-page .mc-live-tile.is-selected{" +
+      "box-sizing:border-box!important;flex:0 0 58px!important;" +
+      "width:58px!important;min-width:58px!important;max-width:58px!important;" +
+      "height:76px!important;padding:0!important;margin:0!important;" +
+      "border:0!important;justify-self:center!important}" +
+      "#mc-mahjong-page .mc-live-tile{transform:none;transition:transform .14s ease!important}" +
+      "#mc-mahjong-page .mc-live-tile.is-selected{transform:translateY(-11px)!important}" +
+      "#mc-mahjong-page .mc-live-tile img{" +
+      "display:block!important;width:58px!important;min-width:58px!important;" +
+      "max-width:58px!important;height:76px!important;aspect-ratio:86/112!important;" +
+      "object-fit:contain!important}" +
+      "@media (max-width:560px){" +
+      "#mc-mahjong-page .mc-live-tile," +
+      "#mc-mahjong-page .mc-live-tile:hover," +
+      "#mc-mahjong-page .mc-live-tile:focus," +
+      "#mc-mahjong-page .mc-live-tile:focus-visible," +
+      "#mc-mahjong-page .mc-live-tile:active," +
+      "#mc-mahjong-page .mc-live-tile.is-selected{" +
+      "flex:0 0 49px!important;width:49px!important;min-width:49px!important;" +
+      "max-width:49px!important;height:64px!important}" +
+      "#mc-mahjong-page .mc-live-tile img{" +
+      "width:49px!important;min-width:49px!important;max-width:49px!important;" +
+      "height:64px!important}}" +
+      "@media (min-width:761px){" +
+      "#mc-mahjong-page .mc-live-tile," +
+      "#mc-mahjong-page .mc-live-tile:hover," +
+      "#mc-mahjong-page .mc-live-tile:focus," +
+      "#mc-mahjong-page .mc-live-tile:focus-visible," +
+      "#mc-mahjong-page .mc-live-tile:active," +
+      "#mc-mahjong-page .mc-live-tile.is-selected{" +
+      "flex:0 0 70px!important;width:70px!important;min-width:70px!important;" +
+      "max-width:70px!important;height:91px!important}" +
+      "#mc-mahjong-page .mc-live-tile img{" +
+      "width:70px!important;min-width:70px!important;max-width:70px!important;" +
+      "height:91px!important}}";
+
+    var el = document.getElementById(styleId);
+    if (!el) {
+      el = document.createElement("style");
+      el.id = styleId;
+      el.setAttribute("data-mc", VERSION);
+      (document.body || document.documentElement).appendChild(el);
+    }
+    if (el.textContent !== css) el.textContent = css;
+  }
+
+  /* Selection rebuilds the rack and reloads tile PNGs; restore already-repaired
+     data URIs immediately so neighbors don't briefly pick up different intrinsics. */
+  function cacheMahjongRepairedTileImages() {
+    if (global.__MC_MAHJONG_TILE_SRC_CACHE_OBS__) return;
+    if (!document.getElementById("mc-mahjong-page")) return;
+
+    var cache = global.__MC_MAHJONG_TILE_SRC_CACHE__ || {};
+    global.__MC_MAHJONG_TILE_SRC_CACHE__ = cache;
+
+    function tileKey(src) {
+      if (!src) return "";
+      if (src.indexOf("data:image/") === 0) return "";
+      var m = String(src).match(/tile-[a-z0-9-]+\.png/i);
+      return m ? m[0].toLowerCase() : "";
+    }
+
+    function remember(img) {
+      if (!img || img.tagName !== "IMG") return;
+      var src = img.getAttribute("src") || "";
+      if (src.indexOf("data:image/") !== 0) return;
+      var key = tileKey(img.getAttribute("data-mc-tile-file") || "");
+      if (!key) {
+        /* repaired imgs lose the filename in src; keep last known file on the node */
+        key = img.getAttribute("data-mc-tile-file") || "";
+      }
+      if (key) cache[key] = src;
+    }
+
+    function restore(img) {
+      if (!img || img.tagName !== "IMG") return;
+      var src = img.getAttribute("src") || "";
+      var key = tileKey(src);
+      if (!key) return;
+      img.setAttribute("data-mc-tile-file", key);
+      if (cache[key] && src.indexOf("data:image/") !== 0) {
+        img.setAttribute("src", cache[key]);
+        img.dataset.mcTileRepairState = "done";
+      }
+    }
+
+    function scan(scope) {
+      if (!scope || !scope.querySelectorAll) return;
+      Array.prototype.forEach.call(
+        scope.querySelectorAll(
+          '#mc-live-rack img[src*="mahjong/tiles/tile-"], #mc-live-rack img[src^="data:image/"]'
+        ),
+        function (img) {
+          var src = img.getAttribute("src") || "";
+          if (src.indexOf("data:image/") === 0) {
+            if (!img.getAttribute("data-mc-tile-file")) {
+              /* cannot key anonymous data URIs without a prior file mark */
+              remember(img);
+            } else {
+              cache[img.getAttribute("data-mc-tile-file")] = src;
+            }
+            return;
+          }
+          restore(img);
+        }
+      );
+    }
+
+    scan(document);
+
+    var obs = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (mutation.type === "attributes" && mutation.target.tagName === "IMG") {
+          var src = mutation.target.getAttribute("src") || "";
+          if (src.indexOf("data:image/") === 0) {
+            var key =
+              mutation.target.getAttribute("data-mc-tile-file") ||
+              tileKey(mutation.oldValue || "");
+            if (key) {
+              mutation.target.setAttribute("data-mc-tile-file", key);
+              cache[key] = src;
+            }
+          } else {
+            restore(mutation.target);
+          }
+        }
+        Array.prototype.forEach.call(mutation.addedNodes, function (node) {
+          if (node.nodeType !== 1) return;
+          if (node.tagName === "IMG") restore(node);
+          scan(node);
+        });
+      });
+    });
+
+    obs.observe(document.getElementById("mc-mahjong-page"), {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src"],
+      attributeOldValue: true
+    });
+    global.__MC_MAHJONG_TILE_SRC_CACHE_OBS__ = obs;
+  }
+
   global.document.addEventListener("DOMContentLoaded", repairCartFloatIcon);
   global.addEventListener("load", repairCartFloatIcon);
   [200, 1000, 3000].forEach(function (ms) {
@@ -2080,4 +2236,24 @@
     }
   } catch (eIv) {}
   repairMahjongLandingImages();
+
+  global.document.addEventListener(
+    "DOMContentLoaded",
+    stabilizeMahjongTrainerTileSizes
+  );
+  global.addEventListener("load", stabilizeMahjongTrainerTileSizes);
+  [0, 50, 200, 800, 2000].forEach(function (ms) {
+    global.setTimeout(stabilizeMahjongTrainerTileSizes, ms);
+  });
+  stabilizeMahjongTrainerTileSizes();
+
+  global.document.addEventListener(
+    "DOMContentLoaded",
+    cacheMahjongRepairedTileImages
+  );
+  global.addEventListener("load", cacheMahjongRepairedTileImages);
+  [100, 500, 1500].forEach(function (ms) {
+    global.setTimeout(cacheMahjongRepairedTileImages, ms);
+  });
+  cacheMahjongRepairedTileImages();
 })(window);
