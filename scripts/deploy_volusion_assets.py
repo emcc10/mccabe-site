@@ -50,6 +50,13 @@ OPTIONAL = (
     "vspfiles/windsor.mp4",
     "vspfiles/category-landings/cat142-bedroom.html",
     "vspfiles/landing/mc-luxe-comforts-saranoni-hero.jpg",
+    "vspfiles/mahjong/hero-community.jpg",
+    "vspfiles/mahjong/category-tiles.jpg",
+    "vspfiles/mahjong/category-travel.jpg",
+    "vspfiles/mahjong/category-mat.jpg",
+    "vspfiles/mahjong/category-racks.jpg",
+    "vspfiles/mahjong/category-accessories.jpg",
+    "vspfiles/mahjong/mahjong-s-201.htm",
 )
 
 CHUNKED_JS_OVER_CAP = (
@@ -124,6 +131,13 @@ def _remotes(rel: str) -> list[str]:
         paths = [f"/v/vspfiles/{sub}", f"/vspfiles/{sub}", f"/v/{rel}", rel, f"/{rel}"]
     else:
         paths = [rel, f"/{rel}", f"/v/{rel}"]
+    if rel.endswith("mahjong-s-201.htm"):
+        paths = [
+            "/mahjong-s/201.htm",
+            "/v/mahjong-s/201.htm",
+            "mahjong-s/201.htm",
+            "/mccabestheaterandliving.com/mahjong-s/201.htm",
+        ] + paths
     if rel.startswith("vspfiles/templates/266/js/min/"):
         name = rel.rsplit("/", 1)[-1]
         paths.append(f"/vspfiles/templates/266/js/min/{name}")

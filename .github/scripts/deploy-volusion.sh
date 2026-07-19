@@ -389,6 +389,12 @@ maybe_put_primary "vspfiles/css/mc-plp-body-last.css" "mc-plp-body-last" \
   "/vspfiles/css/mc-plp-body-last.css" \
   "vspfiles/css/mc-plp-body-last.css"
 
+# Mahjong landing category page (baked HTML; JPG lifestyle image refs)
+maybe_put_primary "vspfiles/mahjong/mahjong-s-201.htm" "mahjong-s-201" \
+  "/mahjong-s/201.htm" \
+  "/v/mahjong-s/201.htm" \
+  "mahjong-s/201.htm"
+
 if command -v node >/dev/null 2>&1 && [[ -f scripts/sanitize-boards-css.mjs ]]; then
   node scripts/sanitize-boards-css.mjs || true
 fi
