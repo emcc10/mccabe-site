@@ -6000,6 +6000,21 @@
     return "";
   }
 
+  var saranoniSaleDataRequested = false;
+  function ensureSaranoniSaleData() {
+    if (global.MC_SARANONI_VARIANT_PRICING || saranoniSaleDataRequested) return;
+    saranoniSaleDataRequested = true;
+    var script = global.document.createElement("script");
+    script.src = "/v/vspfiles/js/mc-saranoni-sale-data.js?v=20260719";
+    script.async = true;
+    script.onload = function () {
+      [0, 120, 500].forEach(function (delay) {
+        global.setTimeout(syncSaranoniOptionPriceFromVolusion, delay);
+      });
+    };
+    (global.document.head || global.document.documentElement).appendChild(script);
+  }
+
   function syncSaranoniSaleMarkers(productCode) {
     var catalog = global.MC_SARANONI_VARIANT_PRICING || {};
     var product = catalog[productCode];
@@ -6027,6 +6042,7 @@
   }
 
   function syncSaranoniOptionPriceFromVolusion() {
+    ensureSaranoniSaleData();
     var pwo =
       global.document.getElementById("priceWithOptions") ||
       global.document.getElementById("priceWithOptionsNoTax");
