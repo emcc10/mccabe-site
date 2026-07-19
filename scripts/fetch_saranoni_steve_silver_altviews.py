@@ -282,6 +282,20 @@ def collect_ss_page_map() -> dict[str, str]:
                 page = (row.get("page") or row.get("Page") or "").strip()
                 if code.startswith("SS-") and page.startswith("http"):
                     pages[code] = page
+    # The enriched active catalog retains resolved manufacturer PDPs by
+    # internal SKU.  Include them so dining and occasional pieces receive
+    # alternate galleries as well as bedroom/upholstery products.
+    vendor_cache = ROOT / "catalog" / "steve-silver-active" / "vendor_copy_cache.json"
+    if vendor_cache.exists():
+        try:
+            cache = json.loads(vendor_cache.read_text(encoding="utf-8"))
+            for sku, item in cache.items():
+                page = str((item or {}).get("source_url") or "").strip()
+                code = f"SS-{str(sku).strip().upper()}"
+                if page.startswith("https://stevesilver.com/product/"):
+                    pages[code] = page
+        except (OSError, ValueError, TypeError):
+            pass
     return pages
 
 
