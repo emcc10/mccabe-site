@@ -1,4 +1,4 @@
-import json, csv, urllib.request, urllib.parse, re, time, html as htmlmod
+import json, csv, math, urllib.request, urllib.parse, re, time, html as htmlmod
 from pathlib import Path
 
 # This script uses the browser to fetch data since Saranoni blocks automated requests.
@@ -102,8 +102,7 @@ VARIANT_MAP = {
 }
 
 # A Shopify product's minimum variant price is not always its default product
-# configuration. This product defaults to a Swaddle ($18.13); Hats and Bows
-# are the lower-priced option and must be represented as negative PriceDiffs.
+# configuration. This product defaults to a Swaddle ($18.13).
 PRODUCT_BASE_PRICE_OVERRIDES = {
     "SAR-STRETCHY-SWADDLES-HATS": 18.13,
 }
@@ -113,6 +112,10 @@ def norm_price(p):
     if isinstance(p, str): return float(p)
     if p > 1000: return p / 100.0
     return float(p)
+
+def import_price(p):
+    """Volusion imports use whole dollars, always rounding fractional prices up."""
+    return math.ceil(norm_price(p))
 
 def scrape_vol_options(code):
     url = f"https://www.mccabestheaterandliving.com/ProductDetails.asp?ProductCode={code}"
@@ -165,9 +168,10 @@ def main():
         variants = item.get("variants", [])
         if not variants: continue
         
-        base_price = PRODUCT_BASE_PRICE_OVERRIDES.get(
+        source_base_price = PRODUCT_BASE_PRICE_OVERRIDES.get(
             code, item.get("shopify_base_price", 0.0)
         )
+        base_price = import_price(source_base_price)
         vol_options = scrape_vol_options(code)
         
         in_stock_ids = []
@@ -184,7 +188,7 @@ def main():
                     break
             
             if match:
-                price_diff = round(norm_price(match["price"]) - base_price, 2)
+                price_diff = max(0, import_price(match["price"]) - base_price)
                 options_map[v_id] = price_diff
                 if match.get("available", True):
                     in_stock_ids.append(v_id)
@@ -204,16 +208,16 @@ def main():
     
     try:
         # Write Products - ensure OptionIDs is quoted by the writer
-        with (out_dir / "volusion_products_import_v3.csv").open("w", newline="") as f:
+        with (out_dir / "volusion_products_import_v4.csv").open("w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=["ProductCode", "ProductPrice", "OptionIDs", "HideProduct"], quoting=csv.QUOTE_ALL)
             writer.writeheader()
             writer.writerows(products_rows)
             
-        with (out_dir / "volusion_options_import_v3.csv").open("w", newline="") as f:
+        with (out_dir / "volusion_options_import_v4.csv").open("w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=["ID", "PriceDiff"])
             writer.writeheader()
             writer.writerows(options_rows)
-        print("Success! Wrote files to _v3 versions.")
+        print("Success! Wrote files to _v4 versions.")
     except PermissionError:
         print("ERROR: CSV files are STILL open. Please close all Excel/CSV windows.")
 
