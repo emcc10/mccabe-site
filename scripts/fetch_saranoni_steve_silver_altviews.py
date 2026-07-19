@@ -296,6 +296,23 @@ def collect_ss_page_map() -> dict[str, str]:
                     pages[code] = page
         except (OSError, ValueError, TypeError):
             pass
+    # Active servers identified from the current Volusion inventory.  Keep
+    # these explicit because they were never represented in the older
+    # furniture fetch scripts.
+    pages.update(
+        {
+            "SS-HY500SV": "https://stevesilver.com/product/hyland-server/",
+            "SS-HY500SVB": "https://stevesilver.com/product/hyland-server-brown/",
+            "SS-JA500SV": "https://stevesilver.com/product/joanna-two-tone-server/",
+            "SS-AUB500SV": "https://stevesilver.com/product/auburn-server/",
+            "SS-COL500WSV": "https://stevesilver.com/product/colvin-server-white/",
+            "SS-COL500ESV": "https://stevesilver.com/product/colvin-server-green-finish/",
+            "SS-COL500KSV": "https://stevesilver.com/product/colvin-server-black/",
+            "SS-COL500NSV": "https://stevesilver.com/product/colvin-server-brown/",
+            "SS-BUR500NSV": "https://stevesilver.com/product/burlington-cathedral-doored-server/",
+            "SS-GA500SV": "https://stevesilver.com/product/garland-server/",
+        }
+    )
     return pages
 
 
