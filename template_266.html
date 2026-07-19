@@ -1666,7 +1666,7 @@ html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion{
 })(window, document);
   </script>
   <script id="mc-plp-enforcer-bridge">
-(function(g,d){var W="20260716freeship1",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
+(function(g,d){var W="20260719cart1",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
 function cat(){try{var p=String(g.location.pathname||"").toLowerCase();
 var isHome =
@@ -2577,44 +2577,51 @@ document.addEventListener("DOMContentLoaded", function () {
   <!--[if IE 9]><script>"searchresults.asp"===PageName()&&!function(e){e(document).ready(function(){var r,t=0,n=0,i=new Array,h=0;e(".v-product").each(function(){if(r=e(this),h=r.position().top,n!=h){for(currentDiv=0;currentDiv<i.length;currentDiv++)i[currentDiv].height(t);i.length=0,n=h,t=r.height(),i.push(r)}else i.push(r),t=t<r.height()?r.height():t;for(currentDiv=0;currentDiv<i.length;currentDiv++)i[currentDiv].height(t)})})}($jQueryModern);</script><![endif]-->
 
   <script src="v/vspfiles/templates/266/js/min/template.min.js?v=20260706cart1"></script>
-  <script id="mc-cart-float-finalizer-20260706">
+  <script id="mc-cart-float-finalizer-20260719cart1">
   (function(w,d){
     "use strict";
+    /* Do NOT use [class*='mc-cart-float'] — that also matches the inner svg
+       (mc-cart-float__icon), which template.min.js already hijacks. Hide the
+       svg and paint the glyph on the anchor only. */
+    var GLYPH='url("data:image/svg+xml;utf8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23111111\'%3E%3Cpath d=\'M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6.2 6l.4 2h12.2c.5 0 .9.2 1.2.6.3.4.3.9.2 1.4l-1.2 5.2c-.2.7-.8 1.2-1.6 1.2H8.1c-.8 0-1.4-.5-1.6-1.2L4.3 4H2V2h3.1c.7 0 1.3.5 1.4 1.2L6.2 6zm1.3 9h9.8l1.1-5H6.6l.9 5z\'/%3E%3C/svg%3E")';
     function fix(){
-      var nodes=d.querySelectorAll(".mc-cart-float,#mc-cart-float,a.mc-cart-float,[class*='mc-cart-float']");
-      for(var i=0;i<nodes.length;i++){
-        var el=nodes[i];
-        try{
-          el.style.setProperty("display","flex","important");
-          el.style.setProperty("align-items","center","important");
-          el.style.setProperty("justify-content","center","important");
-          el.style.setProperty("width","52px","important");
-          el.style.setProperty("height","52px","important");
-          el.style.setProperty("min-width","52px","important");
-          el.style.setProperty("max-width","52px","important");
-          el.style.setProperty("min-height","52px","important");
-          el.style.setProperty("max-height","52px","important");
-          el.style.setProperty("padding","0","important");
-          el.style.setProperty("border-radius","999px","important");
-          el.style.setProperty("overflow","hidden","important");
-          el.style.setProperty("line-height","0","important");
-        }catch(e){}
-        var svg=el.querySelector&&el.querySelector("svg");
-        if(svg){try{
-          svg.style.setProperty("position","static","important");
-          svg.style.setProperty("display","block","important");
-          svg.style.setProperty("width","20px","important");
-          svg.style.setProperty("height","20px","important");
-          svg.style.setProperty("margin","0","important");
-          svg.style.setProperty("transform","none","important");
-        }catch(e2){}}
-      }
+      var el=d.querySelector("a.mc-cart-float")||d.querySelector(".mc-cart-float");
+      if(!el)return;
+      try{
+        el.style.setProperty("display","flex","important");
+        el.style.setProperty("visibility","visible","important");
+        el.style.setProperty("opacity","1","important");
+        el.style.setProperty("align-items","center","important");
+        el.style.setProperty("justify-content","center","important");
+        el.style.setProperty("background-image",GLYPH,"important");
+        el.style.setProperty("background-repeat","no-repeat","important");
+        el.style.setProperty("background-position","center center","important");
+        el.style.setProperty("background-size","20px 20px","important");
+      }catch(e){}
+      var svg=el.querySelector&&el.querySelector("svg.mc-cart-float__icon,svg");
+      if(svg){try{
+        svg.style.setProperty("display","none","important");
+        svg.style.setProperty("visibility","hidden","important");
+        svg.style.setProperty("opacity","0","important");
+        svg.style.setProperty("width","0","important");
+        svg.style.setProperty("height","0","important");
+      }catch(e2){}}
+    }
+    var scheduled=false;
+    function schedule(){
+      if(scheduled)return;
+      scheduled=true;
+      w.setTimeout(function(){scheduled=false;fix();},50);
     }
     fix();
     if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",fix);
     w.addEventListener("load",fix);
     [100,400,900,1600,2800,5000].forEach(function(ms){w.setTimeout(fix,ms);});
-    w.setInterval(fix,500);
+    if(w.MutationObserver){
+      try{
+        new MutationObserver(schedule).observe(d.documentElement,{childList:true,subtree:true});
+      }catch(e3){}
+    }
   })(window,document);
   </script>
 
@@ -14624,7 +14631,7 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260716freeship1"></script>
+  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260719cart1"></script>
  
   <script id="mc-my-boards-template-boot">
 (function () {

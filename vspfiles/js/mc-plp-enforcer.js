@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260706c — all-category meta wrapper, cart float repair
+ * MC_PLP_ENFORCER_20260719cart1 — cart float glyph via inline background-image
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260716freeship1";
+  var VERSION = "20260719cart1";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -145,32 +145,36 @@
     document.documentElement.classList.remove("mc-allow-home-hero");
   }
 
+  /* template.min.js matches [class*=mc-cart-float] and also styles the inner
+     svg (mc-cart-float__icon) as a second fixed 42px box — ripping the glyph
+     out / blanking it. Do not fight its position/size. Hide the hijacked svg
+     and paint the cart glyph as an inline background-image on the anchor. */
+  var MC_CART_GLYPH_BG =
+    'url("data:image/svg+xml;utf8,' +
+    "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23111111'%3E" +
+    "%3Cpath d='M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6.2 6l.4 2h12.2c.5 0 .9.2 1.2.6.3.4.3.9.2 1.4l-1.2 5.2c-.2.7-.8 1.2-1.6 1.2H8.1c-.8 0-1.4-.5-1.6-1.2L4.3 4H2V2h3.1c.7 0 1.3.5 1.4 1.2L6.2 6zm1.3 9h9.8l1.1-5H6.6l.9 5z'/%3E" +
+    '%3C/svg%3E")';
+
   function repairCartFloatIcon() {
     var cart = document.querySelector("a.mc-cart-float");
     if (!cart) return;
     cart.style.setProperty("display", "flex", "important");
+    cart.style.setProperty("visibility", "visible", "important");
+    cart.style.setProperty("opacity", "1", "important");
     cart.style.setProperty("align-items", "center", "important");
     cart.style.setProperty("justify-content", "center", "important");
-    cart.style.setProperty("width", "52px", "important");
-    cart.style.setProperty("height", "52px", "important");
-    cart.style.setProperty("min-width", "52px", "important");
-    cart.style.setProperty("max-width", "52px", "important");
-    cart.style.setProperty("min-height", "52px", "important");
-    cart.style.setProperty("max-height", "52px", "important");
-    cart.style.setProperty("padding", "0", "important");
-    cart.style.setProperty("overflow", "hidden", "important");
+    cart.style.setProperty("background-image", MC_CART_GLYPH_BG, "important");
+    cart.style.setProperty("background-repeat", "no-repeat", "important");
+    cart.style.setProperty("background-position", "center center", "important");
+    cart.style.setProperty("background-size", "20px 20px", "important");
     var svg = cart.querySelector("svg.mc-cart-float__icon");
     if (!svg) return;
-    svg.style.setProperty("position", "static", "important");
-    svg.style.setProperty("display", "block", "important");
-    svg.style.setProperty("width", "20px", "important");
-    svg.style.setProperty("height", "20px", "important");
-    svg.style.setProperty("min-width", "20px", "important");
-    svg.style.setProperty("max-width", "20px", "important");
-    svg.style.setProperty("min-height", "20px", "important");
-    svg.style.setProperty("max-height", "20px", "important");
-    svg.style.setProperty("margin", "0 auto", "important");
-    svg.style.setProperty("transform", "none", "important");
+    svg.style.setProperty("display", "none", "important");
+    svg.style.setProperty("visibility", "hidden", "important");
+    svg.style.setProperty("opacity", "0", "important");
+    svg.style.setProperty("width", "0", "important");
+    svg.style.setProperty("height", "0", "important");
+    svg.style.setProperty("overflow", "hidden", "important");
   }
 
   function isLegacySubcatChromeTable(tbl) {
