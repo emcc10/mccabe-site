@@ -20629,7 +20629,8 @@ html body a.mc-cart-float svg.mc-cart-float__icon {
   display: none !important;
 }
 html body a.mc-cart-float, html body .mc-cart-float {
-  background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%2523111111%22%3E%3Cpath%20d%3D%22M7%2018c-1.1%200-2%20.9-2%202s.9%202%202%202%202-.9%202-2-.9-2-2-2zm10%200c-1.1%200-2%20.9-2%202s.9%202%202%202%202-.9%202-2-.9-2-2-2zM6.2%206l.4%202h12.2c.5%200%20.9.2%201.2.6.3.4.3.9.2%201.4l-1.2%205.2c-.2.7-.8%201.2-1.6%201.2H8.1c-.8%200-1.4-.5-1.6-1.2L4.3%204H2V2h3.1c.7%200%201.3.5%201.4%201.2L6.2%206zm1.3%209h9.8l1.1-5H6.6l.9%205z%22%2F%3E%3C%2Fsvg%3E") !important;
+  /* fill must be %23111111 (#111111). %2523 double-encodes and blanks the glyph. */
+  background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23111111%22%3E%3Cpath%20d%3D%22M7%2018c-1.1%200-2%20.9-2%202s.9%202%202%202%202-.9%202-2-.9-2-2-2zm10%200c-1.1%200-2%20.9-2%202s.9%202%202%202%202-.9%202-2-.9-2-2-2zM6.2%206l.4%202h12.2c.5%200%20.9.2%201.2.6.3.4.3.9.2%201.4l-1.2%205.2c-.2.7-.8%201.2-1.6%201.2H8.1c-.8%200-1.4-.5-1.6-1.2L4.3%204H2V2h3.1c.7%200%201.3.5%201.4%201.2L6.2%206zm1.3%209h9.8l1.1-5H6.6l.9%205z%22%2F%3E%3C%2Fsvg%3E") !important;
   background-repeat: no-repeat !important;
   background-position: center center !important;
   background-size: 20px 20px !important;
@@ -23778,3 +23779,26 @@ html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow[disabled] {
   pointer-events: none !important;
 }
 /* END REMOVABLE: Saranoni variant scroll arrows (20260718) */
+
+/* BEGIN REMOVABLE: mobile cart glyph visible (20260719cart1)
+   Inner svg is hijacked by template.min.js; keep it hidden and paint the
+   glyph on the anchor. Correct fill encoding is %23111111 (not %2523…). */
+html body a.mc-cart-float,
+html body .mc-cart-float {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23111111%22%3E%3Cpath%20d%3D%22M7%2018c-1.1%200-2%20.9-2%202s.9%202%202%202%202-.9%202-2-.9-2-2-2zm10%200c-1.1%200-2%20.9-2%202s.9%202%202%202%202-.9%202-2-.9-2-2-2zM6.2%206l.4%202h12.2c.5%200%20.9.2%201.2.6.3.4.3.9.2%201.4l-1.2%205.2c-.2.7-.8%201.2-1.6%201.2H8.1c-.8%200-1.4-.5-1.6-1.2L4.3%204H2V2h3.1c.7%200%201.3.5%201.4%201.2L6.2%206zm1.3%209h9.8l1.1-5H6.6l.9%205z%22%2F%3E%3C%2Fsvg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  background-size: 20px 20px !important;
+}
+html body a.mc-cart-float svg.mc-cart-float__icon,
+html body .mc-cart-float svg.mc-cart-float__icon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+/* END REMOVABLE: mobile cart glyph visible (20260719cart1) */
