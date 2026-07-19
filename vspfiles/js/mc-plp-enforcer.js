@@ -2027,10 +2027,44 @@
     win.addEventListener("load", tryLoad);
   })(global.document, global);
 
+  /* Mahjong landing (201.htm) references /v/vspfiles/mahjong/*.webp, but Volusion
+     HTTP 404s those. JPGs were deployed alongside; remap src/background to .jpg. */
+  function repairMahjongLandingImages() {
+    var nodes = document.querySelectorAll(
+      "img.mc-mahjong-landing-image, img[src*='/v/vspfiles/mahjong/'][src$='.webp'], img[data-mc-landing-src$='.webp']"
+    );
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var img = nodes[i];
+      var src = img.getAttribute("src") || "";
+      var dataSrc = img.getAttribute("data-mc-landing-src") || "";
+      if (/\.webp(\?|$)/i.test(src)) {
+        img.setAttribute("src", src.replace(/\.webp(\?|$)/i, ".jpg$1"));
+      }
+      if (/\.webp(\?|$)/i.test(dataSrc)) {
+        img.setAttribute(
+          "data-mc-landing-src",
+          dataSrc.replace(/\.webp(\?|$)/i, ".jpg$1")
+        );
+      }
+      var style = img.getAttribute("style") || "";
+      if (/\.webp/i.test(style)) {
+        img.setAttribute("style", style.replace(/\.webp/gi, ".jpg"));
+      }
+    }
+  }
+
   global.document.addEventListener("DOMContentLoaded", repairCartFloatIcon);
   global.addEventListener("load", repairCartFloatIcon);
   [200, 1000, 3000].forEach(function (ms) {
     global.setTimeout(repairCartFloatIcon, ms);
   });
   repairCartFloatIcon();
+
+  global.document.addEventListener("DOMContentLoaded", repairMahjongLandingImages);
+  global.addEventListener("load", repairMahjongLandingImages);
+  [100, 500, 1500].forEach(function (ms) {
+    global.setTimeout(repairMahjongLandingImages, ms);
+  });
+  repairMahjongLandingImages();
 })(window);
