@@ -23854,3 +23854,85 @@ html body .mc-cart-float svg.mc-cart-float__icon {
   opacity: 0 !important;
 }
 /* END REMOVABLE: Mahjong landing lifestyle images (20260719mahjong3) */
+
+
+/* BEGIN REMOVABLE: Mahjong trainer selected-tile size lock (20260720sel1)
+   Selecting a discard rebuilds the rack; fluid grid width:100% tiles then
+   resize as images reload. Lock fixed tile boxes; selection is transform-only. */
+#mc-mahjong-page .mc-live-rack {
+  align-items: flex-end !important;
+}
+#mc-mahjong-page .mc-live-tile,
+#mc-mahjong-page .mc-live-tile:hover,
+#mc-mahjong-page .mc-live-tile:focus,
+#mc-mahjong-page .mc-live-tile:focus-visible,
+#mc-mahjong-page .mc-live-tile:active,
+#mc-mahjong-page .mc-live-tile.is-selected {
+  box-sizing: border-box !important;
+  flex: 0 0 58px !important;
+  width: 58px !important;
+  min-width: 58px !important;
+  max-width: 58px !important;
+  height: 76px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  justify-self: center !important;
+}
+#mc-mahjong-page .mc-live-tile {
+  transform: none;
+  transition: transform 0.14s ease !important;
+}
+#mc-mahjong-page .mc-live-tile.is-selected {
+  transform: translateY(-11px) !important;
+}
+#mc-mahjong-page .mc-live-tile img {
+  display: block !important;
+  width: 58px !important;
+  min-width: 58px !important;
+  max-width: 58px !important;
+  height: 76px !important;
+  aspect-ratio: 86 / 112 !important;
+  object-fit: contain !important;
+}
+@media (max-width: 560px) {
+  #mc-mahjong-page .mc-live-tile,
+  #mc-mahjong-page .mc-live-tile:hover,
+  #mc-mahjong-page .mc-live-tile:focus,
+  #mc-mahjong-page .mc-live-tile:focus-visible,
+  #mc-mahjong-page .mc-live-tile:active,
+  #mc-mahjong-page .mc-live-tile.is-selected {
+    flex: 0 0 49px !important;
+    width: 49px !important;
+    min-width: 49px !important;
+    max-width: 49px !important;
+    height: 64px !important;
+  }
+  #mc-mahjong-page .mc-live-tile img {
+    width: 49px !important;
+    min-width: 49px !important;
+    max-width: 49px !important;
+    height: 64px !important;
+  }
+}
+@media (min-width: 761px) {
+  #mc-mahjong-page .mc-live-tile,
+  #mc-mahjong-page .mc-live-tile:hover,
+  #mc-mahjong-page .mc-live-tile:focus,
+  #mc-mahjong-page .mc-live-tile:focus-visible,
+  #mc-mahjong-page .mc-live-tile:active,
+  #mc-mahjong-page .mc-live-tile.is-selected {
+    flex: 0 0 70px !important;
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    height: 91px !important;
+  }
+  #mc-mahjong-page .mc-live-tile img {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    height: 91px !important;
+  }
+}
+/* END REMOVABLE: Mahjong trainer selected-tile size lock (20260720sel1) */
