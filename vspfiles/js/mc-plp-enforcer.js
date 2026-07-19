@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260719cart1 — cart float glyph via inline background-image
+ * MC_PLP_ENFORCER_20260719mahjong1 — cart glyph + Mahjong landing .webp→.jpg remap
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260719cart1";
+  var VERSION = "20260719mahjong1";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
