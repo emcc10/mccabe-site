@@ -422,6 +422,7 @@
     row.style.setProperty("flex-wrap", "nowrap", "important");
     row.style.setProperty("align-items", "center", "important");
     row.style.setProperty("justify-content", "flex-start", "important");
+    row.style.setProperty("order", "2", "important");
     var visibleCount = Math.min(items.length, 3);
     var thumbSize = Math.max(
       48,
@@ -493,7 +494,10 @@
     st.textContent =
       "#mc-pdp-alt-view-row{display:flex!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
       "#mc-pdp-alt-view-row::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
-      "#mc-pdp-alt-view-row a,#mc-pdp-alt-view-row img{float:none!important;position:relative!important;z-index:1!important}";
+      "#mc-pdp-alt-view-row a,#mc-pdp-alt-view-row img{float:none!important;position:relative!important;z-index:1!important}" +
+      /* Keep custom alt thumbs below the hero when the media cell is a flex column
+         and #product_photo is forced to order:1 (template_266 mobile stack). */
+      "@media (max-width:991px){#mc-pdp-alt-view-row{order:2!important;margin-top:10px!important}}" ;
     (document.head || document.documentElement).appendChild(st);
   }
 
