@@ -5466,12 +5466,9 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     if (toggle){
       toggle.classList.toggle('push-menu--open', openNow);
       toggle.classList.toggle('push-menu--closed', !openNow);
-
-      var txt = toggle.querySelector('.menu-toggle__text');
-      if (txt){
-        txt.classList.toggle('push-menu--open', openNow);
-        txt.classList.toggle('push-menu--closed', !openNow);
-      }
+      /* Leave dual .menu-toggle__text spans alone — CSS shows SELECT vs CLOSE
+         from body/html.push-menu-open. Mutating the first span caused both
+         labels to appear at once on mobile. */
     }
 
     var panel = getPanel();
