@@ -351,7 +351,6 @@
     if (!d || !d.body) return;
     var root = d.getElementById("content_area") || d.body;
     var lines = readCartLines(root);
-    if (!lines.length) return;
     var summary = summarizeCart(lines);
     var zip = readZip(root);
     var options = findRateOptions(root);
