@@ -1,7 +1,8 @@
 (function (window, document) {
   "use strict";
 
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX1__) return;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX3__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260716__ = true;
 
@@ -369,10 +370,12 @@
   }
 
   function probeSaranoniAltViews(code) {
-    if (!code || probeInFlight[code] || saranoniProbeDone[code]) return;
+    if (!code || probeInFlight[code]) return;
+    /* Allow re-probe when a prior pass latched empty (CDN race / blocked imgs). */
+    if (saranoniProbeDone[code] && (discoveredByCode[code] || []).length) return;
     probeInFlight[code] = true;
     discoveredByCode[code] = [];
-    var remaining = MAX_SAR_ALT_SLOT + (MAX_SAR_ALT_SLOT - 1) * 2;
+    var remaining = MAX_SAR_ALT_SLOT;
     var finished = false;
 
     function finish() {
@@ -381,10 +384,14 @@
       probeInFlight[code] = false;
       saranoniProbeDone[code] = true;
       discoveredByCode[code].sort(function (a, b) { return a.slot - b.slot; });
+      /* If nothing found, clear the latch so a later schedule can retry. */
+      if (!(discoveredByCode[code] || []).length) {
+        saranoniProbeDone[code] = false;
+      }
       render();
     }
 
-    setTimeout(finish, 6000);
+    setTimeout(finish, 8000);
 
     function completeOne() {
       remaining -= 1;
@@ -395,23 +402,27 @@
     for (var altSlot = 1; altSlot <= MAX_SAR_ALT_SLOT; altSlot += 1) {
       (function (photoSlot) {
         var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
-        probeImage(src, function () {
-          addSaranoniDiscovered(code, photoSlot, src);
-          completeOne();
-        }, completeOne);
+        /* Prefer fetch HEAD — more reliable than Image probes under extensions. */
+        if (window.fetch) {
+          window
+            .fetch(src, { method: "HEAD", cache: "force-cache" })
+            .then(function (resp) {
+              if (resp && resp.ok) addSaranoniDiscovered(code, photoSlot, src);
+              completeOne();
+            })
+            .catch(function () {
+              probeImage(src, function () {
+                addSaranoniDiscovered(code, photoSlot, src);
+                completeOne();
+              }, completeOne);
+            });
+        } else {
+          probeImage(src, function () {
+            addSaranoniDiscovered(code, photoSlot, src);
+            completeOne();
+          }, completeOne);
+        }
       })(altSlot);
-    }
-
-    for (var slot = 2; slot <= MAX_SAR_ALT_SLOT; slot += 1) {
-      /* Probe non-T first so lifestyle/detail wins the race over -NT. */
-      ["", "T"].forEach(function (suffix) {
-        var photoSlot = slot;
-        var src = "/v/vspfiles/photos/" + code + "-" + photoSlot + suffix + ".jpg";
-        probeImage(src, function () {
-          addSaranoniDiscovered(code, photoSlot, src);
-          completeOne();
-        }, completeOne);
-      });
     }
   }
 

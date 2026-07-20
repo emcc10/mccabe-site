@@ -1,0 +1,35 @@
+Saranoni import checklist — 2026-07-20 (HP nursery + King + Wearable)
+=====================================================================
+
+Import these in Volusion Admin (Inventory → Import):
+
+1) Harry Potter Muslin Nursery — Products (OptionIDs)
+   catalog/saranoni-gap-report/saranoni_hp_nursery_products_optionids_import_volusion_raw.csv
+   Attaches colors + sizes:
+     Colors: 1359 Potions and Charms, 1360 Herbology, 1361 Hedwig
+     Sizes:  1362 Muslin/Lush Mini (+$7), 1363 Swaddle (+$0),
+             1364 Crib Sheet (+$17), 1365 Changing Cover (+$7),
+             1366 Muslin/Lush Quilt (+$50)
+   Matches saranoni.com: 3 colors × 5 sizes = 15 variants.
+
+2) Harry Potter Muslin Nursery — Options (pricediffs)
+   catalog/saranoni-gap-report/saranoni_hp_nursery_pricediff_fix_options_import.csv
+
+3) Faux Fur King Blanket — Products (OptionIDs) — Cream + Hazel if missing
+   catalog/saranoni-gap-report/saranoni_fx_fur_king_products_optionids_import_volusion_raw.csv
+   OptionIDs: 1048 Charcoal, 1158 Classic Leopard, 1154 Cream,
+              1093 Dove, 1049 Feather, 1155 Hazel, 1156 Snow Leopard
+
+4) Wearable Blanket (still pending from earlier)
+   catalog/saranoni-gap-report/saranoni_wearable_products_optionids_import_volusion_raw.csv
+   catalog/saranoni-gap-report/saranoni_wearable_pricediff_fix_options_import.csv
+
+PHOTO DEPLOY (auto on push to main)
+-----------------------------------
+- SAR-FX-FUR-KING-1.jpg / -2T.jpg replaced (was Christmas stockings)
+- King altviews + color option images refreshed from Saranoni
+- HP nursery altview1–24 already on CDN
+
+After import + deploy hard-refresh:
+  https://www.mccabestheaterandliving.com/product-p/sar-hp-hp-msln-nrs.htm
+  https://www.mccabestheaterandliving.com/product-p/sar-fx-fur-king.htm

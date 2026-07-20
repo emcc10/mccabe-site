@@ -24638,3 +24638,96 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
 }
 /* END REMOVABLE: Saranoni related centering (20260720sarfix2) */
 
+/* BEGIN REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix3)
+   Legacy desktop rule used margin-top:min(-58vh,-620px) on #altviews, which
+   pulled a stray thumb over the hero and collapsed the media TD so the 650px
+   hero overflowed Related Items. Saranoni gallery uses #mc-pdp-alt-view-row. */
+html body.mc-saranoni-pdp td.mc-pdp-media-td,
+html body.mc-saranoni-pdp #product_photo_td,
+html body.mc-saranoni-pdp td.mc-unified-pdp-media {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  grid-template-columns: none !important;
+  isolation: auto !important;
+}
+
+html body.mc-saranoni-pdp td.mc-pdp-media-td > img#product_photo,
+html body.mc-saranoni-pdp #product_photo_td > img#product_photo,
+html body.mc-saranoni-pdp td.mc-pdp-media-td > a#product_photo_zoom_url,
+html body.mc-saranoni-pdp td.mc-pdp-media-td > a#product_photo_zoom_url2,
+html body.mc-saranoni-pdp td.mc-pdp-media-td > table {
+  order: 1 !important;
+  position: relative !important;
+  float: none !important;
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+  max-width: 650px !important;
+  width: 100% !important;
+}
+
+html body.mc-saranoni-pdp td.mc-pdp-media-td #altviews,
+html body.mc-saranoni-pdp td.mc-pdp-media-td span#altviews,
+html body.mc-saranoni-pdp #product_photo_td #altviews,
+html body.mc-saranoni-pdp #product_photo_td span#altviews,
+html body.mc-saranoni-pdp #v65-product-parent #altviews,
+html body.mc-saranoni-pdp #v65-product-parent span#altviews,
+html body.mc-saranoni-pdp #content_area #altviews,
+html body.mc-saranoni-pdp #content_area span#altviews {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: auto !important;
+  pointer-events: none !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-alt-view-row {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  order: 2 !important;
+  position: relative !important;
+  z-index: 2 !important;
+  float: none !important;
+  clear: both !important;
+  width: 100% !important;
+  max-width: 650px !important;
+  margin: 12px auto 0 auto !important;
+  padding: 0 0 8px 0 !important;
+  height: auto !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+}
+
+html body.mc-saranoni-pdp #v65-product-related,
+html body.mc-saranoni-pdp #related_products_content {
+  position: relative !important;
+  z-index: 3 !important;
+  clear: both !important;
+  margin-top: 24px !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp td.mc-pdp-media-td > #altviews,
+  html body.mc-saranoni-pdp td.mc-pdp-media-td > span#altviews,
+  html body.mc-saranoni-pdp #product_photo_td > #altviews,
+  html body.mc-saranoni-pdp #product_photo_td > span#altviews {
+    margin-top: 0 !important;
+  }
+}
+/* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix3) */
+

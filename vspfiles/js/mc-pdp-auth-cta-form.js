@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720sarfix2 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720sarfix2";
+  // MC_DEPLOY_FINGERPRINT_20260720sarfix3 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260720sarfix3";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720sarfix2";
+  var VERSION = "20260720sarfix3";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -7498,42 +7498,26 @@
       global.document.getElementById("altviews") ||
       global.document.querySelector("span#altviews, #content_area .altviews, #v65-product-parent .altviews");
     if (!alt) return;
-    var visibleSwatches = 0;
-    global.document.querySelectorAll("#mc-configured-color-swatch-wrapper .mc-configured-color-swatch").forEach(function (btn) {
-      if (btn.style.display !== "none") visibleSwatches++;
-    });
-    if (
-      visibleSwatches > 0 ||
-      global.document.body.classList.contains("mc-saranoni-swatches-ready")
-    ) {
-      alt.classList.remove("mc-saranoni-color-altviews");
-      if (alt.getAttribute("data-mc-sar-alt-signature")) {
-        alt.removeAttribute("data-mc-sar-alt-signature");
-        alt.innerHTML = "";
-      }
-      try {
-        alt.style.setProperty("display", "none", "important");
-        alt.style.setProperty("visibility", "hidden", "important");
-        alt.style.setProperty("height", "0", "important");
-        alt.style.setProperty("overflow", "hidden", "important");
-        alt.style.setProperty("margin", "0", "important");
-        alt.style.setProperty("padding", "0", "important");
-      } catch (eHideAlt) {}
-      return;
-    }
+    /* Always hide native Volusion #altviews on Saranoni — color option images
+       duplicate the swatch rail, and the legacy negative-margin desktop rule
+       collapses the media cell so the hero covers Related Items. Gallery alts
+       come from #mc-pdp-alt-view-row (probed -altviewN.jpg) instead. */
     alt.classList.remove("mc-saranoni-color-altviews");
     if (alt.getAttribute("data-mc-sar-alt-signature")) {
       alt.removeAttribute("data-mc-sar-alt-signature");
       alt.innerHTML = "";
     }
     try {
-      alt.style.removeProperty("display");
-      alt.style.removeProperty("visibility");
-      alt.style.removeProperty("height");
-      alt.style.removeProperty("overflow");
-      alt.style.removeProperty("margin");
-      alt.style.removeProperty("padding");
-    } catch (eShowAlt) {}
+      alt.style.setProperty("display", "none", "important");
+      alt.style.setProperty("visibility", "hidden", "important");
+      alt.style.setProperty("height", "0", "important");
+      alt.style.setProperty("max-height", "0", "important");
+      alt.style.setProperty("overflow", "hidden", "important");
+      alt.style.setProperty("margin", "0", "important");
+      alt.style.setProperty("padding", "0", "important");
+      alt.style.setProperty("position", "absolute", "important");
+      alt.style.setProperty("left", "-9999px", "important");
+    } catch (eHideAlt) {}
   }
 
   function restoreSaranoniNativeColorUi(select) {
@@ -11313,7 +11297,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720sarfix2";
+  var WANT_FP = "20260720sarfix3";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11341,7 +11325,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix2&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix3&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}
