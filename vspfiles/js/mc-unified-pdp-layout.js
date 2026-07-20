@@ -333,6 +333,24 @@
     if (!inner) return;
     ensureUnifiedDescriptionClampCss();
 
+    // Mahjong House descriptions belong in the Product Details accordion and
+    // must remain complete. Never attach the generic image-height "View more"
+    // control to this product family.
+    if (isMahjongHousePdp()) {
+      host.classList.remove(
+        "mc-pdp-description-below-features--clamped",
+        "mc-pdp-description-below-features--expanded"
+      );
+      inner.style.removeProperty("--mc-desc-clamp-height");
+      var mahjongToggle = directChildByClass(host, "mc-pdp-description-view-more");
+      if (mahjongToggle) {
+        try {
+          mahjongToggle.remove();
+        } catch (eRemoveMahjongToggle) {}
+      }
+      return;
+    }
+
     var isDesktop = global.matchMedia && global.matchMedia("(min-width: 992px)").matches;
     var toggle = directChildByClass(host, "mc-pdp-description-view-more");
     if (!toggle) {
