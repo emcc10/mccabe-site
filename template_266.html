@@ -1536,6 +1536,15 @@ html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion{
 </style>
   <script id="mc-tmh-pdp-boot-20260702">
 (function (g, d) {
+  function loadTmhDescriptions() {
+    if (g.MC_TMH_PRODUCT_DESCRIPTIONS) return;
+    if (d.getElementById("mc-tmh-product-descriptions-js")) return;
+    var s = d.createElement("script");
+    s.id = "mc-tmh-product-descriptions-js";
+    s.src = "/v/vspfiles/js/mc-tmh-product-descriptions.js?v=20260720tmhdesc1";
+    s.async = true;
+    (d.head || d.documentElement).appendChild(s);
+  }
   function tagTmhInit() {
     try {
       var pc = String(g.global_Current_ProductCode || "").toUpperCase();
@@ -1546,6 +1555,7 @@ html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion{
       if (!/^TMH-/.test(pc)) return false;
       if (d.documentElement) d.documentElement.classList.add("mc-mahjong-pdp-init");
       if (d.body) d.body.classList.add("mc-mahjong-house-pdp", "mc-mahjong-pdp-init");
+      loadTmhDescriptions();
       return true;
     } catch (e) {
       return false;

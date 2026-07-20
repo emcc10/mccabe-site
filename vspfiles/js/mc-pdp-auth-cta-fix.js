@@ -1739,7 +1739,9 @@
   }
 
   function ensurePdpTitleInOptionsColumn() {
-    if (isPdpLayoutMounted()) return;
+    /* Mahjong: always re-home the breadcrumb H1 into the info column so mobile
+       never leaves the product name stacked above the hero image. */
+    if (isPdpLayoutMounted() && !isMahjongHousePdpPage()) return;
     var col = findPdpHeroColumnTd();
     if (!col) return;
     var titleWrap = global.document.getElementById("mc-pdp-title-right");
@@ -2196,12 +2198,15 @@
     st.textContent =
       "html body.mc-mahjong-house-pdp #mc-pdp-brand-logo{display:block!important;margin:0 auto 10px!important;padding:0!important;text-align:center!important}" +
       "html body.mc-mahjong-house-pdp #mc-pdp-brand-logo img{display:block!important;width:auto!important;max-width:230px!important;max-height:82px!important;height:auto!important;margin:0 auto!important;object-fit:contain!important}" +
+      "html body.mc-mahjong-house-pdp #mc-pdp-title-right{display:block!important;width:100%!important;max-width:100%!important;margin:0 0 10px!important;padding:0!important;text-align:center!important}" +
+      "html body.mc-mahjong-house-pdp #mc-pdp-title-right h1,html body.mc-mahjong-house-pdp #mc-pdp-title-right [itemprop='name'],html body.mc-mahjong-house-pdp #mc-pdp-title-right .productnamecolorLARGE{display:block!important;margin:0!important;padding:0!important;text-align:center!important}" +
+      "html body.mc-mahjong-house-pdp #mc-mahjong-price-host{display:block!important;width:100%!important;margin:0 0 14px!important;text-align:center!important}" +
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion,html body.mc-mahjong-house-pdp .mc-pdp-accordion{width:100%!important;max-width:100%!important;box-sizing:border-box!important;overflow:visible!important;padding-right:0!important}" +
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion *,html body.mc-mahjong-house-pdp .mc-pdp-accordion *{box-sizing:border-box!important;max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important}" +
       "html body.mc-mahjong-house-pdp .mc-acc-panel,html body.mc-mahjong-house-pdp .mc-acc-content{width:100%!important;max-width:100%!important;overflow:visible!important;padding-right:0!important}" +
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-pdp-description-below-features,html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-acc-saranoni-product-details-host,html body.mc-mahjong-house-pdp #mc-pdp-accordion #ProductDetail_ProductDetails_div,html body.mc-mahjong-house-pdp #mc-pdp-accordion #product_description{display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important;overflow:visible!important}" +
-      "@media (min-width:992px){html body.mc-mahjong-house-pdp #content_area tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #content_area tr.mc-unified-pdp-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{column-gap:24px!important;gap:24px!important;justify-content:center!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{max-width:620px!important;padding-right:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{width:440px!important;max-width:440px!important;min-width:420px!important;padding-left:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td img#product_photo,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media img#product_photo{max-width:min(620px,100%)!important;margin-right:0!important}}" +
-      "@media (max-width:991px){html body.mc-mahjong-house-pdp #content_area,html body.mc-mahjong-house-pdp #v65-product-parent{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important;box-sizing:border-box!important}html body.mc-mahjong-house-pdp #v65-product-parent>tbody,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{display:block!important;width:100%!important;max-width:100%!important}html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row>td,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row>td,html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media,html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important}html body.mc-mahjong-house-pdp #product_photo,html body.mc-mahjong-house-pdp a#product_photo_zoom_url{width:100%!important;max-width:650px!important;height:auto!important;margin-left:auto!important;margin-right:auto!important}html body.mc-mahjong-house-pdp #mc-mahjong-purchase-stack{width:100%!important;max-width:100%!important;box-sizing:border-box!important}}";
+      "@media (min-width:992px){html body.mc-mahjong-house-pdp #content_area tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #content_area tr.mc-unified-pdp-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{column-gap:24px!important;gap:24px!important;justify-content:center!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{max-width:620px!important;padding-right:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{width:440px!important;max-width:440px!important;min-width:420px!important;padding-left:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td img#product_photo,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media img#product_photo{max-width:min(620px,100%)!important;margin-right:0!important}html body.mc-mahjong-house-pdp #mc-pdp-title-right,html body.mc-mahjong-house-pdp #mc-pdp-title-right h1,html body.mc-mahjong-house-pdp #mc-pdp-title-right [itemprop='name'],html body.mc-mahjong-house-pdp #mc-mahjong-price-host{text-align:left!important}}" +
+      "@media (max-width:991px){html body.mc-mahjong-house-pdp #content_area,html body.mc-mahjong-house-pdp #v65-product-parent{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important;box-sizing:border-box!important}html body.mc-mahjong-house-pdp #v65-product-parent>tbody,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{display:flex!important;flex-direction:column!important;width:100%!important;max-width:100%!important}html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row>td,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row>td,html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media,html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important;float:none!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{order:1!important}html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{order:2!important}html body.mc-mahjong-house-pdp #v65-product-parent .vCSS_breadcrumb_td:not(:has(h1)):not(:has(#mc-pdp-title-right)){display:none!important}html body.mc-mahjong-house-pdp #product_photo,html body.mc-mahjong-house-pdp a#product_photo_zoom_url{width:100%!important;max-width:650px!important;height:auto!important;margin-left:auto!important;margin-right:auto!important}html body.mc-mahjong-house-pdp #mc-mahjong-purchase-stack{width:100%!important;max-width:100%!important;box-sizing:border-box!important}}";
   }
 
   function findMahjongDescriptionSource() {
@@ -2220,6 +2225,114 @@
       if (txt.length > 10) return node;
     }
     return null;
+  }
+
+  /* Official themahjonghouse.com copy (MC_TMH_PRODUCT_DESCRIPTIONS) into Product Details. */
+  function getMahjongProductCode() {
+    try {
+      var input = global.document.querySelector(
+        'input[name="ProductCode"], input[name="productcode"]'
+      );
+      return String(
+        (global.global_Current_ProductCode || "") || (input && input.value) || ""
+      ).toUpperCase();
+    } catch (eCode) {
+      return "";
+    }
+  }
+
+  function getMahjongOfficialDescriptionHtml(code) {
+    var map = global.MC_TMH_PRODUCT_DESCRIPTIONS;
+    if (!map || !code) return "";
+    return String(map[code] || map[String(code).toUpperCase()] || "").trim();
+  }
+
+  function ensureMahjongOfficialDescriptionsLoaded(done) {
+    if (global.MC_TMH_PRODUCT_DESCRIPTIONS) {
+      if (typeof done === "function") done(true);
+      return;
+    }
+    if (global.document.getElementById("mc-tmh-product-descriptions-js")) {
+      if (typeof done === "function") {
+        var tries = 0;
+        var iv = global.setInterval(function () {
+          tries += 1;
+          if (global.MC_TMH_PRODUCT_DESCRIPTIONS || tries > 40) {
+            global.clearInterval(iv);
+            done(!!global.MC_TMH_PRODUCT_DESCRIPTIONS);
+          }
+        }, 50);
+      }
+      return;
+    }
+    try {
+      var s = global.document.createElement("script");
+      s.id = "mc-tmh-product-descriptions-js";
+      s.src =
+        "/v/vspfiles/js/mc-tmh-product-descriptions.js?v=20260720tmhdesc1&mcrd=" +
+        Date.now();
+      s.async = true;
+      s.onload = function () {
+        if (typeof done === "function") done(!!global.MC_TMH_PRODUCT_DESCRIPTIONS);
+      };
+      s.onerror = function () {
+        if (typeof done === "function") done(false);
+      };
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eLoad) {
+      if (typeof done === "function") done(false);
+    }
+  }
+
+  function applyMahjongOfficialDescriptions() {
+    if (!isMahjongHousePdpPage()) return false;
+    var code = getMahjongProductCode();
+    var html = getMahjongOfficialDescriptionHtml(code);
+    if (!html) return false;
+    var token = code + ":" + html.length;
+    if (global.__MC_TMH_DESC_APPLIED__ === token) return true;
+
+    var written = false;
+    function writeNode(node) {
+      if (!node) return;
+      try {
+        node.innerHTML = html;
+        written = true;
+      } catch (eWrite) {}
+    }
+
+    writeNode(global.document.getElementById("product_description"));
+    global.document
+      .querySelectorAll(
+        "#ProductDetail_ProductDetails_div span[itemprop='description'], #ProductDetail_ProductDetails_div2 span[itemprop='description'], #mc-pdp-description-below-features #product_description, #mc-pdp-description-below-features span[itemprop='description'], #mc-acc-saranoni-product-details-host #product_description, #mc-acc-saranoni-product-details-host span[itemprop='description']"
+      )
+      .forEach(writeNode);
+
+    if (!written) {
+      var details =
+        global.document.getElementById("ProductDetail_ProductDetails_div") ||
+        global.document.getElementById("ProductDetail_ProductDetails_div2");
+      if (details) {
+        try {
+          details.innerHTML =
+            '<span id="product_description" itemprop="description">' +
+            html +
+            "</span>";
+          written = true;
+        } catch (eDetails) {}
+      }
+    }
+
+    if (written) {
+      global.__MC_TMH_DESC_APPLIED__ = token;
+      try {
+        global.document.documentElement.setAttribute(
+          "data-mc-tmh-desc",
+          "official-20260720"
+        );
+      } catch (eAttr) {}
+    }
+    return written;
   }
 
   function ensureMahjongDescriptionVisible() {
@@ -2533,10 +2646,18 @@
       ensureMahjongHousePdpCss();
       ensurePdpTitleInOptionsColumn();
       ensureMahjongHouseBrandLogo();
+      ensureMahjongOfficialDescriptionsLoaded(function () {
+        try {
+          applyMahjongOfficialDescriptions();
+        } catch (eDescLoad) {}
+      });
+      applyMahjongOfficialDescriptions();
       mountPdpFeaturesBlock();
       mountDescriptionBelowFeatures();
+      applyMahjongOfficialDescriptions();
       hideNativeVolusionTabPanels();
       ensureSaranoniPdpAccordion();
+      applyMahjongOfficialDescriptions();
       var tmhCol = resolveSaranoniInfoColumn();
       if (tmhCol) {
         applyMahjongHouseInfoColumnOrder(tmhCol);
@@ -2547,6 +2668,7 @@
           tmhCol.style.setProperty("box-sizing", "border-box", "important");
         } catch (eTmhCol) {}
         ensureMahjongPricePurchaseAndRelated(tmhCol);
+        applyMahjongHouseInfoColumnOrder(tmhCol);
       }
       hideMahjongHeroManufacturerLogo();
       syncPdpDescriptionViewMore();
@@ -4328,10 +4450,12 @@
   var MAHJONG_INFO_COLUMN_ORDER = [
     "mc-pdp-brand-logo",
     "mc-pdp-title-right",
+    "mc-mahjong-price-host",
     "mc-pdp-price-stack-host",
     "messaging-element",
     "mc-pdp-option-block",
     "mc-pdp-accordion",
+    "mc-mahjong-purchase-stack",
     "mc-pdp-purchase-stack",
   ];
 
@@ -4375,7 +4499,36 @@
 
   function applyMahjongHouseInfoColumnOrder(infoColumn) {
     if (!infoColumn || !isMahjongHousePdpPage()) return;
+    ensurePdpTitleInOptionsColumn();
     applyInfoColumnOrder(infoColumn, MAHJONG_INFO_COLUMN_ORDER);
+    try {
+      var logo = global.document.getElementById("mc-pdp-brand-logo");
+      var title = global.document.getElementById("mc-pdp-title-right");
+      var price =
+        global.document.getElementById("mc-mahjong-price-host") ||
+        global.document.getElementById("mc-pdp-price-stack-host");
+      if (logo && logo.parentNode !== infoColumn) infoColumn.insertBefore(logo, infoColumn.firstChild);
+      if (title && title.parentNode === infoColumn) {
+        var titleAfter = logo && logo.parentNode === infoColumn ? logo.nextElementSibling : infoColumn.firstElementChild;
+        if (titleAfter !== title) infoColumn.insertBefore(title, titleAfter);
+      }
+      if (price && title && title.parentNode === infoColumn && title.nextElementSibling !== price) {
+        infoColumn.insertBefore(price, title.nextElementSibling);
+      }
+    } catch (eTmhOrder) {}
+    /* Collapse leftover breadcrumb row once the H1 lives under the logo. */
+    try {
+      global.document
+        .querySelectorAll("#v65-product-parent .vCSS_breadcrumb_td")
+        .forEach(function (td) {
+          if (td.querySelector("h1, #mc-pdp-title-right, [itemprop='name']")) return;
+          var text = String(td.textContent || "").replace(/\s+/g, " ").trim();
+          if (text.length > 0) return;
+          td.style.setProperty("display", "none", "important");
+          var tr = td.parentNode;
+          if (tr && tr.tagName === "TR") tr.style.setProperty("display", "none", "important");
+        });
+    } catch (eBcHide) {}
   }
 
   function reorderSaranoniInfoColumnChildren(infoColumn, skipEnsure) {
