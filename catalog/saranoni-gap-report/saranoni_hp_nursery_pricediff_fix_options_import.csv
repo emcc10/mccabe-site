@@ -1,4 +1,4 @@
-OptionID,OptionCatID,OptionsDesc,PriceDiff
+id,optioncatid,optionsdesc,pricediff
 1359,23,Potions and Charms,0
 1360,23,Herbology,0
 1361,23,Hedwig,0

@@ -1,7 +1,7 @@
-id,optioncatid,optionsdesc,pricediff,applytoproductcodes
-1411,58,Small Minky,0,SAR-WEARABLE
-1412,58,Medium Minky,3,SAR-WEARABLE
-1413,58,Small Faux Fur,0,SAR-WEARABLE
-1414,58,Medium Faux Fur,3,SAR-WEARABLE
-1154,23,Cream,0,SAR-WEARABLE
-1155,23,Hazel,0,SAR-WEARABLE
+id,optioncatid,optionsdesc,pricediff
+1411,58,Small Minky,0
+1412,58,Medium Minky,3
+1413,58,Small Faux Fur,0
+1414,58,Medium Faux Fur,3
+1154,23,Cream,0
+1155,23,Hazel,0

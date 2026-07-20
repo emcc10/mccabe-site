@@ -1,35 +1,26 @@
-Saranoni import checklist — 2026-07-20 (HP nursery + King + Wearable)
-=====================================================================
+Saranoni import checklist — Volusion-approved headers only
+==========================================================
 
-Import these in Volusion Admin (Inventory → Import):
+OPTIONS table import
+--------------------
+Approved headers ONLY:
+  id,optioncatid,optionsdesc,pricediff
 
-1) Harry Potter Muslin Nursery — Products (OptionIDs)
-   catalog/saranoni-gap-report/saranoni_hp_nursery_products_optionids_import_volusion_raw.csv
-   Attaches colors + sizes:
-     Colors: 1359 Potions and Charms, 1360 Herbology, 1361 Hedwig
-     Sizes:  1362 Muslin/Lush Mini (+$7), 1363 Swaddle (+$0),
-             1364 Crib Sheet (+$17), 1365 Changing Cover (+$7),
-             1366 Muslin/Lush Quilt (+$50)
-   Matches saranoni.com: 3 colors × 5 sizes = 15 variants.
+Do NOT include applytoproductcodes (Volusion rejects it on Options import).
 
-2) Harry Potter Muslin Nursery — Options (pricediffs)
-   catalog/saranoni-gap-report/saranoni_hp_nursery_pricediff_fix_options_import.csv
+Files:
+  saranoni_hp_nursery_pricediff_fix_options_import.csv
+  saranoni_wearable_pricediff_fix_options_import.csv
 
-3) Faux Fur King Blanket — Products (OptionIDs) — Cream + Hazel if missing
-   catalog/saranoni-gap-report/saranoni_fx_fur_king_products_optionids_import_volusion_raw.csv
-   OptionIDs: 1048 Charcoal, 1158 Classic Leopard, 1154 Cream,
-              1093 Dove, 1049 Feather, 1155 Hazel, 1156 Snow Leopard
+PRODUCTS table import
+---------------------
+Approved headers ONLY:
+  ProductCode,OptionIDs
 
-4) Wearable Blanket (still pending from earlier)
-   catalog/saranoni-gap-report/saranoni_wearable_products_optionids_import_volusion_raw.csv
-   catalog/saranoni-gap-report/saranoni_wearable_pricediff_fix_options_import.csv
+Files:
+  saranoni_hp_nursery_products_optionids_import_volusion_raw.csv
+  saranoni_fx_fur_king_products_optionids_import_volusion_raw.csv
+  saranoni_wearable_products_optionids_import_volusion_raw.csv
 
-PHOTO DEPLOY (auto on push to main)
------------------------------------
-- SAR-FX-FUR-KING-1.jpg / -2T.jpg replaced (was Christmas stockings)
-- King altviews + color option images refreshed from Saranoni
-- HP nursery altview1–24 already on CDN
-
-After import + deploy hard-refresh:
-  https://www.mccabestheaterandliving.com/product-p/sar-hp-hp-msln-nrs.htm
-  https://www.mccabestheaterandliving.com/product-p/sar-fx-fur-king.htm
+After Products OptionIDs import, run Create All Inventory Control Grids
+in Volusion maintenance if inventory grids are used.
