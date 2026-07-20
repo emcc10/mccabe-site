@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260719mahjong2 — cart glyph + Mahjong landing .webp→.jpg remap
+ * MC_PLP_ENFORCER_20260720home1 — cart glyph + Mahjong remap + mobile cart right nudge
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260719mahjong3";
+  var VERSION = "20260720home1";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -167,6 +167,17 @@
     cart.style.setProperty("background-repeat", "no-repeat", "important");
     cart.style.setProperty("background-position", "center center", "important");
     cart.style.setProperty("background-size", "20px 20px", "important");
+    try {
+      if (
+        global.matchMedia &&
+        global.matchMedia("(max-width: 991px)").matches
+      ) {
+        cart.style.setProperty("left", "auto", "important");
+        cart.style.setProperty("right", "8px", "important");
+        cart.style.setProperty("margin", "0", "important");
+        cart.style.setProperty("translate", "none", "important");
+      }
+    } catch (ePos) {}
     var svg = cart.querySelector("svg.mc-cart-float__icon");
     if (!svg) return;
     svg.style.setProperty("display", "none", "important");

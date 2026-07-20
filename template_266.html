@@ -1679,7 +1679,7 @@ html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion{
 })(window, document);
   </script>
   <script id="mc-plp-enforcer-bridge">
-(function(g,d){var W="20260719mahjong3",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
+(function(g,d){var W="20260720home1",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
 function cat(){try{var p=String(g.location.pathname||"").toLowerCase();
 var isHome =
@@ -2589,8 +2589,8 @@ document.addEventListener("DOMContentLoaded", function () {
   <!-- IE9 FIX - CATEGORY GRID LAYOUT -->
   <!--[if IE 9]><script>"searchresults.asp"===PageName()&&!function(e){e(document).ready(function(){var r,t=0,n=0,i=new Array,h=0;e(".v-product").each(function(){if(r=e(this),h=r.position().top,n!=h){for(currentDiv=0;currentDiv<i.length;currentDiv++)i[currentDiv].height(t);i.length=0,n=h,t=r.height(),i.push(r)}else i.push(r),t=t<r.height()?r.height():t;for(currentDiv=0;currentDiv<i.length;currentDiv++)i[currentDiv].height(t)})})}($jQueryModern);</script><![endif]-->
 
-  <script src="v/vspfiles/templates/266/js/min/template.min.js?v=20260706cart1"></script>
-  <script id="mc-cart-float-finalizer-20260719cart1">
+  <script src="v/vspfiles/templates/266/js/min/template.min.js?v=20260720home1"></script>
+  <script id="mc-cart-float-finalizer-20260720home1">
   (function(w,d){
     "use strict";
     /* Do NOT use [class*='mc-cart-float'] — that also matches the inner svg
@@ -2610,6 +2610,12 @@ document.addEventListener("DOMContentLoaded", function () {
         el.style.setProperty("background-repeat","no-repeat","important");
         el.style.setProperty("background-position","center center","important");
         el.style.setProperty("background-size","20px 20px","important");
+        if(w.matchMedia && w.matchMedia("(max-width: 991px)").matches){
+          el.style.setProperty("left","auto","important");
+          el.style.setProperty("right","8px","important");
+          el.style.setProperty("margin","0","important");
+          el.style.setProperty("translate","none","important");
+        }
       }catch(e){}
       var svg=el.querySelector&&el.querySelector("svg.mc-cart-float__icon,svg");
       if(svg){try{
@@ -2630,6 +2636,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",fix);
     w.addEventListener("load",fix);
     [100,400,900,1600,2800,5000].forEach(function(ms){w.setTimeout(fix,ms);});
+    if(!w.__MC_CART_FLOAT_POS_IV__){
+      w.__MC_CART_FLOAT_POS_IV__=w.setInterval(fix,1100);
+    }
     if(w.MutationObserver){
       try{
         new MutationObserver(schedule).observe(d.documentElement,{childList:true,subtree:true});
@@ -14649,7 +14658,7 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260719mahjong3"></script>
+  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260720home1"></script>
  
   <script id="mc-my-boards-template-boot">
 (function () {
