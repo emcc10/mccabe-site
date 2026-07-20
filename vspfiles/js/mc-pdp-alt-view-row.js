@@ -405,7 +405,7 @@
         /* Prefer fetch HEAD — more reliable than Image probes under extensions. */
         if (window.fetch) {
           window
-            .fetch(src, { method: "HEAD", cache: "force-cache" })
+            .fetch(src, { method: "GET", cache: "force-cache", mode: "same-origin" })
             .then(function (resp) {
               if (resp && resp.ok) addSaranoniDiscovered(code, photoSlot, src);
               completeOne();
