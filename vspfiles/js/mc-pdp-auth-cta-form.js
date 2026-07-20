@@ -6799,6 +6799,10 @@
       ".mc-saranoni-size-label{display:block!important;margin:12px 0 6px!important;font:500 13px/1.3 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;color:#444!important;text-transform:none!important}" +
       ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:90px!important;padding:4px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important}" +
       ".mc-saranoni-size-thumb img{display:block!important;width:82px!important;height:82px!important;object-fit:cover!important;border:0!important;border-radius:2px!important}" +
+      /* Size options are labels only — never show option photos for Small/Medium/Large/XL. */
+      ".mc-saranoni-size-thumb.mc-saranoni-text-size-thumb{width:auto!important;min-width:96px!important;padding:10px 14px!important;flex-direction:row!important;justify-content:center!important}" +
+      ".mc-saranoni-size-thumb.mc-saranoni-text-size-thumb img{display:none!important;width:0!important;height:0!important;margin:0!important;padding:0!important}" +
+      ".mc-saranoni-size-thumb.mc-saranoni-text-size-thumb .mc-saranoni-size-thumb__label{margin-top:0!important;font:600 13px/1.2 Inter,Arial,sans-serif!important;max-width:none!important}" +
       ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}" +
       ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important;margin-top:4px!important;white-space:normal!important;word-break:break-word!important;max-width:86px!important}";
   }
@@ -6897,35 +6901,17 @@
       if (!opt) return;
       var btn = global.document.createElement("button");
       btn.type = "button";
-      btn.className = "mc-saranoni-size-thumb";
+      /* Size options are always text chips — never load {CODE}-{sizeOptionId}-S/T.jpg. */
+      btn.className = "mc-saranoni-size-thumb mc-saranoni-text-size-thumb";
       btn.setAttribute("data-option-id", entry.optionId);
       btn.setAttribute("aria-label", entry.label);
       btn.setAttribute("title", entry.label);
       var displayLabel = entry.label.replace(/(\$\d[\d,]*)\.00(?!\d)/g, "$1");
       btn.innerHTML =
-        '<img alt="' +
-        escapeHtmlText(entry.label) +
-        '" /><span class="mc-saranoni-size-thumb__label">' +
+        '<span class="mc-saranoni-size-thumb__label">' +
         escapeHtmlText(displayLabel) +
         "</span>";
       row.appendChild(btn);
-      var img = btn.querySelector("img");
-      loadProductScopedColorImage(ctx.productCode, entry.swatchImage, function (swatchSrc) {
-        if (swatchSrc) {
-          img.src = swatchSrc;
-          return;
-        }
-        loadProductScopedColorImage(ctx.productCode, entry.mainImage, function (mainSrc) {
-          if (mainSrc) {
-            img.src = mainSrc;
-          } else {
-            btn.classList.add("mc-saranoni-text-size-thumb");
-            try {
-              img.style.setProperty("display", "none", "important");
-            } catch (eHideImg) {}
-          }
-        });
-      });
       btn.addEventListener("click", function (e) {
         e.preventDefault();
         applySaranoniSizeVariantSelection(ctx, entry, true);
