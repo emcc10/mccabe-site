@@ -135,6 +135,13 @@
       addItem(items, seen, item.full, item.alt, item.slot);
     });
     items.sort(function (a, b) { return a.slot - b.slot; });
+    if (code === "MOLLY-OLSON-DINING-SET") {
+      // The first supplier alt is the hero image repeated under a different
+      // filename. Keep the three distinct chair/detail views instead.
+      items = items.filter(function (item) {
+        return !/(?:-altview1|-1|-2t)\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full);
+      });
+    }
     return items;
   }
 
@@ -415,6 +422,11 @@
     row.style.setProperty("flex-wrap", "nowrap", "important");
     row.style.setProperty("align-items", "center", "important");
     row.style.setProperty("justify-content", "flex-start", "important");
+    var visibleCount = Math.min(items.length, 3);
+    var thumbSize = Math.max(
+      48,
+      Math.min(84, Math.floor((heroWidth - Math.max(visibleCount - 1, 0) * 8) / Math.max(visibleCount, 1)))
+    );
     row.style.setProperty("gap", "8px", "important");
     row.style.setProperty("width", "100%", "important");
     row.style.setProperty("max-width", heroWidth ? heroWidth + "px" : "100%", "important");
@@ -446,9 +458,9 @@
       link.setAttribute("data-mc-tmh-alt-slot", String(item.slot));
       link.setAttribute("aria-label", "View alternate product image " + item.slot);
       link.style.setProperty("display", "block", "important");
-      link.style.setProperty("flex", "0 0 84px", "important");
-      link.style.setProperty("width", "84px", "important");
-      link.style.setProperty("height", "84px", "important");
+      link.style.setProperty("flex", "0 0 " + thumbSize + "px", "important");
+      link.style.setProperty("width", thumbSize + "px", "important");
+      link.style.setProperty("height", thumbSize + "px", "important");
       link.style.setProperty("margin", "0", "important");
       link.style.setProperty("padding", "0", "important");
       link.style.setProperty("overflow", "hidden", "important");
@@ -461,8 +473,8 @@
       image.alt = item.alt;
       image.loading = "lazy";
       image.style.setProperty("display", "block", "important");
-      image.style.setProperty("width", "84px", "important");
-      image.style.setProperty("height", "84px", "important");
+      image.style.setProperty("width", thumbSize + "px", "important");
+      image.style.setProperty("height", thumbSize + "px", "important");
       image.style.setProperty("max-width", "none", "important");
       image.style.setProperty("object-fit", "cover", "important");
       image.style.setProperty("margin", "0", "important");
