@@ -74,10 +74,38 @@
   }
 
   function probeImage(src, onload, onerror) {
+    /* Some browser extensions (ad/tracker blockers) silently drop image
+       requests created via document.createElement("img") that are never
+       attached to the DOM — neither onload nor onerror ever fires, so the
+       probe hangs forever even though the image genuinely exists. Attaching
+       the element (hidden, off-screen) avoids that heuristic, and a
+       per-image timeout guards against anything that still gets stuck. */
     var tester = document.createElement("img");
-    tester.onload = onload;
-    tester.onerror = onerror;
+    var settled = false;
+    function cleanup() {
+      if (tester.parentNode) tester.parentNode.removeChild(tester);
+    }
+    function handleLoad() {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      onload();
+    }
+    function handleError() {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      onerror();
+    }
+    tester.onload = handleLoad;
+    tester.onerror = handleError;
+    tester.setAttribute("aria-hidden", "true");
+    tester.style.cssText =
+      "position:absolute!important;width:1px!important;height:1px!important;" +
+      "opacity:0!important;pointer-events:none!important;left:-9999px!important;top:-9999px!important;";
     tester.src = src;
+    (document.body || document.documentElement).appendChild(tester);
+    setTimeout(handleError, 8000);
     return tester;
   }
 
