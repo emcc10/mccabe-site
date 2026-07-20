@@ -37,7 +37,7 @@
   // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
   var MC_DEPLOY_FINGERPRINT = "20260624A";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260714sarvariant2";
+  var VERSION = "20260720sarmob1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -4827,56 +4827,37 @@
   function finalizeSaranoniInfoColumnOrder() {
     if (saranoniLayoutFinalizing) return;
     saranoniLayoutFinalizing = true;
-    try {  
-  
+    try {
       if (!isSaranoniPdpPage()) return;
 
       hideLegacyPdpFrameBits();
-  
       expandSaranoniHeroNestedTables();
-  
       ensureSaranoniHeroImage();
-  
       mountPdpFeaturesBlock();
-  
       mountDescriptionBelowFeatures();
-  
       hideSaranoniNestedStrayMediaCol();
-  
       removeSaranoniDuplicateColorPicker();
-  
       relocateVariantSwatchesFromMediaColumn();
-  
+
       var infoColumn = resolveSaranoniInfoColumn();
-  
-      if (!infoColumn) return;
-  
-      hideSaranoniNativePriceTables(infoColumn);
-      hideSaranoniNativeColumnClutter(infoColumn);
-      hideSaranoniNativeOptionPricing();
+      if (infoColumn) {
+        hideSaranoniNativePriceTables(infoColumn);
+        hideSaranoniNativeColumnClutter(infoColumn);
+        hideSaranoniNativeOptionPricing();
+        hideSaranoniNativePurchaseUi(infoColumn);
+        ensureSaranoniPdpAccordion();
+        ensurePurchaseStackCentered();
+        ensureQuantityAboveAtc();
+        ensureSaranoniSizeThumbsInInfoColumn();
+        hideSaranoniStrayHeroCopy(infoColumn);
+        applySaranoniInfoColumnOrder(infoColumn);
+        applySaranoniInfoColumnAlignment();
+        hideSaranoniLeftoverNativeShell(infoColumn);
+        ensureSaranoniHeroImage();
+      }
 
-      hideSaranoniNativePurchaseUi(infoColumn);
-  
-      ensureSaranoniPdpAccordion();
-  
-      ensurePurchaseStackCentered();
-  
-      ensureQuantityAboveAtc();
-
-      ensureSaranoniSizeThumbsInInfoColumn();
-
-      hideSaranoniStrayHeroCopy(infoColumn);
-
-      applySaranoniInfoColumnOrder(infoColumn);
-
-      applySaranoniInfoColumnAlignment();
-
-      hideSaranoniLeftoverNativeShell(infoColumn);
-  
-      ensureSaranoniHeroImage();
-  
+      revealSaranoniRelated();
       markSaranoniPdpReady();
-  
       markPdpHeroReady();
     } finally {
       saranoniLayoutFinalizing = false;
@@ -9807,7 +9788,51 @@
      products (no duplicates), so a plain reveal is safe. This ONLY touches the
      two related-section elements — no ancestor walking, no dedup — so it
      cannot affect the features column or any other part of the page. */
-  function revealBeanBagRelated() {
+    function revealSaranoniRelated() {
+    if (!isSaranoniPdpPage()) return;
+    var related = global.document.getElementById("related_products_content");
+    var relatedRoot = global.document.getElementById("v65-product-related");
+    if (!related && !relatedRoot) return;
+    try {
+      if (related) {
+        related.style.setProperty("display", "block", "important");
+        related.style.setProperty("visibility", "visible", "important");
+        related.style.setProperty("opacity", "1", "important");
+        related.style.setProperty("height", "auto", "important");
+        related.style.setProperty("max-height", "none", "important");
+        related.style.setProperty("width", "100%", "important");
+        related.style.setProperty("overflow", "visible", "important");
+      }
+      if (relatedRoot) {
+        relatedRoot.style.setProperty("display", "block", "important");
+        relatedRoot.style.setProperty("visibility", "visible", "important");
+        relatedRoot.style.setProperty("opacity", "1", "important");
+        relatedRoot.style.setProperty("width", "100%", "important");
+        relatedRoot.style.setProperty("height", "auto", "important");
+        relatedRoot.style.setProperty("max-height", "none", "important");
+        relatedRoot.style.setProperty("overflow", "visible", "important");
+      }
+      var grid = (relatedRoot || related).querySelector(".mc-related-plp-grid");
+      if (grid) {
+        grid.style.setProperty("display", "flex", "important");
+        grid.style.setProperty("visibility", "visible", "important");
+        grid.style.setProperty("opacity", "1", "important");
+        grid.style.setProperty("height", "auto", "important");
+        grid.style.setProperty("overflow", "visible", "important");
+      }
+    } catch (eSarRelated) {}
+    if (related && !related.dataset.mcSarRelatedRevealBound) {
+      related.dataset.mcSarRelatedRevealBound = "1";
+      try {
+        var relatedObserver = new global.MutationObserver(function () {
+          if (related.style.getPropertyValue("display") === "none") revealSaranoniRelated();
+        });
+        relatedObserver.observe(related, { attributes: true, attributeFilter: ["style"] });
+      } catch (eObs) {}
+    }
+  }
+
+function revealBeanBagRelated() {
     if (!isBeanBagPdpPage()) return;
     var related = global.document.getElementById("related_products_content");
     var relatedRoot = global.document.getElementById("v65-product-related");
@@ -9857,7 +9882,7 @@
     global.__MC_BB_OPTION_REPAIR_VER__ = VERSION;
     [120, 600, 1800].forEach(function (ms) {
       global.setTimeout(function () {
-        try { initBeanBagImageSync(); ensureBeanBagSizeRow(); markBeanBagCoverSwatchesReady(); ensureBeanBagBrandLogo(); ensureBeanBagPdpAccordion(); appendBeanBagInfoColumnOrder(); hideBeanBagNativeOptionsTable(); sanitizeBeanBagAltviews(); applyPdpMainImageCap(); normalizeLegacyPdpInfoWrapper(); revealBeanBagRelated(); } catch (eBbRepair) {}
+        try { initBeanBagImageSync(); ensureBeanBagSizeRow(); markBeanBagCoverSwatchesReady(); ensureBeanBagBrandLogo(); ensureBeanBagPdpAccordion(); appendBeanBagInfoColumnOrder(); hideBeanBagNativeOptionsTable(); sanitizeBeanBagAltviews(); applyPdpMainImageCap(); normalizeLegacyPdpInfoWrapper(); revealBeanBagRelated(); revealSaranoniRelated(); } catch (eBbRepair) {}
       }, ms);
     });
   }
