@@ -1128,9 +1128,9 @@ body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li {
 #display_menu_1 .vnav--horizontal.vnav--level1 > li > a,
 #display_menu_1 .vnav__link,
 #display_menu_1 .vnav__label {
-  font-family: Inter, sans-serif !important;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
   font-size: 15px !important;
-  font-weight: 400 !important;
+  font-weight: 500 !important;
   letter-spacing: 0.12em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;

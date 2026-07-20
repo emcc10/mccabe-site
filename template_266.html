@@ -1290,7 +1290,7 @@ document.addEventListener("DOMContentLoaded", function () {
   </style>
   <script id="mc-hero-copy-head-force">
 (function () {
-  var TAG = '';
+  var TAG = 'FRESH STYLE, NEW PRODUCTS, SAME GREAT SERVICE';
   function paintTagline(el) {
     if (!el) return;
     el.style.cssText = '';
@@ -1326,7 +1326,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (wrap) wrap.insertAdjacentElement('afterend', t);
       else ov.insertBefore(t, ov.firstChild);
     }
-    if (t.textContent.replace(/\s+/g, ' ').trim().indexOf('CUSTOM FURNITURE') === -1) t.textContent = TAG;
+    if (t.textContent.replace(/\s+/g, ' ').trim().indexOf('FRESH STYLE') === -1) t.textContent = TAG;
     paintTagline(t);
     ov.style.setProperty('z-index', '5', 'important');
     t.style.setProperty('-webkit-text-fill-color', '#d8d6d3', 'important');
@@ -1992,7 +1992,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 
     <!-- HERO VIDEO -->
 <section class="mc-hero-video">
- <video class="mc-hero-video-el" autoplay muted loop playsinline preload="auto">
+ <video class="mc-hero-video-el" autoplay muted playsinline preload="auto">
  <source src="/v/vspfiles/windsor-home.mp4" type="video/mp4">
 </video>
 <script>
@@ -2027,10 +2027,20 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
   window.mcPlayWindsorHeroAtSeven = function (v) {
     if (!v) return;
     v.muted = true;
-    v.loop = true;
+    v.loop = false;
     v.playsInline = true;
     v.autoplay = true;
     window.mcEnsureWindsorHeroSrc(v);
+
+    if (!v.dataset.mcLoopBound) {
+      v.dataset.mcLoopBound = "1";
+      v.addEventListener("ended", function () {
+        try {
+          v.currentTime = 7;
+          v.play && v.play().catch(function () {});
+        } catch (eLoop) {}
+      });
+    }
 
     function seekAndPlay() {
       try {
@@ -2083,7 +2093,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
         <div class="hero-logo-wrap">
           <img src="/v/vspfiles/images/mccabe-logo.png" alt="McCabe's Theater & Living" class="hero-logo-img">
         </div>
-        <div id="mc-hero-copy-tagline" style="font-size:36px !important;color:#d8d6d3 !important;letter-spacing:0.12em !important;text-transform:none !important;text-align:center !important;display:block !important;">CUSTOM FURNITURE, DESIGNED FOR LIVING</div>
+        <div id="mc-hero-copy-tagline" style="font-size:36px !important;color:#d8d6d3 !important;letter-spacing:0.12em !important;text-transform:none !important;text-align:center !important;display:block !important;">FRESH STYLE, NEW PRODUCTS, SAME GREAT SERVICE</div>
       <script>
         (function () {
           if (typeof window.mcHeroEnsureCopy === 'function') window.mcHeroEnsureCopy();
