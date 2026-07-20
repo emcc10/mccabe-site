@@ -187,6 +187,37 @@
     return output;
   }
 
+  function findMessageRows(root) {
+    if (!root || !root.querySelectorAll) return [];
+    var candidates = [];
+    root.querySelectorAll("tr, li, div, p, span").forEach(function (el) {
+      var text = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (!text || text.length > 200) return;
+      if (!/free\s+shipping/i.test(text)) return;
+      if (!/on\s+orders?\s+of|\$\s*\d/.test(text)) return;
+      candidates.push(el);
+    });
+    return candidates.filter(function (el) {
+      return !candidates.some(function (other) {
+        return other !== el && el.contains(other);
+      });
+    });
+  }
+
+  function setRowVisible(el, visible) {
+    if (!el) return;
+    if (!visible) {
+      if (!el.hasAttribute("data-mc-shipping-display")) {
+        el.setAttribute("data-mc-shipping-display", el.style.display || "");
+      }
+      el.style.setProperty("display", "none", "important");
+      el.setAttribute("data-mc-shipping-hidden", "1");
+    } else if (el.getAttribute("data-mc-shipping-hidden") === "1") {
+      el.style.display = el.getAttribute("data-mc-shipping-display") || "";
+      el.removeAttribute("data-mc-shipping-hidden");
+    }
+  }
+
   function setOptionVisible(option, visible) {
     var input = option.input;
     var container = option.container;
@@ -215,6 +246,67 @@
     }
   }
 
+  function fireChange(el) {
+    try {
+      el.dispatchEvent(new g.Event("change", { bubbles: true }));
+    } catch (e) {
+      try {
+        var evt = d.createEvent("HTMLEvents");
+        evt.initEvent("change", true, true);
+        el.dispatchEvent(evt);
+      } catch (e2) {}
+    }
+  }
+
+  function selectRemainingAllowedRate(options) {
+    var radioGroups = {};
+    var selectGroups = {};
+
+    options.forEach(function (option) {
+      var input = option.input;
+      if (input.tagName === "OPTION") {
+        var selectEl = input.closest && input.closest("select");
+        if (!selectEl) return;
+        var skey = selectEl.name || selectEl.id || "select";
+        selectGroups[skey] = selectGroups[skey] || { el: selectEl, opts: [] };
+        selectGroups[skey].opts.push(option);
+      } else if (input.type === "radio") {
+        var rkey = input.name || "radio";
+        radioGroups[rkey] = radioGroups[rkey] || [];
+        radioGroups[rkey].push(option);
+      }
+    });
+
+    Object.keys(radioGroups).forEach(function (key) {
+      var opts = radioGroups[key];
+      var visibleOpts = opts.filter(function (o) {
+        return !o.input.disabled;
+      });
+      if (!visibleOpts.length) return;
+      var alreadyChecked = visibleOpts.some(function (o) {
+        return o.input.checked;
+      });
+      if (alreadyChecked) return;
+      visibleOpts[0].input.checked = true;
+      fireChange(visibleOpts[0].input);
+    });
+
+    Object.keys(selectGroups).forEach(function (key) {
+      var group = selectGroups[key];
+      var visibleOpts = group.opts.filter(function (o) {
+        return !o.input.hidden;
+      });
+      if (!visibleOpts.length) return;
+      var current = group.el.options[group.el.selectedIndex];
+      var stillValid = current && visibleOpts.some(function (o) {
+        return o.input === current;
+      });
+      if (stillValid) return;
+      group.el.value = visibleOpts[0].input.value;
+      fireChange(group.el);
+    });
+  }
+
   function applyPolicy() {
     if (!d || !d.body) return;
     var root = d.getElementById("content_area") || d.body;
@@ -226,13 +318,17 @@
     options.forEach(function (option) {
       setOptionVisible(option, isRateAllowed(option.label, summary, zip));
     });
+    selectRemainingAllowedRate(options);
+    findMessageRows(root).forEach(function (row) {
+      setRowVisible(row, isRateAllowed(row.textContent, summary, zip));
+    });
     d.documentElement.setAttribute("data-mc-shipping-policy", VERSION);
   }
 
   function boot() {
     if (!d || !d.body) return;
     var path = String(g.location && g.location.pathname || "").toLowerCase();
-    if (!/shoppingcart|onepagecheckout|checkout/i.test(path)) return;
+    if (!/shoppingcart|shopcart\.asp|\/cart\b|onepagecheckout|checkout/i.test(path)) return;
     applyPolicy();
 
     var root = d.getElementById("content_area") || d.body;

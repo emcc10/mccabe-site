@@ -72,14 +72,7 @@
   }
 
   function goCheckout() {
-    try {
-      if (typeof g.goToCheckout === "function") {
-        g.goToCheckout();
-        return;
-      }
-    } catch (e) {}
-    g.location.href =
-      "/checkout/?text=656565&bg=FFFFFF&font=Lato%2C+ui%2Dsans%2Dserif%2C+system%2Dui%2C+%2Dapple%2Dsystem%2C+BlinkMacSystemFont%2C+Segoe+UI%2C+Roboto%2C+Helvetica+Neue%2C+Arial";
+    g.location.href = "/one-page-checkout.asp";
   }
 
   function elementVisible(el) {
