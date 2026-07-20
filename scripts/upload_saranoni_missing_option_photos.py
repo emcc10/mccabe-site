@@ -10,18 +10,14 @@ ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
 sys.path.insert(0, str(ROOT / "scripts"))
 
-# Known missing live OptionID images (Grand Faux Fur text-only swatches, etc.)
-# Cozy Bamboni Robe Tori Halford + Small/Medium first — still 404 on CDN 2026-07-20.
+# Known missing live OptionID images (color options only).
+# Size options (Small/Medium/Large/XL, etc.) are text-only — do NOT require -T/-S photos.
 TARGETS = [
-    "SAR-COZY-BMB-ROBES-1341-T.jpg",
+    "SAR-COZY-BMB-ROBES-1341-T.jpg",  # Tori Halford (color)
     "SAR-COZY-BMB-ROBES-1341-S.jpg",
-    "SAR-COZY-BMB-ROBES-1218-T.jpg",
-    "SAR-COZY-BMB-ROBES-1218-S.jpg",
-    "SAR-COZY-BMB-ROBES-1219-T.jpg",
-    "SAR-COZY-BMB-ROBES-1219-S.jpg",
-    "SAR-BAMBONI-SETS-1444-T.jpg",
+    "SAR-BAMBONI-SETS-1444-T.jpg",  # Charcoal (color)
     "SAR-BAMBONI-SETS-1444-S.jpg",
-    "SAR-BAMBONI-SETS-1117-T.jpg",
+    "SAR-BAMBONI-SETS-1117-T.jpg",  # Taupe (color)
     "SAR-BAMBONI-SETS-1117-S.jpg",
     "SAR-GRAND-FX-FUR-1351-T.jpg",
     "SAR-GRAND-FX-FUR-1351-S.jpg",
