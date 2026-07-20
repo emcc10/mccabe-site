@@ -5,6 +5,7 @@
   var SARANONI_FREE_THRESHOLD = 99;
 
   var RATE_TYPES = {
+    curbside: /curbside/i,
     beanBagFree: /(?:bean\s*bag|\bbb\b).{0,35}free|free.{0,35}(?:bean\s*bag|\bbb\b)/i,
     saranoniFree: /saranoni.{0,35}free|free.{0,35}saranoni/i,
     whiteGlove: /white\s*glove|local\s+(?:white\s*glove\s+)?delivery/i,
@@ -64,6 +65,7 @@
 
   function rateType(label) {
     var text = String(label || "").replace(/\s+/g, " ").trim();
+    if (RATE_TYPES.curbside.test(text)) return "curbside";
     if (RATE_TYPES.beanBagFree.test(text)) return "beanBagFree";
     if (RATE_TYPES.saranoniFree.test(text)) return "saranoniFree";
     if (RATE_TYPES.whiteGlove.test(text)) return "whiteGlove";
@@ -99,9 +101,28 @@
     return summary;
   }
 
+  function parseMileRange(label) {
+    var text = String(label || "");
+    var m = text.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*miles?\s*from\s*forney/i);
+    if (m) return { min: parseFloat(m[1]), max: parseFloat(m[2]) };
+    m = text.match(/up\s*to\s*(\d+(?:\.\d+)?)\s*miles?\s*from\s*(?:forney|frisco)/i);
+    if (m) return { min: 0, max: parseFloat(m[1]) };
+    return null;
+  }
+
+  function whiteGloveLabelAllowed(label, zip) {
+    var quote = whiteGloveQuote(zip, 0);
+    if (!quote) return false;
+    var range = parseMileRange(label);
+    if (!range) return true;
+    return quote.distanceMiles >= range.min && quote.distanceMiles <= range.max;
+  }
+
   function isRateAllowed(label, summary, zip) {
     var type = rateType(label);
     var cart = summary || summarizeCart([]);
+
+    if (type === "curbside") return false;
 
     if (cart.onlyBeanBags) return type === "beanBagFree" || type === "genericFree";
 
@@ -118,7 +139,7 @@
     }
 
     if (type === "beanBagFree" || type === "saranoniFree" || type === "genericFree") return false;
-    if (type === "whiteGlove") return isDfwZip(zip);
+    if (type === "whiteGlove") return whiteGloveLabelAllowed(label, zip);
     return true;
   }
 
