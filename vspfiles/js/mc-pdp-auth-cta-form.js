@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720sarfix1 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720sarfix1";
+  // MC_DEPLOY_FINGERPRINT_20260720sarfix2 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260720sarfix2";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720sarfix1";
+  var VERSION = "20260720sarfix2";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -9875,14 +9875,16 @@
       var host =
         global.document.getElementById("vCSS_mainform") ||
         global.document.getElementById("content_area");
-      var productParent = global.document.getElementById("v65-product-parent");
-      if (!host || !productParent) return;
-      var block = productParent;
-      while (block.parentElement && block.parentElement !== host) {
-        block = block.parentElement;
+      if (!host) return;
+      var anchor =
+        relatedRoot.closest(".vol-product__bottom") ||
+        global.document.getElementById("v65-product-parent");
+      if (!anchor) return;
+      while (anchor.parentElement && anchor.parentElement !== host) {
+        anchor = anchor.parentElement;
       }
-      if (block && block.contains(relatedRoot) && relatedRoot !== block) {
-        if (block.nextSibling) host.insertBefore(relatedRoot, block.nextSibling);
+      if (anchor && anchor.contains(relatedRoot) && relatedRoot.parentElement !== host) {
+        if (anchor.nextSibling) host.insertBefore(relatedRoot, anchor.nextSibling);
         else host.appendChild(relatedRoot);
       }
     } catch (eHoistRel) {}
@@ -9912,9 +9914,11 @@
         relatedRoot.style.setProperty("visibility", "visible", "important");
         relatedRoot.style.setProperty("opacity", "1", "important");
         relatedRoot.style.setProperty("width", "100%", "important");
-        relatedRoot.style.setProperty("max-width", "1200px", "important");
+        relatedRoot.style.setProperty("max-width", "100%", "important");
         relatedRoot.style.setProperty("margin-left", "auto", "important");
         relatedRoot.style.setProperty("margin-right", "auto", "important");
+        relatedRoot.style.setProperty("padding-left", "0", "important");
+        relatedRoot.style.setProperty("padding-right", "0", "important");
         relatedRoot.style.setProperty("height", "auto", "important");
         relatedRoot.style.setProperty("max-height", "none", "important");
         relatedRoot.style.setProperty("overflow", "visible", "important");
@@ -9927,12 +9931,13 @@
         grid.style.setProperty("visibility", "visible", "important");
         grid.style.setProperty("opacity", "1", "important");
         grid.style.setProperty("width", "100%", "important");
-        grid.style.setProperty("max-width", "1200px", "important");
+        grid.style.setProperty("max-width", "min(1144px, 100%)", "important");
         grid.style.setProperty("height", "auto", "important");
         grid.style.setProperty("overflow", "visible", "important");
         grid.style.setProperty("transform", "none", "important");
         grid.style.setProperty("margin-left", "auto", "important");
         grid.style.setProperty("margin-right", "auto", "important");
+        grid.style.setProperty("justify-content", "center", "important");
       }
     } catch (eSarRelated) {}
     if (related && !related.dataset.mcSarRelatedRevealBound) {
@@ -11308,7 +11313,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720sarfix1";
+  var WANT_FP = "20260720sarfix2";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11336,7 +11341,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix2&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}

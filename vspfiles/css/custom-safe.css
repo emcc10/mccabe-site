@@ -24596,3 +24596,45 @@ html body.mc-product-page #mc-pdp-alt-view-row {
 }
 /* END REMOVABLE: Saranoni related/logo/alt layout (20260720sarfix1) */
 
+/* BEGIN REMOVABLE: Saranoni related centering (20260720sarfix2)
+   Related lived in vol-product__bottom at 1200px left-aligned; hoist now breaks it out
+   and this block centers the grid within the full PDP content width. */
+html body.productdetails #v65-product-related,
+html body.mc-product-page #v65-product-related,
+html body.mc-saranoni-pdp #v65-product-related {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+html body.productdetails #v65-product-related .v65-product-related-header-cell,
+html body.mc-product-page #v65-product-related .v65-product-related-header-cell,
+html body.productdetails #v65-product-related .v65-product-related-details-cell,
+html body.mc-product-page #v65-product-related .v65-product-related-details-cell {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  text-align: center !important;
+}
+
+html body.productdetails #v65-product-related .mc-related-plp-grid,
+html body.mc-product-page #v65-product-related .mc-related-plp-grid {
+  width: 100% !important;
+  max-width: min(1144px, 100%) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  justify-content: center !important;
+}
+
+@media (min-width: 992px) {
+  html body.productdetails #v65-product-related .mc-related-plp-grid,
+  html body.mc-product-page #v65-product-related .mc-related-plp-grid {
+    flex-wrap: nowrap !important;
+  }
+}
+/* END REMOVABLE: Saranoni related centering (20260720sarfix2) */
+
