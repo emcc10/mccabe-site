@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720bbatc2 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720bbatc2";
+  // MC_DEPLOY_FINGERPRINT_20260720sarfix1 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260720sarfix1";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720bbatc2";
+  var VERSION = "20260720sarfix1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -2053,6 +2053,20 @@
     var wrap = global.document.getElementById("mc-pdp-brand-logo");
     if (wrap && wrap.querySelector("img")) {
       positionSaranoniBrandLogo(wrap);
+      try {
+        wrap.style.setProperty("display", "block", "important");
+        wrap.style.setProperty("visibility", "visible", "important");
+        wrap.style.setProperty("opacity", "1", "important");
+        var existing = wrap.querySelector("img");
+        if (existing) {
+          existing.style.setProperty("display", "block", "important");
+          existing.style.setProperty("visibility", "visible", "important");
+          existing.style.setProperty("opacity", "1", "important");
+          existing.style.setProperty("max-height", "72px", "important");
+          existing.style.setProperty("width", "auto", "important");
+          existing.style.setProperty("margin", "0 auto", "important");
+        }
+      } catch (eLogoShow) {}
       return;
     }
     var logo = findManufacturerLogoImg();
@@ -2071,6 +2085,11 @@
       wrap.appendChild(img);
     }
     positionSaranoniBrandLogo(wrap);
+    try {
+      wrap.style.setProperty("display", "block", "important");
+      wrap.style.setProperty("visibility", "visible", "important");
+      wrap.style.setProperty("opacity", "1", "important");
+    } catch (eLogoWrap) {}
   }
 
   function ensureBeanBagBrandLogo() {
@@ -4447,6 +4466,11 @@
     } catch (eHeroSize) {}
     var pc = resolveConfiguredColorProductCode(null);
     var cur = mainImg.getAttribute("src") || "";
+    /* Respect an explicit alt-thumb / color-swatch choice. */
+    try {
+      if (global.__MC_PDP_ALT_VIEW_ACTIVE_SRC__) return;
+      if (configuredColorActiveEntry && configuredColorActiveSrc) return;
+    } catch (eHold) {}
     global.document
       .querySelectorAll(
         "td.mc-pdp-media-td img[src*='/manufacturers/'], #product_photo_td img[src*='/manufacturers/']"
@@ -4459,11 +4483,13 @@
       });
     var hasLoadedHero =
       !mainImg.complete || (mainImg.naturalWidth && mainImg.naturalWidth > 0);
+    var isColorOptionHero = isSaranoniColorOptionPhotoFile(saranoniPhotoFileName(cur));
     var hasGoodHero =
       cur &&
       !isSaranoniBadHeroSrc(cur) &&
       hasLoadedHero &&
-      (!pc || configuredColorImageBelongsToProduct(cur, pc));
+      (!pc || configuredColorImageBelongsToProduct(cur, pc)) &&
+      (isColorOptionHero || !isSaranoniSecondaryNumberedPhoto(cur));
     if (hasGoodHero) {
       if (!configuredColorDefaultSrc) configuredColorDefaultSrc = cur;
       if (!configuredColorActiveSrc) configuredColorActiveSrc = cur;
@@ -4497,10 +4523,8 @@
       [
         "/v/vspfiles/photos/" + pc + "-1.jpg",
         "/v/vspfiles/photos/" + pc + "-1T.jpg",
-        "/v/vspfiles/photos/" + pc + "-2T.jpg",
         "https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/" + pc + "-1.jpg",
         "https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/" + pc + "-1T.jpg",
-        "https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/" + pc + "-2T.jpg",
       ],
       function (resolved) {
         if (!resolved || !configuredColorImageBelongsToProduct(resolved, pc)) return;
@@ -5790,6 +5814,27 @@
     if (/nophoto\.gif/i.test(s)) return true;
     if (/\/manufacturers\//i.test(s)) return true;
     return false;
+  }
+
+  function saranoniPhotoFileName(src) {
+    return String(src || "")
+      .split("?")[0]
+      .split("#")[0]
+      .split("/")
+      .pop() || "";
+  }
+
+  /* Color-option files look like CODE-1096-T.jpg. Numbered gallery files are
+     CODE-1.jpg / CODE-2T.jpg. Prefer -1/-1T as the default hero; -2/-2T are
+     secondary closeups and must not replace the lifestyle shot on load. */
+  function isSaranoniColorOptionPhotoFile(file) {
+    return /-\d{3,}-[TS]\.(jpg|jpeg|png|webp)$/i.test(String(file || ""));
+  }
+
+  function isSaranoniSecondaryNumberedPhoto(src) {
+    var file = saranoniPhotoFileName(src);
+    if (!file || isSaranoniColorOptionPhotoFile(file)) return false;
+    return /-[2-9]\d*T?\.(jpg|jpeg|png|webp)$/i.test(file);
   }
 
   function configuredColorImageMatchesOption(src, productCode, optionId) {
@@ -9824,11 +9869,31 @@
      products (no duplicates), so a plain reveal is safe. This ONLY touches the
      two related-section elements — no ancestor walking, no dedup — so it
      cannot affect the features column or any other part of the page. */
+    function hoistRelatedProductsFullWidth(relatedRoot) {
+    if (!relatedRoot) return;
+    try {
+      var host =
+        global.document.getElementById("vCSS_mainform") ||
+        global.document.getElementById("content_area");
+      var productParent = global.document.getElementById("v65-product-parent");
+      if (!host || !productParent) return;
+      var block = productParent;
+      while (block.parentElement && block.parentElement !== host) {
+        block = block.parentElement;
+      }
+      if (block && block.contains(relatedRoot) && relatedRoot !== block) {
+        if (block.nextSibling) host.insertBefore(relatedRoot, block.nextSibling);
+        else host.appendChild(relatedRoot);
+      }
+    } catch (eHoistRel) {}
+  }
+
     function revealSaranoniRelated() {
     if (!isSaranoniPdpPage()) return;
     var related = global.document.getElementById("related_products_content");
     var relatedRoot = global.document.getElementById("v65-product-related");
     if (!related && !relatedRoot) return;
+    hoistRelatedProductsFullWidth(relatedRoot);
     try {
       if (related) {
         related.style.setProperty("display", "block", "important");
@@ -9837,6 +9902,9 @@
         related.style.setProperty("height", "auto", "important");
         related.style.setProperty("max-height", "none", "important");
         related.style.setProperty("width", "100%", "important");
+        related.style.setProperty("max-width", "100%", "important");
+        related.style.setProperty("margin-left", "0", "important");
+        related.style.setProperty("transform", "none", "important");
         related.style.setProperty("overflow", "visible", "important");
       }
       if (relatedRoot) {
@@ -9844,17 +9912,27 @@
         relatedRoot.style.setProperty("visibility", "visible", "important");
         relatedRoot.style.setProperty("opacity", "1", "important");
         relatedRoot.style.setProperty("width", "100%", "important");
+        relatedRoot.style.setProperty("max-width", "1200px", "important");
+        relatedRoot.style.setProperty("margin-left", "auto", "important");
+        relatedRoot.style.setProperty("margin-right", "auto", "important");
         relatedRoot.style.setProperty("height", "auto", "important");
         relatedRoot.style.setProperty("max-height", "none", "important");
         relatedRoot.style.setProperty("overflow", "visible", "important");
+        relatedRoot.style.setProperty("transform", "none", "important");
+        relatedRoot.style.setProperty("left", "auto", "important");
       }
       var grid = (relatedRoot || related).querySelector(".mc-related-plp-grid");
       if (grid) {
         grid.style.setProperty("display", "flex", "important");
         grid.style.setProperty("visibility", "visible", "important");
         grid.style.setProperty("opacity", "1", "important");
+        grid.style.setProperty("width", "100%", "important");
+        grid.style.setProperty("max-width", "1200px", "important");
         grid.style.setProperty("height", "auto", "important");
         grid.style.setProperty("overflow", "visible", "important");
+        grid.style.setProperty("transform", "none", "important");
+        grid.style.setProperty("margin-left", "auto", "important");
+        grid.style.setProperty("margin-right", "auto", "important");
       }
     } catch (eSarRelated) {}
     if (related && !related.dataset.mcSarRelatedRevealBound) {
@@ -11230,7 +11308,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720bbatc2";
+  var WANT_FP = "20260720sarfix1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11258,7 +11336,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720bbatc2&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix1&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}

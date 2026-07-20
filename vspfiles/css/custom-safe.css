@@ -23184,13 +23184,7 @@ body.mc-product-page #v65-product-related img {
   max-width: 350px !important;
 }
 
-html body.productdetails #related_products_content .mc-related-plp-card:nth-child(1),
-html body.mc-product-page #related_products_content .mc-related-plp-card:nth-child(1),
-html body.productdetails #v65-product-related .mc-related-plp-card:nth-child(1),
-html body.mc-product-page #v65-product-related .mc-related-plp-card:nth-child(1) {
-  width: 100% !important;
-  max-width: 100% !important;
-}
+/* Removed 20260720sarfix1: first-card width:100% squashed the related row. */
 
 html body.productdetails .mc-related-plp-grid,
 html body.mc-product-page .mc-related-plp-grid {
@@ -24456,4 +24450,149 @@ html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label {
   }
 }
 /* END REMOVABLE: SELECT/CLOSE by span order (20260720closemenu2) */
+
+/* BEGIN REMOVABLE: Saranoni related/logo/alt layout (20260720sarfix1)
+   Related was trapped in the ~318px info column; first-card 100% also crushed the row.
+   Force a full-width related shell, stack cleanly on mobile, keep brand logo visible. */
+html body.productdetails #v65-product-related,
+html body.mc-product-page #v65-product-related,
+html body.mc-saranoni-pdp #v65-product-related {
+  display: block !important;
+  visibility: visible !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  float: none !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+
+html body.productdetails #related_products_content,
+html body.mc-product-page #related_products_content,
+html body.mc-saranoni-pdp #related_products_content,
+html body.productdetails #v65-product-related td.v65-product-related-header-cell,
+html body.mc-product-page #v65-product-related td.v65-product-related-header-cell,
+html body.productdetails #v65-product-related td.v65-product-related-details-cell,
+html body.mc-product-page #v65-product-related td.v65-product-related-details-cell,
+html body.productdetails #v65-product-related table,
+html body.mc-product-page #v65-product-related table,
+html body.productdetails #v65-product-related tbody,
+html body.mc-product-page #v65-product-related tbody,
+html body.productdetails #v65-product-related tr,
+html body.mc-product-page #v65-product-related tr {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  float: none !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+
+html body.productdetails .mc-related-plp-grid,
+html body.mc-product-page .mc-related-plp-grid {
+  display: flex !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  left: auto !important;
+}
+
+@media (min-width: 992px) {
+  html body.productdetails .mc-related-plp-grid,
+  html body.mc-product-page .mc-related-plp-grid {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    gap: 24px !important;
+  }
+  html body.productdetails .mc-related-plp-card,
+  html body.mc-product-page .mc-related-plp-card {
+    flex: 1 1 0 !important;
+    width: 25% !important;
+    max-width: 25% !important;
+    min-width: 180px !important;
+  }
+}
+
+@media (max-width: 991px) {
+  html body.productdetails #v65-product-related,
+  html body.mc-product-page #v65-product-related,
+  html body.productdetails #related_products_content,
+  html body.mc-product-page #related_products_content,
+  html body.productdetails .mc-related-plp-grid,
+  html body.mc-product-page .mc-related-plp-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    transform: none !important;
+    float: none !important;
+  }
+
+  html body.productdetails .mc-related-plp-grid,
+  html body.mc-product-page .mc-related-plp-grid {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    overflow-x: visible !important;
+  }
+
+  html body.productdetails .mc-related-plp-card,
+  html body.mc-product-page .mc-related-plp-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+    margin-left: 0 !important;
+    transform: none !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-brand-logo,
+  html body.mc-saranoni-pdp #mc-pdp-brand-logo img,
+  html body.mc-saranoni-pdp:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
+  html body.mc-saranoni-pdp:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: 72px !important;
+    width: auto !important;
+    max-width: min(240px, 70vw) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-alt-view-row,
+  html body.productdetails #mc-pdp-alt-view-row,
+  html body.mc-product-page #mc-pdp-alt-view-row {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    transform: none !important;
+    order: 2 !important;
+  }
+}
+
+html body.productdetails #mc-pdp-alt-view-row,
+html body.mc-product-page #mc-pdp-alt-view-row {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+/* END REMOVABLE: Saranoni related/logo/alt layout (20260720sarfix1) */
 

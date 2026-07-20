@@ -1,7 +1,8 @@
 (function (window, document) {
   "use strict";
 
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260716__) return;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX1__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260716__ = true;
 
   var ROW_ID = "mc-pdp-alt-view-row";
@@ -327,13 +328,48 @@
     }
   }
 
-  /* MC_SARANONI_ALT_VIEW_ROW_20260718: Saranoni gallery assets use the shared
-     {CODE}-altviewN.jpg convention. Keep the older -2/-2T probes as a
-     fallback for legacy Saranoni products. */
+  /* MC_SARANONI_ALT_VIEW_ROW_20260720sarfix1: Saranoni gallery assets use the
+     shared {CODE}-altviewN.jpg convention. Keep older -2/-2T probes as a
+     fallback. Prefer non-T over -NT for the same slot, and allow re-probe when
+     the first pass found nothing (empty-array latch used to block forever). */
   var MAX_SAR_ALT_SLOT = 24;
+  var saranoniProbeDone = {};
+
+  function saranoniIsTFile(src) {
+    return /-\d+T\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(String(src || ""));
+  }
+
+  function addSaranoniDiscovered(code, slot, src) {
+    var list = discoveredByCode[code] || (discoveredByCode[code] = []);
+    var idx = -1;
+    for (var i = 0; i < list.length; i += 1) {
+      if (list[i].slot === slot) {
+        idx = i;
+        break;
+      }
+    }
+    if (idx >= 0) {
+      /* Prefer non-T lifestyle/detail over the smaller -NT closeup. */
+      if (saranoniIsTFile(list[idx].full) && !saranoniIsTFile(src)) {
+        list[idx] = {
+          slot: slot,
+          full: src,
+          alt: "Alternate product view " + slot
+        };
+        schedule();
+      }
+      return;
+    }
+    list.push({
+      slot: slot,
+      full: src,
+      alt: "Alternate product view " + slot
+    });
+    schedule();
+  }
 
   function probeSaranoniAltViews(code) {
-    if (!code || probeInFlight[code] || discoveredByCode[code]) return;
+    if (!code || probeInFlight[code] || saranoniProbeDone[code]) return;
     probeInFlight[code] = true;
     discoveredByCode[code] = [];
     var remaining = MAX_SAR_ALT_SLOT + (MAX_SAR_ALT_SLOT - 1) * 2;
@@ -343,6 +379,7 @@
       if (finished) return;
       finished = true;
       probeInFlight[code] = false;
+      saranoniProbeDone[code] = true;
       discoveredByCode[code].sort(function (a, b) { return a.slot - b.slot; });
       render();
     }
@@ -359,34 +396,19 @@
       (function (photoSlot) {
         var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
         probeImage(src, function () {
-          var already = discoveredByCode[code].some(function (item) { return item.slot === photoSlot; });
-          if (!already) {
-            discoveredByCode[code].push({
-              slot: photoSlot,
-              full: src,
-              alt: "Alternate product view " + photoSlot
-            });
-            schedule();
-          }
+          addSaranoniDiscovered(code, photoSlot, src);
           completeOne();
         }, completeOne);
       })(altSlot);
     }
 
     for (var slot = 2; slot <= MAX_SAR_ALT_SLOT; slot += 1) {
+      /* Probe non-T first so lifestyle/detail wins the race over -NT. */
       ["", "T"].forEach(function (suffix) {
         var photoSlot = slot;
         var src = "/v/vspfiles/photos/" + code + "-" + photoSlot + suffix + ".jpg";
         probeImage(src, function () {
-          var already = discoveredByCode[code].some(function (item) { return item.slot === photoSlot; });
-          if (!already) {
-            discoveredByCode[code].push({
-              slot: photoSlot,
-              full: src,
-              alt: "Alternate product view " + photoSlot
-            });
-            schedule();
-          }
+          addSaranoniDiscovered(code, photoSlot, src);
           completeOne();
         }, completeOne);
       });
@@ -406,7 +428,13 @@
     var row = document.getElementById(ROW_ID);
 
     if (isSaranoni) {
-      var sarItems = (discoveredByCode[code] || []).slice().sort(function (a, b) { return a.slot - b.slot; });
+      var heroCanon = canonicalUrl(hero.currentSrc || hero.getAttribute("src") || "");
+      var sarItems = (discoveredByCode[code] || [])
+        .slice()
+        .filter(function (item) {
+          return canonicalUrl(item.full) !== heroCanon;
+        })
+        .sort(function (a, b) { return a.slot - b.slot; });
       if (!sarItems.length) {
         if (row) row.style.setProperty("display", "none", "important");
         probeSaranoniAltViews(code);
