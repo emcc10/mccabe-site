@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720sizetext1 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720sizetext1";
+  // MC_DEPLOY_FINGERPRINT_20260720bbatc1 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260720bbatc1";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720sizetext1";
+  var VERSION = "20260720bbatc1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -2871,12 +2871,40 @@
         return { parent: sarCol, after: null };
       }
     }
+    /* Bean bag Features live inside #mc-pdp-accordion. Never anchor ATC to
+       #mc-pdp-features or its .mc-acc-panel — that hides Add to Cart. */
+    if (isBeanBagPdpPage()) {
+      var bbCol = findPdpHeroColumnTd();
+      if (bbCol) {
+        var bbAcc = global.document.getElementById("mc-pdp-accordion");
+        if (bbAcc && bbCol.contains(bbAcc)) {
+          return { parent: bbCol, after: bbAcc };
+        }
+        var bbCover = global.document.getElementById("beanbag-swatch-wrapper");
+        if (bbCover && bbCol.contains(bbCover)) {
+          return { parent: bbCol, after: bbCover };
+        }
+        var bbSize = global.document.getElementById("mc-bb-size-section");
+        if (bbSize && bbCol.contains(bbSize)) {
+          return { parent: bbCol, after: bbSize };
+        }
+        var bbPrice = global.document.getElementById("mc-pdp-price-stack-host");
+        if (bbPrice && bbCol.contains(bbPrice)) {
+          return { parent: bbCol, after: bbPrice };
+        }
+        return { parent: bbCol, after: null };
+      }
+    }
     var features = global.document.getElementById("mc-pdp-features");
-    if (features && features.parentNode) {
+    if (features && features.parentNode && !features.closest("#mc-pdp-accordion")) {
       return { parent: features.parentNode, after: features };
     }
+    var accordion = global.document.getElementById("mc-pdp-accordion");
+    if (accordion && accordion.parentNode) {
+      return { parent: accordion.parentNode, after: accordion };
+    }
     var desc = global.document.getElementById("mc-pdp-description-below-features");
-    if (desc && desc.parentNode) {
+    if (desc && desc.parentNode && !desc.closest("#mc-pdp-accordion")) {
       return { parent: desc.parentNode, after: desc };
     }
     var opt = global.document.getElementById("mc-pdp-option-block");
@@ -2912,7 +2940,9 @@
       if (
         global.document.body &&
         (global.document.body.classList.contains("mc-theater-seating-pdp") ||
-          global.document.documentElement.classList.contains("mc-paragon-pdp"))
+          global.document.documentElement.classList.contains("mc-paragon-pdp")) &&
+        !isBeanBagPdpPage() &&
+        !isSaranoniPdpPage()
       ) {
         return;
       }
@@ -2986,7 +3016,9 @@
       if (
         global.document.body &&
         (global.document.body.classList.contains("mc-theater-seating-pdp") ||
-          global.document.documentElement.classList.contains("mc-paragon-pdp"))
+          global.document.documentElement.classList.contains("mc-paragon-pdp")) &&
+        !isBeanBagPdpPage() &&
+        !isSaranoniPdpPage()
       ) {
         return;
       }
@@ -4359,6 +4391,13 @@
     var purchase = resolveBeanBagPurchaseElement(infoColumn);
     if (purchase && purchase.parentNode === infoColumn) infoColumn.insertBefore(acc, purchase);
     else if (acc.parentNode !== infoColumn) infoColumn.appendChild(acc);
+    /* Rescue ATC if an earlier pass nested it inside the collapsed Features panel. */
+    if (purchase && purchase.closest && purchase.closest("#mc-pdp-accordion .mc-acc-panel")) {
+      try {
+        if (acc.nextSibling) infoColumn.insertBefore(purchase, acc.nextSibling);
+        else infoColumn.appendChild(purchase);
+      } catch (eRescueAtc) {}
+    }
     return acc;
   }
   function ensurePdpAccordionVisible() {
@@ -11191,7 +11230,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720sizetext1";
+  var WANT_FP = "20260720bbatc1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11219,7 +11258,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sizetext1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720bbatc1&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}
