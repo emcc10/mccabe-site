@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720bbatc1 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720bbatc1";
+  // MC_DEPLOY_FINGERPRINT_20260720bbatc2 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260720bbatc2";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720bbatc1";
+  var VERSION = "20260720bbatc2";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -11230,13 +11230,13 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720bbatc1";
+  var WANT_FP = "20260720bbatc2";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
       if (String(g.__MC_DEPLOY_FP__ || "") === WANT_FP) return;
-      if (d.documentElement.getAttribute("data-mc-pdp-auth-reload")) return;
-      d.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
+      if (d.documentElement.getAttribute("data-mc-pdp-auth-reload") === WANT_FP) return;
+      d.documentElement.setAttribute("data-mc-pdp-auth-reload", WANT_FP);
       g.__MC_PDP_AUTH_ACTIVE_GEN__ = (g.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
       try {
         if (g.__MC_PDP_LAYOUT_MO__) {
@@ -11258,7 +11258,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720bbatc1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720bbatc2&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}

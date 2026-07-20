@@ -1482,17 +1482,17 @@ document.addEventListener("DOMContentLoaded", function () {
   <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
   <script>
 (function (g, d) {
-  var FP = "20260720bbatc1";
+  var FP = "20260720bbatc2";
   function bootFreshCta() {
     if (!d.getElementById("v65-product-parent")) return;
     if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
-    if (d.documentElement.getAttribute("data-mc-pdp-auth-head-boot")) return;
-    d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", "1");
-    d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+    if (d.documentElement.getAttribute("data-mc-pdp-auth-head-boot") === FP) return;
+    d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", FP);
+    d.querySelectorAll('script[src*="mc-pdp-auth-cta-form.js"]').forEach(function (old) {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720bbatc1&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720bbatc2&mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -1505,7 +1505,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
   <!-- mc-pdp-auth-cta-form.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
        A second static ?mcrd=live tag used to live here; it cached an old copy whose stabilizer
-       fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260720sizetext1 -->
+       fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260720bbatc2 -->
   <!-- Size options must stay text chips even if a stale CDN copy of mc-pdp-auth-cta-form.js still injects imgs. -->
   <style id="mc-saranoni-size-text-only-20260720">
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb{
@@ -2679,20 +2679,18 @@ document.addEventListener("DOMContentLoaded", function () {
 </style>
 <script id="mc-pdp-auth-loader-minimal">
 (function () {
-  var FP = "20260624A";
+  var FP = "20260720bbatc2";
   if (String(window.__MC_DEPLOY_FP__ || "") === FP) {
   } else if (
-    !document.documentElement.getAttribute("data-mc-pdp-auth-reload") &&
-    !document.documentElement.getAttribute("data-mc-pdp-auth-head-boot") &&
-    !document.querySelector('script[src*="mc-pdp-auth-cta-fix.js"]')
+    document.documentElement.getAttribute("data-mc-pdp-auth-reload") !== FP &&
+    document.documentElement.getAttribute("data-mc-pdp-auth-head-boot") !== FP &&
+    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"][src*="20260720bbatc2"]')
   ) {
-    /* mc-pdp-auth-cta-boot (above, in <head>) is the primary loader. This block only
-       fires as a fallback when that loader did not already inject the script — it must
-       never remove/re-inject a copy that is already present, or the PDP script runs twice
-       (MC_PDP_AUTH_DUPLICATE_LOAD_FIX_20260713). */
-    document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
+    /* Fallback only when head boot did not inject the current fingerprint.
+       Always use the versioned URL — unversioned CDN still serves stale copies. */
+    document.documentElement.setAttribute("data-mc-pdp-auth-reload", FP);
     var s = document.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720bbatc2&mcrd=" + Date.now();
     s.async = false;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -2706,6 +2704,38 @@ document.addEventListener("DOMContentLoaded", function () {
   window.mcTryInitWmLeather = function () { return false; };
   window.mcMountInlineConfig = function () {};
 })();
+</script>
+
+<script id="mc-bb-atc-rescue-20260720bbatc2">
+/* Bean bag: Add to Cart must never stay inside collapsed Features .mc-acc-panel. */
+(function (g, d) {
+  function isBb() {
+    try {
+      var path = String((g.location && g.location.pathname) || "").toLowerCase();
+      if (/\/product-p\/bb-/.test(path)) return true;
+      var pc = d.querySelector('#v65-product-parent input[name="ProductCode"]');
+      var code = String((pc && pc.value) || "").toUpperCase();
+      if (/^BB-/.test(code)) return true;
+      return !!(d.body && d.body.classList.contains("mc-bean-bag-pdp"));
+    } catch (e) { return false; }
+  }
+  function rescue() {
+    if (!isBb()) return;
+    var stack = d.getElementById("mc-pdp-purchase-stack");
+    var acc = d.getElementById("mc-pdp-accordion");
+    if (!stack || !acc) return;
+    if (!stack.closest("#mc-pdp-accordion .mc-acc-panel") && !acc.contains(stack)) return;
+    var col = acc.parentNode;
+    if (!col) return;
+    try {
+      if (acc.nextSibling) col.insertBefore(stack, acc.nextSibling);
+      else col.appendChild(stack);
+    } catch (eMove) {}
+  }
+  [0, 200, 600, 1200, 2500, 5000].forEach(function (ms) { g.setTimeout(rescue, ms); });
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", rescue);
+  g.addEventListener("load", rescue);
+})(window, document);
 </script>
 
 <!-- ========= HOMEPAGE-ONLY HERO + MENU CONTROL (CLEAN) ========= -->
