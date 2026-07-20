@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260719mahjong2";
+  var VERSION = "20260719mahjong3";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -1356,6 +1356,24 @@
     });
   }
 
+  function fixTmhTravelTilePlpThumbnails(root) {
+    // Category 202 contains travel tile sets. Their lifestyle image is the
+    // intentional listing thumbnail; -1 is the white-background packshot.
+    if (!/\/category-s\/202\.htm/i.test(global.location.pathname || "")) return;
+    root = root || document.getElementById("content_area") || document;
+    root.querySelectorAll('a[href*="/product-p/tmh-trv-"]').forEach(function (link) {
+      var match = String(link.getAttribute("href") || "").match(
+        /\/product-p\/(tmh-trv-[a-z0-9-]+)\.htm/i
+      );
+      var img = link.querySelector("img");
+      if (!match || !img) return;
+      var code = match[1].toUpperCase();
+      img.setAttribute("src", sameOriginPhotoUrl(code + "-2T.jpg") + "?v=" + VERSION);
+      img.removeAttribute("data-mc-scale-done");
+      img.classList.remove("mc-plp-img-fit", "mc-plp-img-sized");
+    });
+  }
+
   /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP — probe and swap. */
   function fixNoPhotoThumbnails() {
     if (isCloseoutSalePlp()) return;
@@ -1720,6 +1738,7 @@
     fixStalePhotoUrls();
     fixNoPhotoThumbnails();
     fixTmhMatPlpThumbnails();
+    fixTmhTravelTilePlpThumbnails();
     normalizePLPImages();
     injectLegacyPlpLayoutFixCss();
     collapsePlpGridGap(document.getElementById("content_area") || document);
@@ -1738,6 +1757,7 @@
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();
           fixTmhMatPlpThumbnails();
+          fixTmhTravelTilePlpThumbnails();
           normalizePLPImages();
           injectLegacyPlpLayoutFixCss();
           collapsePlpGridGap(document.getElementById("content_area") || document);
