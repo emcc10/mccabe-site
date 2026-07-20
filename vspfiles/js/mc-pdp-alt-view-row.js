@@ -309,13 +309,22 @@
     probeInFlight[code] = true;
     discoveredByCode[code] = [];
     var remaining = MAX_SAR_ALT_SLOT + (MAX_SAR_ALT_SLOT - 1) * 2;
+    var finished = false;
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      probeInFlight[code] = false;
+      discoveredByCode[code].sort(function (a, b) { return a.slot - b.slot; });
+      render();
+    }
+
+    setTimeout(finish, 6000);
 
     function completeOne() {
       remaining -= 1;
       if (remaining > 0) return;
-      probeInFlight[code] = false;
-      discoveredByCode[code].sort(function (a, b) { return a.slot - b.slot; });
-      render();
+      finish();
     }
 
     for (var altSlot = 1; altSlot <= MAX_SAR_ALT_SLOT; altSlot += 1) {

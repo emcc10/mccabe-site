@@ -1946,14 +1946,14 @@
     }
 
     if (isSaranoniPdpPage()) {
-      hideSaranoniHeroAltviews();
+      var sarAltHidden = hideSaranoniHeroAltviews();
       relocateVariantSwatchesFromMediaColumn();
       if (main.nextElementSibling !== alt) {
         try {
           main.parentNode.insertBefore(alt, main.nextSibling);
         } catch (eSarAlt) {}
       }
-      applySoftGoodsAltviewsLayout(alt);
+      if (!sarAltHidden) applySoftGoodsAltviewsLayout(alt);
       return;
     }
 
@@ -7438,11 +7438,11 @@
     finalizeSaranoniInfoColumnOrder();
   }
   function hideSaranoniHeroAltviews() {
-    if (!isSaranoniPdpPage()) return;
+    if (!isSaranoniPdpPage()) return false;
     var alt =
       global.document.getElementById("altviews") ||
       global.document.querySelector("span#altviews, #content_area .altviews, #v65-product-parent .altviews");
-    if (!alt) return;
+    if (!alt) return false;
     var visibleSwatches = 0;
     global.document.querySelectorAll("#mc-configured-color-swatch-wrapper .mc-configured-color-swatch").forEach(function (btn) {
       if (btn.style.display !== "none") visibleSwatches++;
@@ -7464,7 +7464,7 @@
         alt.style.setProperty("margin", "0", "important");
         alt.style.setProperty("padding", "0", "important");
       } catch (eHideAlt) {}
-      return;
+      return true;
     }
     alt.classList.remove("mc-saranoni-color-altviews");
     if (alt.getAttribute("data-mc-sar-alt-signature")) {
@@ -7479,6 +7479,7 @@
       alt.style.removeProperty("margin");
       alt.style.removeProperty("padding");
     } catch (eShowAlt) {}
+    return false;
   }
 
   function restoreSaranoniNativeColorUi(select) {
