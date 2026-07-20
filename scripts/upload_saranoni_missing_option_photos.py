@@ -11,7 +11,18 @@ PHOTOS = ROOT / "vspfiles" / "photos"
 sys.path.insert(0, str(ROOT / "scripts"))
 
 # Known missing live OptionID images (Grand Faux Fur text-only swatches, etc.)
+# Cozy Bamboni Robe Tori Halford + Small/Medium first — still 404 on CDN 2026-07-20.
 TARGETS = [
+    "SAR-COZY-BMB-ROBES-1341-T.jpg",
+    "SAR-COZY-BMB-ROBES-1341-S.jpg",
+    "SAR-COZY-BMB-ROBES-1218-T.jpg",
+    "SAR-COZY-BMB-ROBES-1218-S.jpg",
+    "SAR-COZY-BMB-ROBES-1219-T.jpg",
+    "SAR-COZY-BMB-ROBES-1219-S.jpg",
+    "SAR-BAMBONI-SETS-1444-T.jpg",
+    "SAR-BAMBONI-SETS-1444-S.jpg",
+    "SAR-BAMBONI-SETS-1117-T.jpg",
+    "SAR-BAMBONI-SETS-1117-S.jpg",
     "SAR-GRAND-FX-FUR-1351-T.jpg",
     "SAR-GRAND-FX-FUR-1351-S.jpg",
     "SAR-GRAND-FX-FUR-1352-T.jpg",
