@@ -2222,6 +2222,114 @@
     return null;
   }
 
+  /* Official themahjonghouse.com copy (MC_TMH_PRODUCT_DESCRIPTIONS) into Product Details. */
+  function getMahjongProductCode() {
+    try {
+      var input = global.document.querySelector(
+        'input[name="ProductCode"], input[name="productcode"]'
+      );
+      return String(
+        (global.global_Current_ProductCode || "") || (input && input.value) || ""
+      ).toUpperCase();
+    } catch (eCode) {
+      return "";
+    }
+  }
+
+  function getMahjongOfficialDescriptionHtml(code) {
+    var map = global.MC_TMH_PRODUCT_DESCRIPTIONS;
+    if (!map || !code) return "";
+    return String(map[code] || map[String(code).toUpperCase()] || "").trim();
+  }
+
+  function ensureMahjongOfficialDescriptionsLoaded(done) {
+    if (global.MC_TMH_PRODUCT_DESCRIPTIONS) {
+      if (typeof done === "function") done(true);
+      return;
+    }
+    if (global.document.getElementById("mc-tmh-product-descriptions-js")) {
+      if (typeof done === "function") {
+        var tries = 0;
+        var iv = global.setInterval(function () {
+          tries += 1;
+          if (global.MC_TMH_PRODUCT_DESCRIPTIONS || tries > 40) {
+            global.clearInterval(iv);
+            done(!!global.MC_TMH_PRODUCT_DESCRIPTIONS);
+          }
+        }, 50);
+      }
+      return;
+    }
+    try {
+      var s = global.document.createElement("script");
+      s.id = "mc-tmh-product-descriptions-js";
+      s.src =
+        "/v/vspfiles/js/mc-tmh-product-descriptions.js?v=20260720tmhdesc1&mcrd=" +
+        Date.now();
+      s.async = true;
+      s.onload = function () {
+        if (typeof done === "function") done(!!global.MC_TMH_PRODUCT_DESCRIPTIONS);
+      };
+      s.onerror = function () {
+        if (typeof done === "function") done(false);
+      };
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eLoad) {
+      if (typeof done === "function") done(false);
+    }
+  }
+
+  function applyMahjongOfficialDescriptions() {
+    if (!isMahjongHousePdpPage()) return false;
+    var code = getMahjongProductCode();
+    var html = getMahjongOfficialDescriptionHtml(code);
+    if (!html) return false;
+    var token = code + ":" + html.length;
+    if (global.__MC_TMH_DESC_APPLIED__ === token) return true;
+
+    var written = false;
+    function writeNode(node) {
+      if (!node) return;
+      try {
+        node.innerHTML = html;
+        written = true;
+      } catch (eWrite) {}
+    }
+
+    writeNode(global.document.getElementById("product_description"));
+    global.document
+      .querySelectorAll(
+        "#ProductDetail_ProductDetails_div span[itemprop='description'], #ProductDetail_ProductDetails_div2 span[itemprop='description'], #mc-pdp-description-below-features #product_description, #mc-pdp-description-below-features span[itemprop='description'], #mc-acc-saranoni-product-details-host #product_description, #mc-acc-saranoni-product-details-host span[itemprop='description']"
+      )
+      .forEach(writeNode);
+
+    if (!written) {
+      var details =
+        global.document.getElementById("ProductDetail_ProductDetails_div") ||
+        global.document.getElementById("ProductDetail_ProductDetails_div2");
+      if (details) {
+        try {
+          details.innerHTML =
+            '<span id="product_description" itemprop="description">' +
+            html +
+            "</span>";
+          written = true;
+        } catch (eDetails) {}
+      }
+    }
+
+    if (written) {
+      global.__MC_TMH_DESC_APPLIED__ = token;
+      try {
+        global.document.documentElement.setAttribute(
+          "data-mc-tmh-desc",
+          "official-20260720"
+        );
+      } catch (eAttr) {}
+    }
+    return written;
+  }
+
   function ensureMahjongDescriptionVisible() {
     if (!isMahjongHousePdpPage()) return;
     var nodes = global.document.querySelectorAll(
@@ -2533,10 +2641,18 @@
       ensureMahjongHousePdpCss();
       ensurePdpTitleInOptionsColumn();
       ensureMahjongHouseBrandLogo();
+      ensureMahjongOfficialDescriptionsLoaded(function () {
+        try {
+          applyMahjongOfficialDescriptions();
+        } catch (eDescLoad) {}
+      });
+      applyMahjongOfficialDescriptions();
       mountPdpFeaturesBlock();
       mountDescriptionBelowFeatures();
+      applyMahjongOfficialDescriptions();
       hideNativeVolusionTabPanels();
       ensureSaranoniPdpAccordion();
+      applyMahjongOfficialDescriptions();
       var tmhCol = resolveSaranoniInfoColumn();
       if (tmhCol) {
         applyMahjongHouseInfoColumnOrder(tmhCol);
