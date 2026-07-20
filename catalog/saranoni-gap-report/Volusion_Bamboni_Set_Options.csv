@@ -1,6 +1,6 @@
-optionid,optionsdesc,pricediff
-23,Taupe,0.0
-23,Charcoal,0.0
-58,Small,0.0
-58,Medium,0.0
-58,Large,0.0
+id,optioncatid,optionsdesc,pricediff
+1444,23,Charcoal,0
+1117,23,Taupe,0
+1443,58,Small,0
+1445,58,Medium,0
+1446,58,Large,0
