@@ -24174,3 +24174,117 @@ html body.mc-saranoni-pdp .v65-product-addtocart button {
   }
 }
 /* END REMOVABLE: mobile home cart + SELECT A CATEGORY (20260720home1) */
+
+
+/* BEGIN REMOVABLE: Saranoni mobile title/related + PDP category bar (20260720sarmob1)
+   1) Product pages: category bar stays in document flow at load (no image overlap).
+      sticky so it can pin on scroll without covering content at first paint.
+   2) Kill header margin-bottom:-100px on mobile PDPs (was pulling the hero under the bar).
+   3) Force Saranoni title + related items visible on phones. */
+@media (max-width: 991px) {
+  body:has(#v65-product-parent) header,
+  body:has(#v65-product-parent) .header,
+  body:has(#v65-product-parent) #header,
+  body:has(#v65-product-parent) .site-header,
+  body:has(#v65-product-parent) #site-header,
+  html body.productdetails header.header,
+  html body.mc-product-page header.header,
+  html body.mc-saranoni-pdp header.header {
+    position: relative !important;
+    top: auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    transform: none !important;
+  }
+
+  html body.productdetails header.header .header__section--bottom,
+  html body.mc-product-page header.header .header__section--bottom,
+  html body.mc-saranoni-pdp header.header .header__section--bottom,
+  html body.productdetails header.header .header__section--bottom.visible-xs,
+  html body.mc-product-page header.header .header__section--bottom.visible-xs,
+  html body.mc-saranoni-pdp header.header .header__section--bottom.visible-xs {
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    z-index: 1200 !important;
+    display: flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-brand-logo,
+  html body.mc-saranoni-pdp #mc-pdp-title-right,
+  html body.mc-saranoni-pdp #mc-pdp-title-right h1,
+  html body.mc-saranoni-pdp #mc-pdp-title-right [itemprop="name"],
+  html body.mc-saranoni-pdp #mc-pdp-title-right .productnamecolorLARGE,
+  html body.mc-saranoni-pdp #mc-pdp-title-right .productnamecolor,
+  html body.mc-saranoni-pdp:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
+  html body.mc-saranoni-pdp:not(.mc-pdp-hero-ready) #mc-pdp-title-right {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    color: #777 !important;
+    -webkit-text-fill-color: #777 !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-title-right {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 10px 0 12px !important;
+    padding: 0 !important;
+    text-align: center !important;
+  }
+
+  html body.mc-saranoni-pdp #mc-pdp-brand-logo {
+    width: 100% !important;
+    text-align: center !important;
+    margin: 8px 0 0 !important;
+  }
+
+  html body.mc-saranoni-pdp #v65-product-related,
+  html body.mc-saranoni-pdp #related_products_content,
+  html body.mc-saranoni-pdp #v65-product-related > tbody,
+  html body.mc-saranoni-pdp #v65-product-related > tbody > tr,
+  html body.mc-saranoni-pdp #v65-product-related td {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  html body.mc-saranoni-pdp #v65-product-related .mc-related-plp-grid,
+  html body.mc-saranoni-pdp #related_products_content .mc-related-plp-grid,
+  html body.mc-saranoni-pdp .mc-related-plp-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  html body.mc-saranoni-pdp .mc-related-plp-card {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
+/* END REMOVABLE: Saranoni mobile title/related + PDP category bar (20260720sarmob1) */

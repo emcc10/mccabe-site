@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260720home1 — cart glyph + Mahjong remap + mobile cart right nudge
+ * MC_PLP_ENFORCER_20260720sarmob1 — cart glyph + Mahjong remap + mobile cart right nudge
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260720home1";
+  var VERSION = "20260720sarmob1";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -1919,7 +1919,7 @@
      re-inject the script on every call. Confirmed against the live deployed script on
      20260713 — update this if mc-pdp-auth-cta-fix.js's VERSION is bumped again.
      MC_PDP_AUTH_VERSION_GUARD_FIX_20260713 */
-  var PDP_AUTH_WANT = "20260714sarvariant2";
+  var PDP_AUTH_WANT = "20260720sarmob1";
 
   function isSaranoniPdpPage() {
     try {
