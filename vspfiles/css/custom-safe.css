@@ -1904,11 +1904,11 @@ a.mc-account-float {
 }
 
 @media (max-width: 991px) {
-  body.push-menu-open.menu-toggle__text.push-menu--closed {
+  body.push-menu-open .menu-toggle__text.push-menu--closed {
     display: none !important;
   }
 
-  body.push-menu-open.menu-toggle__text.push-menu--open {
+  body.push-menu-open .menu-toggle__text.push-menu--open {
     display: inline !important;
   }
 
@@ -19047,12 +19047,31 @@ html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-
     box-sizing: border-box !important;
   }
 
-  header.header .menu-toggle__text {
+  /* Only style the closed label here — never force both SELECT + CLOSE visible */
+  header.header .menu-toggle__text.push-menu--closed {
     display: inline-block !important;
     width: 100% !important;
     margin: 0 auto !important;
     text-align: center !important;
     letter-spacing: 0.08em !important;
+  }
+
+  header.header .menu-toggle__text.push-menu--open {
+    display: none !important;
+  }
+
+  body.push-menu-open header.header .menu-toggle__text.push-menu--open,
+  html.push-menu-open header.header .menu-toggle__text.push-menu--open {
+    display: inline-block !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  body.push-menu-open header.header .menu-toggle__text.push-menu--closed,
+  html.push-menu-open header.header .menu-toggle__text.push-menu--closed {
+    display: none !important;
   }
 
   header.header .menu-toggle__icon {
@@ -24034,12 +24053,16 @@ html body .mc-cart-float svg.mc-cart-float__icon {
   }
 
   html.mc-allow-home-hero body.is-home header.header .header__section--bottom .menu-toggle,
-  html.mc-allow-home-hero body.is-home header.header .header__section--bottom .menu-toggle__link,
-  html.mc-allow-home-hero body.is-home header.header .header__section--bottom .menu-toggle__text {
+  html.mc-allow-home-hero body.is-home header.header .header__section--bottom .menu-toggle__link {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  html.mc-allow-home-hero body.is-home header.header .header__section--bottom .menu-toggle__text {
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
   }
@@ -24288,3 +24311,61 @@ html body.mc-saranoni-pdp .v65-product-addtocart button {
   }
 }
 /* END REMOVABLE: Saranoni mobile title/related + PDP category bar (20260720sarmob1) */
+
+/* BEGIN REMOVABLE: hide CLOSE MENU when menu closed (20260720closemenu1) */
+@media (max-width: 991px) {
+  html body:not(.push-menu-open) header.header .menu-toggle__text.push-menu--open,
+  html body:not(.push-menu-open) .menu-toggle .menu-toggle__text.push-menu--open,
+  html:not(.push-menu-open) body header.header .menu-toggle__text.push-menu--open {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html body.push-menu-open header.header .menu-toggle__text.push-menu--closed,
+  html body.push-menu-open .menu-toggle .menu-toggle__text.push-menu--closed,
+  html.push-menu-open body header.header .menu-toggle__text.push-menu--closed {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html body.push-menu-open header.header .menu-toggle__text.push-menu--open,
+  html.push-menu-open body header.header .menu-toggle__text.push-menu--open {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    pointer-events: auto !important;
+  }
+
+  html body:not(.push-menu-open) header.header .menu-toggle__text.push-menu--closed {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+/* END REMOVABLE: hide CLOSE MENU when menu closed (20260720closemenu1) */
