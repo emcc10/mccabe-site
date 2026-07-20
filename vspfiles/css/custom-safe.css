@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260623sarrepair1 — Saranoni layout perf + column order */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260720sarfix4 — Saranoni size 4x2 grid + altviews */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -23744,10 +23744,9 @@ body.mc-saranoni-pdp #v65-product-parent input.mc-unified-atc-btn {
   text-align: center !important;
 }
 /* END REMOVABLE: Saranoni ATC text alignment correction (20260718) */
-/* BEGIN REMOVABLE: Saranoni variant horizontal scroll rail (20260718) */
+/* BEGIN REMOVABLE: Saranoni color horizontal scroll rail (20260718; size grid 20260720sarfix4) */
 html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,
-html body.mc-saranoni-pdp .mc-saranoni-swatches,
-html body.mc-saranoni-pdp #mc-saranoni-size-thumbs {
+html body.mc-saranoni-pdp .mc-saranoni-swatches {
   display: flex !important;
   flex-wrap: nowrap !important;
   overflow-x: auto !important;
@@ -23763,7 +23762,35 @@ html body.mc-saranoni-pdp #mc-saranoni-size-thumbs {
 }
 
 html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,
-html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar,
+html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+html body.mc-saranoni-pdp .mc-configured-color-swatch {
+  flex: 0 0 auto !important;
+}
+
+/* Size chips: 4-across wrap grid, price under name, no scrollbar. */
+html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
+html body.mc-saranoni-pdp #mc-saranoni-size-thumbs.mc-saranoni-scroll-rail {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 12px 0 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  flex-wrap: unset !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
 html body.mc-saranoni-pdp #mc-saranoni-size-thumbs::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
@@ -23771,11 +23798,39 @@ html body.mc-saranoni-pdp #mc-saranoni-size-thumbs::-webkit-scrollbar {
   background: transparent !important;
 }
 
-html body.mc-saranoni-pdp .mc-configured-color-swatch,
-html body.mc-saranoni-pdp .mc-saranoni-size-thumb {
-  flex: 0 0 auto !important;
+html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(> #mc-saranoni-size-thumbs) > .mc-saranoni-scroll-arrow {
+  display: none !important;
 }
-/* END REMOVABLE: Saranoni variant horizontal scroll rail (20260718) */
+
+html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  flex: unset !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label {
+  display: block !important;
+  margin: 0 !important;
+  text-align: center !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__price {
+  display: block !important;
+  margin: 0 !important;
+  text-align: center !important;
+  font-weight: 500 !important;
+  color: #666 !important;
+  white-space: nowrap !important;
+}
+/* END REMOVABLE: Saranoni color horizontal scroll rail (20260718; size grid 20260720sarfix4) */
 /* BEGIN REMOVABLE: PDP alt-view row stable placement/no visible scrollbar (20260718) */
 html body #mc-pdp-alt-view-row {
   display: flex !important;
@@ -24305,15 +24360,16 @@ html body.mc-saranoni-pdp .v65-product-addtocart button {
   }
 }
 /* END REMOVABLE: Saranoni mobile title/related + PDP category bar (20260720sarmob1) */
-/* BEGIN REMOVABLE: Saranoni size options text-only (20260720sizetext1) */
+/* BEGIN REMOVABLE: Saranoni size options text-only (20260720sizetext1 / sarfix4) */
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb {
-  width: auto !important;
-  min-width: 96px !important;
-  padding: 10px 14px !important;
-  flex-direction: row !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 10px 8px !important;
+  flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 0 !important;
+  gap: 4px !important;
+  box-sizing: border-box !important;
 }
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb img {
   display: none !important;
@@ -24324,11 +24380,21 @@ html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb img {
   border: 0 !important;
 }
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label {
-  margin-top: 0 !important;
-  font: 600 13px/1.2 Inter, Arial, sans-serif !important;
-  max-width: none !important;
+  margin: 0 !important;
+  font: 600 12px/1.25 Inter, Arial, sans-serif !important;
+  max-width: 100% !important;
+  text-align: center !important;
+  white-space: normal !important;
+  word-break: break-word !important;
 }
-/* END REMOVABLE: Saranoni size options text-only (20260720sizetext1) */
+html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__price {
+  margin: 0 !important;
+  font: 500 11px/1.2 Inter, Arial, sans-serif !important;
+  color: #666 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+/* END REMOVABLE: Saranoni size options text-only (20260720sizetext1 / sarfix4) */
 
 /* BEGIN REMOVABLE: hide CLOSE MENU when menu closed (20260720closemenu1) */
 @media (max-width: 991px) {
@@ -24638,7 +24704,7 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
 }
 /* END REMOVABLE: Saranoni related centering (20260720sarfix2) */
 
-/* BEGIN REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix3)
+/* BEGIN REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4)
    Legacy desktop rule used margin-top:min(-58vh,-620px) on #altviews, which
    pulled a stray thumb over the hero and collapsed the media TD so the 650px
    hero overflowed Related Items. Saranoni gallery uses #mc-pdp-alt-view-row. */
@@ -24729,5 +24795,5 @@ html body.mc-saranoni-pdp #related_products_content {
     margin-top: 0 !important;
   }
 }
-/* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix3) */
+/* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
 

@@ -1,7 +1,8 @@
 (function (window, document) {
   "use strict";
 
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX3__) return;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260716__ = true;
@@ -373,8 +374,14 @@
     if (!code || probeInFlight[code]) return;
     /* Allow re-probe when a prior pass latched empty (CDN race / blocked imgs). */
     if (saranoniProbeDone[code] && (discoveredByCode[code] || []).length) return;
+    /* Keep any discoveries already found — never wipe mid-flight successes. */
+    if (!discoveredByCode[code]) discoveredByCode[code] = [];
+    if ((discoveredByCode[code] || []).length) {
+      saranoniProbeDone[code] = true;
+      render();
+      return;
+    }
     probeInFlight[code] = true;
-    discoveredByCode[code] = [];
     var remaining = MAX_SAR_ALT_SLOT;
     var finished = false;
 
@@ -391,7 +398,7 @@
       render();
     }
 
-    setTimeout(finish, 8000);
+    setTimeout(finish, 10000);
 
     function completeOne() {
       remaining -= 1;
@@ -402,26 +409,15 @@
     for (var altSlot = 1; altSlot <= MAX_SAR_ALT_SLOT; altSlot += 1) {
       (function (photoSlot) {
         var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
-        /* Prefer fetch HEAD — more reliable than Image probes under extensions. */
-        if (window.fetch) {
-          window
-            .fetch(src, { method: "GET", cache: "force-cache", mode: "same-origin" })
-            .then(function (resp) {
-              if (resp && resp.ok) addSaranoniDiscovered(code, photoSlot, src);
-              completeOne();
-            })
-            .catch(function () {
-              probeImage(src, function () {
-                addSaranoniDiscovered(code, photoSlot, src);
-                completeOne();
-              }, completeOne);
-            });
-        } else {
-          probeImage(src, function () {
+        /* Image probes (DOM-attached) are more reliable than fetch on Volusion CDN. */
+        probeImage(
+          src,
+          function () {
             addSaranoniDiscovered(code, photoSlot, src);
             completeOne();
-          }, completeOne);
-        }
+          },
+          completeOne
+        );
       })(altSlot);
     }
   }
@@ -447,7 +443,10 @@
         })
         .sort(function (a, b) { return a.slot - b.slot; });
       if (!sarItems.length) {
-        if (row) row.style.setProperty("display", "none", "important");
+        /* Keep an already-built row visible while re-probing. */
+        if (!(row && row.children && row.children.length)) {
+          if (row) row.style.setProperty("display", "none", "important");
+        }
         probeSaranoniAltViews(code);
         return;
       }

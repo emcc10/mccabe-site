@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720sarfix3 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720sarfix3";
+  // MC_DEPLOY_FINGERPRINT_20260720sarfix4 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260720sarfix4";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720sarfix3";
+  var VERSION = "20260720sarfix4";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -6859,14 +6859,29 @@
       (global.document.head || global.document.documentElement).appendChild(st);
     }
     st.textContent =
-      ".mc-saranoni-size-thumbs{display:flex!important;flex-wrap:nowrap!important;gap:10px!important;width:100%!important;max-width:100%!important;margin:12px 0 0!important;padding:0 0 6px!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
+      /* 4-across grid, wrap to next row — no horizontal scrollbar. */
+      ".mc-saranoni-size-thumbs{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;width:100%!important;max-width:100%!important;margin:12px 0 0!important;padding:0!important;overflow:visible!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
       ".mc-saranoni-size-thumbs::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
       ".mc-saranoni-size-label{display:block!important;margin:12px 0 6px!important;font:500 13px/1.3 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;color:#444!important;text-transform:none!important}" +
-      /* Size options are always text chips — never show {CODE}-{sizeOptionId}-S/T photos. */
-      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:0!important;width:auto!important;min-width:96px!important;padding:10px 14px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important}" +
+      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:100%!important;min-width:0!important;min-height:56px!important;padding:10px 8px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important;box-sizing:border-box!important}" +
       ".mc-saranoni-size-thumb img{display:none!important;width:0!important;height:0!important;margin:0!important;padding:0!important;border:0!important}" +
-      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{margin-top:0!important;font:600 13px/1.2 Inter,Arial,sans-serif!important;max-width:none!important;color:#444!important;text-align:center!important;white-space:normal!important;word-break:break-word!important}" +
-      ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}";
+      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{margin:0!important;font:600 12px/1.25 Inter,Arial,sans-serif!important;max-width:100%!important;color:#444!important;text-align:center!important;white-space:normal!important;word-break:break-word!important}" +
+      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__price{margin:0!important;font:500 11px/1.2 Inter,Arial,sans-serif!important;color:#666!important;text-align:center!important;white-space:nowrap!important}" +
+      ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}" +
+      /* Size row must never sit in a scroll-host / get rail arrows. */
+      ".mc-saranoni-scroll-host:has(> #mc-saranoni-size-thumbs) > .mc-saranoni-scroll-arrow{display:none!important}" +
+      "#mc-saranoni-size-thumbs.mc-saranoni-scroll-rail{padding-left:0!important;padding-right:0!important;overflow:visible!important}";
+  }
+
+  function splitSaranoniSizeDisplayLabel(rawLabel) {
+    var raw = String(rawLabel || "").replace(/\s+/g, " ").trim();
+    var additional = extractAdditionalFromOptionText(raw);
+    var name = raw
+      .replace(/\[\s*Additional\s*\$?[\d,]+(?:\.\d{2})?\s*\]/gi, "")
+      .replace(/\(\s*\+\s*\$?[\d,]+(?:\.\d{2})?\s*\)/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    return { name: name || raw, additional: additional };
   }
 
   function updateSaranoniSizeThumbUi(optionId) {
@@ -6966,19 +6981,48 @@
       /* Size options are always text chips — never load {CODE}-{sizeOptionId}-S/T.jpg. */
       btn.className = "mc-saranoni-size-thumb mc-saranoni-text-size-thumb";
       btn.setAttribute("data-option-id", entry.optionId);
-      btn.setAttribute("aria-label", entry.label);
-      btn.setAttribute("title", entry.label);
-      var displayLabel = entry.label.replace(/(\$\d[\d,]*)\.00(?!\d)/g, "$1");
+      var parts = splitSaranoniSizeDisplayLabel(entry.label);
+      var aria =
+        parts.additional > 0
+          ? parts.name + " (Additional $" + parts.additional.toFixed(parts.additional % 1 ? 2 : 0) + ")"
+          : parts.name;
+      btn.setAttribute("aria-label", aria);
+      btn.setAttribute("title", aria);
+      var priceHtml = "";
+      if (parts.additional > 0) {
+        var dollars =
+          parts.additional % 1
+            ? parts.additional.toFixed(2)
+            : String(Math.round(parts.additional));
+        priceHtml =
+          '<span class="mc-saranoni-size-thumb__price">Additional $' +
+          escapeHtmlText(dollars) +
+          "</span>";
+      }
       btn.innerHTML =
         '<span class="mc-saranoni-size-thumb__label">' +
-        escapeHtmlText(displayLabel) +
-        "</span>";
+        escapeHtmlText(parts.name) +
+        "</span>" +
+        priceHtml;
       row.appendChild(btn);
       btn.addEventListener("click", function (e) {
         e.preventDefault();
         applySaranoniSizeVariantSelection(ctx, entry, true);
       });
     });
+    /* Unwrap size row from scroll-host / rail if a prior pass added arrows. */
+    try {
+      row.classList.remove("mc-saranoni-scroll-rail");
+      row.style.setProperty("overflow", "visible", "important");
+      row.style.setProperty("padding-left", "0", "important");
+      row.style.setProperty("padding-right", "0", "important");
+      var sizeHost = row.parentNode;
+      if (sizeHost && sizeHost.classList && sizeHost.classList.contains("mc-saranoni-scroll-host")) {
+        sizeHost.querySelectorAll(":scope > .mc-saranoni-scroll-arrow").forEach(function (arrow) {
+          if (arrow.parentNode) arrow.parentNode.removeChild(arrow);
+        });
+      }
+    } catch (eUnwrapSize) {}
     if (saranoniSizeActiveOptionId) updateSaranoniSizeThumbUi(saranoniSizeActiveOptionId);
     ensureSaranoniSizeThumbsInInfoColumn();
   }
@@ -7821,8 +7865,8 @@
     if (!isSaranoniPdpPage()) return;
     ensureSaranoniScrollArrowCss();
     [
-      global.document.querySelector(".mc-configured-color-swatches.mc-saranoni-swatches"),
-      global.document.getElementById("mc-saranoni-size-thumbs")
+      global.document.querySelector(".mc-configured-color-swatches.mc-saranoni-swatches")
+      /* Size options use a 4-column wrap grid — never a scroll rail. */
     ].forEach(function (rail) {
       if (!rail || !rail.parentNode) return;
       var host = rail.parentNode;
@@ -11297,7 +11341,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720sarfix3";
+  var WANT_FP = "20260720sarfix4";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11325,7 +11369,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix3&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix4&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}
