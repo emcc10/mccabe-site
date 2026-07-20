@@ -110,12 +110,20 @@
     return null;
   }
 
+  function parsePrice(label) {
+    var m = String(label || "").match(/\$\s*([\d,]+(?:\.\d+)?)/);
+    if (!m) return null;
+    return parseFloat(m[1].replace(/,/g, ""));
+  }
+
   function whiteGloveLabelAllowed(label, zip) {
     var quote = whiteGloveQuote(zip, 0);
     if (!quote) return false;
     var range = parseMileRange(label);
-    if (!range) return true;
-    return quote.distanceMiles >= range.min && quote.distanceMiles <= range.max;
+    if (range) return quote.distanceMiles >= range.min && quote.distanceMiles <= range.max;
+    var price = parsePrice(label);
+    if (price !== null) return Math.abs(price - quote.total) < 0.01;
+    return true;
   }
 
   function isRateAllowed(label, summary, zip) {

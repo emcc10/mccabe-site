@@ -9,10 +9,9 @@ const outputPath = path.join(repoRoot, "vspfiles", "js", "mc-white-glove-zip-tie
 const FORNEY = Object.freeze({ latitude: 32.742601, longitude: -96.452883 });
 const SOUTH_SURCHARGE = 55;
 const TIERS = Object.freeze([
-  { id: "0-20", minMiles: 0, maxMiles: 20, basePrice: 150 },
-  { id: "21-30", minMiles: 20, maxMiles: 30, basePrice: 225 },
-  { id: "31-50", minMiles: 30, maxMiles: 50, basePrice: 295 },
-  { id: "51-70", minMiles: 50, maxMiles: 70, basePrice: 365 },
+  { id: "1-25", minMiles: 0, maxMiles: 25, basePrice: 199 },
+  { id: "26-40", minMiles: 25, maxMiles: 40, basePrice: 249 },
+  { id: "41-60", minMiles: 40, maxMiles: 60, basePrice: 299 },
 ]);
 
 function radians(value) {

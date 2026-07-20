@@ -53,7 +53,7 @@ assert.equal(policy.isDfwZip("78701"), false);
 
 const forneyQuote = policy.whiteGloveQuote("75126");
 assert.equal(forneyQuote.eligible, true);
-assert.equal(forneyQuote.basePrice, 150);
+assert.equal(forneyQuote.basePrice, 199);
 assert.equal(forneyQuote.weightSurcharge, 0);
 assert.equal(forneyQuote.total, forneyQuote.basePrice + forneyQuote.directionSurcharge);
 
@@ -66,7 +66,7 @@ assert.equal(southQuote.total, southQuote.basePrice + 55 + 25);
 
 assert.equal(policy.whiteGloveQuote("73301"), null);
 
-const expectedBasePrices = { "0-20": 150, "21-30": 225, "31-50": 295, "51-70": 365 };
+const expectedBasePrices = { "1-25": 199, "26-40": 249, "41-60": 299 };
 for (const tier of Object.keys(expectedBasePrices)) {
   for (const direction of ["north", "south"]) {
     const match = Object.entries(window.__MC_WHITE_GLOVE_ZIP_TIERS__.zips).find(
@@ -81,7 +81,7 @@ for (const tier of Object.keys(expectedBasePrices)) {
 }
 
 for (const entry of Object.values(window.__MC_WHITE_GLOVE_ZIP_TIERS__.zips)) {
-  assert.ok(entry.distanceMiles <= 70, `ZIP entry exceeds service radius: ${entry.distanceMiles}`);
+  assert.ok(entry.distanceMiles <= 60, `ZIP entry exceeds service radius: ${entry.distanceMiles}`);
 }
 
 console.log("mc-shipping-rate-policy: all tests passed");
