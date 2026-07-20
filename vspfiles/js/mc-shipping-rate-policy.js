@@ -102,7 +102,7 @@
   }
 
   function parseMileRange(label) {
-    var text = String(label || "");
+    var text = String(label || "").replace(/[‐-―]/g, "-");
     var m = text.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*miles?\s*from\s*forney/i);
     if (m) return { min: parseFloat(m[1]), max: parseFloat(m[2]) };
     m = text.match(/up\s*to\s*(\d+(?:\.\d+)?)\s*miles?\s*from\s*(?:forney|frisco)/i);
