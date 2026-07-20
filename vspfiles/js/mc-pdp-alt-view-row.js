@@ -5,7 +5,7 @@
   window.__MC_TMH_ALT_VIEW_ROW_20260716__ = true;
 
   var ROW_ID = "mc-pdp-alt-view-row";
-  var MAX_ALT_VIEWS = 24;
+  var MAX_ALT_VIEWS = 64;
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;

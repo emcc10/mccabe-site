@@ -665,8 +665,14 @@ def update_inventory_flags() -> None:
 
 def main() -> int:
     only: set[str] | None = None
-    if len(sys.argv) > 1 and sys.argv[1] == "--only":
-        only = {c.strip().upper() for c in sys.argv[2:] if c.strip()}
+    steve_silver_only = "--steve-silver-only" in sys.argv[1:]
+    if "--only" in sys.argv[1:]:
+        start = sys.argv.index("--only") + 1
+        only = {
+            c.strip().upper()
+            for c in sys.argv[start:]
+            if c.strip() and not c.startswith("--")
+        }
 
     PHOTOS.mkdir(parents=True, exist_ok=True)
     OUT_REPORT.parent.mkdir(parents=True, exist_ok=True)
@@ -679,7 +685,8 @@ def main() -> int:
         globals()["saranoni_codes"] = lambda: [c for c in _sar() if c in only]
         globals()["steve_silver_codes"] = lambda page_map: [c for c in _ss(page_map) if c in only]
 
-    fetch_saranoni(rows)
+    if not steve_silver_only:
+        fetch_saranoni(rows)
     fetch_steve_silver(rows)
     update_inventory_flags()
 

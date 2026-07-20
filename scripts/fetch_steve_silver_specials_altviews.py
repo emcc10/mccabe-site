@@ -17,6 +17,7 @@ PHOTOS = ROOT / "vspfiles" / "photos"
 MAX_SIZE = 2000
 MIN_WIDTH = 650
 QUALITY = 92
+MAX_ALT_VIEWS = 64
 UA = {"User-Agent": "Mozilla/5.0 (McCabe Steve Silver closeout photos)"}
 
 # Exact Volusion ProductCode -> supplier page.  The first URL is the primary
@@ -125,7 +126,7 @@ def main() -> int:
     failures: list[str] = []
     for code, pages in PAGES.items():
         existing = sorted(PHOTOS.glob(f"{code}-altview*.jpg"))
-        if len(existing) >= 3:
+        if len(existing) >= MAX_ALT_VIEWS:
             print(f"SKIP {code}: already has {len(existing)} alternate images")
             continue
         urls: list[str] = []
@@ -145,7 +146,7 @@ def main() -> int:
         known = existing_hashes(code)
         slot = len(existing) + 1
         for url in urls:
-            if slot > 3:
+            if slot > MAX_ALT_VIEWS:
                 break
             path = PHOTOS / f"{code}-altview{slot}.jpg"
             try:
@@ -160,9 +161,9 @@ def main() -> int:
                 path.unlink(missing_ok=True)
                 print(f"WARN {code}: {url} ({error})")
             time.sleep(0.15)
-        if slot <= 3:
+        if slot <= 1:
             failures.append(code)
-            print(f"FAIL {code}: only {slot - 1} alternate images available")
+            print(f"FAIL {code}: no distinct alternate images available")
     print(f"Done. Unresolved: {', '.join(failures) if failures else 'none'}")
     return 1 if failures else 0
 
