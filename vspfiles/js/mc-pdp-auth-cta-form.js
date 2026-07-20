@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260624A — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260624A";
+  // MC_DEPLOY_FINGERPRINT_20260720sizetext1 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260720sizetext1";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720sarmob1";
+  var VERSION = "20260720sizetext1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -6778,14 +6778,11 @@
       ".mc-saranoni-size-thumbs{display:flex!important;flex-wrap:nowrap!important;gap:10px!important;width:100%!important;max-width:100%!important;margin:12px 0 0!important;padding:0 0 6px!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
       ".mc-saranoni-size-thumbs::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
       ".mc-saranoni-size-label{display:block!important;margin:12px 0 6px!important;font:500 13px/1.3 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;color:#444!important;text-transform:none!important}" +
-      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;width:90px!important;padding:4px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important}" +
-      ".mc-saranoni-size-thumb img{display:block!important;width:82px!important;height:82px!important;object-fit:cover!important;border:0!important;border-radius:2px!important}" +
-      /* Size options are labels only — never show option photos for Small/Medium/Large/XL. */
-      ".mc-saranoni-size-thumb.mc-saranoni-text-size-thumb{width:auto!important;min-width:96px!important;padding:10px 14px!important;flex-direction:row!important;justify-content:center!important}" +
-      ".mc-saranoni-size-thumb.mc-saranoni-text-size-thumb img{display:none!important;width:0!important;height:0!important;margin:0!important;padding:0!important}" +
-      ".mc-saranoni-size-thumb.mc-saranoni-text-size-thumb .mc-saranoni-size-thumb__label{margin-top:0!important;font:600 13px/1.2 Inter,Arial,sans-serif!important;max-width:none!important}" +
-      ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}" +
-      ".mc-saranoni-size-thumb__label{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;text-align:center!important;margin-top:4px!important;white-space:normal!important;word-break:break-word!important;max-width:86px!important}";
+      /* Size options are always text chips — never show {CODE}-{sizeOptionId}-S/T photos. */
+      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:0!important;width:auto!important;min-width:96px!important;padding:10px 14px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important}" +
+      ".mc-saranoni-size-thumb img{display:none!important;width:0!important;height:0!important;margin:0!important;padding:0!important;border:0!important}" +
+      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{margin-top:0!important;font:600 13px/1.2 Inter,Arial,sans-serif!important;max-width:none!important;color:#444!important;text-align:center!important;white-space:normal!important;word-break:break-word!important}" +
+      ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}";
   }
 
   function updateSaranoniSizeThumbUi(optionId) {
@@ -11194,7 +11191,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260624A";
+  var WANT_FP = "20260720sizetext1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11222,7 +11219,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sizetext1&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}

@@ -1482,7 +1482,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
   <script>
 (function (g, d) {
-  var FP = "20260624A";
+  var FP = "20260720sizetext1";
   function bootFreshCta() {
     if (!d.getElementById("v65-product-parent")) return;
     if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
@@ -1492,7 +1492,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sizetext1&mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -1503,9 +1503,19 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="/v/vspfiles/js/mc-saranoni-sale-data.js?v=20260719regular"></script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
-  <!-- mc-pdp-auth-cta-fix.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
+  <!-- mc-pdp-auth-cta-form.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
        A second static ?mcrd=live tag used to live here; it cached an old copy whose stabilizer
-       fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260624B -->
+       fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260720sizetext1 -->
+  <!-- Size options must stay text chips even if a stale CDN copy of mc-pdp-auth-cta-form.js still injects imgs. -->
+  <style id="mc-saranoni-size-text-only-20260720">
+html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb{
+  width:auto!important;min-width:96px!important;padding:10px 14px!important;
+  flex-direction:row!important;justify-content:center!important;align-items:center!important;gap:0!important}
+html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb img{
+  display:none!important;width:0!important;height:0!important;margin:0!important;padding:0!important;border:0!important}
+html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label{
+  margin-top:0!important;font:600 13px/1.2 Inter,Arial,sans-serif!important;max-width:none!important}
+</style>
   <style id="mc-ss-hero-critical-20260701">
 @media (min-width:992px){
   html body.productdetails:has(#v65-product-parent input[name="ProductCode"][value^="SS-"]) #v65-product-parent>tbody>tr:nth-of-type(2)>td:first-child,

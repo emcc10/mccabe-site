@@ -24288,3 +24288,27 @@ html body.mc-saranoni-pdp .v65-product-addtocart button {
   }
 }
 /* END REMOVABLE: Saranoni mobile title/related + PDP category bar (20260720sarmob1) */
+/* BEGIN REMOVABLE: Saranoni size options text-only (20260720sizetext1) */
+html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb {
+  width: auto !important;
+  min-width: 96px !important;
+  padding: 10px 14px !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 0 !important;
+}
+html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb img {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label {
+  margin-top: 0 !important;
+  font: 600 13px/1.2 Inter, Arial, sans-serif !important;
+  max-width: none !important;
+}
+/* END REMOVABLE: Saranoni size options text-only (20260720sizetext1) */
