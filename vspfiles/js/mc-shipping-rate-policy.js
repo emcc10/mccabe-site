@@ -160,6 +160,25 @@
     var seen = {};
     var lines = [];
 
+    root.querySelectorAll(".v65-onepage-ordersummary-itemcode").forEach(function (codeCell) {
+      var code = normalizeCode(codeCell.textContent);
+      if (!code) return;
+      var row = codeCell.closest("tr") || codeCell.parentElement;
+      if (!row) return;
+      var key = code + "|" + String(row.rowIndex || lines.length);
+      if (seen[key]) return;
+      seen[key] = true;
+
+      var qtyCell = row.querySelector(".v65-onepage-ordersummary-itemqty");
+      var totalCell = row.querySelector(".v65-onepage-ordersummary-itemtotal");
+      lines.push({
+        code: code,
+        quantity: qtyCell ? qtyCell.textContent : 1,
+        unitPrice: totalCell ? totalCell.textContent : 0,
+        total: totalCell ? totalCell.textContent : 0,
+      });
+    });
+
     root.querySelectorAll('a[href*="ProductCode=" i], a[href*="/product-p/" i]').forEach(function (link) {
       var code = codeFromHref(link.getAttribute("href"));
       if (!code) return;
