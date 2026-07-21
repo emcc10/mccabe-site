@@ -34,8 +34,8 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260721style1 — Select Style → swatch rail (lovey)
-  var MC_DEPLOY_FINGERPRINT = "20260721style1";
+  // MC_DEPLOY_FINGERPRINT_20260721style2 — Style label from parent options table
+  var MC_DEPLOY_FINGERPRINT = "20260721style2";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
   var VERSION = "20260720sarfix6";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
@@ -6106,22 +6106,33 @@
     return out;
   }
 
+  function saranoniOptionLabelHaystack(select) {
+    if (!select) return "";
+    try {
+      var row = select.closest ? select.closest("tr") : null;
+      /* Volusion puts "Select Style" in a prior table-row; the select's own tr only
+         has option values. Include the parent options table so Style/Color labels match. */
+      var table = select.closest ? select.closest("table") : null;
+      return String(
+        (select.getAttribute("title") || "") +
+          " " +
+          (row ? row.textContent : "") +
+          " " +
+          (table ? table.textContent : "") +
+          " " +
+          (select.options[0] && select.options[0].text ? select.options[0].text : "")
+      ).toLowerCase();
+    } catch (eLbl) {
+      return "";
+    }
+  }
+
   function isSaranoniColorSelect(select) {
     if (!select || !select.name) return false;
     if (select.classList && select.classList.contains("mc-native-leather")) return false;
     if (!/^SAR/i.test(parseProductCodeFromSelectName(select.name))) return false;
     if (parseOptionCategoryFromSelectName(select.name) === SARANONI_COLOR_OPTION_CATEGORY) return true;
-    var labelHay = "";
-    try {
-      var row = select.closest ? select.closest("tr") : null;
-      labelHay = String(
-        (select.getAttribute("title") || "") +
-          " " +
-          (row ? row.textContent : "") +
-          " " +
-          (select.options[0] && select.options[0].text ? select.options[0].text : "")
-      ).toLowerCase();
-    } catch (eLbl) {}
+    var labelHay = saranoniOptionLabelHaystack(select);
     /* Select Style (Bear/Bunny/etc. on Stuffed Animal Loveys) is this product's only
        option axis — treat it like color so the horizontal swatch rail builds. */
     return /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color|select\s+style|choose\s+style|^style$)/.test(labelHay);
