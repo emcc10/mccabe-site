@@ -20578,7 +20578,15 @@ html body header.header .microblock.main-menu {
 #slideshow-container#slideshow-container .hero-menu a {
   font-family: var(--mc-font-display) !important;
   font-size: 16px !important;
-  font-weight: 400 !important;
+  /* Was 400 (likely copy-pasted from an unrelated "RH treatment" rule) --
+     that's a real, loaded Cormorant Garamond weight so it wasn't silently
+     falling back to Georgia, but it rendered noticeably lighter/thinner
+     than every other menu on the site. This doubled-#slideshow-container
+     selector only applies at desktop widths (see the (min-width:992px)
+     wrapper a few rules down) and beats the .hero-nav a rule elsewhere in
+     this file on specificity, which is why mobile showed the correct
+     weight but desktop never did. 600 matches the rest of the site. */
+  font-weight: 600 !important;
   letter-spacing: 0.18em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
