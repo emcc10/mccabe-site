@@ -1,0 +1,475 @@
+CategoryID,CategoryDescription
+205,"<div id=""mc-lp13-205"" class=""mc-lp13 mc-lp13-saranoni""><div class=""mc-lp13-wrap""><nav class=""mc-lp13-shopbar"" aria-label=""Shop more products in Luxe Comforts""><span>SHOP MORE PRODUCTS</span><a href=""/category-s/205.htm"">Adult</a><a href=""/category-s/206.htm"">Kids</a><a href=""/category-s/207.htm"">Baby</a><a href=""/category-s/228.htm"">Blankets</a><a href=""/category-s/209.htm"">Bedding</a></nav><section class=""mc-lp13-hero"" aria-label=""Saranoni Loungewear category intro""><div class=""mc-lp13-copy""><p class=""mc-lp13-eyebrow"">SARANONI LOUNGEWEAR</p><h1>Saranoni Loungewear</h1><p class=""mc-lp13-intro"">Grown-up softness for the spaces you actually relax in.</p><p class=""mc-lp13-body"">Saranoni’s loungewear turns the brand’s signature softness into everyday indulgence: plush Bamboni robes, weighty faux fur throws, ribbed waffle-knit layers and buttery minky-lush finishes. Built for the sofa, the bed and the quiet moments in between, each piece is substantial enough to feel like a real upgrade and polished enough to leave out instead of tucking away.</p></div><a class=""mc-lp13-media"" href=""/category-s/205.htm"" aria-label=""Shop Saranoni Loungewear""><img src=""/v/vspfiles/landing/mc-luxe-comforts-adult-blankets-hero-20260721.jpg"" alt=""Saranoni Loungewear category banner image"" loading=""eager"" fetchpriority=""high"" onerror=""this.onerror=null;this.src='/v/vspfiles/landing/mc-luxe-comforts-adult-blankets-hero-20260721.jpg';""></a></section></div></div><style id=""mc-lp13-205-css"">.mc-lp13,.mc-lp13 *{box-sizing:border-box;}
+.mc-lp13{
+  position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+  padding:0 clamp(14px,3vw,56px) 18px;color:#141414;font-family:Inter,Arial,sans-serif;overflow-x:hidden;
+}
+.mc-lp13-wrap{max-width:1760px;margin:0 auto;}
+.mc-lp13-shopbar{
+  display:grid;grid-template-columns:minmax(210px,255px) repeat(auto-fit,minmax(148px,1fr));
+  gap:8px;margin:0 auto 12px;align-items:stretch;
+}
+.mc-lp13-shopbar span{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#f2ece4;border:1px solid #cfc2b5;color:#151515;font-size:12px;line-height:1.1;
+  letter-spacing:.16em;text-transform:uppercase;font-weight:900;text-align:center;
+}
+.mc-lp13-shopbar a{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#111;border:1px solid #111;color:#fff!important;text-decoration:none!important;
+  font-size:12px;line-height:1.1;letter-spacing:.11em;text-transform:uppercase;font-weight:900;
+  text-align:center;border-radius:0!important;box-shadow:none!important;
+}
+.mc-lp13-shopbar a:hover{background:#5d4537;border-color:#5d4537;color:#fff!important;}
+.mc-lp13-hero{
+  display:grid;grid-template-columns:minmax(360px,39%) minmax(0,61%);
+  align-items:stretch;height:500px;min-height:500px;max-height:500px;
+  border:1px solid #d2c6b8;background:#f2ece4;overflow:hidden;
+}
+.mc-lp13-copy{
+  padding:34px clamp(34px,4vw,66px);display:flex;flex-direction:column;justify-content:center;
+  min-width:0;align-self:stretch;margin-top:0;overflow:visible;
+}
+.mc-lp13-eyebrow{
+  margin:0 0 10px;color:#6b4e3f;font-size:12px;line-height:1.2;letter-spacing:.20em;
+  text-transform:uppercase;font-weight:900;
+}
+.mc-lp13 h1{
+  margin:0 0 14px;color:#101010;font-size:clamp(36px,4.4vw,68px);line-height:.92;
+  letter-spacing:-.055em;text-transform:uppercase;font-weight:900;
+}
+.mc-lp13-intro{
+  margin:0 0 12px;color:#231f1d;font-size:clamp(17px,1.3vw,22px);line-height:1.42;
+  font-weight:650;max-width:760px;
+}
+.mc-lp13-body{margin:0;color:#3b332e;font-size:15.5px;line-height:1.68;max-width:850px;}
+.mc-lp13-media{
+  display:block;position:relative;height:500px;min-height:500px;max-height:500px;
+  background:#d8cbbb;text-decoration:none!important;overflow:hidden;
+}
+.mc-lp13-media img{
+  display:block;width:100%;height:100%;min-height:500px;max-height:500px;
+  object-fit:cover;object-position:center center;border:0;margin:0!important;padding:0!important;
+  filter:none;background:#d8cbbb;
+}
+.mc-lp13-media:after{
+  content:"""";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.03);pointer-events:none;
+}
+@media (max-width:900px){
+  .mc-lp13-shopbar{grid-template-columns:1fr 1fr;}
+  .mc-lp13-shopbar span{grid-column:1/-1;}
+  .mc-lp13-hero{
+    grid-template-columns:1fr;height:auto;min-height:0;max-height:none;
+  }
+  .mc-lp13-media{order:-1;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:250px;min-height:250px;max-height:250px;margin-top:0;
+  }
+  .mc-lp13-copy{margin-top:0;padding:24px 20px;}
+}
+@media (max-width:560px){
+  .mc-lp13{padding:0 12px 14px;}
+  .mc-lp13-shopbar{grid-template-columns:1fr;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:205px;min-height:205px;max-height:205px;
+  }
+  .mc-lp13-copy{padding:18px 15px 20px;}
+  .mc-lp13 h1{font-size:25px;line-height:1.02;margin-top:0;}
+  .mc-lp13-intro{font-size:13px;line-height:1.28;}
+  .mc-lp13-body{font-size:12px;line-height:1.38;}
+}</style>"
+206,"<div id=""mc-lp13-206"" class=""mc-lp13 mc-lp13-saranoni""><div class=""mc-lp13-wrap""><nav class=""mc-lp13-shopbar"" aria-label=""Shop more products in Luxe Comforts""><span>SHOP MORE PRODUCTS</span><a href=""/category-s/205.htm"">Adult</a><a href=""/category-s/206.htm"">Kids</a><a href=""/category-s/207.htm"">Baby</a><a href=""/category-s/228.htm"">Blankets</a><a href=""/category-s/209.htm"">Bedding</a></nav><section class=""mc-lp13-hero"" aria-label=""Saranoni Kids category intro""><div class=""mc-lp13-copy""><p class=""mc-lp13-eyebrow"">SARANONI KIDS</p><h1>Saranoni Kids</h1><p class=""mc-lp13-intro"">Everyday comfort with characters they already love.</p><p class=""mc-lp13-body"">From double-layer Bamboni blankets to minky-lush throws featuring Batman, Harry Potter and Justice League, Saranoni’s kids collection pairs the brand’s plush, durable fabrics with prints kids actually ask for. Sized for growing bodies and built for real playroom and bedtime use, without giving up the soft, substantial feel Saranoni is known for.</p></div><a class=""mc-lp13-media"" href=""/category-s/206.htm"" aria-label=""Shop Saranoni Kids""><img src=""/v/vspfiles/landing/mc-luxe-comforts-kids-blankets-hero-20260721.jpg"" alt=""Saranoni Kids category banner image"" loading=""eager"" fetchpriority=""high"" onerror=""this.onerror=null;this.src='/v/vspfiles/landing/mc-luxe-comforts-kids-blankets-hero-20260721.jpg';""></a></section></div></div><style id=""mc-lp13-206-css"">.mc-lp13,.mc-lp13 *{box-sizing:border-box;}
+.mc-lp13{
+  position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+  padding:0 clamp(14px,3vw,56px) 18px;color:#141414;font-family:Inter,Arial,sans-serif;overflow-x:hidden;
+}
+.mc-lp13-wrap{max-width:1760px;margin:0 auto;}
+.mc-lp13-shopbar{
+  display:grid;grid-template-columns:minmax(210px,255px) repeat(auto-fit,minmax(148px,1fr));
+  gap:8px;margin:0 auto 12px;align-items:stretch;
+}
+.mc-lp13-shopbar span{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#f2ece4;border:1px solid #cfc2b5;color:#151515;font-size:12px;line-height:1.1;
+  letter-spacing:.16em;text-transform:uppercase;font-weight:900;text-align:center;
+}
+.mc-lp13-shopbar a{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#111;border:1px solid #111;color:#fff!important;text-decoration:none!important;
+  font-size:12px;line-height:1.1;letter-spacing:.11em;text-transform:uppercase;font-weight:900;
+  text-align:center;border-radius:0!important;box-shadow:none!important;
+}
+.mc-lp13-shopbar a:hover{background:#5d4537;border-color:#5d4537;color:#fff!important;}
+.mc-lp13-hero{
+  display:grid;grid-template-columns:minmax(360px,39%) minmax(0,61%);
+  align-items:stretch;height:500px;min-height:500px;max-height:500px;
+  border:1px solid #d2c6b8;background:#f2ece4;overflow:hidden;
+}
+.mc-lp13-copy{
+  padding:34px clamp(34px,4vw,66px);display:flex;flex-direction:column;justify-content:center;
+  min-width:0;align-self:stretch;margin-top:0;overflow:visible;
+}
+.mc-lp13-eyebrow{
+  margin:0 0 10px;color:#6b4e3f;font-size:12px;line-height:1.2;letter-spacing:.20em;
+  text-transform:uppercase;font-weight:900;
+}
+.mc-lp13 h1{
+  margin:0 0 14px;color:#101010;font-size:clamp(36px,4.4vw,68px);line-height:.92;
+  letter-spacing:-.055em;text-transform:uppercase;font-weight:900;
+}
+.mc-lp13-intro{
+  margin:0 0 12px;color:#231f1d;font-size:clamp(17px,1.3vw,22px);line-height:1.42;
+  font-weight:650;max-width:760px;
+}
+.mc-lp13-body{margin:0;color:#3b332e;font-size:15.5px;line-height:1.68;max-width:850px;}
+.mc-lp13-media{
+  display:block;position:relative;height:500px;min-height:500px;max-height:500px;
+  background:#d8cbbb;text-decoration:none!important;overflow:hidden;
+}
+.mc-lp13-media img{
+  display:block;width:100%;height:100%;min-height:500px;max-height:500px;
+  object-fit:cover;object-position:center center;border:0;margin:0!important;padding:0!important;
+  filter:none;background:#d8cbbb;
+}
+.mc-lp13-media:after{
+  content:"""";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.03);pointer-events:none;
+}
+@media (max-width:900px){
+  .mc-lp13-shopbar{grid-template-columns:1fr 1fr;}
+  .mc-lp13-shopbar span{grid-column:1/-1;}
+  .mc-lp13-hero{
+    grid-template-columns:1fr;height:auto;min-height:0;max-height:none;
+  }
+  .mc-lp13-media{order:-1;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:250px;min-height:250px;max-height:250px;margin-top:0;
+  }
+  .mc-lp13-copy{margin-top:0;padding:24px 20px;}
+}
+@media (max-width:560px){
+  .mc-lp13{padding:0 12px 14px;}
+  .mc-lp13-shopbar{grid-template-columns:1fr;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:205px;min-height:205px;max-height:205px;
+  }
+  .mc-lp13-copy{padding:18px 15px 20px;}
+  .mc-lp13 h1{font-size:25px;line-height:1.02;margin-top:0;}
+  .mc-lp13-intro{font-size:13px;line-height:1.28;}
+  .mc-lp13-body{font-size:12px;line-height:1.38;}
+}</style>"
+207,"<div id=""mc-lp13-207"" class=""mc-lp13 mc-lp13-saranoni""><div class=""mc-lp13-wrap""><nav class=""mc-lp13-shopbar"" aria-label=""Shop more products in Luxe Comforts""><span>SHOP MORE PRODUCTS</span><a href=""/category-s/205.htm"">Adult</a><a href=""/category-s/206.htm"">Kids</a><a href=""/category-s/207.htm"">Baby</a><a href=""/category-s/228.htm"">Blankets</a><a href=""/category-s/209.htm"">Bedding</a></nav><section class=""mc-lp13-hero"" aria-label=""Saranoni Baby category intro""><div class=""mc-lp13-copy""><p class=""mc-lp13-eyebrow"">SARANONI BABY</p><h1>Saranoni Baby</h1><p class=""mc-lp13-intro"">Gentle softness for the newest member of the family.</p><p class=""mc-lp13-body"">Saranoni’s baby collection brings the brand’s signature softness to the nursery: breathable cotton muslin, plush Lush-finish receiving blankets, swaddle sets and crib sheets designed for sensitive skin. Whether it’s a keepsake print or an everyday muslin swaddle, each piece is soft enough for daily use and special enough to hold onto.</p></div><a class=""mc-lp13-media"" href=""/category-s/207.htm"" aria-label=""Shop Saranoni Baby""><img src=""/v/vspfiles/landing/mc-luxe-comforts-baby-blankets-hero-20260721.jpg"" alt=""Saranoni Baby category banner image"" loading=""eager"" fetchpriority=""high"" onerror=""this.onerror=null;this.src='/v/vspfiles/landing/mc-luxe-comforts-baby-blankets-hero-20260721.jpg';""></a></section></div></div><style id=""mc-lp13-207-css"">.mc-lp13,.mc-lp13 *{box-sizing:border-box;}
+.mc-lp13{
+  position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+  padding:0 clamp(14px,3vw,56px) 18px;color:#141414;font-family:Inter,Arial,sans-serif;overflow-x:hidden;
+}
+.mc-lp13-wrap{max-width:1760px;margin:0 auto;}
+.mc-lp13-shopbar{
+  display:grid;grid-template-columns:minmax(210px,255px) repeat(auto-fit,minmax(148px,1fr));
+  gap:8px;margin:0 auto 12px;align-items:stretch;
+}
+.mc-lp13-shopbar span{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#f2ece4;border:1px solid #cfc2b5;color:#151515;font-size:12px;line-height:1.1;
+  letter-spacing:.16em;text-transform:uppercase;font-weight:900;text-align:center;
+}
+.mc-lp13-shopbar a{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#111;border:1px solid #111;color:#fff!important;text-decoration:none!important;
+  font-size:12px;line-height:1.1;letter-spacing:.11em;text-transform:uppercase;font-weight:900;
+  text-align:center;border-radius:0!important;box-shadow:none!important;
+}
+.mc-lp13-shopbar a:hover{background:#5d4537;border-color:#5d4537;color:#fff!important;}
+.mc-lp13-hero{
+  display:grid;grid-template-columns:minmax(360px,39%) minmax(0,61%);
+  align-items:stretch;height:500px;min-height:500px;max-height:500px;
+  border:1px solid #d2c6b8;background:#f2ece4;overflow:hidden;
+}
+.mc-lp13-copy{
+  padding:34px clamp(34px,4vw,66px);display:flex;flex-direction:column;justify-content:center;
+  min-width:0;align-self:stretch;margin-top:0;overflow:visible;
+}
+.mc-lp13-eyebrow{
+  margin:0 0 10px;color:#6b4e3f;font-size:12px;line-height:1.2;letter-spacing:.20em;
+  text-transform:uppercase;font-weight:900;
+}
+.mc-lp13 h1{
+  margin:0 0 14px;color:#101010;font-size:clamp(36px,4.4vw,68px);line-height:.92;
+  letter-spacing:-.055em;text-transform:uppercase;font-weight:900;
+}
+.mc-lp13-intro{
+  margin:0 0 12px;color:#231f1d;font-size:clamp(17px,1.3vw,22px);line-height:1.42;
+  font-weight:650;max-width:760px;
+}
+.mc-lp13-body{margin:0;color:#3b332e;font-size:15.5px;line-height:1.68;max-width:850px;}
+.mc-lp13-media{
+  display:block;position:relative;height:500px;min-height:500px;max-height:500px;
+  background:#d8cbbb;text-decoration:none!important;overflow:hidden;
+}
+.mc-lp13-media img{
+  display:block;width:100%;height:100%;min-height:500px;max-height:500px;
+  object-fit:cover;object-position:center center;border:0;margin:0!important;padding:0!important;
+  filter:none;background:#d8cbbb;
+}
+.mc-lp13-media:after{
+  content:"""";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.03);pointer-events:none;
+}
+@media (max-width:900px){
+  .mc-lp13-shopbar{grid-template-columns:1fr 1fr;}
+  .mc-lp13-shopbar span{grid-column:1/-1;}
+  .mc-lp13-hero{
+    grid-template-columns:1fr;height:auto;min-height:0;max-height:none;
+  }
+  .mc-lp13-media{order:-1;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:250px;min-height:250px;max-height:250px;margin-top:0;
+  }
+  .mc-lp13-copy{margin-top:0;padding:24px 20px;}
+}
+@media (max-width:560px){
+  .mc-lp13{padding:0 12px 14px;}
+  .mc-lp13-shopbar{grid-template-columns:1fr;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:205px;min-height:205px;max-height:205px;
+  }
+  .mc-lp13-copy{padding:18px 15px 20px;}
+  .mc-lp13 h1{font-size:25px;line-height:1.02;margin-top:0;}
+  .mc-lp13-intro{font-size:13px;line-height:1.28;}
+  .mc-lp13-body{font-size:12px;line-height:1.38;}
+}</style>"
+228,"<div id=""mc-lp13-228"" class=""mc-lp13 mc-lp13-saranoni""><div class=""mc-lp13-wrap""><nav class=""mc-lp13-shopbar"" aria-label=""Shop more products in Luxe Comforts""><span>SHOP MORE PRODUCTS</span><a href=""/category-s/205.htm"">Adult</a><a href=""/category-s/206.htm"">Kids</a><a href=""/category-s/207.htm"">Baby</a><a href=""/category-s/228.htm"">Blankets</a><a href=""/category-s/209.htm"">Bedding</a></nav><section class=""mc-lp13-hero"" aria-label=""Saranoni Blankets category intro""><div class=""mc-lp13-copy""><p class=""mc-lp13-eyebrow"">SARANONI BLANKETS</p><h1>Saranoni Blankets</h1><p class=""mc-lp13-intro"">Signature softness in every size, from grown-up throws to baby’s first swaddle.</p><p class=""mc-lp13-body"">Saranoni’s blanket collection spans loungewear-ready adult throws, character-print kids blankets and gentle baby muslin and Lush pieces — all built on the same plush, refined fabrics the brand is known for. Shop Loungewear, Kids and Baby to find the right size and style for everyone on your list.</p></div><a class=""mc-lp13-media"" href=""/category-s/228.htm"" aria-label=""Shop Saranoni Blankets""><img src=""/v/vspfiles/landing/mc-luxe-comforts-blankets-hero-20260721b.jpg"" alt=""Saranoni Blankets category banner image"" loading=""eager"" fetchpriority=""high"" onerror=""this.onerror=null;this.src='/v/vspfiles/landing/mc-luxe-comforts-blankets-hero-20260721b.jpg';""></a></section></div></div><style id=""mc-lp13-228-css"">.mc-lp13,.mc-lp13 *{box-sizing:border-box;}
+.mc-lp13{
+  position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+  padding:0 clamp(14px,3vw,56px) 18px;color:#141414;font-family:Inter,Arial,sans-serif;overflow-x:hidden;
+}
+.mc-lp13-wrap{max-width:1760px;margin:0 auto;}
+.mc-lp13-shopbar{
+  display:grid;grid-template-columns:minmax(210px,255px) repeat(auto-fit,minmax(148px,1fr));
+  gap:8px;margin:0 auto 12px;align-items:stretch;
+}
+.mc-lp13-shopbar span{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#f2ece4;border:1px solid #cfc2b5;color:#151515;font-size:12px;line-height:1.1;
+  letter-spacing:.16em;text-transform:uppercase;font-weight:900;text-align:center;
+}
+.mc-lp13-shopbar a{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#111;border:1px solid #111;color:#fff!important;text-decoration:none!important;
+  font-size:12px;line-height:1.1;letter-spacing:.11em;text-transform:uppercase;font-weight:900;
+  text-align:center;border-radius:0!important;box-shadow:none!important;
+}
+.mc-lp13-shopbar a:hover{background:#5d4537;border-color:#5d4537;color:#fff!important;}
+.mc-lp13-hero{
+  display:grid;grid-template-columns:minmax(360px,39%) minmax(0,61%);
+  align-items:stretch;height:500px;min-height:500px;max-height:500px;
+  border:1px solid #d2c6b8;background:#f2ece4;overflow:hidden;
+}
+.mc-lp13-copy{
+  padding:34px clamp(34px,4vw,66px);display:flex;flex-direction:column;justify-content:center;
+  min-width:0;align-self:stretch;margin-top:0;overflow:visible;
+}
+.mc-lp13-eyebrow{
+  margin:0 0 10px;color:#6b4e3f;font-size:12px;line-height:1.2;letter-spacing:.20em;
+  text-transform:uppercase;font-weight:900;
+}
+.mc-lp13 h1{
+  margin:0 0 14px;color:#101010;font-size:clamp(36px,4.4vw,68px);line-height:.92;
+  letter-spacing:-.055em;text-transform:uppercase;font-weight:900;
+}
+.mc-lp13-intro{
+  margin:0 0 12px;color:#231f1d;font-size:clamp(17px,1.3vw,22px);line-height:1.42;
+  font-weight:650;max-width:760px;
+}
+.mc-lp13-body{margin:0;color:#3b332e;font-size:15.5px;line-height:1.68;max-width:850px;}
+.mc-lp13-media{
+  display:block;position:relative;height:500px;min-height:500px;max-height:500px;
+  background:#d8cbbb;text-decoration:none!important;overflow:hidden;
+}
+.mc-lp13-media img{
+  display:block;width:100%;height:100%;min-height:500px;max-height:500px;
+  object-fit:cover;object-position:center center;border:0;margin:0!important;padding:0!important;
+  filter:none;background:#d8cbbb;
+}
+.mc-lp13-media:after{
+  content:"""";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.03);pointer-events:none;
+}
+@media (max-width:900px){
+  .mc-lp13-shopbar{grid-template-columns:1fr 1fr;}
+  .mc-lp13-shopbar span{grid-column:1/-1;}
+  .mc-lp13-hero{
+    grid-template-columns:1fr;height:auto;min-height:0;max-height:none;
+  }
+  .mc-lp13-media{order:-1;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:250px;min-height:250px;max-height:250px;margin-top:0;
+  }
+  .mc-lp13-copy{margin-top:0;padding:24px 20px;}
+}
+@media (max-width:560px){
+  .mc-lp13{padding:0 12px 14px;}
+  .mc-lp13-shopbar{grid-template-columns:1fr;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:205px;min-height:205px;max-height:205px;
+  }
+  .mc-lp13-copy{padding:18px 15px 20px;}
+  .mc-lp13 h1{font-size:25px;line-height:1.02;margin-top:0;}
+  .mc-lp13-intro{font-size:13px;line-height:1.28;}
+  .mc-lp13-body{font-size:12px;line-height:1.38;}
+}</style>"
+208,"<div id=""mc-lp13-208"" class=""mc-lp13 mc-lp13-saranoni""><div class=""mc-lp13-wrap""><nav class=""mc-lp13-shopbar"" aria-label=""Shop more products in Luxe Comforts""><span>SHOP MORE PRODUCTS</span><a href=""/category-s/205.htm"">Adult</a><a href=""/category-s/206.htm"">Kids</a><a href=""/category-s/207.htm"">Baby</a><a href=""/category-s/228.htm"">Blankets</a><a href=""/category-s/209.htm"">Bedding</a></nav><section class=""mc-lp13-hero"" aria-label=""Family Saranoni Snugglewear &amp; Loungewear category intro""><div class=""mc-lp13-copy""><p class=""mc-lp13-eyebrow"">SARANONI SNUGGLEWEAR</p><h1>Family Saranoni Snugglewear &amp; Loungewear</h1><p class=""mc-lp13-intro"">Wearable softness for slow mornings and movie-night furniture hopping.</p><p class=""mc-lp13-body"">Saranoni snugglewear and loungewear turn the brand’s signature softness into pieces you can actually live in. Think plush, enveloping fabrics with a refined finish: cozy enough for the couch, polished enough to feel intentionally indulgent rather than just oversized.</p></div><a class=""mc-lp13-media"" href=""/category-s/208.htm"" aria-label=""Shop Family Saranoni Snugglewear &amp; Loungewear""><img src=""/v/vspfiles/landing/mc-luxe-comforts-snugglewear-hero-20260721b.jpg"" alt=""Family Saranoni Snugglewear &amp; Loungewear category banner image"" loading=""eager"" fetchpriority=""high"" onerror=""this.onerror=null;this.src='/v/vspfiles/landing/mc-luxe-comforts-snugglewear-hero-20260721b.jpg';""></a></section></div></div><style id=""mc-lp13-208-css"">.mc-lp13,.mc-lp13 *{box-sizing:border-box;}
+.mc-lp13{
+  position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+  padding:0 clamp(14px,3vw,56px) 18px;color:#141414;font-family:Inter,Arial,sans-serif;overflow-x:hidden;
+}
+.mc-lp13-wrap{max-width:1760px;margin:0 auto;}
+.mc-lp13-shopbar{
+  display:grid;grid-template-columns:minmax(210px,255px) repeat(auto-fit,minmax(148px,1fr));
+  gap:8px;margin:0 auto 12px;align-items:stretch;
+}
+.mc-lp13-shopbar span{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#f2ece4;border:1px solid #cfc2b5;color:#151515;font-size:12px;line-height:1.1;
+  letter-spacing:.16em;text-transform:uppercase;font-weight:900;text-align:center;
+}
+.mc-lp13-shopbar a{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#111;border:1px solid #111;color:#fff!important;text-decoration:none!important;
+  font-size:12px;line-height:1.1;letter-spacing:.11em;text-transform:uppercase;font-weight:900;
+  text-align:center;border-radius:0!important;box-shadow:none!important;
+}
+.mc-lp13-shopbar a:hover{background:#5d4537;border-color:#5d4537;color:#fff!important;}
+.mc-lp13-hero{
+  display:grid;grid-template-columns:minmax(360px,39%) minmax(0,61%);
+  align-items:stretch;height:500px;min-height:500px;max-height:500px;
+  border:1px solid #d2c6b8;background:#f2ece4;overflow:hidden;
+}
+.mc-lp13-copy{
+  padding:34px clamp(34px,4vw,66px);display:flex;flex-direction:column;justify-content:center;
+  min-width:0;align-self:stretch;margin-top:0;overflow:visible;
+}
+.mc-lp13-eyebrow{
+  margin:0 0 10px;color:#6b4e3f;font-size:12px;line-height:1.2;letter-spacing:.20em;
+  text-transform:uppercase;font-weight:900;
+}
+.mc-lp13 h1{
+  margin:0 0 14px;color:#101010;font-size:clamp(36px,4.4vw,68px);line-height:.92;
+  letter-spacing:-.055em;text-transform:uppercase;font-weight:900;
+}
+.mc-lp13-intro{
+  margin:0 0 12px;color:#231f1d;font-size:clamp(17px,1.3vw,22px);line-height:1.42;
+  font-weight:650;max-width:760px;
+}
+.mc-lp13-body{margin:0;color:#3b332e;font-size:15.5px;line-height:1.68;max-width:850px;}
+.mc-lp13-media{
+  display:block;position:relative;height:500px;min-height:500px;max-height:500px;
+  background:#d8cbbb;text-decoration:none!important;overflow:hidden;
+}
+.mc-lp13-media img{
+  display:block;width:100%;height:100%;min-height:500px;max-height:500px;
+  object-fit:cover;object-position:center center;border:0;margin:0!important;padding:0!important;
+  filter:none;background:#d8cbbb;
+}
+.mc-lp13-media:after{
+  content:"""";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.03);pointer-events:none;
+}
+@media (max-width:900px){
+  .mc-lp13-shopbar{grid-template-columns:1fr 1fr;}
+  .mc-lp13-shopbar span{grid-column:1/-1;}
+  .mc-lp13-hero{
+    grid-template-columns:1fr;height:auto;min-height:0;max-height:none;
+  }
+  .mc-lp13-media{order:-1;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:250px;min-height:250px;max-height:250px;margin-top:0;
+  }
+  .mc-lp13-copy{margin-top:0;padding:24px 20px;}
+}
+@media (max-width:560px){
+  .mc-lp13{padding:0 12px 14px;}
+  .mc-lp13-shopbar{grid-template-columns:1fr;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:205px;min-height:205px;max-height:205px;
+  }
+  .mc-lp13-copy{padding:18px 15px 20px;}
+  .mc-lp13 h1{font-size:25px;line-height:1.02;margin-top:0;}
+  .mc-lp13-intro{font-size:13px;line-height:1.28;}
+  .mc-lp13-body{font-size:12px;line-height:1.38;}
+}</style>"
+209,"<div id=""mc-lp13-209"" class=""mc-lp13 mc-lp13-saranoni""><div class=""mc-lp13-wrap""><nav class=""mc-lp13-shopbar"" aria-label=""Shop more products in Luxe Comforts""><span>SHOP MORE PRODUCTS</span><a href=""/category-s/205.htm"">Adult</a><a href=""/category-s/206.htm"">Kids</a><a href=""/category-s/207.htm"">Baby</a><a href=""/category-s/228.htm"">Blankets</a><a href=""/category-s/209.htm"">Bedding</a></nav><section class=""mc-lp13-hero"" aria-label=""Saranoni Bedding category intro""><div class=""mc-lp13-copy""><p class=""mc-lp13-eyebrow"">SARANONI BEDDING</p><h1>Saranoni Bedding</h1><p class=""mc-lp13-intro"">Soft texture and quiet luxury for the bedroom.</p><p class=""mc-lp13-body"">Saranoni bedding adds the part of the room you feel before you think about it: soft texture, gentle warmth and layers that make a bed look considered without becoming fussy. Waffle knit, muslin, bamboo blends and plush throws bring the brand’s fabric story into the bedroom with a more elevated, collected feel.</p></div><a class=""mc-lp13-media"" href=""/category-s/209.htm"" aria-label=""Shop Saranoni Bedding""><img src=""/v/vspfiles/landing/mc-luxe-comforts-bedding-hero-20260721b.jpg"" alt=""Saranoni Bedding category banner image"" loading=""eager"" fetchpriority=""high"" onerror=""this.onerror=null;this.src='/v/vspfiles/landing/mc-luxe-comforts-bedding-hero-20260721b.jpg';""></a></section></div></div><style id=""mc-lp13-209-css"">.mc-lp13,.mc-lp13 *{box-sizing:border-box;}
+.mc-lp13{
+  position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);
+  padding:0 clamp(14px,3vw,56px) 18px;color:#141414;font-family:Inter,Arial,sans-serif;overflow-x:hidden;
+}
+.mc-lp13-wrap{max-width:1760px;margin:0 auto;}
+.mc-lp13-shopbar{
+  display:grid;grid-template-columns:minmax(210px,255px) repeat(auto-fit,minmax(148px,1fr));
+  gap:8px;margin:0 auto 12px;align-items:stretch;
+}
+.mc-lp13-shopbar span{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#f2ece4;border:1px solid #cfc2b5;color:#151515;font-size:12px;line-height:1.1;
+  letter-spacing:.16em;text-transform:uppercase;font-weight:900;text-align:center;
+}
+.mc-lp13-shopbar a{
+  display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px 14px;
+  background:#111;border:1px solid #111;color:#fff!important;text-decoration:none!important;
+  font-size:12px;line-height:1.1;letter-spacing:.11em;text-transform:uppercase;font-weight:900;
+  text-align:center;border-radius:0!important;box-shadow:none!important;
+}
+.mc-lp13-shopbar a:hover{background:#5d4537;border-color:#5d4537;color:#fff!important;}
+.mc-lp13-hero{
+  display:grid;grid-template-columns:minmax(360px,39%) minmax(0,61%);
+  align-items:stretch;height:500px;min-height:500px;max-height:500px;
+  border:1px solid #d2c6b8;background:#f2ece4;overflow:hidden;
+}
+.mc-lp13-copy{
+  padding:34px clamp(34px,4vw,66px);display:flex;flex-direction:column;justify-content:center;
+  min-width:0;align-self:stretch;margin-top:0;overflow:visible;
+}
+.mc-lp13-eyebrow{
+  margin:0 0 10px;color:#6b4e3f;font-size:12px;line-height:1.2;letter-spacing:.20em;
+  text-transform:uppercase;font-weight:900;
+}
+.mc-lp13 h1{
+  margin:0 0 14px;color:#101010;font-size:clamp(36px,4.4vw,68px);line-height:.92;
+  letter-spacing:-.055em;text-transform:uppercase;font-weight:900;
+}
+.mc-lp13-intro{
+  margin:0 0 12px;color:#231f1d;font-size:clamp(17px,1.3vw,22px);line-height:1.42;
+  font-weight:650;max-width:760px;
+}
+.mc-lp13-body{margin:0;color:#3b332e;font-size:15.5px;line-height:1.68;max-width:850px;}
+.mc-lp13-media{
+  display:block;position:relative;height:500px;min-height:500px;max-height:500px;
+  background:#d8cbbb;text-decoration:none!important;overflow:hidden;
+}
+.mc-lp13-media img{
+  display:block;width:100%;height:100%;min-height:500px;max-height:500px;
+  object-fit:cover;object-position:center center;border:0;margin:0!important;padding:0!important;
+  filter:none;background:#d8cbbb;
+}
+.mc-lp13-media:after{
+  content:"""";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.03);pointer-events:none;
+}
+@media (max-width:900px){
+  .mc-lp13-shopbar{grid-template-columns:1fr 1fr;}
+  .mc-lp13-shopbar span{grid-column:1/-1;}
+  .mc-lp13-hero{
+    grid-template-columns:1fr;height:auto;min-height:0;max-height:none;
+  }
+  .mc-lp13-media{order:-1;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:250px;min-height:250px;max-height:250px;margin-top:0;
+  }
+  .mc-lp13-copy{margin-top:0;padding:24px 20px;}
+}
+@media (max-width:560px){
+  .mc-lp13{padding:0 12px 14px;}
+  .mc-lp13-shopbar{grid-template-columns:1fr;}
+  .mc-lp13-media,.mc-lp13-media img{
+    height:205px;min-height:205px;max-height:205px;
+  }
+  .mc-lp13-copy{padding:18px 15px 20px;}
+  .mc-lp13 h1{font-size:25px;line-height:1.02;margin-top:0;}
+  .mc-lp13-intro{font-size:13px;line-height:1.28;}
+  .mc-lp13-body{font-size:12px;line-height:1.38;}
+}</style>"
