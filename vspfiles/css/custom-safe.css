@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260720sarfix6 — HP nursery alts + size variant images */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260721mobscroll1 — mobile PDP related scroll (no nested scrollports) */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -3694,14 +3694,16 @@ margin-left: 0 !important;
   .content_area-wrapper,
   .container--content {
     max-width: 100% !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     box-sizing: border-box !important;
   }
 
   #content_area,
   #v65-product-parent {
     max-width: 100% !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     box-sizing: border-box !important;
   }
 
@@ -3881,11 +3883,14 @@ margin-left: 0 !important;
     float: none !important;
   }
 
-  /* Keep product page content within viewport (no push right, no overflow) */
+  /* Keep product page content within viewport (no push right, no overflow).
+     Use clip (not hidden) so overflow-y stays visible — hidden couples and
+     creates nested vertical scrollports that glitch into Related Items. */
   body.productdetails .content_area-wrapper,
   body.mc-product-page .content_area-wrapper {
     max-width: 100% !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     padding-left: 12px !important;
     padding-right: 12px !important;
     box-sizing: border-box !important;
@@ -3894,14 +3899,16 @@ margin-left: 0 !important;
   body.productdetails #content_area,
   body.mc-product-page #content_area {
     max-width: 100% !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     box-sizing: border-box !important;
   }
 
   body.productdetails #v65-product-parent,
   body.mc-product-page #v65-product-parent {
     max-width: 100% !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     box-sizing: border-box !important;
   }
 
@@ -4436,7 +4443,8 @@ body:not(.is-home) #display_menu_1 > ul {
     .content_area-wrapper,
     #content_area,
     #v65-product-parent {
-      overflow-x: hidden !important;
+      overflow-x: clip !important;
+      overflow-y: visible !important;
       box-sizing: border-box !important;
       max-width: 100% !important;
     }
@@ -22414,7 +22422,8 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   html body.mc-product-page .mc-acc-content {
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     overflow-wrap: anywhere !important;
     word-break: break-word !important;
     box-sizing: border-box !important;
@@ -22842,7 +22851,8 @@ html body.mc-pdp-hero-ready.mc-pdp-hero-pending td.mc-pdp-options-td {
   html body.productdetails #v65-product-parent,
   html body.mc-product-page #content_area,
   html body.productdetails #content_area {
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 auto !important;
@@ -24800,4 +24810,64 @@ html body.mc-saranoni-pdp #related_products_content {
   }
 }
 /* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
+
+/* BEGIN REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll1)
+   overflow-x:hidden on #content_area / #v65-product-parent / .vol-inner forces
+   overflow-y to compute as auto (CSS overflow coupling). That creates nested
+   vertical scrollports. Related Items is hoisted outside #v65-product-parent,
+   so scrolling into related fights body vs content_area scroll — mobile glitch.
+   Use overflow-x:clip (does not couple) + overflow-y:visible so only body scrolls. */
+@media (max-width: 991px) {
+  html body.mc-product-page,
+  html body.productdetails,
+  html body.mc-saranoni-pdp,
+  html body.mc-mahjong-house-pdp,
+  html body.mc-steve-silver-altview-pdp,
+  html body.mc-closeout-pdp {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+  }
+
+  html body.mc-product-page .vol-inner,
+  html body.productdetails .vol-inner,
+  html body.mc-product-page .content_area-wrapper,
+  html body.productdetails .content_area-wrapper,
+  html body.mc-product-page #content_area,
+  html body.productdetails #content_area,
+  html body.mc-product-page #vCSS_mainform,
+  html body.productdetails #vCSS_mainform,
+  html body.mc-product-page #v65-product-parent,
+  html body.productdetails #v65-product-parent,
+  html body.mc-saranoni-pdp #content_area,
+  html body.mc-saranoni-pdp #v65-product-parent,
+  html body.mc-saranoni-pdp .vol-inner {
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+    overscroll-behavior: auto !important;
+  }
+
+  html body.mc-product-page #v65-product-related,
+  html body.productdetails #v65-product-related,
+  html body.mc-product-page #related_products_content,
+  html body.productdetails #related_products_content,
+  html body.mc-saranoni-pdp #v65-product-related,
+  html body.mc-saranoni-pdp #related_products_content {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    position: relative !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+  }
+
+  /* Keep alt thumbs horizontal-scroll only — never a vertical scrollport. */
+  html body.mc-product-page #mc-pdp-alt-view-row,
+  html body.productdetails #mc-pdp-alt-view-row,
+  html body.mc-saranoni-pdp #mc-pdp-alt-view-row {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+}
+/* END REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll1) */
 

@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720sarfix6 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720sarfix6";
+  // MC_DEPLOY_FINGERPRINT_20260721mobscroll1 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260721mobscroll1";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720sarfix6";
+  var VERSION = "20260721mobscroll1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -2232,7 +2232,7 @@
       "html body.mc-mahjong-house-pdp .mc-acc-panel,html body.mc-mahjong-house-pdp .mc-acc-content{width:100%!important;max-width:100%!important;overflow:visible!important;padding-right:0!important}" +
       "html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-pdp-description-below-features,html body.mc-mahjong-house-pdp #mc-pdp-accordion #mc-acc-saranoni-product-details-host,html body.mc-mahjong-house-pdp #mc-pdp-accordion #ProductDetail_ProductDetails_div,html body.mc-mahjong-house-pdp #mc-pdp-accordion #product_description{display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important;overflow:visible!important}" +
       "@media (min-width:992px){html body.mc-mahjong-house-pdp #content_area tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #content_area tr.mc-unified-pdp-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{column-gap:24px!important;gap:24px!important;justify-content:center!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{max-width:620px!important;padding-right:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{width:440px!important;max-width:440px!important;min-width:420px!important;padding-left:0!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td img#product_photo,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media img#product_photo{max-width:min(620px,100%)!important;margin-right:0!important}html body.mc-mahjong-house-pdp #mc-pdp-title-right,html body.mc-mahjong-house-pdp #mc-pdp-title-right h1,html body.mc-mahjong-house-pdp #mc-pdp-title-right [itemprop='name'],html body.mc-mahjong-house-pdp #mc-mahjong-price-host{text-align:left!important}}" +
-      "@media (max-width:991px){html body.mc-mahjong-house-pdp #content_area,html body.mc-mahjong-house-pdp #v65-product-parent{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important;box-sizing:border-box!important}html body.mc-mahjong-house-pdp #v65-product-parent>tbody,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{display:flex!important;flex-direction:column!important;width:100%!important;max-width:100%!important}html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row>td,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row>td,html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media,html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important;float:none!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{order:1!important}html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{order:2!important}html body.mc-mahjong-house-pdp #v65-product-parent .vCSS_breadcrumb_td:not(:has(h1)):not(:has(#mc-pdp-title-right)){display:none!important}html body.mc-mahjong-house-pdp #product_photo,html body.mc-mahjong-house-pdp a#product_photo_zoom_url{width:100%!important;max-width:650px!important;height:auto!important;margin-left:auto!important;margin-right:auto!important}html body.mc-mahjong-house-pdp #mc-mahjong-purchase-stack{width:100%!important;max-width:100%!important;box-sizing:border-box!important}}";
+      "@media (max-width:991px){html body.mc-mahjong-house-pdp #content_area,html body.mc-mahjong-house-pdp #v65-product-parent{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:clip!important;overflow-y:visible!important;box-sizing:border-box!important}html body.mc-mahjong-house-pdp #v65-product-parent>tbody,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row{display:flex!important;flex-direction:column!important;width:100%!important;max-width:100%!important}html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-pdp-main-row>td,html body.mc-mahjong-house-pdp #v65-product-parent tr.mc-unified-pdp-row>td,html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media,html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important;float:none!important}html body.mc-mahjong-house-pdp td.mc-pdp-media-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-media{order:1!important}html body.mc-mahjong-house-pdp td.mc-pdp-options-td,html body.mc-mahjong-house-pdp td.mc-unified-pdp-info{order:2!important}html body.mc-mahjong-house-pdp #v65-product-parent .vCSS_breadcrumb_td:not(:has(h1)):not(:has(#mc-pdp-title-right)){display:none!important}html body.mc-mahjong-house-pdp #product_photo,html body.mc-mahjong-house-pdp a#product_photo_zoom_url{width:100%!important;max-width:650px!important;height:auto!important;margin-left:auto!important;margin-right:auto!important}html body.mc-mahjong-house-pdp #mc-mahjong-purchase-stack{width:100%!important;max-width:100%!important;box-sizing:border-box!important}}";
   }
 
   function findMahjongDescriptionSource() {
@@ -7599,7 +7599,7 @@
      baked PDPs still request an older ?v= cache key for alt-view-row.js. */
   function ensureFreshSaranoniAltViewRowScript() {
     if (!isSaranoniPdpPage()) return;
-    var want = "20260720sarfix6";
+    var want = "20260721mobscroll1";
     try {
       if (global["__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__"]) {
         global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
@@ -11401,7 +11401,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720sarfix6";
+  var WANT_FP = "20260721mobscroll1";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11429,7 +11429,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix6&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260721mobscroll1&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}
