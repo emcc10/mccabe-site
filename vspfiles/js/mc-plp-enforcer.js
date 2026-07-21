@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260720sarmob1 — cart glyph + Mahjong remap + mobile cart right nudge
+ * MC_PLP_ENFORCER_20260721nophoto1 — hide blank-name NoPhoto stubs + href SKU NoPhoto swap
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260720sarmob1";
+  var VERSION = "20260721nophoto1";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -1267,7 +1267,7 @@
 
   function applyNoPhotoSwap(img, sku) {
     if (!img || !sku) return;
-    var photoCode = resolveTmhMatPhotoCode(sku);
+    var photoCode = resolvePlpPhotoCode(sku);
     var file = photoCode + "-1.jpg";
     var probe = new Image();
     probe.onload = function () {
@@ -1309,6 +1309,64 @@
     return m ? String(m[1]).trim() : "";
   }
 
+  function skuFromProductHref(href) {
+    var h = String(href || "");
+    var m =
+      h.match(/\/product-p\/([^.\/?#]+)/i) ||
+      h.match(/\/-p\/([^.\/?#]+)/i) ||
+      h.match(/[?&]ProductCode=([^&]+)/i) ||
+      h.match(/[?&]productcode=([^&]+)/i);
+    if (!m || !m[1]) return "";
+    var raw = String(m[1]);
+    try {
+      raw = decodeURIComponent(raw.replace(/\+/g, " ")).trim();
+    } catch (eDec) {}
+    return raw.replace(/\.htm.*/i, "").toUpperCase();
+  }
+
+  /** Incomplete imports show title ", SS-####" with empty visible name + NoPhoto. */
+  function isBlankPlpProductName(titleAttr, textContent) {
+    var title = String(titleAttr || "").trim();
+    var text = String(textContent || "").replace(/\u00a0/g, " ").trim();
+    if (/^,\s*[0-9A-Za-z][0-9A-Za-z-]*\s*$/.test(title)) return true;
+    if (!text && /^[0-9A-Za-z][0-9A-Za-z-]*\s*$/.test(title)) return true;
+    if (!text && !title) return true;
+    return false;
+  }
+
+  function hideBlankNamePlpTiles() {
+    var root = document.getElementById("content_area");
+    if (!root) return;
+
+    root.querySelectorAll("a.v-product__title, a.productnamecolor, a.colors_productname").forEach(function (a) {
+      if (!isBlankPlpProductName(a.getAttribute("title"), a.textContent)) return;
+      var card = a.closest && a.closest(".v-product");
+      if (card) {
+        card.style.setProperty("display", "none", "important");
+        return;
+      }
+      var code = skuFromProductHref(a.getAttribute("href") || a.href || "");
+      if (!code) {
+        var td = a.closest && a.closest("td");
+        if (td) td.style.setProperty("display", "none", "important");
+        return;
+      }
+      var needle = code.toLowerCase();
+      root.querySelectorAll("td").forEach(function (td) {
+        var hit = td.querySelector(
+          'a[href*="/product-p/' +
+            needle +
+            '"], a[href*="/product-p/' +
+            code +
+            '"], a[href*="/-p/' +
+            needle +
+            '"]'
+        );
+        if (hit) td.style.setProperty("display", "none", "important");
+      });
+    });
+  }
+
   /** Travel mats use TMH-TRV-* on Volusion; repo photos may be TMH-MAT-* stems. */
   var TMH_TRV_PHOTO_ALIASES = {
     "TMH-TRV-AMETHYST-GEM-MAT": "TMH-MAT-AMETHYST-GEM-TRAVEL-MAT",
@@ -1331,11 +1389,26 @@
     "TMH-TRV-TEAL-TRELLIS-MAT": "TMH-MAT-TEAL-TRELLIS-MAT",
   };
 
+  /** Duplicate/incomplete numeric SS imports → existing slug photo stems on CDN. */
+  var PLP_PHOTO_ALIASES = {
+    "SS-3105415": "SS-GATLIN-BROWN-RECL",
+    "SS-2968622": "SS-OLSEN-DOVE-PWR-RECL",
+    "SS-KE800C": "SS-KEILY-BROWN-RECL",
+    "SS-KE800CG": "SS-MARLOW-CHARCOAL-RECL",
+  };
+
   function resolveTmhMatPhotoCode(sku) {
     var code = String(sku || "").trim().toUpperCase();
     if (!code) return code;
     if (TMH_TRV_PHOTO_ALIASES[code]) return TMH_TRV_PHOTO_ALIASES[code];
     return code;
+  }
+
+  function resolvePlpPhotoCode(sku) {
+    var code = String(sku || "").trim().toUpperCase();
+    if (!code) return code;
+    if (PLP_PHOTO_ALIASES[code]) return PLP_PHOTO_ALIASES[code];
+    return resolveTmhMatPhotoCode(code);
   }
 
   function fixTmhMatPlpThumbnails(root) {
@@ -1391,13 +1464,36 @@
     var root = document.getElementById("content_area");
     if (!root) return;
 
+    function skuFromBlock(block, titleEl) {
+      var sku = skuFromProductTitle(
+        titleEl && (titleEl.getAttribute("title") || titleEl.textContent)
+      );
+      if (sku && /^[0-9A-Za-z][0-9A-Za-z-]*$/.test(sku)) return sku;
+      var link =
+        (titleEl && (titleEl.getAttribute("href") || titleEl.href)) ||
+        (block.querySelector &&
+          (
+            block.querySelector("a.v-product__img[href], a.v-product__title[href], a.productnamecolor[href], a[href*='product-p/'], a[href*='-p/']") ||
+            {}
+          ).href) ||
+        "";
+      if (!link && titleEl && titleEl.getAttribute) {
+        link = titleEl.getAttribute("href") || "";
+      }
+      if (!link && block.querySelector) {
+        var a = block.querySelector(
+          "a.v-product__img[href], a[href*='/product-p/'], a[href*='/-p/']"
+        );
+        link = (a && (a.getAttribute("href") || a.href)) || "";
+      }
+      return skuFromProductHref(link);
+    }
+
     root.querySelectorAll(".v-product").forEach(function (block) {
       var titleEl =
         block.querySelector("a.v-product__title") ||
         block.querySelector("a.productnamecolor, a.colors_productname");
-      var sku = skuFromProductTitle(
-        titleEl && (titleEl.getAttribute("title") || titleEl.textContent)
-      );
+      var sku = skuFromBlock(block, titleEl);
       if (!sku || !/^[0-9A-Za-z][0-9A-Za-z-]*$/.test(sku)) return;
 
       var img =
@@ -1415,9 +1511,10 @@
           ".mc-related-plp-card__title a"
       )
       .forEach(function (titleEl) {
-        var sku = skuFromProductTitle(
-          titleEl && (titleEl.getAttribute("title") || titleEl.textContent)
-        );
+        var sku =
+          skuFromProductTitle(
+            titleEl && (titleEl.getAttribute("title") || titleEl.textContent)
+          ) || skuFromProductHref(titleEl && (titleEl.getAttribute("href") || titleEl.href));
         if (!sku || !/^[0-9A-Za-z][0-9A-Za-z-]*$/.test(sku)) return;
         var card =
           (titleEl.closest && titleEl.closest(".mc-related-plp-card")) ||
@@ -1437,11 +1534,23 @@
     ) {
       splitGridSingleBlocks(legacyTable).forEach(function (blockRows) {
         var sku = legacySkuFromRows(blockRows);
+        if (!sku) {
+          var i;
+          for (i = 0; i < blockRows.length; i++) {
+            var link = blockRows[i].querySelector(
+              'a[href*="/product-p/"], a[href*="/-p/"]'
+            );
+            if (link) {
+              sku = skuFromProductHref(link.getAttribute("href") || link.href);
+              if (sku) break;
+            }
+          }
+        }
         if (!sku || !/^[0-9A-Za-z][0-9A-Za-z-]*$/.test(sku)) return;
         var img = null;
-        var i;
-        for (i = 0; i < blockRows.length; i++) {
-          var cand = blockRows[i].querySelector("td[rowspan] img, img");
+        var j;
+        for (j = 0; j < blockRows.length; j++) {
+          var cand = blockRows[j].querySelector("td[rowspan] img, img");
           if (cand && isNoPhotoPlaceholder(cand.currentSrc || cand.src)) {
             img = cand;
             break;
@@ -1451,6 +1560,15 @@
         applyNoPhotoSwap(img, sku);
       });
     }
+
+    /* Parallel / nested legacy tables (e.g. cat 149): swap per image link. */
+    root.querySelectorAll('a[href*="/product-p/"] img, a[href*="/-p/"] img').forEach(function (img) {
+      if (!isNoPhotoPlaceholder(img.currentSrc || img.src)) return;
+      var a = img.closest && img.closest("a[href]");
+      var sku = skuFromProductHref(a && (a.getAttribute("href") || a.href));
+      if (!sku || !/^[0-9A-Za-z][0-9A-Za-z-]*$/.test(sku)) return;
+      applyNoPhotoSwap(img, sku);
+    });
   }
 
   function thumbBox(img) {
@@ -1746,6 +1864,7 @@
     repairLuxeComfortsListingChrome();
     convertLegacyGridSingleToProductGrid();
     ensureBeanBagCategoryShippingBadges();
+    hideBlankNamePlpTiles();
     fixStalePhotoUrls();
     fixNoPhotoThumbnails();
     fixTmhMatPlpThumbnails();
@@ -1765,6 +1884,7 @@
           repairLuxeComfortsListingChrome();
           convertLegacyGridSingleToProductGrid();
           ensureBeanBagCategoryShippingBadges();
+          hideBlankNamePlpTiles();
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();
           fixTmhMatPlpThumbnails();
@@ -1812,6 +1932,7 @@
           repairLuxeComfortsListingChrome();
           convertLegacyGridSingleToProductGrid();
           ensureBeanBagCategoryShippingBadges();
+          hideBlankNamePlpTiles();
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();
           normalizePLPImages();
