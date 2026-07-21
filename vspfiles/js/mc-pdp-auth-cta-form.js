@@ -6079,7 +6079,7 @@
           (select.options[0] && select.options[0].text ? select.options[0].text : "")
       ).toLowerCase();
     } catch (eLbl) {}
-    return /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color)/.test(labelHay);
+    return /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color|select\s+style|choose\s+style|^style$)/.test(labelHay);
   }
 
   function isSaranoniSizeSelect(select) {
