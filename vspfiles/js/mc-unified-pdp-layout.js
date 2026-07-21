@@ -181,9 +181,16 @@
     return mcBedroomText(qs(".productprice, .price, [itemprop='price'], .saleprice, .ourprice", card));
   }
 
+  function mcBedroomImageFromHref(href) {
+    var m = String(href || "").match(/product-p\/([^\/?#.]+)/i);
+    return m && m[1] ? "/v/vspfiles/photos/" + String(m[1]).toUpperCase() + "-1T.jpg" : "";
+  }
+
   function mcBedroomFindImage(anchor, card) {
     var img = qs("img", anchor) || qs("img", card);
-    return img ? mcBedroomAbs(img.getAttribute("data-src") || img.getAttribute("data-original") || img.getAttribute("src")) : "";
+    var src = img ? mcBedroomAbs(img.getAttribute("data-src") || img.getAttribute("data-original") || img.getAttribute("src")) : "";
+    if (src && !/clear1x1|spacer|blank|nophoto/i.test(src)) return src;
+    return mcBedroomImageFromHref(anchor && anchor.getAttribute("href"));
   }
 
   function mcBedroomProductsFromDoc(doc, collection, current) {
@@ -226,11 +233,21 @@
       a.href = product.href;
       var media = global.document.createElement("span");
       media.className = "mc-collection-image";
-      if (product.image) {
+      var imgSrc = product.image || mcBedroomImageFromHref(product.href);
+      if (imgSrc) {
         var img = global.document.createElement("img");
         img.loading = "lazy";
         img.alt = product.name;
-        img.src = product.image;
+        img.src = imgSrc;
+        img.onerror = function () {
+          var full = String(imgSrc).replace(/-1T\.jpg/i, "-1.jpg");
+          if (full !== imgSrc) {
+            img.onerror = null;
+            img.src = full;
+          } else if (media.parentNode) {
+            media.style.display = "none";
+          }
+        };
         media.appendChild(img);
       }
       a.appendChild(media);
@@ -248,7 +265,12 @@
     });
     section.appendChild(grid);
     var related = mcBedroomRelatedAnchor();
-    if (related && related.parentNode) related.parentNode.insertBefore(section, related);
+    if (related && related.parentNode) {
+      related.parentNode.insertBefore(section, related);
+    } else {
+      var host = qs("#v65-product-parent") || qs("#content_area") || qs("main") || global.document.body;
+      if (host && host.parentNode) host.parentNode.insertBefore(section, host.nextSibling);
+    }
   }
 
   function renderBedroomCollectionFallback() {
