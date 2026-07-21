@@ -12857,6 +12857,24 @@ try {
 
   function flatten(node) {
     if (!node || !node.tagName) return;
+    /* Never un-hide native price/option/related tables here — writing
+       display:block fights Volusion's own display:none toggle on these,
+       making the options column height oscillate and jumping Related
+       Items while scrolling on mobile. */
+    if (
+      (node.classList &&
+        (node.classList.contains("colors_pricebox") ||
+          node.classList.contains("vol-option-name") ||
+          node.classList.contains("vol-option-about") ||
+          node.classList.contains("vol-option-items"))) ||
+      (node.id && (node.id === "options_table" || node.id === "related_products_content")) ||
+      (node.closest &&
+        node.closest(
+          "table.colors_pricebox, #options_table, #v65-product-related, .mc-related-plp-grid"
+        ))
+    ) {
+      return;
+    }
     var tag = node.tagName;
     setImportant(node, "width", "100%");
     setImportant(node, "max-width", "100%");
@@ -12875,9 +12893,12 @@ try {
 
   function repairMobileWidthChain() {
     if (!isUnifiedFamilyPdp() || !g.matchMedia("(max-width: 991px)").matches) return;
+    if (g.__MC_UNIFIED_PDP_WIDTH_WRITING__) return;
     var root = doc.getElementById("v65-product-parent");
     if (!root) return;
+    g.__MC_UNIFIED_PDP_WIDTH_WRITING__ = true;
 
+    try {
     [
       doc.querySelector("section.content_area-wrapper"),
       doc.getElementById("content_area"),
@@ -12933,10 +12954,13 @@ try {
       setImportant(node, "margin-left", "auto");
       setImportant(node, "margin-right", "auto");
     });
+    } finally {
+      g.__MC_UNIFIED_PDP_WIDTH_WRITING__ = false;
+    }
   }
 
   function scheduleRepair() {
-    if (g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__) return;
+    if (g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__ || g.__MC_UNIFIED_PDP_WIDTH_WRITING__) return;
     g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__ = true;
     var run = function () {
       g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__ = false;
@@ -12952,7 +12976,10 @@ try {
     try {
       var observer = g.__MC_UNIFIED_PDP_WIDTH_OBSERVER__;
       if (!observer) {
-        observer = new g.MutationObserver(scheduleRepair);
+        observer = new g.MutationObserver(function () {
+          if (g.__MC_UNIFIED_PDP_WIDTH_WRITING__) return;
+          scheduleRepair();
+        });
         g.__MC_UNIFIED_PDP_WIDTH_OBSERVER__ = observer;
       }
       observer.disconnect();
