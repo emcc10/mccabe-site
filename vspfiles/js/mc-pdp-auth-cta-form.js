@@ -2347,8 +2347,23 @@
     }
   }
 
+  /* MC_TMH_PREFER_VOLUSION_DESC_20260721 — the Product Details accordion
+     should show Volusion's own ProductDescription field when admin has one
+     entered; the static mc-tmh-product-descriptions.js file exists only to
+     backfill products whose Volusion field is empty, not to silently
+     override edits made in admin. */
+  function mahjongNativeDescriptionHasContent() {
+    var details =
+      global.document.getElementById("ProductDetail_ProductDetails_div") ||
+      global.document.getElementById("ProductDetail_ProductDetails_div2");
+    if (!details) return false;
+    var text = String(details.textContent || "").replace(/\s+/g, " ").trim();
+    return text.length > 20;
+  }
+
   function applyMahjongOfficialDescriptions() {
     if (!isMahjongHousePdpPage()) return false;
+    if (mahjongNativeDescriptionHasContent()) return false;
     var code = getMahjongProductCode();
     var html = getMahjongOfficialDescriptionHtml(code);
     if (!html) return false;
@@ -5695,9 +5710,37 @@
     return buildFeaturesListHtml(items);
   }
 
+  /* MC_MOLLY_OLSON_FEATURES_FIX_20260721 — Volusion's native TechSpecs field
+     for this product has malformed <li> boundaries baked directly into its
+     HTML: one sentence is split mid-word across two bullets ("...engineered"
+     / "woods, metal...") and four unrelated feature statements are merged
+     into a single bullet. extractTechSpecsBodyHtml() faithfully copies
+     whatever <li> markup Volusion serves, so this can only be corrected by
+     editing the admin content itself or overriding it here -- same content,
+     properly split. */
+  function getMollyOlsonCorrectedFeaturesHtml() {
+    var items = [
+      "Premium Construction: Table and chairs are crafted from solid Asian hardwoods, engineered woods, metal, and supportive foam for enduring strength and long-term reliability. Styling details include weighty tabletop design, architectural cross “timber-beam” pedestal base and wood framed, upholstered side chairs for extra comfort.",
+      "Elegant Tabletop that delivers the luxurious look of stone while offering a durable, stain-resistant, and easy-to-clean surface ideal for everyday dining.",
+      "Hand-stained Finishes: the table is finished in a natural multi-step washed grey oak finish stain to highlight the wood’s beautiful grain and natural knots.",
+      "Sleek fabric Side Chairs offer a comfortable and stylish accent to the 48-inch round top dining table top in a collection that will add a touch of class to any dining area. The Side Chairs are available in khaki fabric and feature iron legs.",
+      "Reliable Support: Each chair provides a 275-lb weight capacity, ensuring strength and comfort for everyday use.",
+      "Easy Care Upholstery (Code W): Clean using mild soap and water; gently blot stains, avoid over-wetting, rinse lightly, and allow upholstery to air dry fully.",
+      "Product Measurements: Table: 48 x 48 x 30 in Chair: 20 x 22 x 35 in"
+    ];
+    return buildFeaturesListHtml(
+      items.map(function (t) {
+        return "<li>" + escapeHtmlText(t) + "</li>";
+      })
+    );
+  }
+
   function mountPdpFeaturesBlock() {
     if (!isProductPdp()) return;
-    var bodyHtml = extractTechSpecsBodyHtml();
+    var bodyHtml =
+      resolveSoftGoodsProductCode() === "MOLLY-OLSON-DINING-SET"
+        ? getMollyOlsonCorrectedFeaturesHtml()
+        : extractTechSpecsBodyHtml();
     if (!bodyHtml && isMahjongHousePdpPage()) {
       bodyHtml = getMahjongOfficialFeaturesHtml(getMahjongProductCode());
     }

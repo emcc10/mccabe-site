@@ -176,8 +176,12 @@
     if (code === "MOLLY-OLSON-DINING-SET") {
       // The first supplier alt is the hero image repeated under a different
       // filename. Keep the three distinct chair/detail views instead.
+      // altview9 is a mismatched supplier photo -- a dark wood ladder-back
+      // chair on a jute rug, nothing like the Molly Olson's khaki upholstered
+      // mid-century chairs or its round pedestal table shown in the other
+      // alt views. Confirmed visually 2026-07-21.
       items = items.filter(function (item) {
-        return !/(?:-altview1|-1|-2t)\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full);
+        return !/(?:-altview1|-altview9|-1|-2t)\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full);
       });
     }
     return items;
