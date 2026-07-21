@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260721style2 — Style label from parent options table
-  var MC_DEPLOY_FINGERPRINT = "20260721style2";
+  // MC_DEPLOY_FINGERPRINT_20260721style3 — Style haystack + matching self-upgrade FP
+  var MC_DEPLOY_FINGERPRINT = "20260721style3";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720sarfix6";
+  var VERSION = "20260721style3";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -11479,7 +11479,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720sarfix6";
+  var WANT_FP = "20260721style3";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11507,7 +11507,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix6&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260721style3&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}
