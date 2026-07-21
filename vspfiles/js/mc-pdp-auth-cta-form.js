@@ -7641,7 +7641,23 @@
   /* Force the SARFIX5 alt-view probe (cached Image .complete fix) even when
      baked PDPs still request an older ?v= cache key for alt-view-row.js. */
   function ensureFreshSaranoniAltViewRowScript() {
-    if (!isSaranoniPdpPage()) return;
+    /* Despite the name (originally Saranoni-only), mc-pdp-alt-view-row.js is
+       shared by every unified-family PDP (Saranoni, Steve Silver, Mahjong
+       House, closeout). Its script tag uses a static ?v= with no per-load
+       cache-bust, so once a browser/CDN caches a copy under that URL it can
+       keep serving stale JS indefinitely even after the server file is
+       updated -- confirmed live: a fix to this file's alt-view click
+       handler (setHero) took effect on the server but a Steve Silver PDP
+       kept running old cached JS with no way to self-heal, because this
+       guard only ever forced a fresh copy on Saranoni pages. */
+    if (
+      !isSaranoniPdpPage() &&
+      !isSteveSilverPdpPage() &&
+      !isCloseoutPdpPage() &&
+      !isMahjongHousePdpPage()
+    ) {
+      return;
+    }
     var want = "20260720sarfix6";
     try {
       if (global["__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__"]) {
