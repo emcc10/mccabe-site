@@ -34,8 +34,8 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720sarfix6 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720sarfix6";
+  // MC_DEPLOY_FINGERPRINT_20260721style1 — Select Style → swatch rail (lovey)
+  var MC_DEPLOY_FINGERPRINT = "20260721style1";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
   var VERSION = "20260720sarfix6";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
@@ -6122,7 +6122,9 @@
           (select.options[0] && select.options[0].text ? select.options[0].text : "")
       ).toLowerCase();
     } catch (eLbl) {}
-    return /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color)/.test(labelHay);
+    /* Select Style (Bear/Bunny/etc. on Stuffed Animal Loveys) is this product's only
+       option axis — treat it like color so the horizontal swatch rail builds. */
+    return /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color|select\s+style|choose\s+style|^style$)/.test(labelHay);
   }
 
   function isSaranoniSizeSelect(select) {

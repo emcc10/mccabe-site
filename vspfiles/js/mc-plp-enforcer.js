@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260721nophoto1 — hide blank-name NoPhoto stubs + href SKU NoPhoto swap
+ * MC_PLP_ENFORCER_20260721nophoto2 — keep NoPhoto href swap; do not hide blank-name recliner tiles
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260721nophoto1";
+  var VERSION = "20260721nophoto2";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -1324,49 +1324,6 @@
     return raw.replace(/\.htm.*/i, "").toUpperCase();
   }
 
-  /** Incomplete imports show title ", SS-####" with empty visible name + NoPhoto. */
-  function isBlankPlpProductName(titleAttr, textContent) {
-    var title = String(titleAttr || "").trim();
-    var text = String(textContent || "").replace(/\u00a0/g, " ").trim();
-    if (/^,\s*[0-9A-Za-z][0-9A-Za-z-]*\s*$/.test(title)) return true;
-    if (!text && /^[0-9A-Za-z][0-9A-Za-z-]*\s*$/.test(title)) return true;
-    if (!text && !title) return true;
-    return false;
-  }
-
-  function hideBlankNamePlpTiles() {
-    var root = document.getElementById("content_area");
-    if (!root) return;
-
-    root.querySelectorAll("a.v-product__title, a.productnamecolor, a.colors_productname").forEach(function (a) {
-      if (!isBlankPlpProductName(a.getAttribute("title"), a.textContent)) return;
-      var card = a.closest && a.closest(".v-product");
-      if (card) {
-        card.style.setProperty("display", "none", "important");
-        return;
-      }
-      var code = skuFromProductHref(a.getAttribute("href") || a.href || "");
-      if (!code) {
-        var td = a.closest && a.closest("td");
-        if (td) td.style.setProperty("display", "none", "important");
-        return;
-      }
-      var needle = code.toLowerCase();
-      root.querySelectorAll("td").forEach(function (td) {
-        var hit = td.querySelector(
-          'a[href*="/product-p/' +
-            needle +
-            '"], a[href*="/product-p/' +
-            code +
-            '"], a[href*="/-p/' +
-            needle +
-            '"]'
-        );
-        if (hit) td.style.setProperty("display", "none", "important");
-      });
-    });
-  }
-
   /** Travel mats use TMH-TRV-* on Volusion; repo photos may be TMH-MAT-* stems. */
   var TMH_TRV_PHOTO_ALIASES = {
     "TMH-TRV-AMETHYST-GEM-MAT": "TMH-MAT-AMETHYST-GEM-TRAVEL-MAT",
@@ -1864,7 +1821,6 @@
     repairLuxeComfortsListingChrome();
     convertLegacyGridSingleToProductGrid();
     ensureBeanBagCategoryShippingBadges();
-    hideBlankNamePlpTiles();
     fixStalePhotoUrls();
     fixNoPhotoThumbnails();
     fixTmhMatPlpThumbnails();
@@ -1884,7 +1840,6 @@
           repairLuxeComfortsListingChrome();
           convertLegacyGridSingleToProductGrid();
           ensureBeanBagCategoryShippingBadges();
-          hideBlankNamePlpTiles();
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();
           fixTmhMatPlpThumbnails();
@@ -1932,7 +1887,6 @@
           repairLuxeComfortsListingChrome();
           convertLegacyGridSingleToProductGrid();
           ensureBeanBagCategoryShippingBadges();
-          hideBlankNamePlpTiles();
           fixStalePhotoUrls();
           fixNoPhotoThumbnails();
           normalizePLPImages();

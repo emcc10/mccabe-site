@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260720sarfix6 — HP nursery alts + size variant images */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260721style1 — HP nursery alts + size variant images */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -24406,7 +24406,7 @@ html body.mc-saranoni-pdp .v65-product-addtocart button {
   }
 }
 /* END REMOVABLE: Saranoni mobile title/related + PDP category bar (20260720sarmob1) */
-/* BEGIN REMOVABLE: Saranoni size options with images (20260720sarfix6) */
+/* BEGIN REMOVABLE: Saranoni size options with images (20260721style1) */
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb {
   width: 100% !important;
   min-width: 0 !important;
@@ -24444,7 +24444,7 @@ html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__price {
   text-align: center !important;
   white-space: nowrap !important;
 }
-/* END REMOVABLE: Saranoni size options with images (20260720sarfix6) */
+/* END REMOVABLE: Saranoni size options with images (20260721style1) */
 
 /* BEGIN REMOVABLE: hide CLOSE MENU when menu closed (20260720closemenu1) */
 @media (max-width: 991px) {
