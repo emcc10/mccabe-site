@@ -13,6 +13,11 @@ sys.path.insert(0, str(ROOT / "scripts"))
 # Known missing live OptionID images (color options only).
 # Size options (Small/Medium/Large/XL, etc.) are text-only — do NOT require -T/-S photos.
 TARGETS = [
+    # Lovey full-size OptionID images (swatch swap target) — live under photos/options/
+    "options/SAR-STUFFED-ANML-LVYS-1206.jpg",
+    "options/SAR-STUFFED-ANML-LVYS-1207.jpg",
+    "options/SAR-STUFFED-ANML-LVYS-1208.jpg",
+    "options/SAR-STUFFED-ANML-LVYS-1209.jpg",
     "SAR-COZY-BMB-ROBES-1341-T.jpg",  # Tori Halford (color)
     "SAR-COZY-BMB-ROBES-1341-S.jpg",
     "SAR-BAMBONI-SETS-1444-T.jpg",  # Charcoal (color)
