@@ -2179,7 +2179,12 @@ a.hero-cart-link {
   nav.push-menu .vnav__link,
   nav.push-menu .mc-mobile-vnav__link {
     color: #fff !important;
-    font-family: Inter, sans-serif !important;
+    /* Match the brand serif used everywhere else (desktop hero nav, main
+       site nav) -- this mobile hamburger/push-menu was the one place still
+       left on Inter. 600 is the heaviest Cormorant Garamond weight actually
+       loaded (see the hero-nav fix, a7a4e8c1) -- 700 has no matching
+       @font-face and silently falls back to the next font in the stack. */
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
     font-weight: 600 !important;
     letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
