@@ -8194,6 +8194,21 @@ html.mc-allow-home-hero body.is-home #content_area_home {
   flex-shrink: 1 !important;
 }
 
+/* PDP related: hide Volusion's raw tall native table on mobile from first
+   paint, on mobile only. Without this, the untouched native table renders at
+   full height, then template_266.html's mcConvertRelatedV65TablesToPlpGrid()
+   collapses it into the compact grid ~1-2.5s later once Volusion's related
+   items finish loading -- a sudden ~1000px page-height drop. If the visitor
+   is scrolled near the bottom when that fires, the viewport snaps/bounces.
+   Hiding the untouched table up front means the page never renders the tall
+   state at all, so there is nothing to collapse later. */
+@media (max-width: 991px) {
+  html body.productdetails #v65-product-related table.v65-productDisplay:not([data-mc-related-plp="1"]),
+  html body.mc-product-page #v65-product-related table.v65-productDisplay:not([data-mc-related-plp="1"]) {
+    display: none !important;
+  }
+}
+
 /* PDP related: enforce single strip (Volusion + scripts must never stack two grids) */
 html body.productdetails #v65-product-related .mc-related-plp-grid ~ .mc-related-plp-grid,
 html body.mc-product-page #v65-product-related .mc-related-plp-grid ~ .mc-related-plp-grid {
