@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260721mobscroll1 — mobile PDP related scroll (no nested scrollports) */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260721mobscroll2 — mobile PDP related jump (scrollbar + size-label reflow) */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -24374,6 +24374,7 @@ html body.mc-saranoni-pdp .v65-product-addtocart button {
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb {
   width: 100% !important;
   min-width: 0 !important;
+  min-height: 72px !important;
   padding: 8px 6px !important;
   flex-direction: column !important;
   justify-content: flex-start !important;
@@ -24397,9 +24398,11 @@ html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label {
   margin: 0 !important;
   font: 600 12px/1.25 Inter, Arial, sans-serif !important;
   max-width: 100% !important;
+  min-height: 2.5em !important;
   text-align: center !important;
   white-space: normal !important;
   word-break: break-word !important;
+  overflow-wrap: anywhere !important;
 }
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__price {
   margin: 0 !important;
@@ -24811,21 +24814,30 @@ html body.mc-saranoni-pdp #related_products_content {
 }
 /* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
 
-/* BEGIN REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll1)
-   overflow-x:hidden on #content_area / #v65-product-parent / .vol-inner forces
-   overflow-y to compute as auto (CSS overflow coupling). That creates nested
-   vertical scrollports. Related Items is hoisted outside #v65-product-parent,
-   so scrolling into related fights body vs content_area scroll — mobile glitch.
-   Use overflow-x:clip (does not couple) + overflow-y:visible so only body scrolls. */
+/* BEGIN REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll2)
+   1) overflow-x:hidden on wrappers forces overflow-y:auto (CSS coupling) → nested
+      scrollports that fight when Related is hoisted outside #v65-product-parent.
+   2) body{overflow-y:auto} while html is scrollingElement + size labels wrapping
+      at the scrollbar width threshold → document height oscillates ±24px and
+      Related Items jumps while scrolling. Keep one scrollport (html), stable
+      scrollbar gutter, and lock size-thumb label height. */
 @media (max-width: 991px) {
+  html.productdetails,
+  html:has(body.mc-product-page),
+  html:has(body.mc-saranoni-pdp) {
+    overflow-x: clip !important;
+    overflow-y: auto !important;
+    scrollbar-gutter: stable !important;
+  }
+
   html body.mc-product-page,
   html body.productdetails,
   html body.mc-saranoni-pdp,
   html body.mc-mahjong-house-pdp,
   html body.mc-steve-silver-altview-pdp,
   html body.mc-closeout-pdp {
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     overscroll-behavior-y: auto !important;
   }
 
@@ -24845,6 +24857,7 @@ html body.mc-saranoni-pdp #related_products_content {
     overflow-x: clip !important;
     overflow-y: visible !important;
     overscroll-behavior: auto !important;
+    overflow-anchor: none !important;
   }
 
   html body.mc-product-page #v65-product-related,
@@ -24856,6 +24869,7 @@ html body.mc-saranoni-pdp #related_products_content {
     overflow: visible !important;
     overflow-x: visible !important;
     overflow-y: visible !important;
+    overflow-anchor: none !important;
     position: relative !important;
     transform: none !important;
     -webkit-transform: none !important;
@@ -24868,6 +24882,16 @@ html body.mc-saranoni-pdp #related_products_content {
     overflow-x: auto !important;
     overflow-y: hidden !important;
   }
+
+  /* Size chips: reserve 2-line label so wrap/unwrap cannot change page height. */
+  html body.mc-product-page #mc-saranoni-size-thumbs .mc-saranoni-size-thumb,
+  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb {
+    min-height: 72px !important;
+  }
+  html body.mc-product-page #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label,
+  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label {
+    min-height: 2.5em !important;
+  }
 }
-/* END REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll1) */
+/* END REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll2) */
 

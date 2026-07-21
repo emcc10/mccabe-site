@@ -7506,6 +7506,15 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       for (ri = 0; ri < roots.length; ri++) {
         var root = roots[ri];
         if (!root) continue;
+        /* Already converted — do not tear down/rebuild (causes mobile scroll jump). */
+        var existingGrid = root.querySelector('.mc-related-plp-grid');
+        if (
+          existingGrid &&
+          existingGrid.querySelectorAll('.mc-related-plp-card').length > 0 &&
+          root.querySelector('table.v65-productDisplay[data-mc-related-plp="1"]')
+        ) {
+          continue;
+        }
         var killGrids = root.querySelectorAll('.mc-related-plp-grid');
         var kg;
         for (kg = 1; kg < killGrids.length; kg++) {
@@ -8217,6 +8226,14 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function mcRunRelatedFix() {
     try {
+      var mainRelated = document.getElementById('v65-product-related');
+      if (
+        mainRelated &&
+        mainRelated.getAttribute('data-mc-related-stable') === '1' &&
+        mainRelated.querySelector('.mc-related-plp-grid .mc-related-plp-card')
+      ) {
+        return;
+      }
       mcRelatedHideDuplicateVolusionRails();
       var selfCode = mcRelatedCurrentPdpProductCode();
       var railRoots = document.querySelectorAll(
@@ -8231,6 +8248,20 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       mcCapRelatedProductSlots(4);
       mcNormalizeRelatedItemImages(document);
       mcForceRelatedItemCategoryThumbnails(document);
+      if (
+        mainRelated &&
+        mainRelated.querySelector('.mc-related-plp-grid .mc-related-plp-card')
+      ) {
+        try {
+          mainRelated.setAttribute('data-mc-related-stable', '1');
+        } catch (eStable) {}
+        if (window.__MC_RELATED_FIX_MO__) {
+          try {
+            window.__MC_RELATED_FIX_MO__.disconnect();
+          } catch (eDisc) {}
+          window.__MC_RELATED_FIX_MO__ = null;
+        }
+      }
     } catch (eRun) {}
   }
   function boot() {
@@ -8251,14 +8282,26 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     setTimeout(mcRunRelatedFix, 2600);
     setTimeout(mcRunRelatedFix, 4800);
   });
-  /* Related Items may render outside #content_area (Volusion) — observing only #content_area missed late inject + lazy img. */
+  /* Related Items may render outside #content_area (Volusion) — observing only #content_area missed late inject + lazy img.
+     Stop after the rail is stable so chat/analytics body mutations cannot rebuild related mid-scroll. */
   var moRoot = typeof document.body !== 'undefined' && document.body ? document.body : null;
   if (moRoot && typeof MutationObserver !== 'undefined') {
     var t;
     var mo = new MutationObserver(function () {
+      if (
+        document.getElementById('v65-product-related') &&
+        document.getElementById('v65-product-related').getAttribute('data-mc-related-stable') === '1'
+      ) {
+        try {
+          mo.disconnect();
+        } catch (eStop) {}
+        window.__MC_RELATED_FIX_MO__ = null;
+        return;
+      }
       clearTimeout(t);
       t = setTimeout(mcRunRelatedFix, 120);
     });
+    window.__MC_RELATED_FIX_MO__ = mo;
     try {
       mo.observe(moRoot, { childList: true, subtree: true });
     } catch (eMo) {}

@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260721mobscroll1 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260721mobscroll1";
+  // MC_DEPLOY_FINGERPRINT_20260721mobscroll2 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260721mobscroll2";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260721mobscroll1";
+  var VERSION = "20260721mobscroll2";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -7599,7 +7599,7 @@
      baked PDPs still request an older ?v= cache key for alt-view-row.js. */
   function ensureFreshSaranoniAltViewRowScript() {
     if (!isSaranoniPdpPage()) return;
-    var want = "20260721mobscroll1";
+    var want = "20260721mobscroll2";
     try {
       if (global["__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__"]) {
         global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
@@ -11401,7 +11401,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260721mobscroll1";
+  var WANT_FP = "20260721mobscroll2";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11429,7 +11429,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260721mobscroll1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260721mobscroll2&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}
@@ -12857,6 +12857,23 @@ try {
 
   function flatten(node) {
     if (!node || !node.tagName) return;
+    /* Never un-hide native price/option tables — writing display:block here
+       fought display:none and made the options column height oscillate (±24px),
+       which jumps Related Items while scrolling on mobile. */
+    if (
+      (node.classList &&
+        (node.classList.contains("colors_pricebox") ||
+          node.classList.contains("vol-option-name") ||
+          node.classList.contains("vol-option-about") ||
+          node.classList.contains("vol-option-items"))) ||
+      (node.id && (node.id === "options_table" || node.id === "related_products_content")) ||
+      (node.closest &&
+        node.closest(
+          "table.colors_pricebox, #options_table, #v65-product-related, .mc-related-plp-grid"
+        ))
+    ) {
+      return;
+    }
     var tag = node.tagName;
     setImportant(node, "width", "100%");
     setImportant(node, "max-width", "100%");
@@ -12875,9 +12892,12 @@ try {
 
   function repairMobileWidthChain() {
     if (!isUnifiedFamilyPdp() || !g.matchMedia("(max-width: 991px)").matches) return;
+    if (g.__MC_UNIFIED_PDP_WIDTH_WRITING__) return;
     var root = doc.getElementById("v65-product-parent");
     if (!root) return;
+    g.__MC_UNIFIED_PDP_WIDTH_WRITING__ = true;
 
+    try {
     [
       doc.querySelector("section.content_area-wrapper"),
       doc.getElementById("content_area"),
@@ -12933,10 +12953,13 @@ try {
       setImportant(node, "margin-left", "auto");
       setImportant(node, "margin-right", "auto");
     });
+    } finally {
+      g.__MC_UNIFIED_PDP_WIDTH_WRITING__ = false;
+    }
   }
 
   function scheduleRepair() {
-    if (g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__) return;
+    if (g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__ || g.__MC_UNIFIED_PDP_WIDTH_WRITING__) return;
     g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__ = true;
     var run = function () {
       g.__MC_UNIFIED_PDP_WIDTH_SCHEDULED__ = false;
@@ -12952,7 +12975,10 @@ try {
     try {
       var observer = g.__MC_UNIFIED_PDP_WIDTH_OBSERVER__;
       if (!observer) {
-        observer = new g.MutationObserver(scheduleRepair);
+        observer = new g.MutationObserver(function () {
+          if (g.__MC_UNIFIED_PDP_WIDTH_WRITING__) return;
+          scheduleRepair();
+        });
         g.__MC_UNIFIED_PDP_WIDTH_OBSERVER__ = observer;
       }
       observer.disconnect();
