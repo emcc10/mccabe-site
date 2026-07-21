@@ -7596,11 +7596,11 @@
         delete global.__MC_TMH_ALT_VIEW_ROW_20260716__;
       } catch (eFlags) {}
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + want + "&mcrd=" + Date.now();
+      /* Use a fresh cache key so Cloudflare does not serve the old fetch/wipe probe. */
+      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260720sarfix4&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eAltBoot) {}
-  }
   }
 
   function restoreSaranoniNativeColorUi(select) {
