@@ -666,7 +666,13 @@ html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav.hero-nav {
 html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav a {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
-  font-weight: 700 !important;
+  /* Cormorant Garamond only has @font-face faces for weights 300/400/500/600
+     (see template_266.html's cf-fonts block). font-weight:700 has no
+     matching face, so the browser silently falls back to the next font in
+     the stack (Georgia bold) on every load -- no CSS change to font-family
+     alone can fix that, since the requested weight is what's missing, not
+     the family name. 600 is the heaviest weight actually loaded. */
+  font-weight: 600 !important;
   letter-spacing: 0.12em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
