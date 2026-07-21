@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260721mobscroll2 — mobile PDP related jump (scrollbar + size-label reflow) */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260721mobscroll3 — kill colors_pricebox height thrash */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -3371,9 +3371,11 @@ margin-left: 0 !important;
     display: block !important;
   }
 }
-/* Mobile: stop Volusion pricebox tables from forcing horizontal overflow */
+/* Mobile: stop Volusion pricebox tables from forcing horizontal overflow.
+   Do NOT force display:block on .colors_pricebox itself — that un-hides native
+   price shells Saranoni keeps display:none, which oscillates page height ±24px
+   and makes Related Items jump while scrolling. */
 @media (max-width: 991px) {
-  table.colors_pricebox,
   table.colors_pricebox tbody,
   table.colors_pricebox tr,
   table.colors_pricebox td {
@@ -19451,9 +19453,18 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     box-sizing: border-box !important;
   }
 
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:last-child table.colors_pricebox {
-    display: table !important;
-    table-layout: fixed !important;
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:last-child table.colors_pricebox,
+  html body.mc-saranoni-pdp td.mc-pdp-options-td > table.colors_pricebox,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-info > table.colors_pricebox,
+  html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) table.colors_pricebox {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
   }
 
   html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
@@ -24814,7 +24825,7 @@ html body.mc-saranoni-pdp #related_products_content {
 }
 /* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
 
-/* BEGIN REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll2)
+/* BEGIN REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll3)
    1) overflow-x:hidden on wrappers forces overflow-y:auto (CSS coupling) → nested
       scrollports that fight when Related is hoisted outside #v65-product-parent.
    2) body{overflow-y:auto} while html is scrollingElement + size labels wrapping
@@ -24893,5 +24904,5 @@ html body.mc-saranoni-pdp #related_products_content {
     min-height: 2.5em !important;
   }
 }
-/* END REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll2) */
+/* END REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll3) */
 
