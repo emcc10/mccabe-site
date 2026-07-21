@@ -7579,6 +7579,9 @@
       }
       if (
         global.document.querySelector(
+          'script[src*="mc-pdp-alt-view-row.js"][src*="20260720sarfix4"]'
+        ) ||
+        global.document.querySelector(
           'script[src*="mc-pdp-alt-view-row.js"][src*="' + want + '"]'
         )
       ) {
