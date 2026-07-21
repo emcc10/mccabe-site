@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720sarfix4 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720sarfix4";
+  // MC_DEPLOY_FINGERPRINT_20260720sarfix5 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260720sarfix5";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720sarfix4";
+  var VERSION = "20260720sarfix5";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -4657,6 +4657,7 @@
     ensureSaranoniPdpAccordion();
     dismissSaranoniProductPhotoLoading();
     ensureSaranoniHeroImage();
+    ensureFreshSaranoniAltViewRowScript();
     try {
       body.classList.remove("mc-saranoni-pdp-init");
       body.classList.add("mc-saranoni-pdp-ready");
@@ -7562,6 +7563,44 @@
       alt.style.setProperty("position", "absolute", "important");
       alt.style.setProperty("left", "-9999px", "important");
     } catch (eHideAlt) {}
+    ensureFreshSaranoniAltViewRowScript();
+  }
+
+  /* Baked PDPs still request ?v=sarfix3 for alt-view-row.js; Cloudflare caches
+     that URL as the old fetch/wipe probe. CTA already self-upgrades — also
+     force the Image-probe SARFIX4 script so HP nursery alts can appear. */
+  function ensureFreshSaranoniAltViewRowScript() {
+    if (!isSaranoniPdpPage()) return;
+    var want = "20260720sarfix5";
+    try {
+      if (global["__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__"]) {
+        global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
+        return;
+      }
+      if (
+        global.document.querySelector(
+          'script[src*="mc-pdp-alt-view-row.js"][src*="' + want + '"]'
+        )
+      ) {
+        return;
+      }
+      global.document.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
+        try {
+          old.remove();
+        } catch (eRmAlt) {}
+      });
+      try {
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__;
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX3__;
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX1__;
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260716__;
+      } catch (eFlags) {}
+      var s = global.document.createElement("script");
+      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + want + "&mcrd=" + Date.now();
+      s.async = false;
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eAltBoot) {}
+  }
   }
 
   function restoreSaranoniNativeColorUi(select) {
@@ -11341,7 +11380,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720sarfix4";
+  var WANT_FP = "20260720sarfix5";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11369,7 +11408,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix4&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix5&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}
