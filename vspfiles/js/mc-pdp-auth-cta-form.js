@@ -7658,9 +7658,14 @@
     ) {
       return;
     }
-    var want = "20260720sarfix6";
+    /* MC_ALT_VIEW_ROW_20260721B — a stale cached copy of mc-pdp-alt-view-row.js
+       sets the OLD flag (__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__) too, since
+       every past version of that file sets it unconditionally on load. Gate
+       on the NEW flag name instead so a stale cached copy can never satisfy
+       this check and this always forces a genuinely fresh fetch. */
+    var want = "20260721altfix1";
     try {
-      if (global["__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__"]) {
+      if (global["__MC_TMH_ALT_VIEW_ROW_20260721B__"]) {
         global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
         return;
       }
@@ -7670,6 +7675,7 @@
         } catch (eRmAlt) {}
       });
       try {
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260721B__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX3__;

@@ -1,7 +1,17 @@
 (function (window, document) {
   "use strict";
 
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__) return;
+  /* MC_ALT_VIEW_ROW_20260721B — new flag name on purpose. The old
+     SARFIX5 flag gets set unconditionally by this same line in every past
+     version of this file (fixed or not), so a stale cached copy already
+     sets it -- that made the caller's "already loaded, skip" check in
+     ensureFreshSaranoniAltViewRowScript() (mc-pdp-auth-cta-form.js)
+     incapable of detecting staleness, and would have made a freshly
+     injected copy of THIS file immediately bail out too, since the old
+     flag was already true. A new flag name a stale copy could never have
+     set is the only way to force a genuine reload. */
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260721B__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260721B__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX3__ = true;
