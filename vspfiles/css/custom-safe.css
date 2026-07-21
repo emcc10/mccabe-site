@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260721mobscroll3 — kill colors_pricebox height thrash */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260720sarfix6 — HP nursery alts + size variant images */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -3371,11 +3371,9 @@ margin-left: 0 !important;
     display: block !important;
   }
 }
-/* Mobile: stop Volusion pricebox tables from forcing horizontal overflow.
-   Do NOT force display:block on .colors_pricebox itself — that un-hides native
-   price shells Saranoni keeps display:none, which oscillates page height ±24px
-   and makes Related Items jump while scrolling. */
+/* Mobile: stop Volusion pricebox tables from forcing horizontal overflow */
 @media (max-width: 991px) {
+  table.colors_pricebox,
   table.colors_pricebox tbody,
   table.colors_pricebox tr,
   table.colors_pricebox td {
@@ -3696,16 +3694,14 @@ margin-left: 0 !important;
   .content_area-wrapper,
   .container--content {
     max-width: 100% !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow-x: hidden !important;
     box-sizing: border-box !important;
   }
 
   #content_area,
   #v65-product-parent {
     max-width: 100% !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow-x: hidden !important;
     box-sizing: border-box !important;
   }
 
@@ -3885,14 +3881,11 @@ margin-left: 0 !important;
     float: none !important;
   }
 
-  /* Keep product page content within viewport (no push right, no overflow).
-     Use clip (not hidden) so overflow-y stays visible — hidden couples and
-     creates nested vertical scrollports that glitch into Related Items. */
+  /* Keep product page content within viewport (no push right, no overflow) */
   body.productdetails .content_area-wrapper,
   body.mc-product-page .content_area-wrapper {
     max-width: 100% !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow-x: hidden !important;
     padding-left: 12px !important;
     padding-right: 12px !important;
     box-sizing: border-box !important;
@@ -3901,16 +3894,14 @@ margin-left: 0 !important;
   body.productdetails #content_area,
   body.mc-product-page #content_area {
     max-width: 100% !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow-x: hidden !important;
     box-sizing: border-box !important;
   }
 
   body.productdetails #v65-product-parent,
   body.mc-product-page #v65-product-parent {
     max-width: 100% !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow-x: hidden !important;
     box-sizing: border-box !important;
   }
 
@@ -4445,8 +4436,7 @@ body:not(.is-home) #display_menu_1 > ul {
     .content_area-wrapper,
     #content_area,
     #v65-product-parent {
-      overflow-x: clip !important;
-      overflow-y: visible !important;
+      overflow-x: hidden !important;
       box-sizing: border-box !important;
       max-width: 100% !important;
     }
@@ -19453,18 +19443,9 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     box-sizing: border-box !important;
   }
 
-  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:last-child table.colors_pricebox,
-  html body.mc-saranoni-pdp td.mc-pdp-options-td > table.colors_pricebox,
-  html body.mc-saranoni-pdp td.mc-unified-pdp-info > table.colors_pricebox,
-  html body.mc-saranoni-pdp:has(#mc-pdp-price-stack-host) table.colors_pricebox {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    max-height: 0 !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td:last-child table.colors_pricebox {
+    display: table !important;
+    table-layout: fixed !important;
   }
 
   html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
@@ -22433,8 +22414,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   html body.mc-product-page .mc-acc-content {
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow-x: hidden !important;
     overflow-wrap: anywhere !important;
     word-break: break-word !important;
     box-sizing: border-box !important;
@@ -22862,8 +22842,7 @@ html body.mc-pdp-hero-ready.mc-pdp-hero-pending td.mc-pdp-options-td {
   html body.productdetails #v65-product-parent,
   html body.mc-product-page #content_area,
   html body.productdetails #content_area {
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow-x: hidden !important;
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 auto !important;
@@ -24385,7 +24364,6 @@ html body.mc-saranoni-pdp .v65-product-addtocart button {
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb {
   width: 100% !important;
   min-width: 0 !important;
-  min-height: 72px !important;
   padding: 8px 6px !important;
   flex-direction: column !important;
   justify-content: flex-start !important;
@@ -24409,11 +24387,9 @@ html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label {
   margin: 0 !important;
   font: 600 12px/1.25 Inter, Arial, sans-serif !important;
   max-width: 100% !important;
-  min-height: 2.5em !important;
   text-align: center !important;
   white-space: normal !important;
   word-break: break-word !important;
-  overflow-wrap: anywhere !important;
 }
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__price {
   margin: 0 !important;
@@ -24824,85 +24800,4 @@ html body.mc-saranoni-pdp #related_products_content {
   }
 }
 /* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
-
-/* BEGIN REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll3)
-   1) overflow-x:hidden on wrappers forces overflow-y:auto (CSS coupling) → nested
-      scrollports that fight when Related is hoisted outside #v65-product-parent.
-   2) body{overflow-y:auto} while html is scrollingElement + size labels wrapping
-      at the scrollbar width threshold → document height oscillates ±24px and
-      Related Items jumps while scrolling. Keep one scrollport (html), stable
-      scrollbar gutter, and lock size-thumb label height. */
-@media (max-width: 991px) {
-  html.productdetails,
-  html:has(body.mc-product-page),
-  html:has(body.mc-saranoni-pdp) {
-    overflow-x: clip !important;
-    overflow-y: auto !important;
-    scrollbar-gutter: stable !important;
-  }
-
-  html body.mc-product-page,
-  html body.productdetails,
-  html body.mc-saranoni-pdp,
-  html body.mc-mahjong-house-pdp,
-  html body.mc-steve-silver-altview-pdp,
-  html body.mc-closeout-pdp {
-    overflow-x: clip !important;
-    overflow-y: visible !important;
-    overscroll-behavior-y: auto !important;
-  }
-
-  html body.mc-product-page .vol-inner,
-  html body.productdetails .vol-inner,
-  html body.mc-product-page .content_area-wrapper,
-  html body.productdetails .content_area-wrapper,
-  html body.mc-product-page #content_area,
-  html body.productdetails #content_area,
-  html body.mc-product-page #vCSS_mainform,
-  html body.productdetails #vCSS_mainform,
-  html body.mc-product-page #v65-product-parent,
-  html body.productdetails #v65-product-parent,
-  html body.mc-saranoni-pdp #content_area,
-  html body.mc-saranoni-pdp #v65-product-parent,
-  html body.mc-saranoni-pdp .vol-inner {
-    overflow-x: clip !important;
-    overflow-y: visible !important;
-    overscroll-behavior: auto !important;
-    overflow-anchor: none !important;
-  }
-
-  html body.mc-product-page #v65-product-related,
-  html body.productdetails #v65-product-related,
-  html body.mc-product-page #related_products_content,
-  html body.productdetails #related_products_content,
-  html body.mc-saranoni-pdp #v65-product-related,
-  html body.mc-saranoni-pdp #related_products_content {
-    overflow: visible !important;
-    overflow-x: visible !important;
-    overflow-y: visible !important;
-    overflow-anchor: none !important;
-    position: relative !important;
-    transform: none !important;
-    -webkit-transform: none !important;
-  }
-
-  /* Keep alt thumbs horizontal-scroll only — never a vertical scrollport. */
-  html body.mc-product-page #mc-pdp-alt-view-row,
-  html body.productdetails #mc-pdp-alt-view-row,
-  html body.mc-saranoni-pdp #mc-pdp-alt-view-row {
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-  }
-
-  /* Size chips: reserve 2-line label so wrap/unwrap cannot change page height. */
-  html body.mc-product-page #mc-saranoni-size-thumbs .mc-saranoni-size-thumb,
-  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb {
-    min-height: 72px !important;
-  }
-  html body.mc-product-page #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label,
-  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label {
-    min-height: 2.5em !important;
-  }
-}
-/* END REMOVABLE: Mobile PDP nested-scroll kill (20260721mobscroll3) */
 
