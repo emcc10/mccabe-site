@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260720sarfix5 — search live JS URL for this string to confirm upload path
-  var MC_DEPLOY_FINGERPRINT = "20260720sarfix5";
+  // MC_DEPLOY_FINGERPRINT_20260720sarfix6 — search live JS URL for this string to confirm upload path
+  var MC_DEPLOY_FINGERPRINT = "20260720sarfix6";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260720sarfix5";
+  var VERSION = "20260720sarfix6";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -6864,8 +6864,8 @@
       ".mc-saranoni-size-thumbs{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;width:100%!important;max-width:100%!important;margin:12px 0 0!important;padding:0!important;overflow:visible!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
       ".mc-saranoni-size-thumbs::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
       ".mc-saranoni-size-label{display:block!important;margin:12px 0 6px!important;font:500 13px/1.3 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;color:#444!important;text-transform:none!important}" +
-      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:100%!important;min-width:0!important;min-height:56px!important;padding:10px 8px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important;box-sizing:border-box!important}" +
-      ".mc-saranoni-size-thumb img{display:none!important;width:0!important;height:0!important;margin:0!important;padding:0!important;border:0!important}" +
+      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:6px!important;width:100%!important;min-width:0!important;min-height:0!important;padding:8px 6px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important;box-sizing:border-box!important}" +
+      ".mc-saranoni-size-thumb img{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;aspect-ratio:1/1!important;object-fit:cover!important;margin:0!important;padding:0!important;border:0!important;border-radius:2px!important}" +
       ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{margin:0!important;font:600 12px/1.25 Inter,Arial,sans-serif!important;max-width:100%!important;color:#444!important;text-align:center!important;white-space:normal!important;word-break:break-word!important}" +
       ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__price{margin:0!important;font:500 11px/1.2 Inter,Arial,sans-serif!important;color:#666!important;text-align:center!important;white-space:nowrap!important}" +
       ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}" +
@@ -6979,9 +6979,9 @@
       if (!opt) return;
       var btn = global.document.createElement("button");
       btn.type = "button";
-      /* Size options are always text chips — never load {CODE}-{sizeOptionId}-S/T.jpg. */
-      btn.className = "mc-saranoni-size-thumb mc-saranoni-text-size-thumb";
+      btn.className = "mc-saranoni-size-thumb";
       btn.setAttribute("data-option-id", entry.optionId);
+      btn.setAttribute("data-main-image", entry.mainImage || "");
       var parts = splitSaranoniSizeDisplayLabel(entry.label);
       var aria =
         parts.additional > 0
@@ -7001,10 +7001,39 @@
           "</span>";
       }
       btn.innerHTML =
+        '<img alt="' +
+        escapeHtmlText(parts.name) +
+        '" />' +
         '<span class="mc-saranoni-size-thumb__label">' +
         escapeHtmlText(parts.name) +
         "</span>" +
         priceHtml;
+      var img = btn.querySelector("img");
+      var productCode = ctx.productCode || resolveConfiguredColorProductCode(ctx);
+      function hideBrokenSizeImg() {
+        if (!img) return;
+        img.style.setProperty("display", "none", "important");
+      }
+      if (img && productCode) {
+        loadProductScopedColorImage(productCode, entry.swatchImage || entry.mainImage, function (swatchSrc) {
+          if (swatchSrc) {
+            img.src = swatchSrc;
+            img.style.removeProperty("display");
+            return;
+          }
+          loadProductScopedColorImage(productCode, entry.mainImage, function (mainSrc) {
+            if (mainSrc) {
+              img.src = mainSrc;
+              img.style.removeProperty("display");
+            } else {
+              hideBrokenSizeImg();
+            }
+          });
+        });
+        img.onerror = hideBrokenSizeImg;
+      } else {
+        hideBrokenSizeImg();
+      }
       row.appendChild(btn);
       btn.addEventListener("click", function (e) {
         e.preventDefault();
@@ -7566,25 +7595,14 @@
     ensureFreshSaranoniAltViewRowScript();
   }
 
-  /* Baked PDPs still request ?v=sarfix3 for alt-view-row.js; Cloudflare caches
-     that URL as the old fetch/wipe probe. CTA already self-upgrades — also
-     force the Image-probe SARFIX4 script so HP nursery alts can appear. */
+  /* Force the SARFIX5 alt-view probe (cached Image .complete fix) even when
+     baked PDPs still request an older ?v= cache key for alt-view-row.js. */
   function ensureFreshSaranoniAltViewRowScript() {
     if (!isSaranoniPdpPage()) return;
-    var want = "20260720sarfix5";
+    var want = "20260720sarfix6";
     try {
-      if (global["__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__"]) {
+      if (global["__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__"]) {
         global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
-        return;
-      }
-      if (
-        global.document.querySelector(
-          'script[src*="mc-pdp-alt-view-row.js"][src*="20260720sarfix4"]'
-        ) ||
-        global.document.querySelector(
-          'script[src*="mc-pdp-alt-view-row.js"][src*="' + want + '"]'
-        )
-      ) {
         return;
       }
       global.document.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
@@ -7593,14 +7611,14 @@
         } catch (eRmAlt) {}
       });
       try {
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX3__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX1__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260716__;
       } catch (eFlags) {}
       var s = global.document.createElement("script");
-      /* Use a fresh cache key so Cloudflare does not serve the old fetch/wipe probe. */
-      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260720sarfix4&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + want + "&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eAltBoot) {}
@@ -11383,7 +11401,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260720sarfix5";
+  var WANT_FP = "20260720sarfix6";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11411,7 +11429,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix5&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260720sarfix6&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}

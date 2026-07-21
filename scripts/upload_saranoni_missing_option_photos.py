@@ -10,8 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
 sys.path.insert(0, str(ROOT / "scripts"))
 
-# Known missing live OptionID images (color options only).
-# Size options (Small/Medium/Large/XL, etc.) are text-only — do NOT require -T/-S photos.
+# Known missing live OptionID images.
+# HP nursery size options need -T/-S so size chips can show product photos.
 TARGETS = [
     # Lovey full-size OptionID images (swatch swap target) — live under photos/options/
     "options/SAR-BMBU-RYN-MSLN-XL-LG-4-1001.jpg",
@@ -49,6 +49,23 @@ TARGETS = [
     "options/SAR-STUFFED-ANML-LVYS-1207.jpg",
     "options/SAR-STUFFED-ANML-LVYS-1208.jpg",
     "options/SAR-STUFFED-ANML-LVYS-1209.jpg",
+    # HP Muslin Nursery — colors + size variants
+    "SAR-HP-HP-MSLN-NRS-1359-T.jpg",
+    "SAR-HP-HP-MSLN-NRS-1359-S.jpg",
+    "SAR-HP-HP-MSLN-NRS-1360-T.jpg",
+    "SAR-HP-HP-MSLN-NRS-1360-S.jpg",
+    "SAR-HP-HP-MSLN-NRS-1361-T.jpg",
+    "SAR-HP-HP-MSLN-NRS-1361-S.jpg",
+    "SAR-HP-HP-MSLN-NRS-1362-T.jpg",
+    "SAR-HP-HP-MSLN-NRS-1362-S.jpg",
+    "SAR-HP-HP-MSLN-NRS-1363-T.jpg",
+    "SAR-HP-HP-MSLN-NRS-1363-S.jpg",
+    "SAR-HP-HP-MSLN-NRS-1364-T.jpg",
+    "SAR-HP-HP-MSLN-NRS-1364-S.jpg",
+    "SAR-HP-HP-MSLN-NRS-1365-T.jpg",
+    "SAR-HP-HP-MSLN-NRS-1365-S.jpg",
+    "SAR-HP-HP-MSLN-NRS-1366-T.jpg",
+    "SAR-HP-HP-MSLN-NRS-1366-S.jpg",
     "SAR-COZY-BMB-ROBES-1341-T.jpg",  # Tori Halford (color)
     "SAR-COZY-BMB-ROBES-1341-S.jpg",
     "SAR-BAMBONI-SETS-1444-T.jpg",  # Charcoal (color)

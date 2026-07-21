@@ -1,7 +1,8 @@
 (function (window, document) {
   "use strict";
 
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__) return;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX4__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX1__ = true;
@@ -82,7 +83,9 @@
        attached to the DOM — neither onload nor onerror ever fires, so the
        probe hangs forever even though the image genuinely exists. Attaching
        the element (hidden, off-screen) avoids that heuristic, and a
-       per-image timeout guards against anything that still gets stuck. */
+       per-image timeout guards against anything that still gets stuck.
+       Cached images can also finish before onload is useful — check
+       `.complete` after setting src. */
     var tester = document.createElement("img");
     var settled = false;
     function cleanup() {
@@ -106,8 +109,12 @@
     tester.style.cssText =
       "position:absolute!important;width:1px!important;height:1px!important;" +
       "opacity:0!important;pointer-events:none!important;left:-9999px!important;top:-9999px!important;";
-    tester.src = src;
     (document.body || document.documentElement).appendChild(tester);
+    tester.src = src;
+    if (tester.complete) {
+      if (tester.naturalWidth > 0) handleLoad();
+      else handleError();
+    }
     setTimeout(handleError, 8000);
     return tester;
   }
