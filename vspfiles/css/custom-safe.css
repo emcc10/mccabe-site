@@ -16438,12 +16438,18 @@ html body.mc-product-page #product_photo_td img[src*="/manufacturers/"] {
   overflow: hidden !important;
 }
 
-html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
-html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
-html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,
-html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right,
-html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host,
-html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host {
+/* MC_MAHJONG_TITLE_FIX_20260721: this anti-flicker gate must also release
+   once mc-pdp-unified-ready is set, not only mc-pdp-hero-ready. Mahjong
+   House PDPs only ever add mc-pdp-unified-ready (see revealMahjongPdp() in
+   mc-pdp-auth-cta-form.js) -- markPdpHeroReady() is gated behind an
+   accordion/description check that can bail out early on some products, so
+   mc-pdp-hero-ready never gets added and the title stayed hidden forever. */
+html body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo,
+html body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo,
+html body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right,
+html body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right,
+html body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host,
+html body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host {
   visibility: hidden !important;
 }
 
@@ -16485,12 +16491,18 @@ html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host {
 /* =====================================================
    MC PDP LOCK 20260614pdp8 — title, price, qty/atc stack, anti-flicker
 ===================================================== */
-html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
-html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
-html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,
-html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right,
-html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host,
-html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host {
+/* MC_MAHJONG_TITLE_FIX_20260721: this anti-flicker gate must also release
+   once mc-pdp-unified-ready is set, not only mc-pdp-hero-ready. Mahjong
+   House PDPs only ever add mc-pdp-unified-ready (see revealMahjongPdp() in
+   mc-pdp-auth-cta-form.js) -- markPdpHeroReady() is gated behind an
+   accordion/description check that can bail out early on some products, so
+   mc-pdp-hero-ready never gets added and the title stayed hidden forever. */
+html body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo,
+html body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo,
+html body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right,
+html body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right,
+html body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host,
+html body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host {
   visibility: hidden !important;
 }
 

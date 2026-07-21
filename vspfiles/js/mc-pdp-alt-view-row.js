@@ -198,6 +198,15 @@
     publishActiveHero(next);
     hero.setAttribute("src", next);
     hero.removeAttribute("srcset");
+    /* mc-pdp-auth-cta-form.js's ensureSteveSilverHeroPhotoSrc() forces
+       #product_photo back to {code}-1.jpg on every sync pass unless this
+       flag is set -- it already checks for it, nothing ever set it, so an
+       alt-view click swapped the image for a moment and then the next sync
+       pass silently reverted it (SS-* product codes only; that guard
+       doesn't run for closeout codes, which is why those never reverted). */
+    try {
+      hero.__mcSsUserSelectedAlt = true;
+    } catch (eFlag) {}
     var zoom = document.getElementById("product_photo_zoom_url") || document.getElementById("product_photo_zoom_url2");
     if (zoom) zoom.setAttribute("href", next);
     try {
