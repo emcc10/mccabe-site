@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260722lovey2 — hide Style option stack + Cormorant menu */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260722lovey3 - hide Style option stack + Cormorant menu */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -24839,11 +24839,15 @@ html body.mc-saranoni-pdp #related_products_content {
 }
 /* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
 
-/* BEGIN REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey2) */
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #options_table img.vCSS_img_swatch,
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #options_table img[id^="optionimg_"],
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #options_table a:has(img.vCSS_img_swatch),
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #options_table a:has(img[id^="optionimg_"]) {
+/* BEGIN REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey3) */
+/* Hide native Volusion Style option photos (optionimg_*) once our rail is active.
+   body.mc-saranoni-style-rail-active is set by CTA JS — do not require #options_table. */
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active img.vCSS_img_swatch,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active img[id^="optionimg_"],
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active a:has(img.vCSS_img_swatch),
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active a:has(img[id^="optionimg_"]),
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) img.vCSS_img_swatch,
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) img[id^="optionimg_"] {
   display: none !important;
   visibility: hidden !important;
   width: 0 !important;
@@ -24854,13 +24858,33 @@ html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #options_tabl
   padding: 0 !important;
   border: 0 !important;
 }
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #product_photo_td img,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active img#product_photo,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #product_photo,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #altviews img,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active .mc-configured-color-swatch img,
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #product_photo_td img,
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) img#product_photo,
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #altviews img,
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) .mc-configured-color-swatch img {
+  display: inline-block !important;
+  visibility: visible !important;
+  width: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
 @media (min-width: 992px) {
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > a,
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a,
+  html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > ul a,
+  html body header.header #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > ul a,
   html body #display_menu_1#display_menu_1 a,
   html body #display_menu_1#display_menu_1 .vnav__link,
-  html body #display_menu_1#display_menu_1 .vnav--level1 > li > a {
+  html body #display_menu_1#display_menu_1 .vnav--level1 > li > a,
+  html body #display_menu_1#display_menu_1 .vnav--level2 a,
+  html body #display_menu_1#display_menu_1 .vnav--level3 a {
     font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
   }
 }
-/* END REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey2) */
+/* END REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey3) */
