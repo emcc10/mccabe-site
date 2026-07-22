@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260722lovey3 - hide Style option stack + Cormorant menu */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260722lovey4 - promo bar + lovey altviews + SS width */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -24839,15 +24839,12 @@ html body.mc-saranoni-pdp #related_products_content {
 }
 /* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
 
-/* BEGIN REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey3) */
-/* Hide native Volusion Style option photos (optionimg_*) once our rail is active.
-   body.mc-saranoni-style-rail-active is set by CTA JS — do not require #options_table. */
-html body.mc-saranoni-pdp.mc-saranoni-style-rail-active img.vCSS_img_swatch,
+/* BEGIN REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey4) */
+/* Hide ONLY native option photos (optionimg_*) — never generic swatch/alt thumbs. */
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active img[id^="optionimg_"],
-html body.mc-saranoni-pdp.mc-saranoni-style-rail-active a:has(img.vCSS_img_swatch),
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active a:has(img[id^="optionimg_"]),
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) img.vCSS_img_swatch,
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) img[id^="optionimg_"] {
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) img[id^="optionimg_"],
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) a:has(img[id^="optionimg_"]) {
   display: none !important;
   visibility: hidden !important;
   width: 0 !important;
@@ -24858,21 +24855,30 @@ html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) img[id^="opti
   padding: 0 !important;
   border: 0 !important;
 }
+/* Keep hero + alt-view row visible */
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #product_photo_td img,
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active img#product_photo,
-html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #product_photo,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #altviews,
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #altviews img,
-html body.mc-saranoni-pdp.mc-saranoni-style-rail-active .mc-configured-color-swatch img,
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #product_photo_td img,
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) img#product_photo,
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #altviews img,
-html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) .mc-configured-color-swatch img {
-  display: inline-block !important;
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #mc-pdp-alt-view-row,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #mc-pdp-alt-view-row img,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #mc-centered-altviews-wrap,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #mc-centered-altviews-wrap img,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active .mc-configured-color-swatch img {
+  display: revert !important;
   visibility: visible !important;
   width: auto !important;
   height: auto !important;
   max-height: none !important;
   overflow: visible !important;
+}
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #mc-pdp-alt-view-row {
+  display: flex !important;
+}
+/* Hide stray Select Style label above brand logo */
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-unified-pdp-info > font:first-child,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-pdp-options-td > font:first-child {
+  /* no-op placeholder — JS does the text match hide */
 }
 @media (min-width: 992px) {
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > a,
@@ -24881,10 +24887,96 @@ html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) .mc-configure
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > ul a,
   html body #display_menu_1#display_menu_1 a,
   html body #display_menu_1#display_menu_1 .vnav__link,
-  html body #display_menu_1#display_menu_1 .vnav--level1 > li > a,
-  html body #display_menu_1#display_menu_1 .vnav--level2 a,
-  html body #display_menu_1#display_menu_1 .vnav--level3 a {
+  html body #display_menu_1#display_menu_1 .vnav--level1 > li > a {
     font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
   }
 }
-/* END REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey3) */
+/* END REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey4) */
+
+/* BEGIN REMOVABLE: site promo bar (20260722lovey4) — NOT the nest banner */
+html body .mc-site-promo-bar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 10px 28px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 8px 16px !important;
+  margin: 0 !important;
+  background: #fff !important;
+  border-bottom: 1px solid #e8e4dc !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 12px !important;
+  letter-spacing: 0.04em !important;
+  text-align: center !important;
+  color: #333 !important;
+  position: relative !important;
+  z-index: 100050 !important;
+}
+html body .mc-site-promo-bar a {
+  color: #333 !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+}
+html body .mc-site-promo-bar a:hover {
+  text-decoration: underline !important;
+}
+html body .mc-site-promo-bar__sep {
+  color: #c8c2b6 !important;
+  user-select: none !important;
+}
+@media (max-width: 991px) {
+  html body .mc-site-promo-bar {
+    gap: 6px 14px !important;
+    font-size: 11px !important;
+    padding: 7px 10px !important;
+  }
+  html body .mc-site-promo-bar a {
+    white-space: normal !important;
+  }
+  html body .mc-site-promo-bar__sep {
+    display: none !important;
+  }
+}
+/* END REMOVABLE: site promo bar (20260722lovey4) */
+
+/* BEGIN REMOVABLE: Steve Silver / bar-set PDP frame lock (20260722lovey4) */
+@media (min-width: 992px) {
+  html body.mc-steve-silver-altview-pdp #content_area,
+  html body.mc-steve-silver-altview-pdp #v65-product-parent,
+  html body.mc-steve-silver-altview-pdp #content_area #v65-product-parent {
+    width: 1128px !important;
+    max-width: 1128px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+  }
+  html body.mc-steve-silver-altview-pdp tr.mc-unified-pdp-row,
+  html body.mc-steve-silver-altview-pdp tr.mc-pdp-main-row {
+    width: 1128px !important;
+    max-width: 1128px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 28px !important;
+    box-sizing: border-box !important;
+  }
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media,
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-media-td {
+    flex: 0 0 690px !important;
+    width: 690px !important;
+    min-width: 690px !important;
+    max-width: 690px !important;
+    box-sizing: border-box !important;
+  }
+  html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info,
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-options-td {
+    flex: 1 1 400px !important;
+    width: 400px !important;
+    max-width: 410px !important;
+    box-sizing: border-box !important;
+  }
+}
+/* END REMOVABLE: Steve Silver / bar-set PDP frame lock (20260722lovey4) */

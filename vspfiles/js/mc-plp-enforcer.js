@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260722lovey3 — force style3 CTA on lovey Select Style PDPs
+ * MC_PLP_ENFORCER_20260722lovey4 — force style3 CTA on lovey Select Style PDPs
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
@@ -11,7 +11,7 @@
      mc-pdp-auth-cta-form.js. This page already fetches enforcer with a fresh m=
      cache-buster, so force the current Style-rail CTA from here. */
   (function forceLoveyStyleCta() {
-    var WANT = "20260722lovey3";
+    var WANT = "20260722lovey4";
     var ATTR = "data-mc-force-cta-lovey";
     var d = global.document;
     if (!d) return;
@@ -48,7 +48,7 @@
           global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
         } catch (eClr) {}
         var s = d.createElement("script");
-        s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey3&mcrd=" + Date.now();
+        s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey4&mcrd=" + Date.now();
         s.async = false;
         (d.head || d.documentElement).appendChild(s);
       } catch (eForce) {}
@@ -61,7 +61,7 @@
     });
   })();
 
-  var VERSION = "20260722lovey3";
+  var VERSION = "20260722lovey4";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);

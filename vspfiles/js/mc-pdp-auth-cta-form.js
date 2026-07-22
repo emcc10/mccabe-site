@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260722lovey3 — hide Style option stack without #options_table
-  var MC_DEPLOY_FINGERPRINT = "20260722lovey3";
+  // MC_DEPLOY_FINGERPRINT_20260722lovey4 — promo bar safe; hide optionimg only; Select Style; SS width
+  var MC_DEPLOY_FINGERPRINT = "20260722lovey4";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260722lovey3";
+  var VERSION = "20260722lovey4";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -7888,13 +7888,41 @@
         } catch (eLab) {}
       });
     }
+
+    /* Stray "SELECT STYLE" can sit above the brand logo outside the options table. */
+    try {
+      var info =
+        global.document.querySelector(
+          "#v65-product-parent td.mc-unified-pdp-info, #v65-product-parent td.mc-pdp-options-td, #v65-product-parent .colors_pricebox"
+        ) || global.document.getElementById("v65-product-parent");
+      if (info) {
+        info.querySelectorAll("td, font, label, span, b, strong, div").forEach(function (el) {
+          if (!el || (el.children && el.children.length > 3)) return;
+          var txt = String(el.textContent || "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+          if (!/^(select\s+style|choose\s+style|style)\s*\*?$/.test(txt)) return;
+          if (el.closest && el.closest("#mc-configured-color-swatch-wrapper, .mc-configured-color-swatch")) return;
+          try {
+            el.style.setProperty("display", "none", "important");
+            el.style.setProperty("visibility", "hidden", "important");
+            el.style.setProperty("height", "0", "important");
+            el.style.setProperty("overflow", "hidden", "important");
+            el.style.setProperty("margin", "0", "important");
+            el.style.setProperty("padding", "0", "important");
+          } catch (eLab2) {}
+        });
+      }
+    } catch (eInfoLab) {}
+
     /* Style option photos (optionimg_*) stack beside the hero when the rail builds —
        hide them anywhere under the PDP, but never the product photo / altviews / rail. */
-    scope.querySelectorAll("img.vCSS_img_swatch, img[id^='optionimg_']").forEach(function (img) {
+    scope.querySelectorAll("img[id^='optionimg_']").forEach(function (img) {
       if (
         img.closest &&
         img.closest(
-          "#mc-configured-color-swatch-wrapper, .mc-configured-color-swatch, #product_photo_td, #altviews, #product_photo"
+          "#mc-configured-color-swatch-wrapper, .mc-configured-color-swatch, #product_photo_td, #altviews, #product_photo, #mc-pdp-alt-view-row, #mc-centered-altviews-wrap, #mc-steve-silver-altviews-wrap, .mc-pdp-alt-view-row"
         )
       ) {
         return;
@@ -11530,7 +11558,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260722lovey3";
+  var WANT_FP = "20260722lovey4";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11558,7 +11586,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey3&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey4&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}
