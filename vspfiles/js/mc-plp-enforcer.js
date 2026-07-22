@@ -1,13 +1,67 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260721nophoto2 — keep NoPhoto href swap; do not hide blank-name recliner tiles
+ * MC_PLP_ENFORCER_20260722lovey1 — force style3 CTA on lovey Select Style PDPs
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260721nophoto2";
+  /* Lovey / Select Style PDPs still bake FP=20260624A loaders that latch onto stale
+     mc-pdp-auth-cta-form.js. This page already fetches enforcer with a fresh m=
+     cache-buster, so force the current Style-rail CTA from here. */
+  (function forceLoveyStyleCta() {
+    var WANT = "20260721style3";
+    var ATTR = "data-mc-force-cta-lovey";
+    var d = global.document;
+    if (!d) return;
+
+    function needForce() {
+      var path = String((global.location && global.location.pathname) || "").toLowerCase();
+      if (path.indexOf("sar-stuffed-anml-lvys") !== -1) return true;
+      if (!d.getElementById("v65-product-parent")) return false;
+      var sel = d.querySelector('select[name*="SELECT___SAR-"]');
+      if (!sel) return false;
+      var table = sel.closest ? sel.closest("table") : null;
+      var hay = String((table && table.textContent) || "").toLowerCase();
+      return /select\s+style/.test(hay);
+    }
+
+    function hasRail() {
+      return !!d.querySelector("#mc-configured-color-swatch-wrapper .mc-configured-color-swatch");
+    }
+
+    function go() {
+      try {
+        if (!needForce()) return;
+        if (String(global.__MC_DEPLOY_FP__ || "") === WANT && hasRail()) return;
+        if (d.documentElement.getAttribute(ATTR) === WANT && hasRail()) return;
+        d.documentElement.setAttribute(ATTR, WANT);
+        d.querySelectorAll('script[src*="mc-pdp-auth-cta-form.js"]').forEach(function (old) {
+          try {
+            old.remove();
+          } catch (eRm) {}
+        });
+        try {
+          delete global.__MC_DEPLOY_FP__;
+          delete global.__MC_PDP_AUTH_CTA_FIX_VER__;
+          global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
+        } catch (eClr) {}
+        var s = d.createElement("script");
+        s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey1&mcrd=" + Date.now();
+        s.async = false;
+        (d.head || d.documentElement).appendChild(s);
+      } catch (eForce) {}
+    }
+
+    go();
+    if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", go);
+    [400, 1200, 2500].forEach(function (ms) {
+      global.setTimeout(go, ms);
+    });
+  })();
+
+  var VERSION = "20260722lovey1";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);

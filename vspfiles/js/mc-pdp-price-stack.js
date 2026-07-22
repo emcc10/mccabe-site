@@ -1,3 +1,45 @@
+
+/* MC_FORCE_LOVEY_STYLE_CTA_20260722lovey1 — baked 20260624A loaders latch stale CTA; force style3 */
+(function (g, d) {
+  "use strict";
+  if (!d || g.__MC_FORCE_LOVEY_STYLE_CTA__) return;
+  g.__MC_FORCE_LOVEY_STYLE_CTA__ = true;
+  var WANT = "20260721style3";
+  function need() {
+    var path = String((g.location && g.location.pathname) || "").toLowerCase();
+    if (path.indexOf("sar-stuffed-anml-lvys") !== -1) return true;
+    if (!d.getElementById("v65-product-parent")) return false;
+    var sel = d.querySelector('select[name*="SELECT___SAR-"]');
+    if (!sel) return false;
+    var table = sel.closest ? sel.closest("table") : null;
+    return /select\s+style/.test(String((table && table.textContent) || "").toLowerCase());
+  }
+  function hasRail() {
+    return !!d.querySelector("#mc-configured-color-swatch-wrapper .mc-configured-color-swatch");
+  }
+  function go() {
+    try {
+      if (!need()) return;
+      if (String(g.__MC_DEPLOY_FP__ || "") === WANT && hasRail()) return;
+      d.querySelectorAll('script[src*="mc-pdp-auth-cta-form.js"]').forEach(function (old) {
+        try { old.remove(); } catch (eRm) {}
+      });
+      try {
+        delete g.__MC_DEPLOY_FP__;
+        delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
+        g.__MC_PDP_AUTH_ACTIVE_GEN__ = (g.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
+      } catch (eClr) {}
+      var s = d.createElement("script");
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey1&mcrd=" + Date.now();
+      s.async = false;
+      (d.head || d.documentElement).appendChild(s);
+    } catch (eForce) {}
+  }
+  go();
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", go);
+  [500, 1500, 3000].forEach(function (ms) { g.setTimeout(go, ms); });
+})(window, document);
+
 /**
  * PDP retail/member/sale stack repair â€” works without template_266 rebake.
  * MC_PDP_PRICE_STACK_JS_20260522stack
