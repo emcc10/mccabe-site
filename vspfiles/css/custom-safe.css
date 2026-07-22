@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260721style3 — HP nursery alts + size variant images */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260722lovey2 — hide Style option stack + Cormorant menu */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -23581,11 +23581,12 @@ body:has(#v65-product-parent) #site-header {
 /* END REMOVABLE: PDP container/header stabilization (20260717) */
 /* BEGIN REMOVABLE: restore approved PDP header typography/logo margin (20260717) */
 @media (min-width: 992px) {
+  /* Keep Cormorant — a later Inter override here was beating the approved menu font. */
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > a,
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a,
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > ul a,
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > ul a {
-    font-family: Inter, Arial, sans-serif !important;
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
   }
 
   html body.mc-saranoni-pdp .vCSS_img_mfg_logo {
@@ -23609,16 +23610,7 @@ html body.mc-bean-bag-pdp .colors_pricebox > tbody > tr > td > table > tbody > t
   visibility: hidden !important;
 }
 /* END REMOVABLE: Bean Bag accordion/price label correction (20260718) */
-/* BEGIN REMOVABLE: main menu font only (20260718) */
-@media (min-width: 992px) {
-  html body #display_menu_1#display_menu_1 a,
-  html body #display_menu_1#display_menu_1 .vnav__link,
-  html body #display_menu_1#display_menu_1 .vnav--level1 > li > a,
-  html body #display_menu_1#display_menu_1 .vnav--level2 a,
-  html body #display_menu_1#display_menu_1 .vnav--level3 a {
-    font-family: Inter, Arial, sans-serif !important;
-  }
-}
+/* BEGIN REMOVABLE: main menu font only (20260718) — removed Inter override; Cormorant block below wins */
 /* END REMOVABLE: main menu font only (20260718) */
 /* BEGIN REMOVABLE: approved Cormorant main-menu font only (20260718) */
 @media (min-width: 992px) {
@@ -24847,3 +24839,28 @@ html body.mc-saranoni-pdp #related_products_content {
 }
 /* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
 
+/* BEGIN REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey2) */
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #options_table img.vCSS_img_swatch,
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #options_table img[id^="optionimg_"],
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #options_table a:has(img.vCSS_img_swatch),
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) #options_table a:has(img[id^="optionimg_"]) {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+@media (min-width: 992px) {
+  html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > a,
+  html body header.header #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a,
+  html body #display_menu_1#display_menu_1 a,
+  html body #display_menu_1#display_menu_1 .vnav__link,
+  html body #display_menu_1#display_menu_1 .vnav--level1 > li > a {
+    font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  }
+}
+/* END REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey2) */

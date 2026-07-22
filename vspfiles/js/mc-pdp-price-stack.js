@@ -4,7 +4,7 @@
   "use strict";
   if (!d || g.__MC_FORCE_LOVEY_STYLE_CTA__) return;
   g.__MC_FORCE_LOVEY_STYLE_CTA__ = true;
-  var WANT = "20260721style3";
+  var WANT = "20260722lovey2";
   function need() {
     var path = String((g.location && g.location.pathname) || "").toLowerCase();
     if (path.indexOf("sar-stuffed-anml-lvys") !== -1) return true;
@@ -30,7 +30,7 @@
         g.__MC_PDP_AUTH_ACTIVE_GEN__ = (g.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
       } catch (eClr) {}
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey1&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey2&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eForce) {}
