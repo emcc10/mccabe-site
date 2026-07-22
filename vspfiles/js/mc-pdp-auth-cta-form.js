@@ -34,10 +34,10 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260721style3 — Style haystack + matching self-upgrade FP
-  var MC_DEPLOY_FINGERPRINT = "20260721style3";
+  // MC_DEPLOY_FINGERPRINT_20260722lovey3 — hide Style option stack without #options_table
+  var MC_DEPLOY_FINGERPRINT = "20260722lovey3";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260721style3";
+  var VERSION = "20260722lovey3";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
@@ -6010,7 +6010,7 @@
   var SARANONI_COLOR_OPTION_CATEGORY = "23";
   var SARANONI_SIZE_OPTION_CATEGORY = "58";
   var SARANONI_VARIANT_LABEL_PATTERNS =
-    /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color|choose\s+size|selected\s+size|size\s*\*|^size$)/;
+    /(choose\s+color|selected\s+color|color\s*\*|^color$|cover\s+color|select\s+style|choose\s+style|^style$|choose\s+size|selected\s+size|size\s*\*|^size$)/;
   var SARANONI_SWATCH_PROBE_DIRS = [
     "/v/vspfiles/swatches/saranoni/",
     "/v/vspfiles/swatches/lush/",
@@ -7831,10 +7831,16 @@
 
   function hideSaranoniNativeColorUi(select) {
     if (!select || !isSaranoniPdpPage()) return;
+    try {
+      if (global.document && global.document.body) {
+        global.document.body.classList.add("mc-saranoni-style-rail-active");
+      }
+    } catch (eBody) {}
     hideConfiguredColorNativeSelect(select);
     var row = select.closest ? select.closest("tr") : null;
     if (row) {
       try {
+        row.style.setProperty("display", "none", "important");
         row.style.setProperty("height", "0", "important");
         row.style.setProperty("max-height", "0", "important");
         row.style.setProperty("overflow", "hidden", "important");
@@ -7857,21 +7863,66 @@
         } catch (ePrev) {}
       }
     }
-    var table = select.closest ? select.closest("#options_table, table[id*='options_table']") : null;
-    if (!table) return;
-    table.querySelectorAll(".productoptionname, td.productoptionname, label").forEach(function (lab) {
-      var txt = String(lab.textContent || "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
-      if (!SARANONI_VARIANT_LABEL_PATTERNS.test(txt)) return;
-      if (lab.contains && lab.contains(select)) return;
+    /* Baked lovey HTML has no #options_table id — fall back to parent table / PDP root. */
+    var table =
+      (select.closest && select.closest("#options_table, table[id*='options_table']")) ||
+      (select.closest && select.closest("table")) ||
+      null;
+    var scope =
+      table ||
+      global.document.getElementById("v65-product-parent") ||
+      global.document;
+    if (table) {
+      table.querySelectorAll(".productoptionname, td.productoptionname, label").forEach(function (lab) {
+        var txt = String(lab.textContent || "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase();
+        if (!SARANONI_VARIANT_LABEL_PATTERNS.test(txt)) return;
+        if (lab.contains && lab.contains(select)) return;
+        try {
+          lab.style.setProperty("display", "none", "important");
+          lab.style.setProperty("visibility", "hidden", "important");
+          lab.style.setProperty("height", "0", "important");
+          lab.style.setProperty("overflow", "hidden", "important");
+        } catch (eLab) {}
+      });
+    }
+    /* Style option photos (optionimg_*) stack beside the hero when the rail builds —
+       hide them anywhere under the PDP, but never the product photo / altviews / rail. */
+    scope.querySelectorAll("img.vCSS_img_swatch, img[id^='optionimg_']").forEach(function (img) {
+      if (
+        img.closest &&
+        img.closest(
+          "#mc-configured-color-swatch-wrapper, .mc-configured-color-swatch, #product_photo_td, #altviews, #product_photo"
+        )
+      ) {
+        return;
+      }
+      if (img.id === "product_photo" || (img.classList && img.classList.contains("vCSS_img_product_photo"))) {
+        return;
+      }
       try {
-        lab.style.setProperty("display", "none", "important");
-        lab.style.setProperty("visibility", "hidden", "important");
-        lab.style.setProperty("height", "0", "important");
-        lab.style.setProperty("overflow", "hidden", "important");
-      } catch (eLab) {}
+        img.style.setProperty("display", "none", "important");
+        img.style.setProperty("visibility", "hidden", "important");
+        img.style.setProperty("width", "0", "important");
+        img.style.setProperty("height", "0", "important");
+        var link = img.closest ? img.closest("a") : null;
+        if (link && !(link.querySelector && link.querySelector("#product_photo, img#product_photo"))) {
+          link.style.setProperty("display", "none", "important");
+          link.style.setProperty("visibility", "hidden", "important");
+        }
+        var imgRow = img.closest ? img.closest("tr") : null;
+        if (
+          imgRow &&
+          !imgRow.querySelector(
+            "#mc-configured-color-swatch-wrapper, .mc-configured-color-swatch, #product_photo, img#product_photo"
+          )
+        ) {
+          imgRow.style.setProperty("display", "none", "important");
+          imgRow.style.setProperty("height", "0", "important");
+        }
+      } catch (eImg) {}
     });
   }
 
@@ -11479,7 +11530,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
 (function (g, d) {
-  var WANT_FP = "20260721style3";
+  var WANT_FP = "20260722lovey3";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
@@ -11507,7 +11558,7 @@ function revealBeanBagRelated() {
       delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
       delete g.__MC_DEPLOY_FP__;
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260721style3&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey3&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eUp) {}
