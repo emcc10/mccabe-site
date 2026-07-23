@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260723w435 - accordion + ATC max-width 435px */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260723menu1 - opaque push-menu over PDP overlap */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -25615,3 +25615,103 @@ html body.productdetails .mc-unified-purchase-controls button[name="btnaddtocart
   box-sizing: border-box !important;
 }
 /* END REMOVABLE: accordion + ATC max-width 435px 20260723w435 */
+
+/* BEGIN REMOVABLE: push-menu opaque over PDP 20260723menu1 */
+@media (max-width: 991px) {
+  /* Full-screen opaque overlay so product photo / promo never show through. */
+  html.push-menu-open nav.push-menu,
+  body.push-menu-open nav.push-menu,
+  html.push-menu-open body nav.push-menu.menu,
+  body.push-menu-open nav.push-menu.menu {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: none !important;
+    margin: 0 !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    z-index: 2147483000 !important;
+    background: #111111 !important;
+    background-color: #111111 !important;
+    backdrop-filter: none !important;
+    isolation: isolate !important;
+  }
+
+  html.push-menu-open #push-nav__menu,
+  body.push-menu-open #push-nav__menu,
+  html.push-menu-open .push-menu__menu-wrapper,
+  body.push-menu-open .push-menu__menu-wrapper {
+    background: transparent !important;
+    background-color: transparent !important;
+    z-index: 1 !important;
+    position: relative !important;
+  }
+
+  /* Keep product / offers from painting over the open category menu. */
+  html.push-menu-open #content_area,
+  body.push-menu-open #content_area,
+  html.push-menu-open #v65-product-parent,
+  body.push-menu-open #v65-product-parent,
+  html.push-menu-open img#product_photo,
+  body.push-menu-open img#product_photo,
+  html.push-menu-open #product_photo_zoom_url,
+  body.push-menu-open #product_photo_zoom_url {
+    z-index: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html.push-menu-open [role="region"][aria-label*="offer" i],
+  body.push-menu-open [role="region"][aria-label*="offer" i],
+  html.push-menu-open .mc-offers-bar,
+  body.push-menu-open .mc-offers-bar {
+    z-index: 0 !important;
+  }
+
+  /* Subcategory rows inside the mobile menu must stay above the panel. */
+  html.push-menu-open nav.push-menu li.mc-has-sub.mc-open > ul,
+  body.push-menu-open nav.push-menu li.mc-has-sub.mc-open > ul,
+  html.push-menu-open nav.push-menu .vnav--level2,
+  body.push-menu-open nav.push-menu .vnav--level2 {
+    position: relative !important;
+    z-index: 2 !important;
+    background: #111111 !important;
+  }
+}
+
+/* Desktop: keep header + subcategory dropdowns above PDP media/info cells. */
+@media (min-width: 992px) {
+  html body.productdetails header.header,
+  html body.mc-product-page header.header,
+  html.mc-url-looks-like-pdp body header.header {
+    position: relative !important;
+    z-index: 100000 !important;
+  }
+
+  html body.productdetails header.header #display_menu_1 > ul > li > ul,
+  html body.mc-product-page header.header #display_menu_1 > ul > li > ul,
+  html body.productdetails header.header #display_menu_1 .vnav--level2,
+  html body.mc-product-page header.header #display_menu_1 .vnav--level2,
+  html body.productdetails header.header #display_menu_1 .vnav__submenu,
+  html body.mc-product-page header.header #display_menu_1 .vnav__submenu {
+    z-index: 100001 !important;
+    background: #ffffff !important;
+  }
+
+  html body.productdetails #content_area,
+  html body.mc-product-page #content_area,
+  html body.productdetails #v65-product-parent,
+  html body.mc-product-page #v65-product-parent {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+}
+/* END REMOVABLE: push-menu opaque over PDP 20260723menu1 */
