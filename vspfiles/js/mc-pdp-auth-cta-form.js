@@ -5224,15 +5224,12 @@
           return;
         }
         try {
-          box.style.setProperty("display", "none", "important");
-          box.style.setProperty("visibility", "hidden", "important");
-          box.style.setProperty("height", "0", "important");
-          box.style.setProperty("max-height", "0", "important");
-          box.style.setProperty("margin", "0", "important");
-          box.style.setProperty("padding", "0", "important");
-          box.style.setProperty("overflow", "hidden", "important");
-          box.style.setProperty("border", "0", "important");
+          box.style.cssText =
+            "display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;" +
+            "margin:0!important;padding:0!important;overflow:hidden!important;border:0!important;" +
+            "position:absolute!important;left:-9999px!important;pointer-events:none!important;";
           box.setAttribute("aria-hidden", "true");
+          box.setAttribute("data-mc-closeout-pricebox-hidden", "1");
         } catch (eHide) {}
       });
       global.document
