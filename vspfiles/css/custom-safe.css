@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260722lovey4 - promo bar + lovey altviews + SS width */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260722manual4 - game room bars + menu overlap + promo/caption/alts */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -18546,7 +18546,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
     margin-left: auto !important;
     margin-right: auto !important;
     position: relative !important;
-    left: 42px !important;
+    left: 0 !important;
     table-layout: fixed !important;
   }
 
@@ -24839,7 +24839,7 @@ html body.mc-saranoni-pdp #related_products_content {
 }
 /* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
 
-/* BEGIN REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey4) */
+/* BEGIN REMOVABLE: lovey Style stack + menu Cormorant lock (20260722manual2) */
 /* Hide ONLY native option photos (optionimg_*) — never generic swatch/alt thumbs. */
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active img[id^="optionimg_"],
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active a:has(img[id^="optionimg_"]),
@@ -24891,18 +24891,19 @@ html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-pdp-options-td > f
     font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
   }
 }
-/* END REMOVABLE: lovey Style stack + menu Cormorant lock (20260722lovey4) */
+/* END REMOVABLE: lovey Style stack + menu Cormorant lock (20260722manual2) */
 
-/* BEGIN REMOVABLE: site promo bar (20260722lovey4) — NOT the nest banner */
+/* BEGIN REMOVABLE: site promo bar (20260722manual2) — two-row offers + codes */
 html body .mc-site-promo-bar {
   display: flex !important;
-  flex-wrap: wrap !important;
+  flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 10px 28px !important;
+  gap: 4px !important;
   width: 100% !important;
   box-sizing: border-box !important;
-  padding: 8px 16px !important;
+  padding: 12px 16px !important;
+  min-height: 56px !important;
   margin: 0 !important;
   background: #fff !important;
   border-bottom: 1px solid #e8e4dc !important;
@@ -24914,8 +24915,22 @@ html body .mc-site-promo-bar {
   position: relative !important;
   z-index: 100050 !important;
 }
+html body .mc-site-promo-bar__row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px 28px !important;
+  width: 100% !important;
+}
+html body .mc-site-promo-bar__row--codes {
+  font-size: 11px !important;
+  letter-spacing: 0.06em !important;
+  color: #666 !important;
+  gap: 8px 24px !important;
+}
 html body .mc-site-promo-bar a {
-  color: #333 !important;
+  color: inherit !important;
   text-decoration: none !important;
   white-space: nowrap !important;
 }
@@ -24928,9 +24943,12 @@ html body .mc-site-promo-bar__sep {
 }
 @media (max-width: 991px) {
   html body .mc-site-promo-bar {
-    gap: 6px 14px !important;
+    min-height: 64px !important;
+    padding: 10px 10px !important;
     font-size: 11px !important;
-    padding: 7px 10px !important;
+  }
+  html body .mc-site-promo-bar__row {
+    gap: 4px 12px !important;
   }
   html body .mc-site-promo-bar a {
     white-space: normal !important;
@@ -24939,21 +24957,55 @@ html body .mc-site-promo-bar__sep {
     display: none !important;
   }
 }
-/* END REMOVABLE: site promo bar (20260722lovey4) */
+/* END REMOVABLE: site promo bar (20260722manual2) */
 
-/* BEGIN REMOVABLE: Steve Silver / bar-set PDP frame lock (20260722lovey4) */
+/* BEGIN REMOVABLE: hide Selected Color / Select Style stray labels (20260722manual2) */
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-unified-pdp-info .productoptionname,
+html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-pdp-options-td .productoptionname,
+html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) .productoptionname {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+/* END REMOVABLE: hide Selected Color / Select Style stray labels (20260722manual2) */
+
+/* BEGIN REMOVABLE: lovey top-align + SS/bar-set frame (20260722manual3) */
 @media (min-width: 992px) {
+  html body.mc-saranoni-pdp tr.mc-unified-pdp-row,
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row {
+    align-items: flex-start !important;
+  }
+  html body.mc-saranoni-pdp td.mc-unified-pdp-info,
+  html body.mc-saranoni-pdp td.mc-pdp-options-td {
+    vertical-align: top !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  html body.mc-saranoni-pdp img.vCSS_img_mfg_logo,
+  html body.mc-saranoni-pdp #mc-pdp-brand-logo,
+  html body.mc-saranoni-pdp #mc-pdp-brand-logo img {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
   html body.mc-steve-silver-altview-pdp #content_area,
   html body.mc-steve-silver-altview-pdp #v65-product-parent,
-  html body.mc-steve-silver-altview-pdp #content_area #v65-product-parent {
+  html body.mc-closeout-pdp #content_area,
+  html body.mc-closeout-pdp #v65-product-parent {
     width: 1128px !important;
     max-width: 1128px !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    box-sizing: border-box !important;
+    left: 0 !important;
+    position: relative !important;
   }
   html body.mc-steve-silver-altview-pdp tr.mc-unified-pdp-row,
-  html body.mc-steve-silver-altview-pdp tr.mc-pdp-main-row {
+  html body.mc-steve-silver-altview-pdp tr.mc-pdp-main-row,
+  html body.mc-closeout-pdp tr.mc-unified-pdp-row,
+  html body.mc-closeout-pdp tr.mc-pdp-main-row {
     width: 1128px !important;
     max-width: 1128px !important;
     display: flex !important;
@@ -24961,22 +25013,328 @@ html body .mc-site-promo-bar__sep {
     align-items: flex-start !important;
     justify-content: flex-start !important;
     gap: 28px !important;
-    box-sizing: border-box !important;
   }
   html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-media,
-  html body.mc-steve-silver-altview-pdp td.mc-pdp-media-td {
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-media-td,
+  html body.mc-closeout-pdp td.mc-unified-pdp-media,
+  html body.mc-closeout-pdp td.mc-pdp-media-td {
     flex: 0 0 690px !important;
     width: 690px !important;
     min-width: 690px !important;
     max-width: 690px !important;
-    box-sizing: border-box !important;
   }
   html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info,
-  html body.mc-steve-silver-altview-pdp td.mc-pdp-options-td {
-    flex: 1 1 400px !important;
-    width: 400px !important;
+  html body.mc-steve-silver-altview-pdp td.mc-pdp-options-td,
+  html body.mc-closeout-pdp td.mc-unified-pdp-info,
+  html body.mc-closeout-pdp td.mc-pdp-options-td {
+    flex: 0 0 410px !important;
+    width: 410px !important;
     max-width: 410px !important;
-    box-sizing: border-box !important;
+    vertical-align: top !important;
+  }
+  html body.mc-steve-silver-altview-pdp #mc-pdp-accordion,
+  html body.mc-closeout-pdp #mc-pdp-accordion,
+  html body.mc-pdp-accordion-pdp #mc-pdp-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
   }
 }
-/* END REMOVABLE: Steve Silver / bar-set PDP frame lock (20260722lovey4) */
+/* END REMOVABLE: lovey top-align + SS/bar-set frame (20260722manual3) */
+
+/* BEGIN REMOVABLE: emergency layout/promo/caption/alts (20260722manual4) */
+
+/* Kill PDP/category content pulling up under the main menu */
+@media (min-width: 992px) {
+  html body header.header,
+  html body:has(#v65-product-parent) header.header,
+  html body:has(#v65-product-parent) .header,
+  html body.mc-product-page header.header,
+  html body.productdetails header.header,
+  html body.category header.header {
+    margin-bottom: 0 !important;
+  }
+
+  html body .container--content,
+  html body .content_area-wrapper,
+  html body.mc-product-page .container--content,
+  html body.productdetails .container--content,
+  html body.category .container--content,
+  html body.mc-product-page .content_area-wrapper,
+  html body.productdetails .content_area-wrapper,
+  html body.category .content_area-wrapper {
+    margin-top: 0 !important;
+  }
+
+  html body #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1,
+  html body #display_menu_1#display_menu_1 > ul.vnav--level1,
+  html body #display_menu_1#display_menu_1 > ul {
+    margin-top: 0 !important;
+  }
+
+  /* Keep menu above landing/PDP content */
+  html body header.header {
+    position: relative !important;
+    z-index: 3000 !important;
+  }
+  html body header.header #display_menu_1#display_menu_1 {
+    z-index: 3001 !important;
+  }
+}
+
+/* Promo banner — single-line offers; numbers +2px vs body copy */
+html body .mc-promo-banner,
+html body #mcPromoBanner.mc-promo-banner {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background: #f8f8f8 !important;
+  color: #333 !important;
+  border-top: 2px solid #d0d0d0 !important;
+  border-bottom: 2px solid #d0d0d0 !important;
+  padding: 12px 16px !important;
+  position: relative !important;
+  z-index: 100050 !important;
+}
+html body .mc-promo-banner__line {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 1100px !important;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.35 !important;
+  color: #333 !important;
+  text-align: center !important;
+}
+html body .mc-promo-banner__line--offers {
+  margin-bottom: 4px !important;
+}
+html body .mc-promo-banner__line--shipping {
+  margin-top: 2px !important;
+}
+html body .mc-promo-banner__num {
+  font-size: 18px !important; /* +2px vs .mc-promo-banner__line */
+  font-weight: 700 !important;
+}
+html body .mc-promo-banner__pipe {
+  display: inline !important;
+  margin: 0 0.55em !important;
+  color: #c0c0c0 !important;
+  font-weight: 400 !important;
+}
+html body .mc-promo-banner__segment,
+html body .mc-promo-banner__sep,
+html body .mc-promo-banner__main,
+html body .mc-promo-banner__fine {
+  display: none !important;
+}
+@media (max-width: 991px) {
+  html body .mc-promo-banner,
+  html body #mcPromoBanner.mc-promo-banner {
+    padding: 10px 12px !important;
+  }
+  html body .mc-promo-banner__line {
+    font-size: 13px !important;
+    letter-spacing: 0.03em !important;
+    white-space: normal !important;
+  }
+  html body .mc-promo-banner__line--offers {
+    margin-bottom: 8px !important;
+  }
+  html body .mc-promo-banner__num {
+    font-size: 15px !important; /* +2px vs mobile line */
+  }
+  html body .mc-promo-banner__line--offers .mc-promo-banner__pipe {
+    display: block !important;
+    width: 40% !important;
+    height: 1px !important;
+    margin: 8px auto !important;
+    background: #d0d0d0 !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+  }
+  html body .mc-site-promo-bar {
+    display: none !important;
+  }
+}
+
+/* Homepage hero caption must stay visible (mobile + desktop) */
+html body.is-home #mc-hero-copy-tagline,
+html.mc-allow-home-hero body.is-home #slideshow-container #mc-hero-copy-tagline {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #d8d6d3 !important;
+  -webkit-text-fill-color: #d8d6d3 !important;
+  min-height: 1.2em !important;
+}
+html body.is-home .mc-hero-wordmark {
+  display: block !important;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  color: #d8d6d3 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: none !important;
+  font-size: clamp(18px, 3.2vw, 34px) !important;
+  text-align: center !important;
+}
+
+/* Luxe / bean-bag / Cordaroy: keep hero + alt thumbs visible */
+html body.mc-bean-bag-pdp #product_photo,
+html body.mc-bean-bag-pdp img#product_photo,
+html body.mc-bean-bag-pdp #altviews,
+html body.mc-bean-bag-pdp #altviews img,
+html body.mc-bean-bag-pdp #mc-centered-altviews-wrap,
+html body.mc-bean-bag-pdp #mc-centered-altviews-wrap img,
+html body.mc-bean-bag-pdp #mc-pdp-alt-view-row,
+html body.mc-bean-bag-pdp #mc-pdp-alt-view-row img {
+  display: revert !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  max-height: none !important;
+  height: auto !important;
+}
+html body.mc-bean-bag-pdp #altviews,
+html body.mc-bean-bag-pdp #mc-centered-altviews-wrap #altviews {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+  width: 100% !important;
+  max-width: 650px !important;
+}
+html body.mc-bean-bag-pdp #altviews a,
+html body.mc-bean-bag-pdp #altviews img {
+  display: inline-flex !important;
+  width: 88px !important;
+  height: 88px !important;
+  object-fit: cover !important;
+}
+
+/* Game Room bars (cat 194) — same 1128 frame as other brand PDPs */
+@media (min-width: 992px) {
+  html body.mc-game-room-bar-pdp #content_area,
+  html body.mc-game-room-bar-pdp #v65-product-parent,
+  html body.mc-steve-silver-altview-pdp.mc-game-room-bar-pdp #v65-product-parent {
+    width: 1128px !important;
+    max-width: 1128px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    left: 0 !important;
+    position: relative !important;
+  }
+  html body.mc-game-room-bar-pdp tr.mc-unified-pdp-row,
+  html body.mc-game-room-bar-pdp tr.mc-pdp-main-row {
+    width: 1128px !important;
+    max-width: 1128px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 28px !important;
+  }
+  html body.mc-game-room-bar-pdp td.mc-unified-pdp-media,
+  html body.mc-game-room-bar-pdp td.mc-pdp-media-td {
+    flex: 0 0 690px !important;
+    width: 690px !important;
+    min-width: 690px !important;
+    max-width: 690px !important;
+  }
+  html body.mc-game-room-bar-pdp td.mc-unified-pdp-info,
+  html body.mc-game-room-bar-pdp td.mc-pdp-options-td {
+    flex: 0 0 410px !important;
+    width: 410px !important;
+    max-width: 410px !important;
+    vertical-align: top !important;
+  }
+  html body.mc-game-room-bar-pdp #product_photo,
+  html body.mc-game-room-bar-pdp img#product_photo,
+  html body.mc-game-room-bar-pdp td.mc-unified-pdp-media img,
+  html body.mc-game-room-bar-pdp td.mc-pdp-media-td img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 690px !important;
+    height: auto !important;
+    min-width: 200px !important;
+    min-height: 200px !important;
+  }
+  html body.mc-game-room-bar-pdp #mc-pdp-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+}
+/* END REMOVABLE: emergency layout/promo/caption/alts (20260722manual4) */
+
+/* BEGIN REMOVABLE: user chrome tweaks 20260723
+   Delete this entire block to revert promo/footer/Saranoni PDP chrome experiments.
+   Safety vs raw DevTools paste:
+   - promo min-width:1200px and footer margin-left:300px are desktop-only
+     (@media min-width:1200px) — unscoped they overflowed mobile.
+   - modal-content / modal-title / .close / .col-sm-offset-2 display:none
+     are NOT enabled (broke member login / footer newsletter). Left commented. */
+html body .mc-promo-banner__line {
+  font-weight: 500 !important;
+  letter-spacing: 0.08em !important;
+  line-height: 1.25 !important;
+}
+html body .mc-promo-banner__num {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+}
+@media (min-width: 1200px) {
+  html body .mc-promo-banner__line {
+    min-width: 1200px !important;
+  }
+  html body footer.footer .link-column {
+    min-width: 400px !important;
+    justify-content: left !important;
+  }
+  html body footer.footer .footer__section {
+    padding: 20px 0 !important;
+    max-width: 1300px !important;
+    margin-left: 300px !important;
+  }
+  html body footer.footer [class*="col-"] {
+    padding-left: 78px !important;
+    padding-right: 200px !important;
+  }
+}
+/* Saranoni PDP (tested on sar-lush-tod) */
+html body.mc-saranoni-pdp .vol-list-grid,
+html body.productdetails.mc-saranoni-pdp .vol-list-grid {
+  display: none !important;
+}
+html body.mc-saranoni-pdp .vCSS_img_mfg_logo,
+html body.productdetails.mc-saranoni-pdp .vCSS_img_mfg_logo {
+  margin-top: -10px !important;
+}
+html body.mc-saranoni-pdp .mc-pdp-main-row > td:nth-child(2),
+html body.mc-saranoni-pdp tr.mc-unified-pdp-row > td:nth-child(2),
+html body.productdetails.mc-saranoni-pdp .mc-pdp-main-row > td:nth-child(2) {
+  margin-top: -20px !important;
+}
+/*
+  INTENTIONALLY NOT APPLIED (breaks site-wide modals / login / newsletter):
+  .close > span:nth-child(1) { display: none !important; }
+  .modal-title { display: none; }
+  .modal-content { display: none !important; }
+  .col-sm-offset-2 { display: none; }
+*/
+/* END REMOVABLE: user chrome tweaks 20260723 */
