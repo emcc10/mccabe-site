@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260723mob1 - mobile PDP receiving/title/promo/alts/bedroom */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260723close2 - closeout chrome + promo nowrap/shipping tracking */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -25298,10 +25298,22 @@ html body .mc-promo-banner__num {
   font-size: 16px !important;
   font-weight: 500 !important;
 }
-@media (min-width: 1200px) {
-  html body .mc-promo-banner__line {
-    min-width: 1200px !important;
+/* Desktop offers: keep all three savings offers on ONE line (incl. SUMMER). */
+@media (min-width: 992px) {
+  html body .mc-promo-banner__line--offers {
+    white-space: nowrap !important;
+    letter-spacing: 0.06em !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
   }
+  html body .mc-promo-banner__line--shipping {
+    letter-spacing: 0.16em !important; /* wider gap between letters */
+    white-space: nowrap !important;
+    min-width: 0 !important;
+  }
+}
+@media (min-width: 1200px) {
   html body footer.footer .link-column {
     min-width: 400px !important;
     justify-content: left !important;
@@ -25408,7 +25420,7 @@ html body.productdetails.mc-saranoni-pdp .mc-pdp-main-row > td:nth-child(2) {
     overflow: hidden !important;
   }
 
-  /* Closeout / Steve Silver info column: logo → title → price → … → ATC */
+  /* Closeout / Steve Silver info column: logo → title → price → accordion → ATC */
   html body.mc-closeout-pdp td.mc-unified-pdp-info,
   html body.mc-closeout-pdp td.mc-pdp-options-td,
   html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info,
@@ -25427,16 +25439,16 @@ html body.productdetails.mc-saranoni-pdp .mc-pdp-main-row > td:nth-child(2) {
   html body.mc-steve-silver-altview-pdp #messaging-element { order: 40 !important; }
   html body.mc-closeout-pdp #mc-pdp-option-block,
   html body.mc-steve-silver-altview-pdp #mc-pdp-option-block { order: 45 !important; }
-  html body.mc-closeout-pdp .mc-unified-purchase-controls,
-  html body.mc-closeout-pdp #mc-pdp-purchase-stack,
-  html body.mc-steve-silver-altview-pdp .mc-unified-purchase-controls,
-  html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack { order: 50 !important; }
   html body.mc-closeout-pdp #mc-pdp-accordion,
   html body.mc-steve-silver-altview-pdp #mc-pdp-accordion,
   html body.mc-closeout-pdp #mc-pdp-features,
-  html body.mc-steve-silver-altview-pdp #mc-pdp-features { order: 70 !important; }
+  html body.mc-steve-silver-altview-pdp #mc-pdp-features { order: 50 !important; }
   html body.mc-closeout-pdp #mc-pdp-description-below-features,
-  html body.mc-steve-silver-altview-pdp #mc-pdp-description-below-features { order: 80 !important; }
+  html body.mc-steve-silver-altview-pdp #mc-pdp-description-below-features { order: 60 !important; }
+  html body.mc-closeout-pdp .mc-unified-purchase-controls,
+  html body.mc-closeout-pdp #mc-pdp-purchase-stack,
+  html body.mc-steve-silver-altview-pdp .mc-unified-purchase-controls,
+  html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack { order: 90 !important; }
 
   html body.mc-closeout-pdp #mc-pdp-price-stack-host,
   html body.mc-closeout-pdp #mc-pdp-price-stack-host .product_list_price,
@@ -25470,4 +25482,35 @@ html body.productdetails.mc-saranoni-pdp .mc-pdp-main-row > td:nth-child(2) {
   }
 }
 /* END REMOVABLE: mobile PDP fixes 20260723mob1 */
+
+/* BEGIN REMOVABLE: closeout chrome cleanup 20260723close2
+   Kill leftover Volusion price-box chrome (Quantity: text + PBox_Border lines)
+   and keep ATC below Product Details on desktop + mobile. */
+html body.mc-closeout-pdp table.colors_pricebox,
+html body.mc-closeout-pdp:has(#mc-pdp-price-stack-host) table.colors_pricebox {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+}
+html body.mc-closeout-pdp img[src*="PBox_Border"] {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
+}
+html body.mc-closeout-pdp #mc-pdp-accordion { order: 50 !important; }
+html body.mc-closeout-pdp #mc-pdp-purchase-stack,
+html body.mc-closeout-pdp .mc-unified-purchase-controls { order: 90 !important; }
+html body.mc-closeout-pdp td.mc-unified-pdp-info,
+html body.mc-closeout-pdp td.mc-pdp-options-td,
+html body.mc-closeout-pdp .vol-product__top--right {
+  display: flex !important;
+  flex-direction: column !important;
+}
+/* END REMOVABLE: closeout chrome cleanup 20260723close2 */
 
