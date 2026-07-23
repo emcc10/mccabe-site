@@ -1,9 +1,10 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260723mob1 — product-code filter + suppress dual #altviews.
-     New flag name so stale 20260721B caches cannot satisfy the fresh-boot gate. */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260723mob1__) return;
+  /* MC_ALT_VIEW_ROW_20260723close1 — closeout altview-only + suppress dual #altviews.
+     New flag so stale mob1/20260721B caches cannot satisfy the fresh-boot gate. */
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260723close1__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260723close1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723mob1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260721B__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260720SARFIX5__ = true;
@@ -201,6 +202,16 @@
         return !/(?:-altview1|-altview9|-1|-2t)\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full);
       });
     }
+    /* Drop legacy -N.jpg / -NT.jpg thumbs when -altviewN exists — those numbered
+       slots are frequently wrong supplier photos on closeout furniture. */
+    var hasAltview = items.some(function (item) {
+      return /-altview\d+\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full);
+    });
+    if (hasAltview) {
+      items = items.filter(function (item) {
+        return !/-\d+T?\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full) || /-altview\d+\./i.test(item.full);
+      });
+    }
     return items;
   }
 
@@ -322,7 +333,9 @@
     if (!code || probeInFlight[code] || discoveredByCode[code]) return;
     probeInFlight[code] = true;
     discoveredByCode[code] = [];
-    var remaining = MAX_ALT_VIEWS + (MAX_ALT_VIEWS - 1) * 2;
+    /* Closeout / furniture: prefer -altviewN only. Legacy -2/-3/-4.jpg slots on
+       products like TYLER-BAR-SET often contain unrelated supplier photos. */
+    var remaining = MAX_ALT_VIEWS;
 
     function completeOne() {
       remaining -= 1;
@@ -353,17 +366,6 @@
           completeOne();
         }, completeOne);
       })(altSlot);
-    }
-
-    for (var slot = 2; slot <= MAX_ALT_VIEWS; slot += 1) {
-      ["", "T"].forEach(function (suffix) {
-        var photoSlot = slot;
-        var legacySrc = "/v/vspfiles/photos/" + code + "-" + photoSlot + suffix + ".jpg";
-        probeImage(legacySrc, function () {
-          addItem(100 + photoSlot, legacySrc, "Alternate product view");
-          completeOne();
-        }, completeOne);
-      });
     }
   }
 

@@ -25426,17 +25426,17 @@ html body.productdetails.mc-saranoni-pdp .mc-pdp-main-row > td:nth-child(2) {
   html body.mc-closeout-pdp #messaging-element,
   html body.mc-steve-silver-altview-pdp #messaging-element { order: 40 !important; }
   html body.mc-closeout-pdp #mc-pdp-option-block,
-  html body.mc-steve-silver-altview-pdp #mc-pdp-option-block { order: 50 !important; }
+  html body.mc-steve-silver-altview-pdp #mc-pdp-option-block { order: 45 !important; }
+  html body.mc-closeout-pdp .mc-unified-purchase-controls,
+  html body.mc-closeout-pdp #mc-pdp-purchase-stack,
+  html body.mc-steve-silver-altview-pdp .mc-unified-purchase-controls,
+  html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack { order: 50 !important; }
   html body.mc-closeout-pdp #mc-pdp-accordion,
   html body.mc-steve-silver-altview-pdp #mc-pdp-accordion,
   html body.mc-closeout-pdp #mc-pdp-features,
   html body.mc-steve-silver-altview-pdp #mc-pdp-features { order: 70 !important; }
   html body.mc-closeout-pdp #mc-pdp-description-below-features,
   html body.mc-steve-silver-altview-pdp #mc-pdp-description-below-features { order: 80 !important; }
-  html body.mc-closeout-pdp .mc-unified-purchase-controls,
-  html body.mc-closeout-pdp #mc-pdp-purchase-stack,
-  html body.mc-steve-silver-altview-pdp .mc-unified-purchase-controls,
-  html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack { order: 90 !important; }
 
   html body.mc-closeout-pdp #mc-pdp-price-stack-host,
   html body.mc-closeout-pdp #mc-pdp-price-stack-host .product_list_price,
