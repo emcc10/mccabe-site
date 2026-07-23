@@ -1326,7 +1326,8 @@ document.addEventListener("DOMContentLoaded", function () {
       if (wrap) wrap.insertAdjacentElement('afterend', t);
       else ov.insertBefore(t, ov.firstChild);
     }
-    if (t.textContent.replace(/\s+/g, ' ').trim().indexOf('FRESH STYLE') === -1) t.textContent = TAG;
+    var _tag = (TAG && String(TAG).trim()) || 'FRESH STYLE, NEW PRODUCTS, SAME GREAT SERVICE';
+    if (t.textContent.replace(/\s+/g, ' ').trim().indexOf('FRESH STYLE') === -1) t.textContent = _tag;
     paintTagline(t);
     ov.style.setProperty('z-index', '5', 'important');
     t.style.setProperty('-webkit-text-fill-color', '#d8d6d3', 'important');
@@ -1482,7 +1483,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
   <script>
 (function (g, d) {
-  var FP = "20260721style3";
+  var FP = "20260723gap1";
   function bootFreshCta() {
     if (!d.getElementById("v65-product-parent")) return;
     if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
@@ -1492,7 +1493,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260721style3&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723gap1&mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -1505,7 +1506,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
   <!-- mc-pdp-auth-cta-form.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
        A second static ?mcrd=live tag used to live here; it cached an old copy whose stabilizer
-       fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260721style3 -->
+       fought the fresh script and made the ATC bounce. Removed. MC_TEMPLATE_DEPLOY_VERIFY_20260723gap1 -->
   <!-- Size options must stay text chips even if a stale CDN copy of mc-pdp-auth-cta-form.js still injects imgs. -->
   <style id="mc-saranoni-size-text-only-20260720">
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb{
@@ -1703,6 +1704,28 @@ if (isHome) return false;
 if(g.document.body&&g.document.body.classList.contains("productdetails"))return false;if(/shoppingcart|one-page-checkout|checkout|orderconfirm/i.test(p))return false;if((/-s\//.test(p)||/category-s\//.test(p))&&/\.html?/i.test(p))return true;if(/productslist\.asp|searchresults\.asp/.test(p))return true;var r=d.getElementById("content_area");if(r&&r.querySelector(".v-product-grid a.v-product__img, ul.v-product-grid li.v-product"))return true;}catch(e){}return false;}function go(){if(!cat())return;if(vn(g.__MC_PLP_ENFORCER_VER__)>=vn(W)&&typeof g.mcPlpEnforcerRun==="function")return;d.querySelectorAll('script[src*="mc-plp-enforcer"]').forEach(function(s){try{s.remove();}catch(e2){}});delete g.__MC_PLP_ENFORCER__;delete g.__MC_PLP_ENFORCER_VER__;delete g.mcPlpEnforcerRun;var s=d.createElement("script");s.id="mc-plp-enforcer-js";s.src="/v/vspfiles/js/mc-plp-enforcer.js?v="+W+"&mcrd="+Date.now();s.onload=function(){try{g.mcPlpEnforcerRun&&g.mcPlpEnforcerRun();}catch(e3){}};(d.head||d.documentElement).appendChild(s);}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",go);else go();g.addEventListener("load",go);[0,200,900,2500].forEach(function(t){g.setTimeout(go,t);});})(window,document);
   </script>
 
+
+<script id="mc-hero-logo-fallback">
+(function () {
+  function swap(img) {
+    if (!img || img.getAttribute('data-mc-logo-fallback')) return;
+    img.setAttribute('data-mc-logo-fallback', '1');
+    var span = document.createElement('div');
+    span.className = 'mc-hero-wordmark';
+    span.textContent = "McCabe's Theater & Living";
+    if (img.parentNode) img.parentNode.replaceChild(span, img);
+  }
+  function run() {
+    var img = document.querySelector('.hero-logo-img, .hero-logo-wrap img');
+    if (!img) return;
+    if (img.complete && img.naturalWidth === 0) swap(img);
+    img.addEventListener('error', function () { swap(img); }, { once: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})();
+</script>
+
 </head>
 
 
@@ -1714,12 +1737,17 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 ========================================= -->
 
 <body>
-<div class="mc-site-promo-bar" role="region" aria-label="Current offers">
-  <a href="/searchresults.asp?Search=Saranoni">Free shipping on Saranoni purchase of $99+</a>
-  <span class="mc-site-promo-bar__sep" aria-hidden="true">|</span>
-  <a href="/category-s/202.htm">Save 20% on Mahjong Tile Sets</a>
-  <span class="mc-site-promo-bar__sep" aria-hidden="true">|</span>
-  <a href="/searchresults.asp?Search=Cordaroys">Save 10% on Corduroy Mattresses</a>
+<div id="mcPromoBanner" class="mc-promo-banner" role="region" aria-label="Current offers">
+  <p class="mc-promo-banner__line mc-promo-banner__line--offers">
+    Save <span class="mc-promo-banner__num">20%</span> on Select Mahjong Sets with code <span class="mc-promo-banner__num">MAHJ20</span>
+    <span class="mc-promo-banner__pipe" aria-hidden="true">|</span>
+    Save <span class="mc-promo-banner__num">10%</span> on All Hybrid Mattresses and Bean Bags with code <span class="mc-promo-banner__num">CORD10</span>
+    <span class="mc-promo-banner__pipe" aria-hidden="true">|</span>
+    Save <span class="mc-promo-banner__num">10%</span> on Saranoni Purchases over <span class="mc-promo-banner__num">$99</span> with code <span class="mc-promo-banner__num">SUMMER</span>
+  </p>
+  <p class="mc-promo-banner__line mc-promo-banner__line--shipping">
+    Free Shipping on all Bean Bags &amp; Mattresses and Saranoni Purchases of <span class="mc-promo-banner__num">$99+</span>
+  </p>
 </div>
  
 <script>
@@ -2686,18 +2714,18 @@ document.addEventListener("DOMContentLoaded", function () {
 </style>
 <script id="mc-pdp-auth-loader-minimal">
 (function () {
-  var FP = "20260721style3";
+  var FP = "20260723gap1";
   if (String(window.__MC_DEPLOY_FP__ || "") === FP) {
   } else if (
     document.documentElement.getAttribute("data-mc-pdp-auth-reload") !== FP &&
     document.documentElement.getAttribute("data-mc-pdp-auth-head-boot") !== FP &&
-    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"][src*="20260721style3"]')
+    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"][src*="20260723gap1"]')
   ) {
     /* Fallback only when head boot did not inject the current fingerprint.
        Always use the versioned URL — unversioned CDN still serves stale copies. */
     document.documentElement.setAttribute("data-mc-pdp-auth-reload", FP);
     var s = document.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260721style3&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723gap1&mcrd=" + Date.now();
     s.async = false;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -2713,7 +2741,7 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 </script>
 
-<script id="mc-bb-atc-rescue-20260721style3">
+<script id="mc-bb-atc-rescue-20260723gap1">
 /* Bean bag: Add to Cart must never stay inside collapsed Features .mc-acc-panel. */
 (function (g, d) {
   function isBb() {
@@ -15555,6 +15583,6 @@ body.mc-product-page #v65-product-related img {
   window.addEventListener('load', removeOnlyStaleCustomSafeCss, { once: true });
 })();
 </script>
-<script src="/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260721style3"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"219322d1a28c40a88da65ab074cf5d58","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script src="/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260723gap1"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"219322d1a28c40a88da65ab074cf5d58","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1c9facf1ed8f075',t:'MTc4NDI5ODk5NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
