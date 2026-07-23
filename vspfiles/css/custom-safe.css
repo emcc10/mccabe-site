@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260723close2 - closeout chrome + promo nowrap/shipping tracking */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260723w435 - accordion + ATC max-width 435px */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -12694,7 +12694,7 @@ body.mc-product-page #v65-product-parent [itemprop="offers"] {
   }
 }
 
-/* PDP: Add to Cart column alignment (matches flush-left 440px stack — was sectional-centered only). */
+/* PDP: Add to Cart column alignment (matches flush-left 435px stack — was sectional-centered only). */
 body.productdetails #v65-product-parent .v65-product-addtocart,
 body.mc-product-page #v65-product-parent .v65-product-addtocart {
   display: flex !important;
@@ -12702,7 +12702,7 @@ body.mc-product-page #v65-product-parent .v65-product-addtocart {
   align-items: stretch !important;
   flex-wrap: wrap !important;
   width: 100% !important;
-  max-width: 440px !important;
+  max-width: 435px !important;
   text-align: left !important;
   box-sizing: border-box !important;
 }
@@ -13175,7 +13175,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
    - Pull the relocated H1 title flush left so it aligns with the right-column edge.
    ========================================================= */
 
-/* ----- 440px cap on the right-column stack (desktop only) ----- */
+/* ----- 435px cap on accordion (desktop only) ----- */
 @media (min-width: 992px) {
   body.mc-product-page #mc-pdp-accordion,
   body.productdetails #mc-pdp-accordion,
@@ -13183,7 +13183,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
   body.productdetails #v65-product-parent .colors_pricebox,
   body.mc-product-page #content_area .colors_pricebox,
   body.productdetails #content_area .colors_pricebox {
-    max-width: 440px !important;
+    max-width: 435px !important;
     width: 100% !important;
     box-sizing: border-box !important;
     margin-left: 0 !important;
@@ -25529,3 +25529,89 @@ html body.mc-closeout-pdp .vol-product__top--right {
 }
 /* END REMOVABLE: closeout chrome cleanup 20260723close2 */
 
+/* BEGIN REMOVABLE: related bounce + ATC width + saranoni mobile arrows 20260723rel1 */
+@media (max-width: 991px) {
+  html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow {
+    display: none !important;
+  }
+}
+html body.mc-closeout-pdp #mc-pdp-purchase-stack,
+html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,
+html body.mc-closeout-pdp .mc-unified-purchase-controls,
+html body.mc-steve-silver-altview-pdp .mc-unified-purchase-controls,
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+html body.mc-closeout-pdp #mc-pdp-purchase-stack .mc-atc-row,
+html body.mc-closeout-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack .mc-atc-row,
+html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-row,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-closeout-pdp #mc-pdp-purchase-stack input[name="btnaddtocart"],
+html body.mc-closeout-pdp #mc-pdp-purchase-stack button[name="btnaddtocart"],
+html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack input[name="btnaddtocart"],
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack input[name="btnaddtocart"] {
+  display: flex !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  align-self: stretch !important;
+  box-sizing: border-box !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+html body.mc-closeout-pdp .vol-cartqty__toggle,
+html body.mc-steve-silver-altview-pdp .vol-cartqty__toggle {
+  display: none !important;
+}
+html body.mc-closeout-pdp #mc-pdp-qty-row .mc-pdp-qty-row__label,
+html body.mc-steve-silver-altview-pdp #mc-pdp-qty-row .mc-pdp-qty-row__label {
+  display: block !important;
+}
+/* END REMOVABLE: related bounce + ATC width + saranoni mobile arrows 20260723rel1 */
+
+
+/* BEGIN REMOVABLE: accordion + ATC max-width 435px 20260723w435 */
+html body.mc-product-page #mc-pdp-accordion,
+html body.productdetails #mc-pdp-accordion,
+html body.mc-product-page .mc-pdp-accordion,
+html body.productdetails .mc-pdp-accordion {
+  max-width: 435px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+html body.mc-product-page #mc-pdp-purchase-stack,
+html body.productdetails #mc-pdp-purchase-stack,
+html body.mc-product-page .mc-unified-purchase-controls,
+html body.productdetails .mc-unified-purchase-controls,
+html body.mc-product-page .v65-product-addtocart,
+html body.productdetails .v65-product-addtocart,
+html body.mc-product-page .mc-atc-button-wrap,
+html body.productdetails .mc-atc-button-wrap {
+  max-width: 435px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+html body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"],
+html body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"],
+html body.mc-product-page #mc-pdp-purchase-stack button[name="btnaddtocart"],
+html body.productdetails #mc-pdp-purchase-stack button[name="btnaddtocart"],
+html body.mc-product-page .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.productdetails .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.mc-product-page .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.productdetails .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.mc-product-page .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.productdetails .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-product-page .mc-unified-purchase-controls button[name="btnaddtocart"],
+html body.productdetails .mc-unified-purchase-controls button[name="btnaddtocart"] {
+  max-width: 435px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+/* END REMOVABLE: accordion + ATC max-width 435px 20260723w435 */

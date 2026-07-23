@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723close2 — hide closeout pricebox chrome; ATC below accordion; promo
-  var MC_DEPLOY_FINGERPRINT = "20260723close2";
-  var VERSION = "20260723close2";
+  // MC_DEPLOY_FINGERPRINT_20260723w435 — accordion + ATC max-width 435px
+  var MC_DEPLOY_FINGERPRINT = "20260723w435";
+  var VERSION = "20260723w435";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -3229,7 +3229,7 @@
       if (isBeanBagPdpPage()) stack.classList.add("mc-bean-bag-purchase-stack");
       stack.style.setProperty("flex-direction", "column", "important");
       stack.style.setProperty("align-items", "stretch", "important");
-      stack.style.setProperty("max-width", isSaranoniPdpPage() ? "100%" : "400px", "important");
+      stack.style.setProperty("max-width", "435px", "important");
       stack.style.setProperty("width", "100%", "important");
       if (isSaranoniPdpPage()) {
         stack.style.setProperty("margin-left", "0", "important");
@@ -3256,7 +3256,11 @@
       if (btn) {
         try {
           btn.style.setProperty("width", "100%", "important");
-          btn.style.setProperty("display", "block", "important");
+          btn.style.setProperty("display", "flex", "important");
+          btn.style.setProperty("align-items", "center", "important");
+          btn.style.setProperty("justify-content", "center", "important");
+          btn.style.setProperty("text-align", "center", "important");
+          btn.style.setProperty("text-indent", "0.12em", "important");
           btn.style.setProperty("box-sizing", "border-box", "important");
         } catch (eBtn) {}
       }
@@ -3343,12 +3347,17 @@
       btn.style.setProperty("font-weight", "600", "important");
       btn.style.setProperty("letter-spacing", "0.12em", "important");
       btn.style.setProperty("text-transform", "uppercase", "important");
-      btn.style.setProperty("line-height", "1", "important");
+      btn.style.setProperty("line-height", "48px", "important");
       btn.style.setProperty("padding", "0 28px", "important");
+      /* Letter-spacing shifts perceived center left on <input type=submit>. */
+      btn.style.setProperty("text-indent", "0.12em", "important");
       btn.style.setProperty("min-height", "48px", "important");
       btn.style.setProperty("opacity", "1", "important");
       btn.style.setProperty("width", "100%", "important");
-      btn.style.setProperty("display", "block", "important");
+      btn.style.setProperty("display", "flex", "important");
+      btn.style.setProperty("align-items", "center", "important");
+      btn.style.setProperty("justify-content", "center", "important");
+      btn.style.setProperty("text-align", "center", "important");
       btn.style.setProperty("box-sizing", "border-box", "important");
       btn.style.setProperty("-webkit-appearance", "none", "important");
       btn.style.setProperty("appearance", "none", "important");
@@ -3524,6 +3533,9 @@
         purchaseTarget ? purchaseTarget.stackNode : null
       );
     }
+    try {
+      normalizeCloseoutPurchaseControls();
+    } catch (eCloseAtc) {}
   }
 
   function scheduleAtcBlackLock() {
@@ -3651,7 +3663,7 @@
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-bean-bag-purchase-stack," +
       "html body.mc-bean-bag-pdp .mc-unified-purchase-controls,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls{" +
       "display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;" +
-      "text-align:center!important;width:100%!important;max-width:400px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important;visibility:visible!important;opacity:1!important}" +
+      "text-align:center!important;width:100%!important;max-width:435px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important;visibility:visible!important;opacity:1!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls .mc-unified-qty-row{order:1!important;width:100%!important;justify-content:center!important;visibility:visible!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
@@ -5262,6 +5274,115 @@
     } catch (eChrome) {}
   }
 
+  /* Closeout/SS: qty label + input above ATC; full-width ATC; hide +/- grey squares. */
+  function normalizeCloseoutPurchaseControls() {
+    if (!isCloseoutPdpPage() && !isSteveSilverPdpPage()) return;
+    var purchase =
+      global.document.getElementById("mc-pdp-purchase-stack") ||
+      global.document.querySelector(".mc-unified-purchase-controls");
+    if (!purchase) return;
+    try {
+      purchase.style.setProperty("display", "flex", "important");
+      purchase.style.setProperty("flex-direction", "column", "important");
+      purchase.style.setProperty("align-items", "stretch", "important");
+      purchase.style.setProperty("justify-content", "flex-start", "important");
+      purchase.style.setProperty("width", "100%", "important");
+      purchase.style.setProperty("max-width", "100%", "important");
+      purchase.style.setProperty("gap", "10px", "important");
+    } catch (eStack) {}
+
+    var qty =
+      purchase.querySelector('input[name^="QTY."], input.v65-productdetail-cartqty, input[name="quantity"]') ||
+      global.document.querySelector(
+        '#v65-product-parent input[name^="QTY."], #content_area input[name^="QTY."], input.v65-productdetail-cartqty'
+      );
+    if (qty) {
+      var row = global.document.getElementById("mc-pdp-qty-row");
+      if (!row) {
+        row = global.document.createElement("div");
+        row.id = "mc-pdp-qty-row";
+        row.className = "mc-pdp-qty-row";
+        var lab = global.document.createElement("span");
+        lab.className = "mc-pdp-qty-row__label";
+        lab.textContent = "Quantity";
+        row.appendChild(lab);
+      }
+      if (!row.contains(qty)) row.appendChild(qty);
+      if (row.parentNode !== purchase) purchase.insertBefore(row, purchase.firstChild);
+      try {
+        row.style.setProperty("display", "flex", "important");
+        row.style.setProperty("flex-direction", "column", "important");
+        row.style.setProperty("align-items", "center", "important");
+        row.style.setProperty("justify-content", "center", "important");
+        row.style.setProperty("gap", "6px", "important");
+        row.style.setProperty("width", "100%", "important");
+        row.style.setProperty("order", "1", "important");
+        var labEl = row.querySelector(".mc-pdp-qty-row__label");
+        if (labEl) {
+          labEl.style.setProperty("display", "block", "important");
+          labEl.style.setProperty("font", "500 13px/1.2 Inter,Arial,sans-serif", "important");
+          labEl.style.setProperty("color", "#444", "important");
+        }
+        qty.style.setProperty("display", "inline-block", "important");
+        qty.style.setProperty("width", "58px", "important");
+        qty.style.setProperty("height", "38px", "important");
+        qty.style.setProperty("text-align", "center", "important");
+        qty.style.setProperty("border", "1px solid #e0e0e0", "important");
+      } catch (eQty) {}
+    }
+
+    purchase.querySelectorAll(".vol-cartqty__toggle, .vol-cartqty__text").forEach(function (el) {
+      try {
+        el.style.setProperty("display", "none", "important");
+        el.setAttribute("aria-hidden", "true");
+      } catch (eTog) {}
+    });
+    purchase.querySelectorAll(".vol-cartqty__wrap").forEach(function (wrap) {
+      if (wrap.querySelector("#mc-pdp-qty-row, .mc-pdp-qty-row__label")) return;
+      if (qty && wrap.contains(qty)) return;
+      try {
+        wrap.style.setProperty("display", "none", "important");
+      } catch (eWrap) {}
+    });
+
+    var atcRow =
+      purchase.querySelector(".mc-atc-row, .mc-atc-button-wrap, .v65-product-addtocart") ||
+      purchase.querySelector("input[name='btnaddtocart'], button[name='btnaddtocart']");
+    if (atcRow && atcRow.closest) {
+      var host = atcRow.closest(".mc-atc-row, .v65-product-addtocart, .mc-atc-button-wrap") || atcRow;
+      try {
+        host.style.setProperty("display", "flex", "important");
+        host.style.setProperty("width", "100%", "important");
+        host.style.setProperty("max-width", "100%", "important");
+        host.style.setProperty("align-self", "stretch", "important");
+        host.style.setProperty("order", "2", "important");
+        host.style.setProperty("box-sizing", "border-box", "important");
+      } catch (eAtcHost) {}
+    }
+    purchase.querySelectorAll(".mc-atc-button-wrap, .mc-atc-row").forEach(function (wrap) {
+      try {
+        wrap.style.setProperty("display", "flex", "important");
+        wrap.style.setProperty("width", "100%", "important");
+        wrap.style.setProperty("max-width", "100%", "important");
+        wrap.style.setProperty("align-self", "stretch", "important");
+        wrap.style.setProperty("flex", "1 1 auto", "important");
+      } catch (eW) {}
+      wrap.querySelectorAll("input[name='btnaddtocart'], button[name='btnaddtocart'], input[type='submit']").forEach(
+        function (btn) {
+          try {
+            btn.style.setProperty("width", "100%", "important");
+            btn.style.setProperty("max-width", "100%", "important");
+            btn.style.setProperty("display", "flex", "important");
+            btn.style.setProperty("align-items", "center", "important");
+            btn.style.setProperty("justify-content", "center", "important");
+            btn.style.setProperty("text-align", "center", "important");
+            btn.style.setProperty("text-indent", "0.12em", "important");
+          } catch (eB) {}
+        }
+      );
+    });
+  }
+
   function appendSteveSilverInfoColumnOrder() {
     if (!isSteveSilverPdpPage() && !isCloseoutPdpPage()) return;
     var infoColumn =
@@ -5333,6 +5454,7 @@
     } catch (eFlex) {}
 
     hideCloseoutNativePriceBoxChrome();
+    normalizeCloseoutPurchaseControls();
 
     try {
       var priceHost = global.document.getElementById("mc-pdp-price-stack-host");
@@ -8459,6 +8581,18 @@
 
   function ensureSaranoniRailArrows() {
     if (!isSaranoniPdpPage()) return;
+    /* Mobile: hide rail arrows — they sit absolute left/right and visually
+       appear on the sides of the main product image. Touch-scroll still works. */
+    try {
+      if (global.matchMedia && global.matchMedia("(max-width: 991px)").matches) {
+        global.document.querySelectorAll(".mc-saranoni-scroll-arrow").forEach(function (btn) {
+          try {
+            btn.style.setProperty("display", "none", "important");
+          } catch (eHideArr) {}
+        });
+        return;
+      }
+    } catch (eMq) {}
     ensureSaranoniScrollArrowCss();
     [
       global.document.querySelector(".mc-configured-color-swatches.mc-saranoni-swatches")
@@ -9495,7 +9629,7 @@
         unified.style.setProperty("visibility", "visible", "important");
         unified.style.setProperty("opacity", "1", "important");
         unified.style.setProperty("width", "100%", "important");
-        unified.style.setProperty("max-width", "400px", "important");
+        unified.style.setProperty("max-width", "435px", "important");
         unified.style.setProperty("height", "auto", "important");
         unified.style.setProperty("max-height", "none", "important");
         unified.style.setProperty("overflow", "visible", "important");
@@ -9526,7 +9660,7 @@
       stack.style.setProperty("justify-content", "flex-start", "important");
       stack.style.setProperty("text-align", "center", "important");
       stack.style.setProperty("width", "100%", "important");
-      stack.style.setProperty("max-width", "400px", "important");
+      stack.style.setProperty("max-width", "435px", "important");
       stack.style.setProperty("margin", "18px auto 0 auto", "important");
       stack.style.setProperty("padding", "0", "important");
       stack.style.setProperty("gap", "10px", "important");
@@ -10530,6 +10664,14 @@
     var relatedRoot = global.document.getElementById("v65-product-related");
     if (!related && !relatedRoot) return;
     hoistRelatedProductsFullWidth(relatedRoot);
+    /* One-shot style settle. Re-applying display/width on every saranoni layout
+       pass fought CSS + related converter and bounced the rail on mobile. */
+    if (
+      (relatedRoot && relatedRoot.getAttribute("data-mc-saranoni-related-ready") === "1") ||
+      (related && related.getAttribute("data-mc-saranoni-related-ready") === "1")
+    ) {
+      return;
+    }
     try {
       if (related) {
         related.style.setProperty("display", "block", "important");
@@ -10542,6 +10684,7 @@
         related.style.setProperty("margin-left", "0", "important");
         related.style.setProperty("transform", "none", "important");
         related.style.setProperty("overflow", "visible", "important");
+        related.setAttribute("data-mc-saranoni-related-ready", "1");
       }
       if (relatedRoot) {
         relatedRoot.style.setProperty("display", "block", "important");
@@ -10558,6 +10701,7 @@
         relatedRoot.style.setProperty("overflow", "visible", "important");
         relatedRoot.style.setProperty("transform", "none", "important");
         relatedRoot.style.setProperty("left", "auto", "important");
+        relatedRoot.setAttribute("data-mc-saranoni-related-ready", "1");
       }
       var grid = (relatedRoot || related).querySelector(".mc-related-plp-grid");
       if (grid) {
@@ -10574,8 +10718,6 @@
         grid.style.setProperty("justify-content", "center", "important");
       }
     } catch (eSarRelated) {}
-    /* Do not bind a MutationObserver that re-enters on our own style writes — that
-       caused related-items flicker on mobile. */
   }
 
 function revealBeanBagRelated() {
