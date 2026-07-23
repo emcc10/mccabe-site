@@ -1483,7 +1483,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
   <script>
 (function (g, d) {
-  var FP = "20260723bbnest2";
+  var FP = "20260723bbnest7";
   function bootFreshCta() {
     if (!d.getElementById("v65-product-parent")) return;
     if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
@@ -1493,7 +1493,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723bbnest2&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723bbnest7&mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -1878,17 +1878,17 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
         document.documentElement.classList.add("mc-mahjong-pdp-init");
       }
     }
-    var catEarly =
-      document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
-    var catEarlyV = catEarly && String(catEarly.value || "").trim();
     var isBean =
       /^BB/i.test(pc) ||
-      /\/bean-bag-seating-s\//.test(p) ||
-      /product-p\/bb-/i.test(p) ||
-      catEarlyV === "103";
+      /product-p\/bb-/i.test(p);
     if (isBean) {
       b.classList.add("mc-bean-bag-pdp");
       return;
+    }
+    /* Cordaroy mattresses / dog beds / outdoor share cat 103 and "CordaRoy's"
+       in the title — never treat them as bean-bag PDPs. */
+    if (/^MHH-/i.test(pc) || /^FC-/i.test(pc) || /^PC\d*-/i.test(pc)) {
+      b.classList.remove("mc-bean-bag-pdp");
     }
     function mcSyncSectionalHtmlClassFromPdp() {
       if (window.isSectionalProductPage()) {
@@ -2720,18 +2720,18 @@ document.addEventListener("DOMContentLoaded", function () {
 </style>
 <script id="mc-pdp-auth-loader-minimal">
 (function () {
-  var FP = "20260723bbnest2";
+  var FP = "20260723bbnest7";
   if (String(window.__MC_DEPLOY_FP__ || "") === FP) {
   } else if (
     document.documentElement.getAttribute("data-mc-pdp-auth-reload") !== FP &&
     document.documentElement.getAttribute("data-mc-pdp-auth-head-boot") !== FP &&
-    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"][src*="20260723bbnest2"]')
+    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"][src*="20260723bbnest7"]')
   ) {
     /* Fallback only when head boot did not inject the current fingerprint.
        Always use the versioned URL â€” unversioned CDN still serves stale copies. */
     document.documentElement.setAttribute("data-mc-pdp-auth-reload", FP);
     var s = document.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723bbnest2&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723bbnest7&mcrd=" + Date.now();
     s.async = false;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -6557,32 +6557,16 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var pcInp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
       var pc = String((pcInp && pcInp.value) || "").trim().toUpperCase();
       if (/^SAR/.test(pc)) return false;
+      /* Mattresses / dog beds / outdoor Cordaroys are NOT bean-bag configurators.
+         Fuzzy "cordaroys" title matching previously tagged every MHH/FC/PC PDP as
+         mc-bean-bag-pdp and applied Nest layout + wrong hero handling. */
+      if (/^MHH-/.test(pc) || /^FC-/.test(pc) || /^PC\d*-/.test(pc)) return false;
       if (/^BB/.test(pc)) return true;
       var p = (location.pathname || '').toLowerCase();
-      var catInp = document.querySelector(
-        'input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]'
-      );
-      var catVal = catInp && String(catInp.value || '').trim();
-      if (catVal === '103') return true;
-      /* Fuzzy copy checks must NOT use document.body â€” global nav includes e.g. "Nest Bean Bags" (/nest/), which false-flagged every PDP as a bean bag and killed member pricing. */
-      var contentRoot =
-        document.getElementById('content_area') ||
-        document.getElementById('v65-product-parent') ||
-        document.body;
-      var bodyText = (contentRoot ? contentRoot.textContent : '').toLowerCase();
-      var titleText = (document.title || '').toLowerCase();
-
-      if (
-        /\/bean-bag-seating-s\//.test(p) ||
-        /product-p\/bb-/.test(p) ||
-        /cordaroys/.test(bodyText) ||
-        /cordaroys/.test(titleText) ||
-        /bean bag/.test(bodyText) ||
-        /bean bag/.test(titleText)
-      ) {
-        return true;
-      }
-
+      if (/product-p\/bb-/.test(p)) return true;
+      if (document.getElementById('beanbag-swatch-wrapper')) return true;
+      /* Category 103 listing only — never tag non-BB product PDPs by category. */
+      if (/\/bean-bag-seating-s\//.test(p) && !/\/product-p\//.test(p)) return true;
       return false;
     } catch (e) {
       return false;

@@ -6,11 +6,11 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723bbnest2 — Cordaroy Nest column + accordion + desktop flex
-  var MC_DEPLOY_FINGERPRINT = "20260723bbnest2";
-  var VERSION = "20260723bbnest2";
+  // MC_DEPLOY_FINGERPRINT_20260723bbnest7 - mattress/BB layout + hero; keep Nest class
+  var MC_DEPLOY_FINGERPRINT = "20260723bbnest7";
+  var VERSION = "20260723bbnest7";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
-     Bail so lovey3/sarmob1/close1/w435/bbnest1 cannot overwrite this generation. */
+     Bail so lovey3/sarmob1/close1/w435/bbnest1-6 cannot overwrite this generation. */
   try {
     if (String(global.__MC_PDP_AUTH_CTA_MAX_VER__ || "") >= VERSION) return;
     global.__MC_PDP_AUTH_CTA_MAX_VER__ = VERSION;
@@ -65,6 +65,9 @@
     markCloseoutPdpPage();
     applySteveSilverBarSetFrame();
     alignSaranoniInfoToHeroTop();
+    try {
+      scheduleCordaroyHeroRepair();
+    } catch (eCordSched) {}
     [150, 400, 900, 1600, 2800].forEach(function (ms) {
       global.setTimeout(function () {
         try {
@@ -74,6 +77,7 @@
           alignSaranoniInfoToHeroTop();
           if (typeof hideSaranoniStrayVariantLabels === "function") hideSaranoniStrayVariantLabels();
           ensureSaranoniPdpAccordion();
+          ensureCordaroyHeroPhotoSrc();
         } catch (eTick) {}
       }, ms);
     });
@@ -651,8 +655,131 @@
     }
   }
 
+  function ensureCordaroyHeroPhotoSrc() {
+    if (!isProductPdp()) return false;
+    var pc = resolveSoftGoodsProductCode();
+    if (!pc) return false;
+    /* Mattresses / accessories: Volusion often serves -2T lifestyle as the
+       default hero. Prefer the primary -1 catalog shot. Bean-bag configurators
+       own their hero via cover swatches — leave those alone. */
+    var forcePrimary =
+      isCordaroyMattressOrAccessoryPdp() ||
+      (/^BB/i.test(pc) && !global.document.getElementById("beanbag-swatch-wrapper"));
+    if (!forcePrimary) return false;
+    /* Only strip bean-bag class on mattress/accessory PDPs. Nest / simple BB
+       SKUs need mc-bean-bag-pdp for desktop flex + accordion CSS. */
+    try {
+      if (global.document.body && isCordaroyMattressOrAccessoryPdp()) {
+        global.document.body.classList.remove("mc-bean-bag-pdp");
+        global.document.body.classList.add("mc-cordaroy-mattress-pdp");
+      }
+    } catch (eCls) {}
+    var img = global.document.getElementById("product_photo");
+    if (!img || img.__mcUserSelectedAlt) return false;
+    var cur = String(img.getAttribute("src") || img.src || "");
+    var full = "/v/vspfiles/photos/" + pc + "-1.jpg";
+    var alreadyPrimary = new RegExp(pc.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "-1\\.(jpg|jpeg|png|webp)", "i").test(cur);
+    if (alreadyPrimary) return true;
+    if (!/-2T?\.(jpg|jpeg|png|webp)/i.test(cur) && !/nophoto/i.test(cur) && cur) {
+      /* Keep non-2T heroes (e.g. color-specific) unless clearly a -2 secondary. */
+      if (!/-\d+T?\.(jpg|jpeg|png|webp)/i.test(cur)) return false;
+      if (!/-2T?\./i.test(cur)) return false;
+    }
+    try {
+      img.setAttribute("src", full);
+      img.src = full;
+      img.removeAttribute("srcset");
+    } catch (eSwap) {}
+    global.document
+      .querySelectorAll("a#product_photo_zoom_url, a#product_photo_zoom_url2")
+      .forEach(function (link) {
+        try {
+          link.setAttribute("href", full);
+        } catch (eHref) {}
+      });
+    return true;
+  }
+
+  function repairCordaroyMattressDesktopLayout() {
+    if (!isCordaroyMattressOrAccessoryPdp()) return;
+    try {
+      if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
+    } catch (eMq) {
+      return;
+    }
+    try {
+      if (global.document.body) {
+        global.document.body.classList.remove("mc-bean-bag-pdp");
+        global.document.body.classList.add("mc-cordaroy-mattress-pdp");
+      }
+    } catch (eCls) {}
+    var row =
+      global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row") ||
+      global.document.querySelector("#v65-product-parent tr.vol-product__top__inner");
+    var media =
+      global.document.querySelector("#v65-product-parent td.mc-pdp-media-td") ||
+      global.document.querySelector("#v65-product-parent td.vol-product__top--left");
+    var info =
+      global.document.querySelector("#v65-product-parent td.mc-pdp-options-td") ||
+      global.document.querySelector("#v65-product-parent td.vol-product__top--right");
+    if (row) {
+      try {
+        row.style.setProperty("display", "flex", "important");
+        row.style.setProperty("flex-wrap", "nowrap", "important");
+        row.style.setProperty("align-items", "flex-start", "important");
+        row.style.setProperty("justify-content", "center", "important");
+        row.style.setProperty("gap", "40px", "important");
+        row.style.setProperty("width", "100%", "important");
+        row.style.setProperty("max-width", "1200px", "important");
+      } catch (eRow) {}
+    }
+    if (media) {
+      try {
+        media.style.setProperty("display", "block", "important");
+        media.style.setProperty("flex", "0 0 650px", "important");
+        media.style.setProperty("width", "650px", "important");
+        media.style.setProperty("min-width", "650px", "important");
+        media.style.setProperty("max-width", "650px", "important");
+      } catch (eMedia) {}
+    }
+    if (info) {
+      try {
+        info.style.setProperty("display", "block", "important");
+        info.style.setProperty("flex", "0 0 420px", "important");
+        info.style.setProperty("width", "420px", "important");
+        info.style.setProperty("max-width", "420px", "important");
+      } catch (eInfo) {}
+    }
+    var img = global.document.getElementById("product_photo");
+    if (img) {
+      try {
+        img.style.setProperty("width", "100%", "important");
+        img.style.setProperty("max-width", "650px", "important");
+        img.style.setProperty("min-width", "0", "important");
+        img.style.setProperty("height", "auto", "important");
+      } catch (eImg) {}
+    }
+  }
+
+  function scheduleCordaroyHeroRepair() {
+    if (!isProductPdp()) return;
+    if (!isCordaroyMattressOrAccessoryPdp() && !/^BB/i.test(resolveSoftGoodsProductCode() || "")) return;
+    [0, 120, 400, 900, 1800, 3200].forEach(function (ms) {
+      global.setTimeout(function () {
+        try {
+          ensureCordaroyHeroPhotoSrc();
+          repairCordaroyMattressDesktopLayout();
+          if (typeof repairBeanBagDesktopMainRow === "function") repairBeanBagDesktopMainRow();
+        } catch (eTick) {}
+      }, ms);
+    });
+  }
+
   function applyPdpMainImageCap() {
     if (!isProductPdp()) return;
+    try {
+      ensureCordaroyHeroPhotoSrc();
+    } catch (eCordHero) {}
     var isSs = isSteveSilverPdpPage();
     if (!isSs && global.__MC_PDP_MAIN_IMAGE_CAP_VER__ === VERSION) return;
     if (!isSs) global.__MC_PDP_MAIN_IMAGE_CAP_VER__ = VERSION;
@@ -3992,12 +4119,38 @@
     } catch (eMq) {
       return;
     }
+    try {
+      if (global.document.body) {
+        global.document.body.classList.remove("mc-theater-seating-pdp", "category", "is-category-or-listing-page");
+        global.document.body.classList.add("mc-bean-bag-pdp");
+        if (global.document.documentElement) {
+          global.document.documentElement.classList.remove("is-category-or-listing-page", "category");
+        }
+      }
+    } catch (eCls) {}
     var row =
       global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row") ||
+      global.document.querySelector("#v65-product-parent tr.vol-product__top__inner.vol-product__main-details__inner") ||
       global.document.querySelector("#v65-product-parent tr.vol-product__top__inner");
+    var photo = global.document.getElementById("product_photo");
+    var info =
+      global.document.querySelector("#v65-product-parent td.vol-product__top--right") ||
+      global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
+    if (info && isNestedAtcInfoCell(info)) {
+      info = global.document.querySelector("#v65-product-parent td.vol-product__top--right") || info;
+    }
+    if ((!row || !row.contains || (info && !row.contains(info))) && info && info.parentElement && info.parentElement.tagName === "TR") {
+      row = info.parentElement;
+    }
+    if (!row && photo && photo.closest) {
+      var photoTd = photo.closest("td.mc-pdp-media-td, td.vol-product__top--left, td");
+      if (photoTd && photoTd.parentElement && photoTd.parentElement.tagName === "TR") row = photoTd.parentElement;
+    }
     if (!row) return;
     try {
+      row.classList.add("mc-pdp-main-row");
       row.style.setProperty("display", "flex", "important");
+      row.style.setProperty("flex-direction", "row", "important");
       row.style.setProperty("flex-wrap", "nowrap", "important");
       row.style.setProperty("align-items", "flex-start", "important");
       row.style.setProperty("justify-content", "center", "important");
@@ -4005,22 +4158,31 @@
       row.style.setProperty("width", "100%", "important");
       row.style.setProperty("max-width", "1200px", "important");
     } catch (eRow) {}
-    var media = row.querySelector("td.mc-pdp-media-td, td.vol-product__top--left");
-    var info = row.querySelector("td.mc-pdp-options-td, td.vol-product__top--right");
+    var media =
+      (row.querySelector && row.querySelector("td.vol-product__top--left, td.mc-pdp-media-td")) ||
+      (photo && photo.closest && photo.closest("td"));
+    if (media && info && media.parentElement !== row && info.parentElement === row) {
+      /* Photo may sit in a nested table; keep outer media cell on the main row. */
+      media = row.querySelector("td.mc-pdp-media-td, td.vol-product__top--left") || media;
+    }
     if (media) {
       try {
+        media.classList.add("mc-pdp-media-td");
         media.style.setProperty("display", "block", "important");
         media.style.setProperty("flex", "0 0 650px", "important");
         media.style.setProperty("width", "650px", "important");
         media.style.setProperty("max-width", "650px", "important");
+        media.style.setProperty("min-width", "0", "important");
       } catch (eMedia) {}
     }
     if (info) {
       try {
+        info.classList.add("mc-pdp-options-td");
         info.style.setProperty("display", "block", "important");
         info.style.setProperty("flex", "0 0 420px", "important");
         info.style.setProperty("width", "420px", "important");
         info.style.setProperty("max-width", "420px", "important");
+        info.style.setProperty("min-width", "0", "important");
       } catch (eInfo) {}
     }
   }
@@ -5882,18 +6044,40 @@
     return "";
   }
 
+  function isCordaroyMattressOrAccessoryPdp() {
+    try {
+      var pc = resolveSoftGoodsProductCode();
+      if (/^MHH-/i.test(pc) || /^FC-/i.test(pc) || /^PC\d*-/i.test(pc)) return true;
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (/\/product-p\/(?:mhh-|fc-|pc\d*-)/i.test(p)) return true;
+    } catch (eCord) {}
+    return false;
+  }
+
   function isBeanBagPdpPage() {
     try {
       if (isSaranoniPdpPage()) return false;
+      if (isCordaroyMattressOrAccessoryPdp()) return false;
       var pc = resolveSoftGoodsProductCode();
       if (/^BB/i.test(pc)) return true;
+      if (global.document.getElementById("beanbag-swatch-wrapper")) return true;
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (/product-p\/bb-/i.test(p)) return true;
+      /* Do not trust a stale mc-bean-bag-pdp class on mattress/accessory PDPs. */
+      if (pc && !/^BB/i.test(pc)) return false;
       if (typeof global.isBeanBagProductPage === "function") return !!global.isBeanBagProductPage();
       if (global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp")) return true;
-      var p = String(global.location.pathname || "").toLowerCase();
-      if (/product-p\/bb-/i.test(p) || /\/bean-bag-seating-s\//.test(p)) return true;
+      if (/\/bean-bag-seating-s\//.test(p) && !/\/product-p\//.test(p)) return true;
     } catch (eBb) {}
     return !!global.document.getElementById("beanbag-swatch-wrapper");
   }
+
+  /* Override stale template helpers that fuzzy-matched "CordaRoy's" titles. */
+  try {
+    global.isBeanBagProductPage = function () {
+      return isBeanBagPdpPage();
+    };
+  } catch (eOverrideBb) {}
 
   function isSaranoniPdpPage() {
     try {
@@ -7400,10 +7584,17 @@
     if (!isProductPdp()) return;
     try {
       if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
-      var info = global.document.querySelector(
-        "#v65-product-parent td.mc-pdp-options-td, #v65-product-parent td.mc-unified-pdp-info"
-      );
+      /* Prefer Bootstrap right column over nested ATC mc-pdp-options-td. */
+      var info =
+        global.document.querySelector(
+          "#v65-product-parent td.vol-product__top--right, #v65-product-parent td.mc-unified-pdp-info"
+        ) ||
+        global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
       if (!info) return;
+      if (typeof isNestedAtcInfoCell === "function" && isNestedAtcInfoCell(info)) {
+        info =
+          global.document.querySelector("#v65-product-parent td.vol-product__top--right") || info;
+      }
       var outer = info.closest && info.closest("td.vol-product__top--right");
       /* When the Bootstrap right column IS the options td (Cordaroy Nest /
          simple BB SKUs), there is no nested wrapper to unwrap. Walking parents
@@ -11286,11 +11477,17 @@ function revealBeanBagRelated() {
         body.classList.remove("mc-bean-bag-pdp");
         return;
       }
+      if (isCordaroyMattressOrAccessoryPdp()) {
+        body.classList.remove("mc-bean-bag-pdp");
+        body.classList.add("mc-cordaroy-mattress-pdp");
+        return;
+      }
       if (isMahjongHousePdpPage()) {
         body.classList.add("mc-mahjong-house-pdp");
         body.classList.remove("mc-saranoni-pdp", "mc-saranoni-pdp-init", "mc-saranoni-pdp-ready");
       }
       if (isBeanBagPdpPage()) body.classList.add("mc-bean-bag-pdp");
+      else body.classList.remove("mc-bean-bag-pdp");
     } catch (eTag) {}
   }
 
@@ -12269,15 +12466,30 @@ function revealBeanBagRelated() {
   g.addEventListener("load", bootCloseoutFrame);
 })(window, document);
 
-/* MC_PDP_AUTH_SELF_UPGRADE disabled 20260722manual4 — stop lovey freeze */
+/* MC_PDP_AUTH_SELF_UPGRADE 20260723bbnest7 - force newest CTA over baked ?v= */
 (function (g, d) {
-  try {
-    /* Never downgrade a newer CTA fingerprint to manual4. */
-    if (!g.__MC_DEPLOY_FP__) g.__MC_DEPLOY_FP__ = "20260722manual4";
-    if (d && d.documentElement && !d.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
-      d.documentElement.setAttribute("data-mc-pdp-auth-reload", String(g.__MC_DEPLOY_FP__));
-    }
-  } catch (e) {}
+  var WANT_FP = "20260723bbnest7";
+  function go() {
+    try {
+      if (!d.getElementById("v65-product-parent") && !/\/product-p\//i.test(String(g.location.pathname || ""))) return;
+      if (String(g.__MC_DEPLOY_FP__ || "") === WANT_FP) return;
+      if (d.documentElement.getAttribute("data-mc-pdp-auth-reload") === WANT_FP) return;
+      d.documentElement.setAttribute("data-mc-pdp-auth-reload", WANT_FP);
+      try {
+        if (g.__MC_PDP_LAYOUT_MO__) {
+          g.__MC_PDP_LAYOUT_MO__.disconnect();
+          g.__MC_PDP_LAYOUT_MO__ = null;
+        }
+      } catch (eMoUp) {}
+      g.__MC_PDP_AUTH_ACTIVE_GEN__ = (g.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
+      var s = d.createElement("script");
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=" + WANT_FP + "&mcrd=" + Date.now();
+      s.async = false;
+      (d.head || d.documentElement).appendChild(s);
+    } catch (eUp) {}
+  }
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", go);
+  else go();
 })(window, document);
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
@@ -12990,7 +13202,10 @@ try {
   }
 
   function isBeanBagPdp() {
-    return /^BB-/.test(productCode()) || (d.body && d.body.classList.contains("mc-bean-bag-pdp"));
+    try {
+      if (typeof isBeanBagPdpPage === "function") return !!isBeanBagPdpPage();
+    } catch (eBbPage) {}
+    return /^BB-/.test(productCode()) || /^BB/.test(productCode());
   }
 
   function setImportant(el, prop, value) {
