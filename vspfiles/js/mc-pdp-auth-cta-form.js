@@ -34,11 +34,32 @@
   })();
 
   // MC_PDP_AUTH_DEPLOY_VERIFY_20260626sarrepair15
-  // MC_DEPLOY_FINGERPRINT_20260722lovey4 — promo bar safe; hide optionimg only; Select Style; SS width
-  var MC_DEPLOY_FINGERPRINT = "20260722lovey4";
+  // MC_DEPLOY_FINGERPRINT_20260723gap1 — restore PDP -72px top pull-up under menu
+  var MC_DEPLOY_FINGERPRINT = "20260723gap1";
   global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-  var VERSION = "20260722lovey4";
+  var VERSION = "20260723gap1";
   global.__MC_PDP_AUTH_ACTIVE_GEN__ = (global.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
+  /* MC_SS_FRAME_SCHED_20260722manual4 */
+
+  try {
+    markGameRoomBarPdpPage();
+    markCloseoutPdpPage();
+    applySteveSilverBarSetFrame();
+    alignSaranoniInfoToHeroTop();
+    [150, 400, 900, 1600, 2800].forEach(function (ms) {
+      global.setTimeout(function () {
+        try {
+          markGameRoomBarPdpPage();
+          markCloseoutPdpPage();
+          applySteveSilverBarSetFrame();
+          alignSaranoniInfoToHeroTop();
+          if (typeof hideSaranoniStrayVariantLabels === "function") hideSaranoniStrayVariantLabels();
+          ensureSaranoniPdpAccordion();
+        } catch (eTick) {}
+      }, ms);
+    });
+  } catch (eBootSs) {}
+
   var SCRIPT_GEN = global.__MC_PDP_AUTH_ACTIVE_GEN__;
   try {
     if (global.__MC_PDP_LAYOUT_MO__) {
@@ -4219,7 +4240,8 @@
       !isSaranoniPdpPage() &&
       !isSteveSilverPdpPage() &&
       !isMahjongHousePdpPage() &&
-      !isCloseoutPdpPage()
+      !isCloseoutPdpPage() &&
+      !(typeof isGameRoomBarPdpPage === "function" && isGameRoomBarPdpPage())
     ) {
       return null;
     }
@@ -5534,6 +5556,54 @@
   function isSoftGoodsPdpPage() {
     return isBeanBagPdpPage() || isSaranoniPdpPage();
   }
+
+  function isGameRoomBarPdpPage() {
+    if (!isProductPdp()) return false;
+    try {
+      if (global.document.body && global.document.body.classList.contains("mc-game-room-bar-pdp")) {
+        return true;
+      }
+      var path = String((global.location && global.location.pathname) || "").toLowerCase();
+      if (/\/product-p\/(?:garcia-bar|[\w-]*home-bar[\w-]*|[\w-]*-bar(?:-|\.)|[\w-]*bar-unit)/.test(path)) {
+        return true;
+      }
+      var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pc = String((pcEl && pcEl.value) || global.global_Current_ProductCode || "").trim().toUpperCase();
+      if (/(?:^|-)BAR(?:-|$)/.test(pc) || /HOME-BAR|BAR-UNIT|BAR-CABINET/.test(pc)) return true;
+      var ids = typeof parseBreadCrumbCategoryIds === "function" ? parseBreadCrumbCategoryIds() : [];
+      var i;
+      for (i = 0; i < ids.length; i++) {
+        if (String(ids[i]) === "194") {
+          if (/BAR|HOME.?BAR|WINE.?CABINET/i.test(pc) || /bar|home-bar|wine/i.test(path)) return true;
+        }
+      }
+      if (
+        global.document.querySelector(
+          '#v65-product-parent a[href*="/category-s/194"], #content_area a[href*="/category-s/194"], a[href*="cat=194"]'
+        )
+      ) {
+        if (/BAR|HOME.?BAR|WINE.?CABINET/i.test(pc) || /bar|home-bar|wine/i.test(path)) return true;
+      }
+    } catch (eGr) {}
+    return false;
+  }
+
+  function markGameRoomBarPdpPage() {
+    if (!isGameRoomBarPdpPage()) return;
+    try {
+      if (global.document.body) {
+        global.document.body.classList.add(
+          "mc-game-room-bar-pdp",
+          "mc-steve-silver-altview-pdp",
+          "mc-pdp-accordion-pdp",
+          "mc-pdp-unified-ready"
+        );
+      }
+      applySteveSilverBarSetFrame();
+      try { ensureSaranoniPdpAccordion(); } catch (eAccGr) {}
+    } catch (eMarkGr) {}
+  }
+
   function isSteveSilverPdpPage() {
     try {
       if (
@@ -5542,6 +5612,9 @@
       ) {
         return true;
       }
+      if (typeof isCloseoutPdpPage === "function" && isCloseoutPdpPage()) return true;
+      var pathSs = String((global.location && global.location.pathname) || "").toLowerCase();
+      if (/\/product-p\/(?:tyler-bar-set|[\w-]*-bar-set|[\w-]*-dining-set|[\w-]*-patio-set)\.htm/.test(pathSs)) return true;
       var pcEarly = String(global.global_Current_ProductCode || "").trim().toUpperCase();
       if (/^SS-/.test(pcEarly)) return true;
       var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
@@ -5592,12 +5665,87 @@
     return false;
   }
 
+  
+  function applySteveSilverBarSetFrame() {
+    if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
+    if (!(isSteveSilverPdpPage() || isCloseoutPdpPage() || (typeof isGameRoomBarPdpPage === "function" && isGameRoomBarPdpPage()))) return;
+    try {
+      if (global.document.body) {
+        global.document.body.classList.add("mc-steve-silver-altview-pdp", "mc-pdp-unified-ready", "mc-pdp-accordion-pdp");
+        if (isCloseoutPdpPage()) global.document.body.classList.add("mc-closeout-pdp");
+      }
+      var parent = global.document.getElementById("v65-product-parent");
+      var row = global.document.querySelector(
+        "#v65-product-parent tr.mc-unified-pdp-row, #v65-product-parent tr.mc-pdp-main-row"
+      );
+      if (parent) {
+        parent.style.setProperty("width", "1128px", "important");
+        parent.style.setProperty("max-width", "1128px", "important");
+        parent.style.setProperty("margin-left", "auto", "important");
+        parent.style.setProperty("margin-right", "auto", "important");
+        parent.style.setProperty("left", "0", "important");
+      }
+      if (row) {
+        row.style.setProperty("width", "1128px", "important");
+        row.style.setProperty("max-width", "1128px", "important");
+        row.style.setProperty("display", "flex", "important");
+        row.style.setProperty("flex-wrap", "nowrap", "important");
+        row.style.setProperty("align-items", "flex-start", "important");
+        row.style.setProperty("justify-content", "flex-start", "important");
+        row.style.setProperty("gap", "28px", "important");
+        var media = row.querySelector("td.mc-unified-pdp-media, td.mc-pdp-media-td");
+        var info = row.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td");
+        if (media) {
+          media.style.setProperty("flex", "0 0 690px", "important");
+          media.style.setProperty("width", "690px", "important");
+          media.style.setProperty("min-width", "690px", "important");
+          media.style.setProperty("max-width", "690px", "important");
+        }
+        if (info) {
+          info.style.setProperty("flex", "0 0 410px", "important");
+          info.style.setProperty("width", "410px", "important");
+          info.style.setProperty("max-width", "410px", "important");
+          info.style.setProperty("vertical-align", "top", "important");
+          info.style.setProperty("padding-top", "0", "important");
+        }
+      }
+      try { ensureSaranoniPdpAccordion(); } catch (eA) {}
+    } catch (eF) {}
+  }
+
+  function alignSaranoniInfoToHeroTop() {
+    if (!isSaranoniPdpPage()) return;
+    try {
+      var row = global.document.querySelector(
+        "#v65-product-parent tr.mc-unified-pdp-row, #v65-product-parent tr.mc-pdp-main-row"
+      );
+      if (row) row.style.setProperty("align-items", "flex-start", "important");
+      var info = global.document.querySelector(
+        "#v65-product-parent td.mc-unified-pdp-info, #v65-product-parent td.mc-pdp-options-td"
+      );
+      if (info) {
+        info.style.setProperty("vertical-align", "top", "important");
+        info.style.setProperty("padding-top", "0", "important");
+        info.style.setProperty("margin-top", "0", "important");
+      }
+      var logo = global.document.querySelector(
+        "#v65-product-parent img.vCSS_img_mfg_logo, #mc-pdp-brand-logo"
+      );
+      if (logo) {
+        logo.style.setProperty("margin-top", "0", "important");
+        logo.style.setProperty("padding-top", "0", "important");
+      }
+    } catch (eAl) {}
+  }
+
   function markCloseoutPdpPage() {
     if (!isCloseoutPdpPage()) return;
     try {
       if (global.document.body) {
-        global.document.body.classList.add("mc-closeout-pdp", "mc-pdp-accordion-pdp");
+        global.document.body.classList.add("mc-closeout-pdp", "mc-steve-silver-altview-pdp", "mc-pdp-accordion-pdp", "mc-pdp-unified-ready");
       }
+      applySteveSilverBarSetFrame();
+      try { ensureSaranoniPdpAccordion(); } catch (eAcc0) {}
     } catch (eMarkCo) {}
   }
 
@@ -7799,7 +7947,7 @@
     if (visibleCount > 0 && wrap && wrap.querySelector(".mc-configured-color-swatch")) {
       body.classList.add("mc-saranoni-swatches-ready");
       hideConfiguredColorNativeSelect(select);
-      hideSaranoniNativeColorUi(select);
+      hideSaranoniNativeColorUi(select); hideSaranoniStrayVariantLabels();
       try {
         wrap.style.removeProperty("display");
         wrap.style.removeProperty("visibility");
@@ -7829,8 +7977,42 @@
     restoreConfiguredColorNativeSelect(select);
   }
 
+  
+  function hideSaranoniStrayVariantLabels() {
+    if (!isSaranoniPdpPage()) return;
+    try {
+      if (global.document.body) global.document.body.classList.add("mc-saranoni-style-rail-active");
+    } catch (eB) {}
+    var root = global.document.getElementById("v65-product-parent") || global.document;
+    root.querySelectorAll("td, font, label, span, b, strong, div, .productoptionname").forEach(function (el) {
+      if (!el) return;
+      if (el.closest && el.closest("#mc-configured-color-swatch-wrapper, .mc-configured-color-swatch, #mc-pdp-accordion")) return;
+      var txt = String(el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      if (!/^(select\s+style|choose\s+style|selected\s+color|choose\s+color|selected\s+style|style|color)\s*\*?$/.test(txt)) return;
+      if (el.querySelector && el.querySelector("select, input, img, button, a")) return;
+      try {
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("visibility", "hidden", "important");
+        el.style.setProperty("height", "0", "important");
+        el.style.setProperty("overflow", "hidden", "important");
+        el.style.setProperty("margin", "0", "important");
+        el.style.setProperty("padding", "0", "important");
+      } catch (eH) {}
+    });
+    root.querySelectorAll("img[id^='optionimg_']").forEach(function (img) {
+      if (img.closest && img.closest("#mc-configured-color-swatch-wrapper, #altviews, #mc-pdp-alt-view-row, #product_photo_td")) return;
+      try {
+        img.style.setProperty("display", "none", "important");
+        var row = img.closest && img.closest("tr");
+        if (row) row.style.setProperty("display", "none", "important");
+      } catch (eI) {}
+    });
+  }
+
   function hideSaranoniNativeColorUi(select) {
     if (!select || !isSaranoniPdpPage()) return;
+    hideSaranoniStrayVariantLabels();
+    alignSaranoniInfoToHeroTop();
     try {
       if (global.document && global.document.body) {
         global.document.body.classList.add("mc-saranoni-style-rail-active");
@@ -7912,6 +8094,31 @@
             el.style.setProperty("margin", "0", "important");
             el.style.setProperty("padding", "0", "important");
           } catch (eLab2) {}
+        });
+      }
+    } catch (eInfoLab) {}
+
+    /* Hide stray SELECT STYLE / SELECTED COLOR above brand logo. */
+    try {
+      var info =
+        global.document.querySelector(
+          "#v65-product-parent td.mc-unified-pdp-info, #v65-product-parent td.mc-pdp-options-td, #v65-product-parent .colors_pricebox"
+        ) || global.document.getElementById("v65-product-parent");
+      if (info) {
+        info.querySelectorAll("td, font, label, span, b, strong, div, .productoptionname").forEach(function (el) {
+          if (!el || (el.children && el.children.length > 4)) return;
+          var txt = String(el.textContent || "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+          if (!/^(select\s+style|choose\s+style|selected\s+color|choose\s+color|color|style)\s*\*?$/.test(txt)) return;
+          if (el.closest && el.closest("#mc-configured-color-swatch-wrapper, .mc-configured-color-swatch")) return;
+          try {
+            el.style.setProperty("display", "none", "important");
+            el.style.setProperty("visibility", "hidden", "important");
+            el.style.setProperty("height", "0", "important");
+            el.style.setProperty("overflow", "hidden", "important");
+          } catch (e2) {}
         });
       }
     } catch (eInfoLab) {}
@@ -11556,44 +11763,12 @@ function revealBeanBagRelated() {
   g.addEventListener("load", bootCloseoutFrame);
 })(window, document);
 
-/* MC_PDP_AUTH_SELF_UPGRADE — bypass stale ?v= CDN snapshots on baked PDPs */
+/* MC_PDP_AUTH_SELF_UPGRADE disabled 20260722manual4 — stop lovey freeze */
 (function (g, d) {
-  var WANT_FP = "20260722lovey4";
-  function go() {
-    try {
-      if (!d.getElementById("v65-product-parent")) return;
-      if (String(g.__MC_DEPLOY_FP__ || "") === WANT_FP) return;
-      if (d.documentElement.getAttribute("data-mc-pdp-auth-reload") === WANT_FP) return;
-      d.documentElement.setAttribute("data-mc-pdp-auth-reload", WANT_FP);
-      g.__MC_PDP_AUTH_ACTIVE_GEN__ = (g.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
-      try {
-        if (g.__MC_PDP_LAYOUT_MO__) {
-          g.__MC_PDP_LAYOUT_MO__.disconnect();
-          g.__MC_PDP_LAYOUT_MO__ = null;
-        }
-      } catch (eMoUp) {}
-      try {
-        if (d.body) {
-          delete d.body.dataset.mcPdpLayoutMounted;
-          delete d.body.dataset.mcPdpLayoutVer;
-        }
-      } catch (eDs) {}
-      d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
-        try {
-          old.remove();
-        } catch (eRm) {}
-      });
-      delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
-      delete g.__MC_DEPLOY_FP__;
-      var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260722lovey4&mcrd=" + Date.now();
-      s.async = false;
-      (d.head || d.documentElement).appendChild(s);
-    } catch (eUp) {}
-  }
-  [0, 120, 500, 1500].forEach(function (ms) {
-    g.setTimeout(go, ms);
-  });
+  try {
+    g.__MC_DEPLOY_FP__ = g.__MC_DEPLOY_FP__ || "20260722manual4";
+    if (d && d.documentElement) d.documentElement.setAttribute("data-mc-pdp-auth-reload", "20260722manual4");
+  } catch (e) {}
 })(window, document);
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
@@ -13318,6 +13493,12 @@ try {
           alt.style.setProperty("display", "flex", "important");
         };
         image.onerror = function () {
+          /* Luxe/Cordaroy often ship full-size -N.jpg without -NT.jpg thumbs */
+          if (image.getAttribute("data-mc-alt-fallback") !== "1") {
+            image.setAttribute("data-mc-alt-fallback", "1");
+            image.src = full(productCode, photoSlot);
+            return;
+          }
           if (link.parentNode) link.parentNode.removeChild(link);
           if (!alt.querySelector("img")) alt.style.setProperty("display", "none", "important");
         };
