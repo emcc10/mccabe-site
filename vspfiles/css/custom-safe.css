@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260723menu1 - opaque push-menu over PDP overlap */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260723bbnest2 - Cordaroy Nest column + desktop flex */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -25715,3 +25715,39 @@ html body.productdetails .mc-unified-purchase-controls button[name="btnaddtocart
   }
 }
 /* END REMOVABLE: push-menu opaque over PDP 20260723menu1 */
+
+/* BEGIN REMOVABLE: Cordaroy Nest info column rescue 20260723bbnest2
+   Nested ATC TDs must never act as the purchase/info column. */
+@media (min-width: 992px) {
+  html body.mc-bean-bag-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-bean-bag-pdp #v65-product-parent tr.vol-product__top__inner {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 40px !important;
+    width: 100% !important;
+    max-width: 1200px !important;
+  }
+  html body.mc-bean-bag-pdp td.vol-product__top--right.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp td.vol-product__top--right {
+    flex: 0 0 420px !important;
+    width: 420px !important;
+    max-width: 420px !important;
+    min-width: 0 !important;
+  }
+}
+html body.mc-bean-bag-pdp td.vol-product__top--right #mc-pdp-title-right,
+html body.mc-bean-bag-pdp td.vol-product__top--right #mc-pdp-price-stack-host,
+html body.mc-bean-bag-pdp td.vol-product__top--right #mc-pdp-purchase-stack,
+html body.mc-bean-bag-pdp td.vol-product__top--right #mc-pdp-accordion {
+  display: block !important;
+  width: 100% !important;
+  max-width: 435px !important;
+  box-sizing: border-box !important;
+}
+html body.mc-bean-bag-pdp td.vol-product__top--right #mc-pdp-title-right {
+  min-width: 200px !important;
+  white-space: normal !important;
+}
+/* END REMOVABLE: Cordaroy Nest info column rescue 20260723bbnest2 */

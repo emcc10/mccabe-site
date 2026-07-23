@@ -6,14 +6,26 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723w435 — accordion + ATC max-width 435px
-  var MC_DEPLOY_FINGERPRINT = "20260723w435";
-  var VERSION = "20260723w435";
+  // MC_DEPLOY_FINGERPRINT_20260723bbnest2 — Cordaroy Nest column + accordion + desktop flex
+  var MC_DEPLOY_FINGERPRINT = "20260723bbnest2";
+  var VERSION = "20260723bbnest2";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
-     Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
+     Bail so lovey3/sarmob1/close1/w435/bbnest1 cannot overwrite this generation. */
   try {
     if (String(global.__MC_PDP_AUTH_CTA_MAX_VER__ || "") >= VERSION) return;
     global.__MC_PDP_AUTH_CTA_MAX_VER__ = VERSION;
+    global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
+    /* Freeze FP so a later stale lovey3/sarmob1 copy cannot rewrite it. */
+    try {
+      Object.defineProperty(global, "__MC_DEPLOY_FP__", {
+        configurable: true,
+        enumerable: true,
+        get: function () {
+          return MC_DEPLOY_FINGERPRINT;
+        },
+        set: function () {},
+      });
+    } catch (eFreezeFp) {}
   } catch (eMax) {}
 
   /* Same guard as mc-sectional-pdp-emergency.js — only load on sectional configurator PDPs */
@@ -3973,6 +3985,46 @@
     return host;
   }
 
+  function repairBeanBagDesktopMainRow() {
+    if (!isBeanBagPdpPage()) return;
+    try {
+      if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
+    } catch (eMq) {
+      return;
+    }
+    var row =
+      global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row") ||
+      global.document.querySelector("#v65-product-parent tr.vol-product__top__inner");
+    if (!row) return;
+    try {
+      row.style.setProperty("display", "flex", "important");
+      row.style.setProperty("flex-wrap", "nowrap", "important");
+      row.style.setProperty("align-items", "flex-start", "important");
+      row.style.setProperty("justify-content", "center", "important");
+      row.style.setProperty("gap", "40px", "important");
+      row.style.setProperty("width", "100%", "important");
+      row.style.setProperty("max-width", "1200px", "important");
+    } catch (eRow) {}
+    var media = row.querySelector("td.mc-pdp-media-td, td.vol-product__top--left");
+    var info = row.querySelector("td.mc-pdp-options-td, td.vol-product__top--right");
+    if (media) {
+      try {
+        media.style.setProperty("display", "block", "important");
+        media.style.setProperty("flex", "0 0 650px", "important");
+        media.style.setProperty("width", "650px", "important");
+        media.style.setProperty("max-width", "650px", "important");
+      } catch (eMedia) {}
+    }
+    if (info) {
+      try {
+        info.style.setProperty("display", "block", "important");
+        info.style.setProperty("flex", "0 0 420px", "important");
+        info.style.setProperty("width", "420px", "important");
+        info.style.setProperty("max-width", "420px", "important");
+      } catch (eInfo) {}
+    }
+  }
+
   function appendBeanBagInfoColumnOrder() {
     if (!isBeanBagPdpPage()) return;
     var infoColumn = findPdpHeroColumnTd();
@@ -4111,6 +4163,9 @@
       } catch (eBbQty) {}
     }
     relocateVariantSwatchesFromMediaColumn();
+    try {
+      repairBeanBagDesktopMainRow();
+    } catch (eBbDesk) {}
     infoColumn.querySelectorAll(":scope > table, :scope > div").forEach(function (node) {
       if (node.id && /^(mc-pdp-|beanbag-|messaging|mc-bb-)/.test(node.id)) return;
       if (node.id) return;
@@ -4452,9 +4507,36 @@
   function ensureBeanBagPdpAccordion() {
     if (!isBeanBagPdpPage()) return null;
     var infoColumn = findPdpHeroColumnTd();
+    if (!infoColumn) return null;
+    /* Simple color SKUs (Nest Chinchilla, etc.) have no cover swatches and may
+       never create #mc-pdp-features. Still mount Product Details into the
+       accordion from the native description block. */
+    try {
+      if (!global.document.getElementById("mc-pdp-features")) mountPdpFeaturesBlock();
+    } catch (eFeatAcc) {}
+    try {
+      if (!global.document.getElementById("mc-pdp-description-below-features")) {
+        mountDescriptionBelowFeatures();
+      }
+    } catch (eDescAcc) {}
     var features = global.document.getElementById("mc-pdp-features");
     var description = global.document.getElementById("mc-pdp-description-below-features");
-    if (!infoColumn || (!features && !description)) return null;
+    if (!description) {
+      var nativeDesc =
+        global.document.getElementById("ProductDetail_ProductDetails_div") ||
+        global.document.getElementById("ProductDetail_ProductDetails_div2");
+      if (nativeDesc && String(nativeDesc.textContent || "").replace(/\s+/g, "").length) {
+        description = global.document.createElement("div");
+        description.id = "mc-pdp-description-below-features";
+        description.className = "mc-pdp-description-below-features";
+        try {
+          description.appendChild(nativeDesc);
+        } catch (eMoveNative) {
+          description = null;
+        }
+      }
+    }
+    if (!features && !description) return null;
 
     var acc = global.document.getElementById("mc-pdp-accordion");
     if (!acc) {
@@ -6050,14 +6132,53 @@
     (global.document.head || global.document.documentElement).appendChild(st);
   }
 
-  function findPdpHeroColumnTd() {
-    var td = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td, #v65-product-parent td.mc-unified-pdp-info");
-    if (td) return td;
-    /* Closeout / legacy Volusion PDPs use Bootstrap right column, not unified TDs. */
-    var right =
+  function isNestedAtcInfoCell(node) {
+    if (!node || !node.classList) return false;
+    if (node.classList.contains("vol-product__top--right") || node.classList.contains("mc-unified-pdp-info")) {
+      return false;
+    }
+    if (node.classList.contains("mc-atc-row")) return true;
+    try {
+      if (node.id === "v65-productdetail-action-wrapper") return true;
+      if (node.closest && node.closest("#v65-productdetail-action-wrapper")) return true;
+    } catch (eNest) {}
+    return false;
+  }
+
+  function findVolProductRightColumn() {
+    return (
+      global.document.querySelector(
+        "#v65-product-parent td.vol-product__top--right, #content_area td.vol-product__top--right, td.vol-product__top--right"
+      ) ||
       global.document.querySelector(
         "#v65-product-parent .vol-product__top--right, #content_area .vol-product__top--right, .vol-product__top--right"
-      );
+      )
+    );
+  }
+
+  function findPdpHeroColumnTd() {
+    /* Bean Bag Bootstrap PDPs: the real info column is .vol-product__top--right.
+       Never treat the nested ATC TD (often also tagged mc-atc-row +
+       mc-pdp-options-td) as the purchase column — that collapses
+       title/price/accordion to ~0px on simple color SKUs like BB-CHINCHILLA. */
+    if (isBeanBagPdpPage()) {
+      var bbRight = findVolProductRightColumn();
+      if (bbRight) {
+        try {
+          bbRight.classList.add("mc-pdp-options-td");
+        } catch (eTagRight) {}
+        return bbRight;
+      }
+    }
+    var tagged = global.document.querySelectorAll(
+      "#v65-product-parent td.mc-pdp-options-td, #v65-product-parent td.mc-unified-pdp-info"
+    );
+    var ti;
+    for (ti = 0; ti < tagged.length; ti++) {
+      if (!isNestedAtcInfoCell(tagged[ti])) return tagged[ti];
+    }
+    /* Closeout / legacy Volusion PDPs use Bootstrap right column, not unified TDs. */
+    var right = findVolProductRightColumn();
     if (right) return right;
     var seeds = [
       global.document.getElementById("mc-pdp-title-right"),
@@ -6069,12 +6190,17 @@
     for (si = 0; si < seeds.length; si++) {
       var walk = seeds[si];
       while (walk && walk !== global.document.body) {
-        if (walk.tagName === "TD") return walk;
         if (
           walk.classList &&
-          (walk.classList.contains("vol-product__top--right") ||
-            walk.classList.contains("mc-unified-pdp-info") ||
-            walk.classList.contains("mc-pdp-options-td"))
+          (walk.classList.contains("vol-product__top--right") || walk.classList.contains("mc-unified-pdp-info"))
+        ) {
+          return walk;
+        }
+        if (walk.tagName === "TD" && !isNestedAtcInfoCell(walk)) return walk;
+        if (
+          walk.classList &&
+          walk.classList.contains("mc-pdp-options-td") &&
+          !isNestedAtcInfoCell(walk)
         ) {
           return walk;
         }
@@ -7279,7 +7405,11 @@
       );
       if (!info) return;
       var outer = info.closest && info.closest("td.vol-product__top--right");
-      if (!outer || info.parentElement === outer) return;
+      /* When the Bootstrap right column IS the options td (Cordaroy Nest /
+         simple BB SKUs), there is no nested wrapper to unwrap. Walking parents
+         from that cell would hit the main product row and force
+         display:block, stacking the hero above the purchase column. */
+      if (!outer || info === outer || info.parentElement === outer) return;
 
       var priceHost = global.document.getElementById("mc-pdp-price-stack-host");
       if (priceHost) {
@@ -9234,9 +9364,13 @@
     ) {
       return;
     }
-    var col =
-      global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
-      findPdpHeroColumnTd();
+    var col = findPdpHeroColumnTd();
+    if (!col) {
+      col = global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td");
+    }
+    if (col && isNestedAtcInfoCell(col)) {
+      col = findVolProductRightColumn() || findPdpHeroColumnTd();
+    }
     if (!col) return;
     var descDiv =
       global.document.getElementById("ProductDetail_ProductDetails_div") ||
@@ -11280,18 +11414,63 @@ function revealBeanBagRelated() {
       if (mediaTd) mediaTd.classList.add("mc-pdp-media-td");
     }
 
-    var optTd = table.querySelector("td.mc-pdp-options-td");
+    /* Prefer the Bootstrap right column. Falling back to the ATC button's
+       closest TD tags the nested Add-to-Cart cell as mc-pdp-options-td and
+       collapses the Cordaroy purchase column. */
+    var optTd = findVolProductRightColumn();
+    if (!optTd) {
+      var taggedOpts = table.querySelectorAll("td.mc-pdp-options-td");
+      var oi;
+      for (oi = 0; oi < taggedOpts.length; oi++) {
+        if (!isNestedAtcInfoCell(taggedOpts[oi])) {
+          optTd = taggedOpts[oi];
+          break;
+        }
+      }
+    }
     if (!optTd) {
       var addBtn = table.querySelector(
         'input[name="btnaddtocart"], button[name="btnaddtocart"], input[id*="btnaddtocart" i]'
       );
-      if (addBtn) optTd = addBtn.closest ? addBtn.closest("td") : null;
+      if (addBtn && addBtn.closest) {
+        var fromBtn = addBtn.closest("td.vol-product__top--right, .vol-product__top--right");
+        if (!fromBtn) {
+          var btnTd = addBtn.closest("td");
+          while (btnTd && btnTd !== table) {
+            if (btnTd.classList && btnTd.classList.contains("vol-product__top--right")) {
+              fromBtn = btnTd;
+              break;
+            }
+            if (btnTd.tagName === "TD" && !isNestedAtcInfoCell(btnTd) && btnTd.querySelector("#product_photo") == null) {
+              /* Keep walking for a wider options cell; avoid the ATC-only TD. */
+              if (!btnTd.classList.contains("mc-atc-row")) fromBtn = btnTd;
+            }
+            btnTd = btnTd.parentElement && btnTd.parentElement.closest ? btnTd.parentElement.closest("td") : null;
+          }
+        }
+        optTd = fromBtn;
+      }
     }
     if (!optTd) {
       var sel = table.querySelector("select:not(.mc-native-leather)");
-      if (sel) optTd = sel.closest ? sel.closest("td") : null;
+      if (sel && sel.closest) {
+        optTd =
+          sel.closest("td.vol-product__top--right, .vol-product__top--right") ||
+          (isNestedAtcInfoCell(sel.closest("td")) ? null : sel.closest("td"));
+      }
     }
-    if (optTd) optTd.classList.add("mc-pdp-options-td");
+    if (optTd) {
+      optTd.classList.add("mc-pdp-options-td");
+      /* Strip mistaken options-td marks from nested ATC chrome. */
+      table.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
+        if (cell === optTd) return;
+        if (isNestedAtcInfoCell(cell) || cell.classList.contains("mc-atc-row")) {
+          try {
+            cell.classList.remove("mc-pdp-options-td");
+          } catch (eUntag) {}
+        }
+      });
+    }
 
     table.querySelectorAll("tr.mc-pdp-main-row").forEach(function (row) {
       try {
@@ -12093,8 +12272,11 @@ function revealBeanBagRelated() {
 /* MC_PDP_AUTH_SELF_UPGRADE disabled 20260722manual4 — stop lovey freeze */
 (function (g, d) {
   try {
-    g.__MC_DEPLOY_FP__ = g.__MC_DEPLOY_FP__ || "20260722manual4";
-    if (d && d.documentElement) d.documentElement.setAttribute("data-mc-pdp-auth-reload", "20260722manual4");
+    /* Never downgrade a newer CTA fingerprint to manual4. */
+    if (!g.__MC_DEPLOY_FP__) g.__MC_DEPLOY_FP__ = "20260722manual4";
+    if (d && d.documentElement && !d.documentElement.getAttribute("data-mc-pdp-auth-reload")) {
+      d.documentElement.setAttribute("data-mc-pdp-auth-reload", String(g.__MC_DEPLOY_FP__));
+    }
   } catch (e) {}
 })(window, document);
 
