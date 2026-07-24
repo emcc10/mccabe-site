@@ -6,26 +6,14 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723bbnest7 - mattress/BB layout + hero; keep Nest class
-  var MC_DEPLOY_FINGERPRINT = "20260723bbnest7";
-  var VERSION = "20260723bbnest7";
+  // MC_DEPLOY_FINGERPRINT_20260723restore3 — product description into Product Details accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore3";
+  var VERSION = "20260723restore3";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
-     Bail so lovey3/sarmob1/close1/w435/bbnest1-6 cannot overwrite this generation. */
+     Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
     if (String(global.__MC_PDP_AUTH_CTA_MAX_VER__ || "") >= VERSION) return;
     global.__MC_PDP_AUTH_CTA_MAX_VER__ = VERSION;
-    global.__MC_DEPLOY_FP__ = MC_DEPLOY_FINGERPRINT;
-    /* Freeze FP so a later stale lovey3/sarmob1 copy cannot rewrite it. */
-    try {
-      Object.defineProperty(global, "__MC_DEPLOY_FP__", {
-        configurable: true,
-        enumerable: true,
-        get: function () {
-          return MC_DEPLOY_FINGERPRINT;
-        },
-        set: function () {},
-      });
-    } catch (eFreezeFp) {}
   } catch (eMax) {}
 
   /* Same guard as mc-sectional-pdp-emergency.js — only load on sectional configurator PDPs */
@@ -65,9 +53,6 @@
     markCloseoutPdpPage();
     applySteveSilverBarSetFrame();
     alignSaranoniInfoToHeroTop();
-    try {
-      scheduleCordaroyHeroRepair();
-    } catch (eCordSched) {}
     [150, 400, 900, 1600, 2800].forEach(function (ms) {
       global.setTimeout(function () {
         try {
@@ -77,7 +62,6 @@
           alignSaranoniInfoToHeroTop();
           if (typeof hideSaranoniStrayVariantLabels === "function") hideSaranoniStrayVariantLabels();
           ensureSaranoniPdpAccordion();
-          ensureCordaroyHeroPhotoSrc();
         } catch (eTick) {}
       }, ms);
     });
@@ -655,131 +639,8 @@
     }
   }
 
-  function ensureCordaroyHeroPhotoSrc() {
-    if (!isProductPdp()) return false;
-    var pc = resolveSoftGoodsProductCode();
-    if (!pc) return false;
-    /* Mattresses / accessories: Volusion often serves -2T lifestyle as the
-       default hero. Prefer the primary -1 catalog shot. Bean-bag configurators
-       own their hero via cover swatches — leave those alone. */
-    var forcePrimary =
-      isCordaroyMattressOrAccessoryPdp() ||
-      (/^BB/i.test(pc) && !global.document.getElementById("beanbag-swatch-wrapper"));
-    if (!forcePrimary) return false;
-    /* Only strip bean-bag class on mattress/accessory PDPs. Nest / simple BB
-       SKUs need mc-bean-bag-pdp for desktop flex + accordion CSS. */
-    try {
-      if (global.document.body && isCordaroyMattressOrAccessoryPdp()) {
-        global.document.body.classList.remove("mc-bean-bag-pdp");
-        global.document.body.classList.add("mc-cordaroy-mattress-pdp");
-      }
-    } catch (eCls) {}
-    var img = global.document.getElementById("product_photo");
-    if (!img || img.__mcUserSelectedAlt) return false;
-    var cur = String(img.getAttribute("src") || img.src || "");
-    var full = "/v/vspfiles/photos/" + pc + "-1.jpg";
-    var alreadyPrimary = new RegExp(pc.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "-1\\.(jpg|jpeg|png|webp)", "i").test(cur);
-    if (alreadyPrimary) return true;
-    if (!/-2T?\.(jpg|jpeg|png|webp)/i.test(cur) && !/nophoto/i.test(cur) && cur) {
-      /* Keep non-2T heroes (e.g. color-specific) unless clearly a -2 secondary. */
-      if (!/-\d+T?\.(jpg|jpeg|png|webp)/i.test(cur)) return false;
-      if (!/-2T?\./i.test(cur)) return false;
-    }
-    try {
-      img.setAttribute("src", full);
-      img.src = full;
-      img.removeAttribute("srcset");
-    } catch (eSwap) {}
-    global.document
-      .querySelectorAll("a#product_photo_zoom_url, a#product_photo_zoom_url2")
-      .forEach(function (link) {
-        try {
-          link.setAttribute("href", full);
-        } catch (eHref) {}
-      });
-    return true;
-  }
-
-  function repairCordaroyMattressDesktopLayout() {
-    if (!isCordaroyMattressOrAccessoryPdp()) return;
-    try {
-      if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
-    } catch (eMq) {
-      return;
-    }
-    try {
-      if (global.document.body) {
-        global.document.body.classList.remove("mc-bean-bag-pdp");
-        global.document.body.classList.add("mc-cordaroy-mattress-pdp");
-      }
-    } catch (eCls) {}
-    var row =
-      global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row") ||
-      global.document.querySelector("#v65-product-parent tr.vol-product__top__inner");
-    var media =
-      global.document.querySelector("#v65-product-parent td.mc-pdp-media-td") ||
-      global.document.querySelector("#v65-product-parent td.vol-product__top--left");
-    var info =
-      global.document.querySelector("#v65-product-parent td.mc-pdp-options-td") ||
-      global.document.querySelector("#v65-product-parent td.vol-product__top--right");
-    if (row) {
-      try {
-        row.style.setProperty("display", "flex", "important");
-        row.style.setProperty("flex-wrap", "nowrap", "important");
-        row.style.setProperty("align-items", "flex-start", "important");
-        row.style.setProperty("justify-content", "center", "important");
-        row.style.setProperty("gap", "40px", "important");
-        row.style.setProperty("width", "100%", "important");
-        row.style.setProperty("max-width", "1200px", "important");
-      } catch (eRow) {}
-    }
-    if (media) {
-      try {
-        media.style.setProperty("display", "block", "important");
-        media.style.setProperty("flex", "0 0 650px", "important");
-        media.style.setProperty("width", "650px", "important");
-        media.style.setProperty("min-width", "650px", "important");
-        media.style.setProperty("max-width", "650px", "important");
-      } catch (eMedia) {}
-    }
-    if (info) {
-      try {
-        info.style.setProperty("display", "block", "important");
-        info.style.setProperty("flex", "0 0 420px", "important");
-        info.style.setProperty("width", "420px", "important");
-        info.style.setProperty("max-width", "420px", "important");
-      } catch (eInfo) {}
-    }
-    var img = global.document.getElementById("product_photo");
-    if (img) {
-      try {
-        img.style.setProperty("width", "100%", "important");
-        img.style.setProperty("max-width", "650px", "important");
-        img.style.setProperty("min-width", "0", "important");
-        img.style.setProperty("height", "auto", "important");
-      } catch (eImg) {}
-    }
-  }
-
-  function scheduleCordaroyHeroRepair() {
-    if (!isProductPdp()) return;
-    if (!isCordaroyMattressOrAccessoryPdp() && !/^BB/i.test(resolveSoftGoodsProductCode() || "")) return;
-    [0, 120, 400, 900, 1800, 3200].forEach(function (ms) {
-      global.setTimeout(function () {
-        try {
-          ensureCordaroyHeroPhotoSrc();
-          repairCordaroyMattressDesktopLayout();
-          if (typeof repairBeanBagDesktopMainRow === "function") repairBeanBagDesktopMainRow();
-        } catch (eTick) {}
-      }, ms);
-    });
-  }
-
   function applyPdpMainImageCap() {
     if (!isProductPdp()) return;
-    try {
-      ensureCordaroyHeroPhotoSrc();
-    } catch (eCordHero) {}
     var isSs = isSteveSilverPdpPage();
     if (!isSs && global.__MC_PDP_MAIN_IMAGE_CAP_VER__ === VERSION) return;
     if (!isSs) global.__MC_PDP_MAIN_IMAGE_CAP_VER__ = VERSION;
@@ -972,6 +833,18 @@
         return false;
       }
     } catch (eDefer) {}
+    return true;
+  }
+
+  /** Coaster and other generic unified furniture PDPs (not SS/closeout/Saranoni/bean bag). */
+  function isGenericUnifiedFurnitureAccordionPdp() {
+    if (!shouldDeferToUnifiedPdpLayout()) return false;
+    if (isSteveSilverPdpPage() || isCloseoutPdpPage()) return false;
+    if (isSaranoniPdpPage() || isMahjongHousePdpPage()) return false;
+    if (isBeanBagPdpPage()) return false;
+    try {
+      if (typeof isGameRoomBarPdpPage === "function" && isGameRoomBarPdpPage()) return false;
+    } catch (eBar) {}
     return true;
   }
 
@@ -4112,81 +3985,6 @@
     return host;
   }
 
-  function repairBeanBagDesktopMainRow() {
-    if (!isBeanBagPdpPage()) return;
-    try {
-      if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
-    } catch (eMq) {
-      return;
-    }
-    try {
-      if (global.document.body) {
-        global.document.body.classList.remove("mc-theater-seating-pdp", "category", "is-category-or-listing-page");
-        global.document.body.classList.add("mc-bean-bag-pdp");
-        if (global.document.documentElement) {
-          global.document.documentElement.classList.remove("is-category-or-listing-page", "category");
-        }
-      }
-    } catch (eCls) {}
-    var row =
-      global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row") ||
-      global.document.querySelector("#v65-product-parent tr.vol-product__top__inner.vol-product__main-details__inner") ||
-      global.document.querySelector("#v65-product-parent tr.vol-product__top__inner");
-    var photo = global.document.getElementById("product_photo");
-    var info =
-      global.document.querySelector("#v65-product-parent td.vol-product__top--right") ||
-      global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
-    if (info && isNestedAtcInfoCell(info)) {
-      info = global.document.querySelector("#v65-product-parent td.vol-product__top--right") || info;
-    }
-    if ((!row || !row.contains || (info && !row.contains(info))) && info && info.parentElement && info.parentElement.tagName === "TR") {
-      row = info.parentElement;
-    }
-    if (!row && photo && photo.closest) {
-      var photoTd = photo.closest("td.mc-pdp-media-td, td.vol-product__top--left, td");
-      if (photoTd && photoTd.parentElement && photoTd.parentElement.tagName === "TR") row = photoTd.parentElement;
-    }
-    if (!row) return;
-    try {
-      row.classList.add("mc-pdp-main-row");
-      row.style.setProperty("display", "flex", "important");
-      row.style.setProperty("flex-direction", "row", "important");
-      row.style.setProperty("flex-wrap", "nowrap", "important");
-      row.style.setProperty("align-items", "flex-start", "important");
-      row.style.setProperty("justify-content", "center", "important");
-      row.style.setProperty("gap", "40px", "important");
-      row.style.setProperty("width", "100%", "important");
-      row.style.setProperty("max-width", "1200px", "important");
-    } catch (eRow) {}
-    var media =
-      (row.querySelector && row.querySelector("td.vol-product__top--left, td.mc-pdp-media-td")) ||
-      (photo && photo.closest && photo.closest("td"));
-    if (media && info && media.parentElement !== row && info.parentElement === row) {
-      /* Photo may sit in a nested table; keep outer media cell on the main row. */
-      media = row.querySelector("td.mc-pdp-media-td, td.vol-product__top--left") || media;
-    }
-    if (media) {
-      try {
-        media.classList.add("mc-pdp-media-td");
-        media.style.setProperty("display", "block", "important");
-        media.style.setProperty("flex", "0 0 650px", "important");
-        media.style.setProperty("width", "650px", "important");
-        media.style.setProperty("max-width", "650px", "important");
-        media.style.setProperty("min-width", "0", "important");
-      } catch (eMedia) {}
-    }
-    if (info) {
-      try {
-        info.classList.add("mc-pdp-options-td");
-        info.style.setProperty("display", "block", "important");
-        info.style.setProperty("flex", "0 0 420px", "important");
-        info.style.setProperty("width", "420px", "important");
-        info.style.setProperty("max-width", "420px", "important");
-        info.style.setProperty("min-width", "0", "important");
-      } catch (eInfo) {}
-    }
-  }
-
   function appendBeanBagInfoColumnOrder() {
     if (!isBeanBagPdpPage()) return;
     var infoColumn = findPdpHeroColumnTd();
@@ -4325,9 +4123,6 @@
       } catch (eBbQty) {}
     }
     relocateVariantSwatchesFromMediaColumn();
-    try {
-      repairBeanBagDesktopMainRow();
-    } catch (eBbDesk) {}
     infoColumn.querySelectorAll(":scope > table, :scope > div").forEach(function (node) {
       if (node.id && /^(mc-pdp-|beanbag-|messaging|mc-bb-)/.test(node.id)) return;
       if (node.id) return;
@@ -4496,13 +4291,111 @@
     } catch (eMount) {}
   }
 
+  function resolveGenericProductDescriptionNode() {
+    var descHost = global.document.getElementById("mc-pdp-description-below-features");
+    if (descHost && String(descHost.textContent || "").replace(/\s+/g, "").length > 20) {
+      return descHost;
+    }
+    var candidates = [
+      global.document.getElementById("ProductDetail_ProductDetails_div"),
+      global.document.getElementById("ProductDetail_ProductDetails_div2"),
+      global.document.querySelector(
+        ".mc-unified-pdp-description--media #ProductDetail_ProductDetails_div, .mc-unified-pdp-description--media #product_description"
+      ),
+      global.document.getElementById("product_description"),
+      global.document.querySelector(
+        "#ProductDetail_ProductDetails_div span[itemprop='description'], #ProductDetail_ProductDetails_div2 span[itemprop='description']"
+      ),
+    ];
+    var i;
+    for (i = 0; i < candidates.length; i++) {
+      var node = candidates[i];
+      if (!node) continue;
+      if (
+        node.closest(
+          "#mc-pdp-features, #mc-acc-saranoni-features-host, #mc-acc-row-saranoni-features"
+        )
+      ) {
+        continue;
+      }
+      if (String(node.textContent || "").replace(/\s+/g, " ").trim().length >= 20) {
+        return node;
+      }
+    }
+    return null;
+  }
+
+  function ensureGenericProductDescriptionHost(infoColumn) {
+    var descNode = resolveGenericProductDescriptionNode();
+    if (!descNode) return null;
+    var host = global.document.getElementById("mc-pdp-description-below-features");
+    if (!host) {
+      host = global.document.createElement("div");
+      host.id = "mc-pdp-description-below-features";
+      host.className = "mc-pdp-description-below-features";
+    }
+    if (descNode !== host && descNode.parentNode !== host) {
+      try {
+        descNode.querySelectorAll("script").forEach(function (s) {
+          try {
+            s.remove();
+          } catch (eRmScript) {}
+        });
+        host.appendChild(descNode);
+      } catch (eWrapDesc) {}
+    }
+    if (infoColumn && host.parentNode !== infoColumn && !host.closest("#mc-pdp-accordion")) {
+      try {
+        infoColumn.appendChild(host);
+      } catch (eHostCol) {}
+    }
+    ensureDescriptionBelowFeaturesInner(host);
+    return host;
+  }
+
+  function repairGenericAccordionProductDetails() {
+    if (!isGenericUnifiedFurnitureAccordionPdp()) return;
+    var infoColumn = resolveSaranoniInfoColumn() || findPdpHeroColumnTd();
+    var detailsHost = global.document.getElementById("mc-acc-saranoni-product-details-host");
+    var panel = global.document.querySelector(
+      "#mc-acc-row-saranoni-product-details .mc-acc-panel"
+    );
+    if (!detailsHost && panel) {
+      detailsHost = panel.querySelector(".mc-acc-content--saranoni-description");
+    }
+    var host = ensureGenericProductDescriptionHost(infoColumn);
+    if (host && detailsHost) {
+      mountNodeInSaranoniAccordionHost(detailsHost, host);
+    }
+    var acc = global.document.getElementById("mc-pdp-accordion");
+    if (acc && detailsHost && !hostHasGenericAccordionDetailsContent(detailsHost)) {
+      var desc = resolveGenericProductDescriptionNode();
+      if (desc) mountNodeInSaranoniAccordionHost(detailsHost, desc);
+    }
+    global.document
+      .querySelectorAll("td.mc-unified-pdp-media .mc-unified-pdp-description--media, td.mc-pdp-media-td .mc-unified-pdp-description--media")
+      .forEach(function (stray) {
+        try {
+          stray.style.setProperty("display", "none", "important");
+          stray.setAttribute("aria-hidden", "true");
+        } catch (eHideStray) {}
+      });
+  }
+
+  function hostHasGenericAccordionDetailsContent(host) {
+    if (!host) return false;
+    var txt = String(host.textContent || "").replace(/\s+/g, " ").trim();
+    return txt.length >= 20;
+  }
+
   function ensureSaranoniPdpAccordion() {
     if (
       !isSaranoniPdpPage() &&
       !isSteveSilverPdpPage() &&
       !isMahjongHousePdpPage() &&
       !isCloseoutPdpPage() &&
-      !(typeof isGameRoomBarPdpPage === "function" && isGameRoomBarPdpPage())
+      !(typeof isGameRoomBarPdpPage === "function" && isGameRoomBarPdpPage()) &&
+      !isGenericUnifiedFurnitureAccordionPdp()
     ) {
       return null;
     }
@@ -4591,6 +4484,24 @@
         mountNodeInSaranoniAccordionHost(detailsHost, closeoutDesc);
       }
     }
+    if (isGenericUnifiedFurnitureAccordionPdp()) {
+      ensureGenericProductDescriptionHost(infoColumn);
+      mountNodeInSaranoniAccordionHost(
+        detailsHost,
+        global.document.getElementById("mc-pdp-description-below-features")
+      );
+      if (!hostHasGenericAccordionDetailsContent(detailsHost)) {
+        var genericDesc = resolveGenericProductDescriptionNode();
+        if (genericDesc) {
+          if (genericDesc.id === "mc-pdp-description-below-features") {
+            mountNodeInSaranoniAccordionHost(detailsHost, genericDesc);
+          } else {
+            var genericHost = ensureGenericProductDescriptionHost(infoColumn);
+            if (genericHost) mountNodeInSaranoniAccordionHost(detailsHost, genericHost);
+          }
+        }
+      }
+    }
     mountExistingTextPanel(shippingHost, /\b(shipping|returns?|return policy)\b/i);
     mountExistingTextPanel(faqHost, /\b(faq|frequently asked questions?)\b/i);
 
@@ -4645,7 +4556,7 @@
     if (isMahjongHousePdpPage()) {
       applyMahjongHouseInfoColumnOrder(infoColumn);
     }
-    if (isSteveSilverPdpPage() || isMahjongHousePdpPage() || isCloseoutPdpPage()) {
+    if (isSteveSilverPdpPage() || isMahjongHousePdpPage() || isCloseoutPdpPage() || isGenericUnifiedFurnitureAccordionPdp()) {
       try {
         if (global.document.body) {
           global.document.body.classList.add("mc-pdp-accordion-pdp");
@@ -4663,42 +4574,28 @@
     return acc;
   }
 
+  function finalizeGenericFurniturePdpAccordion() {
+    if (!isGenericUnifiedFurnitureAccordionPdp()) return null;
+    try {
+      mountPdpFeaturesBlock();
+      mountDescriptionBelowFeatures();
+      ensureSaranoniPdpAccordion();
+      repairGenericAccordionProductDetails();
+      ensureSaranoniPdpAccordion();
+      ensurePdpAccordionVisible();
+    } catch (eGenAcc) {}
+    return global.document.getElementById("mc-pdp-accordion");
+  }
+
   /* Bean Bag PDPs already own their Features and optional description nodes.
      Mount those existing nodes in the same accessible accordion component used by
      the other soft-goods PDPs; do not duplicate or rewrite their content. */
   function ensureBeanBagPdpAccordion() {
     if (!isBeanBagPdpPage()) return null;
     var infoColumn = findPdpHeroColumnTd();
-    if (!infoColumn) return null;
-    /* Simple color SKUs (Nest Chinchilla, etc.) have no cover swatches and may
-       never create #mc-pdp-features. Still mount Product Details into the
-       accordion from the native description block. */
-    try {
-      if (!global.document.getElementById("mc-pdp-features")) mountPdpFeaturesBlock();
-    } catch (eFeatAcc) {}
-    try {
-      if (!global.document.getElementById("mc-pdp-description-below-features")) {
-        mountDescriptionBelowFeatures();
-      }
-    } catch (eDescAcc) {}
     var features = global.document.getElementById("mc-pdp-features");
     var description = global.document.getElementById("mc-pdp-description-below-features");
-    if (!description) {
-      var nativeDesc =
-        global.document.getElementById("ProductDetail_ProductDetails_div") ||
-        global.document.getElementById("ProductDetail_ProductDetails_div2");
-      if (nativeDesc && String(nativeDesc.textContent || "").replace(/\s+/g, "").length) {
-        description = global.document.createElement("div");
-        description.id = "mc-pdp-description-below-features";
-        description.className = "mc-pdp-description-below-features";
-        try {
-          description.appendChild(nativeDesc);
-        } catch (eMoveNative) {
-          description = null;
-        }
-      }
-    }
-    if (!features && !description) return null;
+    if (!infoColumn || (!features && !description)) return null;
 
     var acc = global.document.getElementById("mc-pdp-accordion");
     if (!acc) {
@@ -6044,40 +5941,18 @@
     return "";
   }
 
-  function isCordaroyMattressOrAccessoryPdp() {
-    try {
-      var pc = resolveSoftGoodsProductCode();
-      if (/^MHH-/i.test(pc) || /^FC-/i.test(pc) || /^PC\d*-/i.test(pc)) return true;
-      var p = String(global.location.pathname || "").toLowerCase();
-      if (/\/product-p\/(?:mhh-|fc-|pc\d*-)/i.test(p)) return true;
-    } catch (eCord) {}
-    return false;
-  }
-
   function isBeanBagPdpPage() {
     try {
       if (isSaranoniPdpPage()) return false;
-      if (isCordaroyMattressOrAccessoryPdp()) return false;
       var pc = resolveSoftGoodsProductCode();
       if (/^BB/i.test(pc)) return true;
-      if (global.document.getElementById("beanbag-swatch-wrapper")) return true;
-      var p = String(global.location.pathname || "").toLowerCase();
-      if (/product-p\/bb-/i.test(p)) return true;
-      /* Do not trust a stale mc-bean-bag-pdp class on mattress/accessory PDPs. */
-      if (pc && !/^BB/i.test(pc)) return false;
       if (typeof global.isBeanBagProductPage === "function") return !!global.isBeanBagProductPage();
       if (global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp")) return true;
-      if (/\/bean-bag-seating-s\//.test(p) && !/\/product-p\//.test(p)) return true;
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (/product-p\/bb-/i.test(p) || /\/bean-bag-seating-s\//.test(p)) return true;
     } catch (eBb) {}
     return !!global.document.getElementById("beanbag-swatch-wrapper");
   }
-
-  /* Override stale template helpers that fuzzy-matched "CordaRoy's" titles. */
-  try {
-    global.isBeanBagProductPage = function () {
-      return isBeanBagPdpPage();
-    };
-  } catch (eOverrideBb) {}
 
   function isSaranoniPdpPage() {
     try {
@@ -6341,28 +6216,13 @@
   }
 
   function findPdpHeroColumnTd() {
-    /* Bean Bag Bootstrap PDPs: the real info column is .vol-product__top--right.
-       Never treat the nested ATC TD (often also tagged mc-atc-row +
-       mc-pdp-options-td) as the purchase column — that collapses
-       title/price/accordion to ~0px on simple color SKUs like BB-CHINCHILLA. */
-    if (isBeanBagPdpPage()) {
-      var bbRight = findVolProductRightColumn();
-      if (bbRight) {
-        try {
-          bbRight.classList.add("mc-pdp-options-td");
-        } catch (eTagRight) {}
-        return bbRight;
-      }
-    }
-    var tagged = global.document.querySelectorAll(
-      "#v65-product-parent td.mc-pdp-options-td, #v65-product-parent td.mc-unified-pdp-info"
-    );
-    var ti;
-    for (ti = 0; ti < tagged.length; ti++) {
-      if (!isNestedAtcInfoCell(tagged[ti])) return tagged[ti];
-    }
+    var td = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td, #v65-product-parent td.mc-unified-pdp-info");
+    if (td) return td;
     /* Closeout / legacy Volusion PDPs use Bootstrap right column, not unified TDs. */
-    var right = findVolProductRightColumn();
+    var right =
+      global.document.querySelector(
+        "#v65-product-parent .vol-product__top--right, #content_area .vol-product__top--right, .vol-product__top--right"
+      );
     if (right) return right;
     var seeds = [
       global.document.getElementById("mc-pdp-title-right"),
@@ -6374,17 +6234,12 @@
     for (si = 0; si < seeds.length; si++) {
       var walk = seeds[si];
       while (walk && walk !== global.document.body) {
+        if (walk.tagName === "TD") return walk;
         if (
           walk.classList &&
-          (walk.classList.contains("vol-product__top--right") || walk.classList.contains("mc-unified-pdp-info"))
-        ) {
-          return walk;
-        }
-        if (walk.tagName === "TD" && !isNestedAtcInfoCell(walk)) return walk;
-        if (
-          walk.classList &&
-          walk.classList.contains("mc-pdp-options-td") &&
-          !isNestedAtcInfoCell(walk)
+          (walk.classList.contains("vol-product__top--right") ||
+            walk.classList.contains("mc-unified-pdp-info") ||
+            walk.classList.contains("mc-pdp-options-td"))
         ) {
           return walk;
         }
@@ -6550,6 +6405,13 @@
         applyMahjongHouseInfoColumnOrder(findPdpHeroColumnTd());
       }
       hideNativeVolusionTabPanels();
+      if (isGenericUnifiedFurnitureAccordionPdp()) {
+        try {
+          mountDescriptionBelowFeatures();
+          ensureSaranoniPdpAccordion();
+          ensurePdpAccordionVisible();
+        } catch (eGenAccMount) {}
+      }
       return;
     }
     if (block.parentNode !== insertParent || (insertAfter && block.previousElementSibling !== insertAfter)) {
@@ -7584,23 +7446,12 @@
     if (!isProductPdp()) return;
     try {
       if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
-      /* Prefer Bootstrap right column over nested ATC mc-pdp-options-td. */
-      var info =
-        global.document.querySelector(
-          "#v65-product-parent td.vol-product__top--right, #v65-product-parent td.mc-unified-pdp-info"
-        ) ||
-        global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
+      var info = global.document.querySelector(
+        "#v65-product-parent td.mc-pdp-options-td, #v65-product-parent td.mc-unified-pdp-info"
+      );
       if (!info) return;
-      if (typeof isNestedAtcInfoCell === "function" && isNestedAtcInfoCell(info)) {
-        info =
-          global.document.querySelector("#v65-product-parent td.vol-product__top--right") || info;
-      }
       var outer = info.closest && info.closest("td.vol-product__top--right");
-      /* When the Bootstrap right column IS the options td (Cordaroy Nest /
-         simple BB SKUs), there is no nested wrapper to unwrap. Walking parents
-         from that cell would hit the main product row and force
-         display:block, stacking the hero above the purchase column. */
-      if (!outer || info === outer || info.parentElement === outer) return;
+      if (!outer || info.parentElement === outer) return;
 
       var priceHost = global.document.getElementById("mc-pdp-price-stack-host");
       if (priceHost) {
@@ -7958,22 +7809,47 @@
     });
   }
 
+  var configuredColorImageProbeCache = {};
+  var configuredColorImageProbeInflight = {};
+
   function loadConfiguredColorImage(candidates, done) {
+    if (!candidates || !candidates.length) {
+      done("");
+      return;
+    }
+    var cacheKey = candidates.join("|");
+    if (configuredColorImageProbeCache[cacheKey]) {
+      done(configuredColorImageProbeCache[cacheKey]);
+      return;
+    }
+    if (configuredColorImageProbeInflight[cacheKey]) {
+      configuredColorImageProbeInflight[cacheKey].push(done);
+      return;
+    }
+    configuredColorImageProbeInflight[cacheKey] = [done];
     var idx = 0;
+    function finish(resolved) {
+      if (resolved) configuredColorImageProbeCache[cacheKey] = resolved;
+      var waiters = configuredColorImageProbeInflight[cacheKey] || [];
+      delete configuredColorImageProbeInflight[cacheKey];
+      waiters.forEach(function (cb) {
+        try {
+          cb(resolved || "");
+        } catch (eDone) {}
+      });
+    }
     function tryNext() {
       if (idx >= candidates.length) {
-        done("");
+        finish("");
         return;
       }
       var probe = new global.Image();
       var candidate = candidates[idx++];
-      var bust =
-        candidate.indexOf("?") >= 0 ? "&mcimg=" + Date.now() : "?mcimg=" + Date.now();
       probe.onload = function () {
-        done(candidate);
+        finish(candidate);
       };
       probe.onerror = tryNext;
-      probe.src = candidate + bust;
+      probe.src = candidate;
     }
     tryNext();
   }
@@ -9075,21 +8951,29 @@
         var candidates = buildConfiguredColorThumbCandidates(entry, productCode);
         if (ctx.dataDriven) {
           probeState.pending++;
-          var primarySrc = candidates[0] || "";
+          var primarySrc =
+            (isSar && entry.swatchImage
+              ? "https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/" + entry.swatchImage
+              : "") ||
+            candidates[0] ||
+            "";
           var settled = false;
           function settleDataDrivenSwatch(resolvedSrc) {
             if (settled) return;
             settled = true;
             probeState.pending--;
-            var normalized = normalizeConfiguredColorAssetUrl(resolvedSrc);
+            var liveSrc =
+              resolvedSrc ||
+              (img && img.complete && img.naturalWidth > 0 ? img.getAttribute("src") || "" : "");
+            var normalized = normalizeConfiguredColorAssetUrl(liveSrc);
             if (
-              resolvedSrc &&
-              configuredColorImageMatchesOption(resolvedSrc, productCode, entry.optionId) &&
+              liveSrc &&
+              configuredColorImageMatchesOption(liveSrc, productCode, entry.optionId) &&
               (!normalized || !probeState.usedSrc[normalized])
             ) {
               if (normalized) probeState.usedSrc[normalized] = true;
               probeState.loaded++;
-              img.src = resolvedSrc;
+              img.src = liveSrc;
               btn.style.display = "";
               hideConfiguredColorNativeSelect(ctx.select);
               hideSaranoniNativeColorUi(ctx.select);
@@ -9146,9 +9030,6 @@
                 });
               }
             }, 250);
-            global.setTimeout(function () {
-              if (!settled) settleDataDrivenSwatch("");
-            }, 1400);
           } else {
             loadProductScopedColorImage(productCode, entry.swatchImage, function (swatchSrc) {
               acceptResolvedSrc(swatchSrc, function () {
@@ -9551,7 +9432,8 @@
       isPdpLayoutMounted() &&
       !isSoftGoodsPdpPage() &&
       !isSteveSilverPdpPage() &&
-      !isMahjongHousePdpPage()
+      !isMahjongHousePdpPage() &&
+      !isGenericUnifiedFurnitureAccordionPdp()
     ) {
       return;
     }
@@ -10072,6 +9954,9 @@
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcHideNativeVolusionTabPanels = hideNativeVolusionTabPanels;
   global.mcMountDescriptionBelowFeatures = mountDescriptionBelowFeatures;
+  global.mcIsGenericUnifiedFurnitureAccordionPdp = isGenericUnifiedFurnitureAccordionPdp;
+  global.mcFinalizeGenericFurniturePdpAccordion = finalizeGenericFurniturePdpAccordion;
+  global.mcRepairGenericAccordionProductDetails = repairGenericAccordionProductDetails;
   global.mcAppendSteveSilverInfoColumnOrder = appendSteveSilverInfoColumnOrder;
   global.mcAppendMahjongHouseInfoColumnOrder = appendMahjongHouseInfoColumnOrder;
   global.mcEnsureMahjongHousePdpCorrections = ensureMahjongHousePdpCorrections;
@@ -11477,17 +11362,11 @@ function revealBeanBagRelated() {
         body.classList.remove("mc-bean-bag-pdp");
         return;
       }
-      if (isCordaroyMattressOrAccessoryPdp()) {
-        body.classList.remove("mc-bean-bag-pdp");
-        body.classList.add("mc-cordaroy-mattress-pdp");
-        return;
-      }
       if (isMahjongHousePdpPage()) {
         body.classList.add("mc-mahjong-house-pdp");
         body.classList.remove("mc-saranoni-pdp", "mc-saranoni-pdp-init", "mc-saranoni-pdp-ready");
       }
       if (isBeanBagPdpPage()) body.classList.add("mc-bean-bag-pdp");
-      else body.classList.remove("mc-bean-bag-pdp");
     } catch (eTag) {}
   }
 
@@ -11611,63 +11490,18 @@ function revealBeanBagRelated() {
       if (mediaTd) mediaTd.classList.add("mc-pdp-media-td");
     }
 
-    /* Prefer the Bootstrap right column. Falling back to the ATC button's
-       closest TD tags the nested Add-to-Cart cell as mc-pdp-options-td and
-       collapses the Cordaroy purchase column. */
-    var optTd = findVolProductRightColumn();
-    if (!optTd) {
-      var taggedOpts = table.querySelectorAll("td.mc-pdp-options-td");
-      var oi;
-      for (oi = 0; oi < taggedOpts.length; oi++) {
-        if (!isNestedAtcInfoCell(taggedOpts[oi])) {
-          optTd = taggedOpts[oi];
-          break;
-        }
-      }
-    }
+    var optTd = table.querySelector("td.mc-pdp-options-td");
     if (!optTd) {
       var addBtn = table.querySelector(
         'input[name="btnaddtocart"], button[name="btnaddtocart"], input[id*="btnaddtocart" i]'
       );
-      if (addBtn && addBtn.closest) {
-        var fromBtn = addBtn.closest("td.vol-product__top--right, .vol-product__top--right");
-        if (!fromBtn) {
-          var btnTd = addBtn.closest("td");
-          while (btnTd && btnTd !== table) {
-            if (btnTd.classList && btnTd.classList.contains("vol-product__top--right")) {
-              fromBtn = btnTd;
-              break;
-            }
-            if (btnTd.tagName === "TD" && !isNestedAtcInfoCell(btnTd) && btnTd.querySelector("#product_photo") == null) {
-              /* Keep walking for a wider options cell; avoid the ATC-only TD. */
-              if (!btnTd.classList.contains("mc-atc-row")) fromBtn = btnTd;
-            }
-            btnTd = btnTd.parentElement && btnTd.parentElement.closest ? btnTd.parentElement.closest("td") : null;
-          }
-        }
-        optTd = fromBtn;
-      }
+      if (addBtn) optTd = addBtn.closest ? addBtn.closest("td") : null;
     }
     if (!optTd) {
       var sel = table.querySelector("select:not(.mc-native-leather)");
-      if (sel && sel.closest) {
-        optTd =
-          sel.closest("td.vol-product__top--right, .vol-product__top--right") ||
-          (isNestedAtcInfoCell(sel.closest("td")) ? null : sel.closest("td"));
-      }
+      if (sel) optTd = sel.closest ? sel.closest("td") : null;
     }
-    if (optTd) {
-      optTd.classList.add("mc-pdp-options-td");
-      /* Strip mistaken options-td marks from nested ATC chrome. */
-      table.querySelectorAll("td.mc-pdp-options-td").forEach(function (cell) {
-        if (cell === optTd) return;
-        if (isNestedAtcInfoCell(cell) || cell.classList.contains("mc-atc-row")) {
-          try {
-            cell.classList.remove("mc-pdp-options-td");
-          } catch (eUntag) {}
-        }
-      });
-    }
+    if (optTd) optTd.classList.add("mc-pdp-options-td");
 
     table.querySelectorAll("tr.mc-pdp-main-row").forEach(function (row) {
       try {
@@ -12296,6 +12130,11 @@ function revealBeanBagRelated() {
           ensurePdpAccordionVisible();
         } catch (eSsFinal) {}
       }
+      if (isGenericUnifiedFurnitureAccordionPdp()) {
+        try {
+          finalizeGenericFurniturePdpAccordion();
+        } catch (eGenFinal) {}
+      }
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
         prepareDeferredUnifiedPdpHero();
         ensureUnifiedPdpLayout();
@@ -12466,30 +12305,12 @@ function revealBeanBagRelated() {
   g.addEventListener("load", bootCloseoutFrame);
 })(window, document);
 
-/* MC_PDP_AUTH_SELF_UPGRADE 20260723bbnest7 - force newest CTA over baked ?v= */
+/* MC_PDP_AUTH_SELF_UPGRADE disabled 20260722manual4 — stop lovey freeze */
 (function (g, d) {
-  var WANT_FP = "20260723bbnest7";
-  function go() {
-    try {
-      if (!d.getElementById("v65-product-parent") && !/\/product-p\//i.test(String(g.location.pathname || ""))) return;
-      if (String(g.__MC_DEPLOY_FP__ || "") === WANT_FP) return;
-      if (d.documentElement.getAttribute("data-mc-pdp-auth-reload") === WANT_FP) return;
-      d.documentElement.setAttribute("data-mc-pdp-auth-reload", WANT_FP);
-      try {
-        if (g.__MC_PDP_LAYOUT_MO__) {
-          g.__MC_PDP_LAYOUT_MO__.disconnect();
-          g.__MC_PDP_LAYOUT_MO__ = null;
-        }
-      } catch (eMoUp) {}
-      g.__MC_PDP_AUTH_ACTIVE_GEN__ = (g.__MC_PDP_AUTH_ACTIVE_GEN__ || 0) + 1;
-      var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=" + WANT_FP + "&mcrd=" + Date.now();
-      s.async = false;
-      (d.head || d.documentElement).appendChild(s);
-    } catch (eUp) {}
-  }
-  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", go);
-  else go();
+  try {
+    g.__MC_DEPLOY_FP__ = g.__MC_DEPLOY_FP__ || "20260722manual4";
+    if (d && d.documentElement) d.documentElement.setAttribute("data-mc-pdp-auth-reload", "20260722manual4");
+  } catch (e) {}
 })(window, document);
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
@@ -13202,10 +13023,7 @@ try {
   }
 
   function isBeanBagPdp() {
-    try {
-      if (typeof isBeanBagPdpPage === "function") return !!isBeanBagPdpPage();
-    } catch (eBbPage) {}
-    return /^BB-/.test(productCode()) || /^BB/.test(productCode());
+    return /^BB-/.test(productCode()) || (d.body && d.body.classList.contains("mc-bean-bag-pdp"));
   }
 
   function setImportant(el, prop, value) {

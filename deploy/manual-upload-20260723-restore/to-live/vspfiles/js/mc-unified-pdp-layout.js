@@ -1425,9 +1425,6 @@
         } else if (typeof global.mcMountDescriptionBelowFeatures === "function") {
           global.mcMountDescriptionBelowFeatures();
         }
-        if (typeof global.mcRepairGenericAccordionProductDetails === "function") {
-          global.mcRepairGenericAccordionProductDetails();
-        }
         if (typeof global.mcSyncPdpDescriptionViewMore === "function") {
           global.mcSyncPdpDescriptionViewMore();
         }
