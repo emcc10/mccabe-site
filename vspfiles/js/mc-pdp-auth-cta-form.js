@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore6 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore6";
-  var VERSION = "20260723restore6";
+  // MC_DEPLOY_FINGERPRINT_20260723restore7 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore7";
+  var VERSION = "20260723restore7";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -4566,11 +4566,21 @@
       findPdpHeroColumnTd();
     if (!info) return;
     try {
+      mountPdpFeaturesBlock();
+      mountDescriptionBelowFeatures();
       finalizeUnifiedPdpAccordion();
+      if (isBeanBagPdpPage()) {
+        try { ensureBeanBagBrandLogo(); } catch (eLogo) {}
+        try { ensureBeanBagPdpAccordion(); } catch (eBbAcc) {}
+      }
     } catch (eFin) {}
     var brand = global.document.getElementById("mc-pdp-brand-logo");
-    var title = global.document.getElementById("mc-pdp-title-right");
-    var price = global.document.getElementById("mc-pdp-price-stack-host");
+    var title =
+      global.document.getElementById("mc-pdp-title-right") ||
+      info.querySelector("h1, .product_name, #ProductDetails_ProductName");
+    var price =
+      global.document.getElementById("mc-pdp-price-stack-host") ||
+      info.querySelector(".mc-pdp-price-stack, .product_productprice, #price_div");
     var shipping = global.document.getElementById("mc-bb-shipping-info");
     var sizeOpts =
       global.document.getElementById("mc-bean-bag-size-row") ||
@@ -4579,14 +4589,19 @@
       global.document.getElementById("beanbag-swatch-wrapper") ||
       global.document.getElementById("mc-configured-color-swatches");
     var optionsTable = global.document.getElementById("options_table");
+    var desc = global.document.getElementById("mc-pdp-description-below-features");
+    var detailsHost = global.document.getElementById("mc-acc-saranoni-product-details-host");
+    if (desc && detailsHost && desc.parentNode !== detailsHost) {
+      try { detailsHost.appendChild(desc); } catch (eDesc) {}
+    }
     var acc = global.document.getElementById("mc-pdp-accordion");
     var purchase =
       global.document.getElementById("mc-pdp-purchase-stack") ||
-      info.querySelector(".mc-pdp-purchase-controls, .mc-unified-purchase-controls");
+      info.querySelector("#mc-pdp-purchase-stack, .mc-pdp-purchase-controls, .mc-unified-purchase-controls");
     info.querySelectorAll(
-      ":scope > .mc-unified-purchase-controls, :scope > table.colors_pricebox.mc-pdp-duplicate-price-h"
+      ":scope > table.colors_pricebox, :scope > .mc-pdp-duplicate-price-hidden"
     ).forEach(function (node) {
-      if (node === purchase) return;
+      if (purchase && node.contains(purchase)) return;
       try {
         node.style.setProperty("display", "none", "important");
         node.style.setProperty("visibility", "hidden", "important");
@@ -4594,16 +4609,33 @@
         node.style.setProperty("overflow", "hidden", "important");
       } catch (eHide) {}
     });
+    /* Strict order: logo -> title -> price -> options -> accordion -> ATC */
     var ordered = [brand, title, price, shipping, sizeOpts, covers, optionsTable, acc, purchase];
-    ordered.forEach(function (el) {
-      if (!el) return;
+    var i;
+    for (i = 0; i < ordered.length; i++) {
+      var el = ordered[i];
+      if (!el || !info.contains(el) && el.parentNode !== info) {
+        /* allow moving into info even if currently elsewhere in product parent */
+      }
+      if (!el) continue;
       try {
         info.appendChild(el);
+        el.style.setProperty("display", el.id === "options_table" ? "" : "block", "important");
         el.style.removeProperty("visibility");
         el.style.removeProperty("height");
         el.style.removeProperty("overflow");
       } catch (eMove) {}
-    });
+    }
+    /* Keep orphan description nodes out of the info column root. */
+    if (desc && desc.parentNode === info) {
+      try {
+        if (detailsHost) detailsHost.appendChild(desc);
+        else if (acc) {
+          var panel = acc.querySelector("#mc-acc-row-details .mc-acc-panel") || acc;
+          panel.appendChild(desc);
+        }
+      } catch (eDesc2) {}
+    }
     var media = global.document.querySelector("td.mc-unified-pdp-media, td.mc-pdp-media-td");
     if (media && global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
       try {
@@ -4613,7 +4645,7 @@
         media.style.setProperty("padding-right", "24px", "important");
       } catch (eMed) {}
     }
-    if (info && global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
+    if (global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
       try {
         info.style.setProperty("width", "auto", "important");
         info.style.setProperty("max-width", "520px", "important");
@@ -10020,6 +10052,7 @@
   global.mcMountDescriptionBelowFeatures = mountDescriptionBelowFeatures;
   global.mcIsUnifiedAccordionPdp = isUnifiedAccordionPdp;
   global.mcFinalizeUnifiedPdpAccordion = finalizeUnifiedPdpAccordion;
+  global.mcForceCanonicalUnifiedInfoColumnOrder = forceCanonicalUnifiedInfoColumnOrder;
   global.mcIsGenericUnifiedFurnitureAccordionPdp = isGenericUnifiedFurnitureAccordionPdp;
   global.mcFinalizeGenericFurniturePdpAccordion = finalizeGenericFurniturePdpAccordion;
   global.mcRepairGenericAccordionProductDetails = repairGenericAccordionProductDetails;
@@ -12200,6 +12233,11 @@ function revealBeanBagRelated() {
             appendBeanBagInfoColumnOrder();
           }
           forceCanonicalUnifiedInfoColumnOrder();
+          [50, 200, 600, 1200, 2500].forEach(function (ms) {
+            global.setTimeout(function () {
+              try { forceCanonicalUnifiedInfoColumnOrder(); } catch (eForceLater) {}
+            }, ms);
+          });
         } catch (eUnifiedFinal) {}
       }
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {

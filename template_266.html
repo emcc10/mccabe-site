@@ -1483,7 +1483,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
   <script>
 (function (g, d) {
-  var FP = "20260723restore6";
+  var FP = "20260723restore7";
   function bootFreshCta() {
     if (!d.getElementById("v65-product-parent")) return;
     if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
@@ -1493,7 +1493,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723restore6&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723restore7&mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -2720,18 +2720,18 @@ document.addEventListener("DOMContentLoaded", function () {
 </style>
 <script id="mc-pdp-auth-loader-minimal">
 (function () {
-  var FP = "20260723restore6";
+  var FP = "20260723restore7";
   if (String(window.__MC_DEPLOY_FP__ || "") === FP) {
   } else if (
     document.documentElement.getAttribute("data-mc-pdp-auth-reload") !== FP &&
     document.documentElement.getAttribute("data-mc-pdp-auth-head-boot") !== FP &&
-    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"][src*="20260723restore6"]')
+    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"][src*="20260723restore7"]')
   ) {
     /* Fallback only when head boot did not inject the current fingerprint.
        Always use the versioned URL â€” unversioned CDN still serves stale copies. */
     document.documentElement.setAttribute("data-mc-pdp-auth-reload", FP);
     var s = document.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723restore6&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723restore7&mcrd=" + Date.now();
     s.async = false;
     (document.head || document.documentElement).appendChild(s);
   }
