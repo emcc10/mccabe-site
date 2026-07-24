@@ -26089,23 +26089,45 @@ body.productdetails td.mc-pdp-media-td #mc-pdp-description-below-features {
 }
 
 
-/* Furniture / unified PDP: readable title + price on black theme */
-html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent #mc-pdp-title-right,
-html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent #mc-pdp-title-right h1,
-html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent #mc-pdp-title-right h1 font,
-html body.mc-product-page.mc-pdp-unified-ready #content_area #mc-pdp-title-right,
-html body.mc-product-page.mc-pdp-unified-ready #content_area #mc-pdp-title-right h1,
-html body.mc-product-page.mc-pdp-unified-ready #content_area #mc-pdp-title-right h1 font,
-html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-title-right [itemprop="name"],
-html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-title-right .vp-product-title {
+/* Furniture / unified PDP: readable title + price on black theme.
+   Soft-goods / bean-bag white panels must keep dark text. */
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #mc-pdp-title-right,
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #mc-pdp-title-right h1,
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #mc-pdp-title-right h1 font,
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area #mc-pdp-title-right,
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area #mc-pdp-title-right h1,
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area #mc-pdp-title-right h1 font,
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #mc-pdp-title-right [itemprop="name"],
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #mc-pdp-title-right .vp-product-title {
   color: #f2f2f2 !important;
 }
-html body.mc-pdp-unified-ready .colors_productprice,
-html body.mc-pdp-unified-ready .colors_productprice *,
-html body.mc-pdp-unified-ready #mc-pdp-price-stack-host,
-html body.mc-pdp-unified-ready #mc-pdp-price-stack-host .product_productprice,
-html body.mc-pdp-unified-ready #mc-pdp-price-stack-host .product_productprice * {
+html body.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) .colors_productprice,
+html body.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) .colors_productprice *,
+html body.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #mc-pdp-price-stack-host,
+html body.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #mc-pdp-price-stack-host .product_productprice,
+html body.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #mc-pdp-price-stack-host .product_productprice * {
   color: #ffffff !important;
+}
+/* Bean bag / Cordaroys soft goods: force readable dark title + price on white panel */
+html body.mc-bean-bag-pdp #mc-pdp-title-right,
+html body.mc-bean-bag-pdp #mc-pdp-title-right h1,
+html body.mc-bean-bag-pdp #mc-pdp-title-right h1 font,
+html body.mc-bean-bag-pdp #mc-pdp-title-right [itemprop="name"],
+html body.mc-bean-bag-pdp #mc-pdp-title-right .vp-product-title,
+html body.mc-cordaroys-pdp #mc-pdp-title-right,
+html body.mc-cordaroys-pdp #mc-pdp-title-right h1,
+html body.mc-cordaroys-pdp #mc-pdp-title-right h1 font,
+html body.mc-cordaroys-pdp #mc-pdp-title-right [itemprop="name"],
+html body.mc-cordaroys-pdp #mc-pdp-title-right .vp-product-title {
+  color: #444 !important;
+}
+html body.mc-bean-bag-pdp #mc-pdp-price-stack-host,
+html body.mc-bean-bag-pdp #mc-pdp-price-stack-host .product_productprice,
+html body.mc-bean-bag-pdp #mc-pdp-price-stack-host .product_productprice *,
+html body.mc-cordaroys-pdp #mc-pdp-price-stack-host,
+html body.mc-cordaroys-pdp #mc-pdp-price-stack-host .product_productprice,
+html body.mc-cordaroys-pdp #mc-pdp-price-stack-host .product_productprice * {
+  color: #111 !important;
 }
 html body.mc-pdp-unified-ready td.mc-unified-pdp-media #product_photo,
 html body.mc-pdp-unified-ready td.mc-pdp-media-td #product_photo {

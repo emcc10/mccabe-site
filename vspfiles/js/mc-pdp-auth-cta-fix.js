@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725coast2b — Coaster logo above title + readable details/ATC
-  var MC_DEPLOY_FINGERPRINT = "20260725coast2b";
-  var VERSION = "20260725coast2b";
+  // MC_DEPLOY_FINGERPRINT_20260725bbatc3 — restore bean bag ATC/qty purchase stack
+  var MC_DEPLOY_FINGERPRINT = "20260725bbatc3";
+  var VERSION = "20260725bbatc3";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725017;
+  var DEPLOY_RANK = 20260725020;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -2137,10 +2137,16 @@
 
   function collapseEmptyMediaLogoCells() {
     try {
+      /* Furniture-only. Soft goods / bean bags keep their own media frames. */
+      if (isBeanBagPdpPage() || isSoftGoodsPdpPage()) return;
       var hero = global.document.getElementById("product_photo");
       if (!hero) return;
+      var media = hero.closest("td.mc-unified-pdp-media, td.mc-pdp-media-td, td.vol-product__top--left, #product_photo_td");
+      if (!media) return;
       var row = hero.closest("tr");
-      if (!row) return;
+      if (!row || !media.contains(row)) return;
+      /* Never operate on the main product row (media + info). */
+      if (row.querySelector("td.vol-product__top--right, td.mc-unified-pdp-info, td.mc-pdp-options-td, #mc-pdp-title-right, #mc-pdp-accordion")) return;
       Array.prototype.slice.call(row.children).forEach(function (td) {
         if (!td || td.tagName !== "TD") return;
         if (td.contains(hero)) return;
@@ -4086,6 +4092,129 @@
     });
   }
 
+  function salvageBeanBagPurchaseFromAccordion(acc) {
+    if (!acc || !isBeanBagPdpPage()) return;
+    var col = findPdpHeroColumnTd() || (acc && acc.parentNode);
+    if (!col) return;
+    var nodes = acc.querySelectorAll(
+      '#mc-pdp-purchase-stack, .mc-unified-purchase-controls, .mc-atc-button-wrap, input[name="btnaddtocart"], button[name="btnaddtocart"], input[name^="QTY."], input.v65-productdetail-cartqty, #mc-pdp-qty-row'
+    );
+    Array.prototype.forEach.call(nodes, function (node) {
+      try {
+        if (node.closest && node.closest("#mc-pdp-purchase-stack") && node.id !== "mc-pdp-purchase-stack") return;
+        if (acc.nextSibling) col.insertBefore(node, acc.nextSibling);
+        else col.appendChild(node);
+      } catch (eMove) {}
+    });
+  }
+
+  function stripTheaterClassFromBeanBags() {
+    if (!isBeanBagPdpPage() && !isCordaroysBrandPdpPage()) return;
+    try {
+      if (global.document.body) {
+        global.document.body.classList.remove("mc-theater-seating-pdp", "category", "is-category-or-listing-page");
+        if (isBeanBagPdpPage()) global.document.body.classList.add("mc-bean-bag-pdp");
+      }
+    } catch (eStripTheater) {}
+  }
+
+  function ensureBeanBagPurchaseControlsAlive() {
+    if (!isBeanBagPdpPage()) return null;
+    stripTheaterClassFromBeanBags();
+    var info = findPdpHeroColumnTd();
+    if (!info) return null;
+    var pcEl = global.document.querySelector('#v65-product-parent input[name="ProductCode"], input[name="ProductCode"]');
+    var pc = String((pcEl && pcEl.value) || "").trim() || "BB-ITEM";
+    var qty = global.document.querySelector(
+      '#v65-product-parent input[name^="QTY."], #v65-product-parent input.v65-productdetail-cartqty, input[name^="QTY."], input.v65-productdetail-cartqty'
+    );
+    var btn = global.document.querySelector(
+      '#v65-product-parent input[name="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"], input[name="btnaddtocart"], button[name="btnaddtocart"]'
+    );
+    if (!qty) {
+      qty = global.document.createElement("input");
+      qty.type = "text";
+      qty.className = "v65-productdetail-cartqty form-control";
+      qty.name = "QTY." + pc;
+      qty.value = "1";
+      qty.setAttribute("title", "Quantity");
+      qty.setAttribute("maxlength", "8");
+      qty.setAttribute("size", "3");
+    }
+    if (!btn) {
+      btn = global.document.createElement("input");
+      btn.type = "submit";
+      btn.name = "btnaddtocart";
+      btn.className = "vCSS_input_addtocart mc-unified-atc-btn btn-primary";
+      btn.value = "ADD TO CART";
+      btn.setAttribute("alt", "Add to cart");
+    } else if (btn.tagName === "INPUT" && String(btn.type || "").toLowerCase() === "image") {
+      try { btn.type = "submit"; } catch (eType) {}
+      btn.removeAttribute("src");
+      if (!btn.value) btn.value = "ADD TO CART";
+    }
+    var stack = global.document.getElementById("mc-pdp-purchase-stack");
+    if (!stack) {
+      stack = global.document.createElement("div");
+      stack.id = "mc-pdp-purchase-stack";
+    }
+    stack.classList.add("mc-pdp-purchase-controls", "mc-pdp-cart-row", "mc-bean-bag-purchase-stack", "mc-soft-goods-purchase-stack");
+    var qtyRow = global.document.getElementById("mc-pdp-qty-row");
+    if (!qtyRow) {
+      qtyRow = global.document.createElement("div");
+      qtyRow.id = "mc-pdp-qty-row";
+      qtyRow.className = "mc-pdp-qty-row mc-unified-qty-row";
+    }
+    if (!qtyRow.contains(qty)) qtyRow.appendChild(qty);
+    var wrap = btn.closest(".mc-atc-button-wrap") || stack.querySelector(".mc-atc-button-wrap");
+    if (!wrap) {
+      wrap = global.document.createElement("div");
+      wrap.className = "mc-atc-button-wrap mc-unified-atc-host";
+    }
+    if (!wrap.contains(btn)) wrap.appendChild(btn);
+    if (!stack.contains(qtyRow)) stack.appendChild(qtyRow);
+    if (!stack.contains(wrap)) stack.appendChild(wrap);
+    var acc = global.document.getElementById("mc-pdp-accordion");
+    try {
+      if (acc && acc.parentNode === info) {
+        if (acc.nextSibling) info.insertBefore(stack, acc.nextSibling);
+        else info.appendChild(stack);
+      } else if (!info.contains(stack)) {
+        info.appendChild(stack);
+      }
+    } catch (ePlace) {}
+    try {
+      stack.style.setProperty("display", "flex", "important");
+      stack.style.setProperty("flex-direction", "column", "important");
+      stack.style.setProperty("align-items", "stretch", "important");
+      stack.style.setProperty("gap", "10px", "important");
+      stack.style.setProperty("width", "100%", "important");
+      stack.style.setProperty("max-width", "435px", "important");
+      stack.style.setProperty("visibility", "visible", "important");
+      stack.style.setProperty("opacity", "1", "important");
+      stack.removeAttribute("aria-hidden");
+      qtyRow.style.setProperty("display", "flex", "important");
+      qtyRow.style.setProperty("justify-content", "center", "important");
+      qty.style.setProperty("display", "inline-block", "important");
+      qty.style.setProperty("visibility", "visible", "important");
+      qty.style.setProperty("opacity", "1", "important");
+      qty.style.setProperty("width", "58px", "important");
+      qty.style.setProperty("height", "48px", "important");
+      wrap.style.setProperty("display", "flex", "important");
+      wrap.style.setProperty("width", "100%", "important");
+      wrap.style.setProperty("background", "#111", "important");
+      btn.style.setProperty("display", "flex", "important");
+      btn.style.setProperty("width", "100%", "important");
+      btn.style.setProperty("min-height", "48px", "important");
+      btn.style.setProperty("background", "#111", "important");
+      btn.style.setProperty("color", "#fff", "important");
+    } catch (eStyle) {}
+    try { applySoftGoodsAtcChrome(wrap); } catch (eChrome) {}
+    return stack;
+  }
+
+  global.mcEnsureBeanBagPurchaseControlsAlive = ensureBeanBagPurchaseControlsAlive;
+
   function resolveBeanBagPurchaseElement(infoColumn) {
     infoColumn = infoColumn || findPdpHeroColumnTd();
     var unified =
@@ -4494,10 +4623,16 @@
     try {
       hideBeanBagNativeOptionsTable();
     } catch (eHideNative) {}
+    if (isBeanBagPdpPage()) {
+      try { purchaseElement = ensureBeanBagPurchaseControlsAlive() || purchaseElement; } catch (eBbAlive) {}
+    }
     consolidateBeanBagPurchaseBlocks(infoColumn, purchaseElement);
     /* Keep the real native quantity input in the one Bean Bag purchase stack,
        immediately before its existing Add to Cart control. */
     ensureQuantityAboveAtc();
+    if (isBeanBagPdpPage()) {
+      try { ensureBeanBagPurchaseControlsAlive(); } catch (eBbAlive2) {}
+    }
     var bbPurchase = resolveBeanBagPurchaseElement(infoColumn);
     var bbQty = global.document.getElementById("mc-pdp-qty-row");
     var bbAtc =
@@ -5059,14 +5194,28 @@
     /* Soft goods (Cordaroys / Saranoni) keep their approved frames. The
        dining/closeout 650/420 lock must not shrink heroes or wipe logos. */
     if (isBeanBagPdpPage() || isCordaroysExtendedPdpPage()) {
+      try { stripTheaterClassFromBeanBags(); } catch (eThBb) {}
       try { forceRevealCanonicalAtc(); } catch (eAtcBb) {}
       try { ensureBeanBagBrandLogo(); } catch (eLogoBb) {}
       try { mountPdpFeaturesBlock(); } catch (eFeatBb) {}
       try { mountDescriptionBelowFeatures(); } catch (eDescBb) {}
       try { ensureBeanBagPdpAccordion(); } catch (eAccBb) {}
+      if (isBeanBagPdpPage()) {
+        try { ensureBeanBagPurchaseControlsAlive(); } catch (eBbAtc) {}
+      }
       try { appendBeanBagInfoColumnOrder(); } catch (eOrdBb) {}
       try { repairBeanBagDesktopMainRow(); } catch (eRowBb) {}
       try { finalizeCordaroysPurchaseStack(); } catch (ePurBb) {}
+      if (isBeanBagPdpPage()) {
+        try { ensureBeanBagPurchaseControlsAlive(); } catch (eBbAtc2) {}
+        try {
+          if (!global.__MC_BB_THEATER_STRIP_TIMER__) {
+            global.__MC_BB_THEATER_STRIP_TIMER__ = global.setInterval(function () {
+              try { stripTheaterClassFromBeanBags(); } catch (eTick) {}
+            }, 750);
+          }
+        } catch (eTimerBb) {}
+      }
       try { ensureFeaturesInsideAccordion(); } catch (eFeatInBb) {}
       return;
     }
@@ -5343,6 +5492,7 @@
       });
       acc.dataset.mcBeanBagRows = signature;
     } else {
+      try { salvageBeanBagPurchaseFromAccordion(acc); } catch (eSalv0) {}
       while (acc.firstChild) acc.removeChild(acc.firstChild);
       rows.forEach(function (row) { acc.appendChild(buildSaranoniAccordionRow(row.id, row.label, row.host)); });
       acc.dataset.mcBeanBagRows = signature;

@@ -1493,7 +1493,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725coast2b&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725bbatc3&mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -2731,7 +2731,7 @@ document.addEventListener("DOMContentLoaded", function () {
        Always use the versioned URL â€” unversioned CDN still serves stale copies. */
     document.documentElement.setAttribute("data-mc-pdp-auth-reload", FP);
     var s = document.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725coast2b&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725bbatc3&mcrd=" + Date.now();
     s.async = false;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -2747,8 +2747,8 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 </script>
 
-<script id="mc-bb-atc-rescue-20260723rel1">
-/* Bean bag: Add to Cart must never stay inside collapsed Features .mc-acc-panel. */
+<script id="mc-bb-atc-rescue-20260725bbatc3">
+/* Bean bag: keep ATC/qty alive outside collapsed Features accordion. */
 (function (g, d) {
   function isBb() {
     try {
@@ -2762,18 +2762,24 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function rescue() {
     if (!isBb()) return;
+    try { if (typeof g.mcEnsureBeanBagPurchaseControlsAlive === "function") g.mcEnsureBeanBagPurchaseControlsAlive(); } catch (eApi) {}
     var stack = d.getElementById("mc-pdp-purchase-stack");
     var acc = d.getElementById("mc-pdp-accordion");
-    if (!stack || !acc) return;
-    if (!stack.closest("#mc-pdp-accordion .mc-acc-panel") && !acc.contains(stack)) return;
-    var col = acc.parentNode;
-    if (!col) return;
-    try {
-      if (acc.nextSibling) col.insertBefore(stack, acc.nextSibling);
-      else col.appendChild(stack);
-    } catch (eMove) {}
+    var btn = d.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]');
+    if (stack && acc && (stack.closest("#mc-pdp-accordion .mc-acc-panel") || acc.contains(stack))) {
+      var col = acc.parentNode;
+      if (col) {
+        try {
+          if (acc.nextSibling) col.insertBefore(stack, acc.nextSibling);
+          else col.appendChild(stack);
+        } catch (eMove) {}
+      }
+    }
+    if (!btn) {
+      try { if (typeof g.mcEnsureBeanBagPurchaseControlsAlive === "function") g.mcEnsureBeanBagPurchaseControlsAlive(); } catch (eApi2) {}
+    }
   }
-  [0, 200, 600, 1200, 2500, 5000].forEach(function (ms) { g.setTimeout(rescue, ms); });
+  [0, 200, 600, 1200, 2500, 5000, 8000].forEach(function (ms) { g.setTimeout(rescue, ms); });
   if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", rescue);
   g.addEventListener("load", rescue);
 })(window, document);
@@ -7013,6 +7019,16 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
       return false;
     }
+    /* Bean bags / Cordaroys use "Choose Cover" selects — never treat as theater seating. */
+    try {
+      if (document.body && (
+        document.body.classList.contains("mc-bean-bag-pdp") ||
+        document.body.classList.contains("mc-cordaroys-pdp") ||
+        document.body.classList.contains("mc-saranoni-pdp")
+      )) return false;
+      var softPath = String(location.pathname || "").toLowerCase();
+      if (/\/product-p\/bb-|bean.?bag|cordaroy|saranoni/i.test(softPath + " " + (document.title || ""))) return false;
+    } catch (eSoftTheater) {}
     var scope = root || document;
     var theaterTitle = (
       (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
@@ -7023,7 +7039,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
       !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
       /theater seating|theatre seating|theater chair|theatre chair|\bparagon\b/i.test(theaterTitle) ||
-      !!scope.querySelector('select[title*="Number of Seats"], select[title*="Choose Configuration"], select[title*="Choose Cover"]')
+      !!scope.querySelector('select[title*="Number of Seats"], select[title*="Choose Configuration"]')
     );
   }
   function hideTheaterSeatPdpNativePricing(scope){
