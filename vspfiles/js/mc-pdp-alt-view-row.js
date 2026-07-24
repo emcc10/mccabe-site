@@ -1,8 +1,19 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260724altfix1 — block scrollport + track; CSS flex was locking scrollLeft */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260724altfix1__) return;
+  /* MC_ALT_VIEW_ROW_20260724altfix3 — stop flicker (ignore self-mutations) + block scroll */
+  if (!window || !document) return;
+  if (window.__MC_TMH_ALT_VIEW_ROW_20260724altfix3__) return;
+  /* Bump generation so any prior boot (stale ?v= then force-refresh) stops scheduling. */
+  try {
+    if (window.__MC_ALT_VIEW_ROW_MO__) {
+      window.__MC_ALT_VIEW_ROW_MO__.disconnect();
+      window.__MC_ALT_VIEW_ROW_MO__ = null;
+    }
+  } catch (eDisc) {}
+  window.__MC_ALT_VIEW_ROW_GEN__ = (window.__MC_ALT_VIEW_ROW_GEN__ || 0) + 1;
+  var BOOT_GEN = window.__MC_ALT_VIEW_ROW_GEN__;
+  window.__MC_TMH_ALT_VIEW_ROW_20260724altfix3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260724altfix1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723close1__ = true;
@@ -20,6 +31,10 @@
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
+
+  function isLiveBoot() {
+    return BOOT_GEN === window.__MC_ALT_VIEW_ROW_GEN__;
+  }
 
   function productCode() {
     var field = document.querySelector('input[name="ProductCode"],input[name="productcode"]');
@@ -540,6 +555,12 @@
       else mediaCell.appendChild(row);
     }
 
+    var signature = items.map(function (item) { return canonicalUrl(item.full); }).join("|");
+    /* Stable: skip style + DOM rebuild when thumbs already match (stops flicker). */
+    if (row.getAttribute("data-mc-items") === signature && row.querySelector("." + TRACK_CLASS)) {
+      return;
+    }
+
     var heroWidth = Math.round(hero.getBoundingClientRect().width || hero.offsetWidth || 0);
     /* IMPORTANT: do NOT use display:flex on the scrollport itself. Inside
        Volusion nested table cells, a flex scrollport reports scrollWidth >
@@ -571,8 +592,6 @@
     row.style.setProperty("scrollbar-width", "thin", "important");
     row.style.setProperty("-ms-overflow-style", "auto", "important");
 
-    var signature = items.map(function (item) { return canonicalUrl(item.full); }).join("|");
-    if (row.getAttribute("data-mc-items") === signature && row.querySelector("." + TRACK_CLASS)) return;
     row.setAttribute("data-mc-items", signature);
     while (row.firstChild) row.removeChild(row.firstChild);
 
@@ -643,13 +662,18 @@
   }
 
   function schedule() {
+    if (!isLiveBoot()) return;
     window.clearTimeout(schedule.timer);
-    schedule.timer = window.setTimeout(render, 80);
+    schedule.timer = window.setTimeout(function () {
+      if (!isLiveBoot()) return;
+      render();
+    }, 160);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", schedule);
   else schedule();
   document.addEventListener("click", function (event) {
+    if (!isLiveBoot()) return;
     if (!isSaranoniProductPage(productCode())) return;
     var full = variantHeroFromClickTarget(event.target);
     if (!full) return;
@@ -657,11 +681,32 @@
   }, true);
   window.addEventListener("load", schedule);
   window.addEventListener("resize", schedule);
-  [300, 900, 1800, 3500, 7000, 11000].forEach(function (delay) {
+  [400, 1200, 2800].forEach(function (delay) {
     window.setTimeout(schedule, delay);
   });
   if (window.MutationObserver) {
-    var observer = new window.MutationObserver(schedule);
-    observer.observe(document.getElementById("v65-product-parent") || document.body, { childList: true, subtree: true });
+    var observer = new window.MutationObserver(function (mutations) {
+      if (!isLiveBoot()) return;
+      var meaningful = false;
+      for (var i = 0; i < mutations.length; i++) {
+        var m = mutations[i];
+        var t = m.target;
+        if (t && t.id === ROW_ID) continue;
+        if (t && t.closest && t.closest("#" + ROW_ID)) continue;
+        if (t && t.classList && t.classList.contains(TRACK_CLASS)) continue;
+        /* Ignore attribute-only churn on hero img (src swaps) — holdHero already
+           owns the hero; rebuilding thumbs from that causes desktop flicker. */
+        if (m.type === "attributes" && t && t.tagName === "IMG") continue;
+        meaningful = true;
+        break;
+      }
+      if (meaningful) schedule();
+    });
+    observer.observe(document.getElementById("v65-product-parent") || document.body, {
+      childList: true,
+      subtree: true,
+      attributes: false,
+    });
+    window.__MC_ALT_VIEW_ROW_MO__ = observer;
   }
 })(window, document);

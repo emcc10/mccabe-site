@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260724altfix2 — force alt-row refresh on all unified PDPs
-  var MC_DEPLOY_FINGERPRINT = "20260724altfix2";
-  var VERSION = "20260724altfix2";
+  // MC_DEPLOY_FINGERPRINT_20260724altfix3 — stop Saranoni alt flicker; lock variants below logo
+  var MC_DEPLOY_FINGERPRINT = "20260724altfix3";
+  var VERSION = "20260724altfix3";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -5072,33 +5072,36 @@
       var logo = global.document.getElementById("mc-pdp-brand-logo");
       var title = global.document.getElementById("mc-pdp-title-right");
       var price = global.document.getElementById("mc-pdp-price-stack-host");
+      var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
       var colors =
-        global.document.getElementById("mc-configured-color-swatch-wrapper") ||
+        (wrap &&
+          wrap.closest &&
+          wrap.closest(".mc-saranoni-scroll-host")) ||
+        wrap ||
         global.document.querySelector(
           ".mc-saranoni-scroll-host:has(.mc-configured-color-swatches), .mc-configured-color-swatch-wrapper"
         );
       var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
       var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
-      if (logo && logo.parentNode !== infoColumn) {
-        infoColumn.insertBefore(logo, infoColumn.firstChild);
-      } else if (logo && infoColumn.firstElementChild !== logo) {
-        infoColumn.insertBefore(logo, infoColumn.firstElementChild);
+      if (sizes && sizes.closest && sizes.closest(".mc-saranoni-scroll-host")) {
+        sizes = sizes.closest(".mc-saranoni-scroll-host");
       }
-      if (title && logo && logo.parentNode === infoColumn && logo.nextElementSibling !== title) {
-        infoColumn.insertBefore(title, logo.nextElementSibling);
-      }
-      if (price && title && title.parentNode === infoColumn && title.nextElementSibling !== price) {
-        infoColumn.insertBefore(price, title.nextElementSibling);
-      }
-      var afterPrice = price && price.parentNode === infoColumn ? price : title || logo;
-      [colors, sizeLabel, sizes].forEach(function (el) {
-        if (!el || !afterPrice || afterPrice.parentNode !== infoColumn) return;
-        if (el.parentNode !== infoColumn) {
-          insertNodeAfter(infoColumn, afterPrice, el);
-        } else if (afterPrice.nextElementSibling !== el) {
-          insertNodeAfter(infoColumn, afterPrice, el);
-        }
-        afterPrice = el;
+      /* Always force DOM order from the top — CSS order alone is unreliable
+         when flex is only applied on some breakpoints. */
+      var chain = [logo, title, price, colors, sizeLabel, sizes].filter(Boolean);
+      var prev = null;
+      chain.forEach(function (el) {
+        try {
+          if (el.parentNode !== infoColumn) infoColumn.appendChild(el);
+          if (!prev) {
+            if (infoColumn.firstElementChild !== el) {
+              infoColumn.insertBefore(el, infoColumn.firstElementChild);
+            }
+          } else if (prev.nextElementSibling !== el) {
+            insertNodeAfter(infoColumn, prev, el);
+          }
+          prev = el;
+        } catch (eChain) {}
       });
       try {
         if (logo) logo.style.setProperty("order", "1", "important");
@@ -8707,20 +8710,22 @@
     ) {
       return;
     }
-    /* MC_ALT_VIEW_ROW_20260724altfix1 — gate on newest flag so stale caches
-       still force a fresh fetch with block scrollport + track. */
-    var want = "20260724altfix1";
+    /* MC_ALT_VIEW_ROW_20260724altfix3 — gate on newest flag; boot once only. */
+    var want = "20260724altfix3";
     try {
-      if (global["__MC_TMH_ALT_VIEW_ROW_20260724altfix1__"]) {
+      if (global["__MC_TMH_ALT_VIEW_ROW_20260724altfix3__"]) {
         global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
         return;
       }
+      if (global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__) return;
+      global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__ = true;
       global.document.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
         try {
           old.remove();
         } catch (eRmAlt) {}
       });
       try {
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260724altfix3__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260724altfix1__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260723close1__;
@@ -8735,8 +8740,16 @@
       var s = global.document.createElement("script");
       s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + want + "&mcrd=" + Date.now();
       s.async = false;
+      s.onload = function () {
+        global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__ = false;
+      };
+      s.onerror = function () {
+        global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__ = false;
+      };
       (global.document.head || global.document.documentElement).appendChild(s);
-    } catch (eAltBoot) {}
+    } catch (eAltBoot) {
+      global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__ = false;
+    }
   }
 
   function restoreSaranoniNativeColorUi(select) {
@@ -9300,6 +9313,9 @@
       wrap.style.setProperty("padding", "0", "important");
     } catch (eWrapStyle) {}
     ensureSaranoniRailArrows();
+    try {
+      applySaranoniInfoColumnOrder(col || findPdpHeroColumnTd());
+    } catch (eSarOrdMount) {}
   }
 
   function finishDataDrivenSaranoniSwatchProbe(wrap, select, ctx, probeState) {
