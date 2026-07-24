@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725order2 — saranoni variants below price (not above logo)
-  var MC_DEPLOY_FINGERPRINT = "20260725order2";
-  var VERSION = "20260725order2";
+  // MC_DEPLOY_FINGERPRINT_20260725feat1 — features inside accordion; info col 420px
+  var MC_DEPLOY_FINGERPRINT = "20260725feat1";
+  var VERSION = "20260725feat1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725005;
+  var DEPLOY_RANK = 20260725006;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -4385,6 +4385,33 @@
     } catch (eMount) {}
   }
 
+  /* Keep #mc-pdp-features inside the FEATURES accordion panel — later layout
+     passes were re-inserting it as a loose sibling under the info column. */
+  function ensureFeaturesInsideAccordion() {
+    if (!isUnifiedAccordionPdp()) return;
+    var features = global.document.getElementById("mc-pdp-features");
+    if (!features) return;
+    var featuresHost = global.document.getElementById("mc-acc-saranoni-features-host");
+    if (!featuresHost) {
+      try {
+        ensureSaranoniPdpAccordion();
+      } catch (eAcc) {}
+      featuresHost = global.document.getElementById("mc-acc-saranoni-features-host");
+    }
+    if (!featuresHost) return;
+    if (features.parentNode !== featuresHost) {
+      try {
+        featuresHost.appendChild(features);
+      } catch (eFeat) {}
+    }
+    var featHeading = features.querySelector(".mc-pdp-features__heading");
+    if (featHeading) {
+      try {
+        featHeading.style.setProperty("display", "none", "important");
+      } catch (eHideFeat) {}
+    }
+  }
+
   function resolveGenericProductDescriptionNode() {
     var descHost = global.document.getElementById("mc-pdp-description-below-features");
     if (descHost && String(descHost.textContent || "").replace(/\s+/g, "").length > 20) {
@@ -4672,6 +4699,9 @@
       ensureMahjongAccordionClosed();
       markMahjongPdpReady();
     }
+    try {
+      ensureFeaturesInsideAccordion();
+    } catch (eFeatIn) {}
     return acc;
   }
 
@@ -4744,7 +4774,7 @@
         el.style.removeProperty("overflow");
       } catch (eMove) {}
     }
-    /* Keep orphan description nodes out of the info column root. */
+    /* Keep orphan description / features nodes out of the info column root. */
     if (desc && desc.parentNode === info) {
       try {
         if (detailsHost) detailsHost.appendChild(desc);
@@ -4754,6 +4784,9 @@
         }
       } catch (eDesc2) {}
     }
+    try {
+      ensureFeaturesInsideAccordion();
+    } catch (eFeatCanon) {}
     var media = global.document.querySelector("td.mc-unified-pdp-media, td.mc-pdp-media-td");
     if (media && global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
       try {
@@ -4766,8 +4799,8 @@
     if (global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
       try {
         info.style.setProperty("width", "auto", "important");
-        info.style.setProperty("max-width", "520px", "important");
-        info.style.setProperty("flex", "0 1 520px", "important");
+        info.style.setProperty("max-width", "420px", "important");
+        info.style.setProperty("flex", "0 1 420px", "important");
         info.style.setProperty("padding-left", "0", "important");
       } catch (eInfo) {}
     }
@@ -5915,6 +5948,10 @@
     });
 
     try {
+      ensureFeaturesInsideAccordion();
+    } catch (eFeatSs) {}
+
+    try {
       infoColumn.style.setProperty("display", "flex", "important");
       infoColumn.style.setProperty("flex-direction", "column", "important");
       infoColumn.style.setProperty("align-items", "stretch", "important");
@@ -6707,6 +6744,19 @@
     try {
       block.style.removeProperty("display");
     } catch (eShow) {}
+    /* Never yank #mc-pdp-features out of the FEATURES accordion once mounted. */
+    if (block.closest && block.closest("#mc-pdp-accordion")) {
+      pruneDescriptionDuplicateFeatures();
+      hideNativeVolusionTabPanels();
+      if (isUnifiedAccordionPdp()) {
+        try {
+          ensureSaranoniPdpAccordion();
+          ensureFeaturesInsideAccordion();
+          ensurePdpAccordionVisible();
+        } catch (eAccKeep) {}
+      }
+      return;
+    }
     /* Bean Bag features are owned by their existing accordion once it exists.
        Do not reinsert that node as a loose sibling on a later PDP pass. */
     if (isBeanBagPdpPage() && global.document.getElementById("mc-pdp-accordion")) {

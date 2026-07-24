@@ -25790,10 +25790,12 @@ html body.mc-pdp-accordion-pdp #mc-pdp-accordion {
   html body.mc-pdp-accordion-pdp td.mc-unified-pdp-info,
   html body.mc-pdp-accordion-pdp td.mc-pdp-options-td,
   html body.mc-bean-bag-pdp td.mc-unified-pdp-info,
-  html body.mc-bean-bag-pdp td.mc-pdp-options-td {
-    flex: 0 1 520px !important;
-    width: 520px !important;
-    max-width: 520px !important;
+  html body.mc-bean-bag-pdp td.mc-pdp-options-td,
+  html body.mc-product-page #v65-product-parent > tbody > tr:nth-child(2) > td:nth-child(2),
+  html body.productdetails #v65-product-parent > tbody > tr:nth-child(2) > td:nth-child(2) {
+    flex: 0 1 420px !important;
+    width: auto !important;
+    max-width: 420px !important;
     padding-left: 0 !important;
     margin-left: 0 !important;
     box-sizing: border-box !important;
