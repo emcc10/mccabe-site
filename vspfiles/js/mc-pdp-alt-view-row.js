@@ -1,10 +1,9 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260723altscrl — block scroll-host + inline-flex track so
-     closeout/SS alt thumbs can scroll inside Volusion table cells (flex
-     scrollports fail there: scrollLeft stays 0). */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__) return;
+  /* MC_ALT_VIEW_ROW_20260724altfix1 — block scrollport + track; CSS flex was locking scrollLeft */
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260724altfix1__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260724altfix1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723close1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723mob1__ = true;
@@ -632,7 +631,9 @@
       (document.head || document.documentElement).appendChild(st);
     }
     st.textContent =
-      "#mc-pdp-alt-view-row{display:block!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;" +
+      "html body #mc-pdp-alt-view-row,html body.mc-product-page #mc-pdp-alt-view-row,html body.productdetails #mc-pdp-alt-view-row," +
+      "html body.mc-saranoni-pdp #mc-pdp-alt-view-row,html body.mc-closeout-pdp #mc-pdp-alt-view-row{" +
+      "display:block!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;" +
       "overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;" +
       "scrollbar-width:thin!important}" +
       "#mc-pdp-alt-view-row .mc-pdp-alt-view-row__track{display:inline-flex!important;flex-wrap:nowrap!important;align-items:center!important;" +

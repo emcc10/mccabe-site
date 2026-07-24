@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260723menu1 - opaque push-menu over PDP overlap */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260724altfix1 - alt-row block scroll + saranoni variant order */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -23930,13 +23930,18 @@ html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__pric
 /* END REMOVABLE: Saranoni color horizontal scroll rail (20260718; size grid 20260720sarfix4) */
 /* BEGIN REMOVABLE: PDP alt-view row stable placement/no visible scrollbar (20260718) */
 html body #mc-pdp-alt-view-row {
-  display: flex !important;
+  /* block scrollport — flex locks horizontal scroll in Volusion table cells */
+  display: block !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
   position: relative !important;
   clear: both !important;
   float: none !important;
   z-index: 1 !important;
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
+  scrollbar-width: thin !important;
+  -ms-overflow-style: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x !important;
 }
 
 html body #mc-pdp-alt-view-row::-webkit-scrollbar {
@@ -24742,7 +24747,9 @@ html body.mc-product-page .mc-related-plp-grid {
   html body.mc-saranoni-pdp #mc-pdp-alt-view-row,
   html body.productdetails #mc-pdp-alt-view-row,
   html body.mc-product-page #mc-pdp-alt-view-row {
-    display: flex !important;
+    display: block !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
     visibility: visible !important;
     opacity: 1 !important;
     width: 100% !important;
@@ -24755,7 +24762,9 @@ html body.mc-product-page .mc-related-plp-grid {
 
 html body.productdetails #mc-pdp-alt-view-row,
 html body.mc-product-page #mc-pdp-alt-view-row {
-  display: flex !important;
+  display: block !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
   visibility: visible !important;
   opacity: 1 !important;
   position: relative !important;
@@ -24861,7 +24870,7 @@ html body.mc-saranoni-pdp #content_area span#altviews {
 }
 
 html body.mc-saranoni-pdp #mc-pdp-alt-view-row {
-  display: flex !important;
+  display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
   order: 2 !important;
@@ -24876,8 +24885,8 @@ html body.mc-saranoni-pdp #mc-pdp-alt-view-row {
   height: auto !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x !important;
 }
 
 html body.mc-saranoni-pdp #v65-product-related,
@@ -24932,7 +24941,9 @@ html body.mc-saranoni-pdp.mc-saranoni-style-rail-active .mc-configured-color-swa
   overflow: visible !important;
 }
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #mc-pdp-alt-view-row {
-  display: flex !important;
+  display: block !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
 }
 /* Hide stray Select Style label above brand logo */
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-unified-pdp-info > font:first-child,

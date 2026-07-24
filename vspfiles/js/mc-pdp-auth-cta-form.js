@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore16 — TechSpecs→FEATURES, ProductDescription→Details; Mahjong ATC order
-  var MC_DEPLOY_FINGERPRINT = "20260723restore16";
-  var VERSION = "20260723restore16";
+  // MC_DEPLOY_FINGERPRINT_20260724altfix1 — alt-row block scroll + Saranoni variant order/arrows
+  var MC_DEPLOY_FINGERPRINT = "20260724altfix1";
+  var VERSION = "20260724altfix1";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -5063,6 +5063,49 @@
     if (!infoColumn || !isSaranoniPdpPage()) return;
     applyInfoColumnOrder(infoColumn, SARANONI_INFO_COLUMN_ORDER);
     dedupeSaranoniConfiguredColorSwatchWrappers();
+    /* Hard lock: logo → title → price → color/size variants. Variants must
+       never sit above the brand logo (seen when scroll-host remount races order). */
+    try {
+      var logo = global.document.getElementById("mc-pdp-brand-logo");
+      var title = global.document.getElementById("mc-pdp-title-right");
+      var price = global.document.getElementById("mc-pdp-price-stack-host");
+      var colors =
+        global.document.getElementById("mc-configured-color-swatch-wrapper") ||
+        global.document.querySelector(
+          ".mc-saranoni-scroll-host:has(.mc-configured-color-swatches), .mc-configured-color-swatch-wrapper"
+        );
+      var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
+      var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
+      if (logo && logo.parentNode !== infoColumn) {
+        infoColumn.insertBefore(logo, infoColumn.firstChild);
+      } else if (logo && infoColumn.firstElementChild !== logo) {
+        infoColumn.insertBefore(logo, infoColumn.firstElementChild);
+      }
+      if (title && logo && logo.parentNode === infoColumn && logo.nextElementSibling !== title) {
+        infoColumn.insertBefore(title, logo.nextElementSibling);
+      }
+      if (price && title && title.parentNode === infoColumn && title.nextElementSibling !== price) {
+        infoColumn.insertBefore(price, title.nextElementSibling);
+      }
+      var afterPrice = price && price.parentNode === infoColumn ? price : title || logo;
+      [colors, sizeLabel, sizes].forEach(function (el) {
+        if (!el || !afterPrice || afterPrice.parentNode !== infoColumn) return;
+        if (el.parentNode !== infoColumn) {
+          insertNodeAfter(infoColumn, afterPrice, el);
+        } else if (afterPrice.nextElementSibling !== el) {
+          insertNodeAfter(infoColumn, afterPrice, el);
+        }
+        afterPrice = el;
+      });
+      try {
+        if (logo) logo.style.setProperty("order", "1", "important");
+        if (title) title.style.setProperty("order", "2", "important");
+        if (price) price.style.setProperty("order", "3", "important");
+        if (colors) colors.style.setProperty("order", "5", "important");
+        if (sizeLabel) sizeLabel.style.setProperty("order", "6", "important");
+        if (sizes) sizes.style.setProperty("order", "7", "important");
+      } catch (eOrdLock) {}
+    } catch (eSarOrder) {}
   }
 
   function applyMahjongHouseInfoColumnOrder(infoColumn) {
@@ -5381,6 +5424,8 @@
       global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
       findPdpHeroColumnTd();
     if (!info) return;
+    var logo = global.document.getElementById("mc-pdp-brand-logo");
+    var title = global.document.getElementById("mc-pdp-title-right");
     var price = global.document.getElementById("mc-pdp-price-stack-host");
     var colors =
       global.document.getElementById("mc-configured-color-swatch-wrapper") ||
@@ -5396,32 +5441,36 @@
     }
     var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
     var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
-    var anchor = price;
-    [colors, sizeLabel, sizes].forEach(function (el) {
+    /* Rebuild order from the top so variants never land above the logo. */
+    var anchor = null;
+    [logo, title, price, colors, sizeLabel, sizes].forEach(function (el) {
       if (!el) return;
       try {
+        if (el.parentNode !== info) info.appendChild(el);
         if (anchor && anchor.parentNode === info) {
-          if (anchor.nextSibling) info.insertBefore(el, anchor.nextSibling);
-          else info.appendChild(el);
-          anchor = el;
-        } else if (el.parentNode !== info) {
-          info.appendChild(el);
-        } else if (anchor && el !== anchor) {
-          /* Already in info but above price — reinsert after anchor. */
-          if (anchor.nextSibling) info.insertBefore(el, anchor.nextSibling);
-          else info.appendChild(el);
-          anchor = el;
+          if (anchor.nextElementSibling !== el) insertNodeAfter(info, anchor, el);
+        } else if (info.firstElementChild !== el) {
+          info.insertBefore(el, info.firstElementChild);
         }
-        el.style.setProperty("display", el.id === "mc-saranoni-size-thumbs" ? "grid" : "block", "important");
+        el.style.setProperty(
+          "display",
+          el.id === "mc-saranoni-size-thumbs" ? "grid" : "block",
+          "important"
+        );
         el.style.setProperty("visibility", "visible", "important");
         el.style.setProperty("width", "100%", "important");
         el.style.setProperty("max-width", "100%", "important");
-        el.style.setProperty("order", el === colors ? "5" : el === sizeLabel ? "6" : "7", "important");
+        anchor = el;
       } catch (eMove) {}
     });
-    if (price) {
-      try { price.style.setProperty("order", "3", "important"); } catch (eOrd) {}
-    }
+    try {
+      if (logo) logo.style.setProperty("order", "1", "important");
+      if (title) title.style.setProperty("order", "2", "important");
+      if (price) price.style.setProperty("order", "3", "important");
+      if (colors) colors.style.setProperty("order", "5", "important");
+      if (sizeLabel) sizeLabel.style.setProperty("order", "6", "important");
+      if (sizes) sizes.style.setProperty("order", "7", "important");
+    } catch (eOrd) {}
   }
 
   function finalizeSaranoniInfoColumnOrder() {
@@ -8655,11 +8704,11 @@
     ) {
       return;
     }
-    /* MC_ALT_VIEW_ROW_20260723close1 — gate on newest flag so stale caches
-       still force a fresh fetch with closeout altview-only probing. */
-    var want = "20260723close1";
+    /* MC_ALT_VIEW_ROW_20260724altfix1 — gate on newest flag so stale caches
+       still force a fresh fetch with block scrollport + track. */
+    var want = "20260724altfix1";
     try {
-      if (global["__MC_TMH_ALT_VIEW_ROW_20260723close1__"]) {
+      if (global["__MC_TMH_ALT_VIEW_ROW_20260724altfix1__"]) {
         global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
         return;
       }
@@ -8669,6 +8718,8 @@
         } catch (eRmAlt) {}
       });
       try {
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260724altfix1__;
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260723close1__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260723mob1__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260721B__;
@@ -9093,9 +9144,14 @@
       ".mc-configured-color-swatch-label{display:block!important;margin-bottom:8px!important;font:700 12px/1.4 Inter,Arial,sans-serif!important;letter-spacing:.03em!important;text-transform:none!important;color:#444!important}" +
       ".mc-configured-color-swatch-label span{font-weight:600!important;letter-spacing:.03em!important;text-transform:none!important}" +
       ".mc-configured-color-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
-      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,html body.mc-saranoni-pdp .mc-saranoni-swatches{display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;max-width:100%!important;padding:0 0 6px!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
-      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
-      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important}" +
+      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,html body.mc-saranoni-pdp .mc-saranoni-swatches{display:block!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;max-width:100%!important;padding:0 0 6px!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;touch-action:pan-x!important;scrollbar-width:thin!important;-ms-overflow-style:auto!important}" +
+      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches > .mc-saranoni-swatch-track,html body.mc-saranoni-pdp .mc-saranoni-swatches > .mc-saranoni-swatch-track{display:inline-flex!important;flex-wrap:nowrap!important;gap:12px!important;width:max-content!important;max-width:none!important;align-items:center!important}" +
+      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar{height:6px!important}" +
+      /* Hide orphan rail arrows that are not beside a real color rail (grey pills under altviews). */
+      "html body .mc-saranoni-scroll-arrow{display:none!important}" +
+      "html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(.mc-configured-color-swatches) > .mc-saranoni-scroll-arrow{display:flex!important}" +
+      "html body.mc-saranoni-pdp td.mc-pdp-media-td .mc-saranoni-scroll-arrow,html body.mc-saranoni-pdp td.mc-unified-pdp-media .mc-saranoni-scroll-arrow,html body.mc-saranoni-pdp #mc-pdp-alt-view-row ~ .mc-saranoni-scroll-arrow,html body.mc-saranoni-pdp #product_photo_td .mc-saranoni-scroll-arrow{display:none!important}" +
+      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important;flex:0 0 auto!important}" +
       ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}" +
       ".mc-configured-color-swatch.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
       ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:72px!important;min-height:36px!important;border-radius:4px!important;padding:6px 12px!important}" +
@@ -9122,6 +9178,23 @@
 
   function ensureSaranoniRailArrows() {
     if (!isSaranoniPdpPage()) return;
+    /* Strip orphan arrows that landed outside the color rail host (grey pills
+       under altviews / media column). */
+    try {
+      global.document.querySelectorAll(".mc-saranoni-scroll-arrow").forEach(function (btn) {
+        var host = btn.parentElement;
+        var ok =
+          host &&
+          host.classList &&
+          host.classList.contains("mc-saranoni-scroll-host") &&
+          host.querySelector(".mc-configured-color-swatches");
+        if (!ok) {
+          try {
+            btn.parentNode.removeChild(btn);
+          } catch (eRmOrphan) {}
+        }
+      });
+    } catch (eOrphans) {}
     /* Mobile: hide rail arrows — they sit absolute left/right and visually
        appear on the sides of the main product image. Touch-scroll still works. */
     try {
@@ -9141,6 +9214,13 @@
     ].forEach(function (rail) {
       if (!rail || !rail.parentNode) return;
       var host = rail.parentNode;
+      /* Never attach arrows under the product photo / alt-view media column. */
+      if (
+        host.closest &&
+        host.closest("td.mc-pdp-media-td, td.mc-unified-pdp-media, #product_photo_td, #mc-pdp-alt-view-row")
+      ) {
+        return;
+      }
       host.classList.add("mc-saranoni-scroll-host");
       rail.classList.add("mc-saranoni-scroll-rail");
       var id = rail.id || rail.getAttribute("data-mc-rail-id") || ("mc-saranoni-rail-" + Math.random().toString(36).slice(2));
@@ -9275,8 +9355,15 @@
         '<div class="mc-configured-color-swatch-label">' +
         configuredVariantChooseLabel(ctx, isSar) +
         '<span id="mc-configured-color-selected-name"></span></div>' +
-        '<div class="mc-configured-color-swatches' + (isSar ? " mc-saranoni-swatches" : "") + '"></div>';
+        '<div class="mc-configured-color-swatches' +
+        (isSar ? " mc-saranoni-swatches" : "") +
+        '">' +
+        (isSar ? '<div class="mc-saranoni-swatch-track"></div>' : "") +
+        "</div>";
       var rail = wrap.querySelector(".mc-configured-color-swatches");
+      var track =
+        (rail && rail.querySelector(".mc-saranoni-swatch-track")) ||
+        rail;
       var probeState = { pending: 0, loaded: 0, usedSrc: {} };
       ctx.entries.forEach(function (entry) {
         var opt = findConfiguredColorOption(ctx.select, entry);
@@ -9396,7 +9483,7 @@
             img.src = resolvedSrc || "";
           });
         }
-        rail.appendChild(btn);
+        track.appendChild(btn);
       });
       if (ctx.dataDriven && probeState.pending === 0) {
         finishDataDrivenSaranoniSwatchProbe(wrap, ctx.select, ctx, probeState);

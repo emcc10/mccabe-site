@@ -3784,12 +3784,16 @@ body.mc-product-page #content_area .wm-swatch img {
     min-height: 0 !important;
   }
   /* Alt images: centered under main. Custom #mc-pdp-alt-view-row stays visible;
-     native #altviews is hidden once the custom row owns the thumbs. */
+     native #altviews is hidden once the custom row owns the thumbs.
+     MUST be display:block (not flex) — flex scrollports lock scrollLeft=0
+     inside Volusion nested table cells. Track uses inline-flex instead. */
   body.mc-product-page #content_area #mc-pdp-alt-view-row,
   .productdetails #content_area #mc-pdp-alt-view-row,
   #content_area #mc-pdp-alt-view-row {
-    display: flex !important;
-    text-align: center !important;
+    display: block !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    text-align: left !important;
     margin: 8px auto 36px auto !important;
     padding: 0 !important;
     width: 100% !important;
@@ -3798,6 +3802,8 @@ body.mc-product-page #content_area .wm-swatch img {
     clear: both !important;
     order: 2 !important;
     box-sizing: border-box !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
   }
   body.mc-product-page:not(.mc-pdp-custom-alt-row) #content_area #altviews,
   body.mc-product-page:not(.mc-pdp-custom-alt-row) #content_area .altviews,
@@ -15649,6 +15655,6 @@ body.mc-product-page #v65-product-related img {
   window.addEventListener('load', removeOnlyStaleCustomSafeCss, { once: true });
 })();
 </script>
-<script src="/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260723rel1"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"219322d1a28c40a88da65ab074cf5d58","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script src="/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260724altfix1"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"219322d1a28c40a88da65ab074cf5d58","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1c9facf1ed8f075',t:'MTc4NDI5ODk5NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
