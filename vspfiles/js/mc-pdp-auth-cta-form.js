@@ -2242,6 +2242,9 @@
         col.appendChild(wrap);
       } catch (eCol) {}
     }
+    try {
+      ensureSaranoniVariantsBelowPrice();
+    } catch (eLogoOrd) {}
   }
 
   function bindMahjongHouseBrandLogoFallback(img) {
