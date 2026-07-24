@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore15 — closeout features stay inside accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore15";
-  var VERSION = "20260723restore15";
+  // MC_DEPLOY_FINGERPRINT_20260723restore16 — TechSpecs→FEATURES, ProductDescription→Details; Mahjong ATC order
+  var MC_DEPLOY_FINGERPRINT = "20260723restore16";
+  var VERSION = "20260723restore16";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -2667,15 +2667,19 @@
       if (qty && qtyRow.parentNode !== stack) stack.appendChild(qtyRow);
       if (atcWrap && atcWrap.parentNode !== stack) stack.appendChild(atcWrap);
       var accordion = global.document.getElementById("mc-pdp-accordion");
-      if (stack.parentNode !== infoColumn) {
-        try {
-          if (accordion && accordion.parentNode === infoColumn && accordion.nextSibling) {
-            infoColumn.insertBefore(stack, accordion.nextSibling);
+      try {
+        if (stack.parentNode !== infoColumn) {
+          if (accordion && accordion.parentNode === infoColumn) {
+            insertNodeAfter(infoColumn, accordion, stack);
           } else {
             infoColumn.appendChild(stack);
           }
-        } catch (eStackMount) {}
-      }
+        } else if (accordion && accordion.parentNode === infoColumn && accordion.nextElementSibling !== stack) {
+          insertNodeAfter(infoColumn, accordion, stack);
+        } else if (!accordion) {
+          infoColumn.appendChild(stack);
+        }
+      } catch (eStackMount) {}
       stack.style.setProperty("display", "flex", "important");
       stack.style.setProperty("flex-direction", "column", "important");
       stack.style.setProperty("align-items", "stretch", "important");
@@ -2756,6 +2760,9 @@
           placeMahjongDesktopTitleAbovePurchase();
           placeMahjongPriceBelowTitle();
           hideMahjongNativePurchaseBox();
+          try {
+            applyMahjongHouseInfoColumnOrder(infoColumn);
+          } catch (eOrdObs) {}
         });
         purchaseObserver.observe(infoColumn, {
           childList: true,
@@ -4541,29 +4548,23 @@
     mountExistingTextPanel(shippingHost, /\b(shipping|returns?|return policy)\b/i);
     mountExistingTextPanel(faqHost, /\b(faq|frequently asked questions?)\b/i);
 
+    /* FEATURES = Volusion TechSpecs only. Never invent placeholder bullets when
+       TechSpecs is empty — hide the FEATURES row instead. */
     if (!hostHasContent(featuresHost)) {
-      var featSeed = global.document.getElementById("mc-pdp-features");
-      if (!featSeed) {
-        featSeed = global.document.createElement("div");
-        featSeed.id = "mc-pdp-features";
-        featSeed.className = "mc-pdp-features";
-        featSeed.innerHTML =
-          '<ul class="mc-pdp-features__list"><li>Premium construction and finish</li><li>Designed for everyday use</li><li>See Product Details for full specifications</li></ul>';
+      var featExisting = global.document.getElementById("mc-pdp-features");
+      if (featExisting && String(featExisting.textContent || "").replace(/\s+/g, " ").trim()) {
+        mountNodeInSaranoniAccordionHost(featuresHost, featExisting);
       }
-      mountNodeInSaranoniAccordionHost(featuresHost, featSeed);
     }
     if (!hostHasGenericAccordionDetailsContent(detailsHost)) {
       var detailSeed = ensureGenericProductDescriptionHost(infoColumn);
       if (detailSeed) mountNodeInSaranoniAccordionHost(detailsHost, detailSeed);
-      if (!hostHasGenericAccordionDetailsContent(detailsHost)) {
-        detailsHost.innerHTML = "<p>See product specifications and care details below.</p>";
-      }
     }
     var rows = [];
     function addRow(id, label, host, force) {
       if (force || hostHasContent(host)) rows.push({ id: id, label: label, host: host });
     }
-    addRow("saranoni-features", "FEATURES", featuresHost, true);
+    addRow("saranoni-features", "FEATURES", featuresHost, false);
     addRow("saranoni-product-details", "PRODUCT DETAILS", detailsHost, true);
     addRow("saranoni-shipping-returns", "SHIPPING & RETURNS", shippingHost, false);
     addRow("saranoni-faq", "FAQ", faqHost, false);
@@ -5074,6 +5075,10 @@
       var price =
         global.document.getElementById("mc-mahjong-price-host") ||
         global.document.getElementById("mc-pdp-price-stack-host");
+      var accordion = global.document.getElementById("mc-pdp-accordion");
+      var purchase =
+        global.document.getElementById("mc-mahjong-purchase-stack") ||
+        global.document.getElementById("mc-pdp-purchase-stack");
       if (logo && logo.parentNode !== infoColumn) infoColumn.insertBefore(logo, infoColumn.firstChild);
       if (title && title.parentNode === infoColumn) {
         var titleAfter = logo && logo.parentNode === infoColumn ? logo.nextElementSibling : infoColumn.firstElementChild;
@@ -5081,6 +5086,30 @@
       }
       if (price && title && title.parentNode === infoColumn && title.nextElementSibling !== price) {
         infoColumn.insertBefore(price, title.nextElementSibling);
+      }
+      /* Hard lock: logo → title → price → accordion → ATC. Purchase must never
+         sit above the brand/title (seen on Celebration Jokers). */
+      if (accordion && accordion.parentNode !== infoColumn) {
+        try {
+          if (price && price.parentNode === infoColumn) insertNodeAfter(infoColumn, price, accordion);
+          else if (title && title.parentNode === infoColumn) insertNodeAfter(infoColumn, title, accordion);
+          else infoColumn.appendChild(accordion);
+        } catch (eAccOrd) {}
+      } else if (accordion && price && price.parentNode === infoColumn && price.nextElementSibling !== accordion) {
+        try {
+          insertNodeAfter(infoColumn, price, accordion);
+        } catch (eAccOrd2) {}
+      }
+      if (purchase && purchase.parentNode === infoColumn) {
+        try {
+          if (accordion && accordion.parentNode === infoColumn) {
+            if (accordion.nextElementSibling !== purchase) {
+              insertNodeAfter(infoColumn, accordion, purchase);
+            }
+          } else {
+            infoColumn.appendChild(purchase);
+          }
+        } catch (ePurchOrd) {}
       }
     } catch (eTmhOrder) {}
     /* Collapse leftover breadcrumb row once the H1 lives under the logo. */
@@ -6640,12 +6669,18 @@
     if (!bodyHtml && isMahjongHousePdpPage()) {
       bodyHtml = getMahjongOfficialFeaturesHtml(getMahjongProductCode());
     }
-    if (!bodyHtml) bodyHtml = extractDescriptionFeaturesHtml();
+    /* Unified accordion: FEATURES is Volusion TechSpecs only. Do not scrape
+       ProductDescription into FEATURES — that belongs under PRODUCT DETAILS. */
+    if (!bodyHtml && !isUnifiedAccordionPdp()) {
+      bodyHtml = extractDescriptionFeaturesHtml();
+    }
     var block = global.document.getElementById("mc-pdp-features");
     if (!bodyHtml) {
       if (block) {
         try {
           block.style.setProperty("display", "none", "important");
+          block.innerHTML = "";
+          block.removeAttribute("data-mc-features-sig");
         } catch (eHide) {}
       }
       return;
@@ -12623,7 +12658,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE_20260723restore13 — pull fresh form when baked pages pin stale ?v= */
 (function (g, d) {
-  var WANT = "20260723restore15";
+  var WANT = "20260723restore16";
   try {
     if (String(g.__MC_DEPLOY_FP__ || "") === WANT) return;
     if (d.documentElement.getAttribute("data-mc-pdp-auth-self-upgrade") === WANT) return;
