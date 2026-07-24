@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260724altfix1 — alt-row block scroll + Saranoni variant order/arrows
-  var MC_DEPLOY_FINGERPRINT = "20260724altfix1";
-  var VERSION = "20260724altfix1";
+  // MC_DEPLOY_FINGERPRINT_20260724altfix2 — force alt-row refresh on all unified PDPs
+  var MC_DEPLOY_FINGERPRINT = "20260724altfix2";
+  var VERSION = "20260724altfix2";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -289,6 +289,9 @@
       body.classList.add("mc-pdp-hero-ready");
       global.__MC_PDP_HERO_READY_LOCKED__ = true;
     } catch (eReady) {}
+    try {
+      ensureFreshSaranoniAltViewRowScript();
+    } catch (eAltFresh) {}
   }
 
   function scheduleMarkPdpHeroReady() {
@@ -12364,6 +12367,9 @@ function revealBeanBagRelated() {
       if (isSteveSilverPdpPage() || isCloseoutPdpPage()) {
         markCloseoutPdpPage();
         appendSteveSilverInfoColumnOrder();
+        try {
+          ensureFreshSaranoniAltViewRowScript();
+        } catch (eAltSs) {}
       }
       syncPdpDescriptionViewMore();
       applyPdpPriceTypography();
