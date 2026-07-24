@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore9 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore9";
-  var VERSION = "20260723restore9";
+  // MC_DEPLOY_FINGERPRINT_20260723restore10 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore10";
+  var VERSION = "20260723restore10";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -4714,9 +4714,17 @@
     if (!description) {
       description = global.document.getElementById("mc-pdp-description-below-features");
     }
-    if (description) {
-      rows.push({ id: "details", label: "PRODUCT DETAILS", host: description });
+    if (!description) {
+      description = global.document.createElement("div");
+      description.id = "mc-pdp-description-below-features";
+      description.className = "mc-pdp-description-below-features";
+      try {
+        var srcDesc = global.document.getElementById("ProductDetail_ProductDetails_div2") || global.document.getElementById("ProductDetail_ProductDetails_div");
+        if (srcDesc) description.appendChild(srcDesc.cloneNode(true));
+        else description.innerHTML = "<p>See product specifications and care details below.</p>";
+      } catch (eDescSeed) {}
     }
+    rows.push({ id: "details", label: "PRODUCT DETAILS", host: description });
     if (!rows.length) return null;
 
     var signature = rows.map(function (row) { return row.id; }).join("|");
