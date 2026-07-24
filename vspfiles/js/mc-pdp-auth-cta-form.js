@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725fix3 — rocker label swatches; bedroom collection imgs; humidor 650px
-  var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260725fix3";
+  // MC_DEPLOY_FINGERPRINT_20260725order1 — saranoni variants below price (not above logo)
+  var MC_DEPLOY_FINGERPRINT = "20260725order1";
+  var VERSION = "20260725order1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725003;
+  var DEPLOY_RANK = 20260725004;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -74,6 +74,11 @@
           alignSaranoniInfoToHeroTop();
           if (typeof hideSaranoniStrayVariantLabels === "function") hideSaranoniStrayVariantLabels();
           ensureSaranoniPdpAccordion();
+          try {
+            if (typeof isSaranoniPdpPage === "function" && isSaranoniPdpPage()) {
+              ensureSaranoniVariantsBelowPrice();
+            }
+          } catch (eSarOrdTick) {}
           if (typeof isHumidorOrSaunaPdpPage === "function" && isHumidorOrSaunaPdpPage()) {
             ensureSteveSilverHeroImageSize();
           } else if (typeof applyPdpMainImageCap === "function") {
@@ -5335,34 +5340,86 @@
     });
   }
 
-  function ensureSaranoniVariantsBelowPriceMobile() {
+  function repairSaranoniOrphanSwatchRail(infoColumn) {
     if (!isSaranoniPdpPage()) return;
-    if (!global.matchMedia || !global.matchMedia("(max-width: 991px)").matches) return;
+    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    if (!wrap) return;
+    var rail = wrap.querySelector(".mc-configured-color-swatches");
+    var orphans = global.document.querySelectorAll(
+      "td.mc-unified-pdp-info > .mc-configured-color-swatches, td.mc-pdp-options-td > .mc-configured-color-swatches, .mc-configured-color-swatches.mc-saranoni-swatches"
+    );
+    Array.prototype.forEach.call(orphans, function (node) {
+      if (!node || wrap.contains(node)) return;
+      if (rail && node !== rail) {
+        try {
+          if (node.parentNode) node.parentNode.removeChild(node);
+        } catch (eRmOrphan) {}
+        return;
+      }
+      try {
+        wrap.appendChild(node);
+        rail = node;
+      } catch (eReparent) {}
+    });
+    if (infoColumn && infoColumn.classList && infoColumn.classList.contains("mc-saranoni-scroll-host")) {
+      try {
+        infoColumn.classList.remove("mc-saranoni-scroll-host");
+      } catch (eHost) {}
+      infoColumn.querySelectorAll(":scope > .mc-saranoni-scroll-arrow").forEach(function (btn) {
+        try {
+          if (btn.parentNode) btn.parentNode.removeChild(btn);
+        } catch (eBtn) {}
+      });
+    }
+  }
+
+  /* Logo -> title -> price -> variants. Always. Desktop + mobile. */
+  function ensureSaranoniVariantsBelowPrice() {
+    if (!isSaranoniPdpPage()) return;
     var info =
+      resolveSaranoniInfoColumn() ||
       global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
       findPdpHeroColumnTd();
     if (!info) return;
+    repairSaranoniOrphanSwatchRail(info);
+    var logo = global.document.getElementById("mc-pdp-brand-logo");
+    var title = global.document.getElementById("mc-pdp-title-right");
     var price = global.document.getElementById("mc-pdp-price-stack-host");
     var colors = global.document.getElementById("mc-configured-color-swatch-wrapper");
-    var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
     var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
-    var anchor = price;
-    [colors, sizeLabel, sizes].forEach(function (el) {
+    var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
+    var accordion = global.document.getElementById("mc-pdp-accordion");
+    var purchase =
+      global.document.getElementById("mc-pdp-purchase-stack") ||
+      global.document.getElementById("mc-unified-purchase-controls");
+    var stack = [logo, title, price, colors, sizeLabel, sizes, accordion, purchase];
+    var anchor = null;
+    stack.forEach(function (el) {
       if (!el) return;
       try {
+        if (el.parentNode !== info) info.appendChild(el);
         if (anchor && anchor.parentNode === info) {
-          if (anchor.nextSibling) info.insertBefore(el, anchor.nextSibling);
-          else info.appendChild(el);
-          anchor = el;
-        } else if (el.parentNode !== info) {
-          info.appendChild(el);
+          if (anchor.nextElementSibling !== el) insertNodeAfter(info, anchor, el);
+        } else if (info.firstElementChild !== el) {
+          info.insertBefore(el, info.firstElementChild);
         }
-        el.style.setProperty("display", el.id === "mc-saranoni-size-thumbs" ? "grid" : "block", "important");
-        el.style.setProperty("visibility", "visible", "important");
-        el.style.setProperty("width", "100%", "important");
-        el.style.setProperty("max-width", "100%", "important");
+        if (el.parentNode === info) anchor = el;
+        if (el === colors || el === sizes || el === sizeLabel) {
+          el.style.setProperty(
+            "display",
+            el.id === "mc-saranoni-size-thumbs" ? "grid" : "block",
+            "important"
+          );
+          el.style.setProperty("visibility", "visible", "important");
+          el.style.setProperty("width", "100%", "important");
+          el.style.setProperty("max-width", "100%", "important");
+        }
       } catch (eMove) {}
     });
+  }
+
+  function ensureSaranoniVariantsBelowPriceMobile() {
+    ensureSaranoniVariantsBelowPrice();
   }
 
   function finalizeSaranoniInfoColumnOrder() {
@@ -5402,7 +5459,7 @@
         applySaranoniInfoColumnAlignment();
         hideSaranoniLeftoverNativeShell(infoColumn);
         ensureSaranoniHeroImage();
-        try { ensureSaranoniVariantsBelowPriceMobile(); } catch (eSarMobFin) {}
+        try { ensureSaranoniVariantsBelowPrice(); } catch (eSarMobFin) {}
       }
 
       revealSaranoniRelated();
@@ -7777,7 +7834,18 @@
     st.textContent =
       "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #v65-product-parent tbody:has(>tr.mc-pdp-main-row){display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:0!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 650px!important;flex-basis:650px!important;max-width:650px!important;min-width:0!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;min-width:460px!important;max-width:460px!important;width:460px!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp.mc-saranoni-pdp-ready tr.mc-pdp-main-row>td:last-child table.colors_pricebox:not(:has(#mc-pdp-option-block)):not(:has(#mc-pdp-accordion)):not(:has(#mc-pdp-features)):not(:has(#mc-pdp-purchase-stack)):not(:has(#mc-pdp-price-stack-host)):not(:has(#mc-pdp-title-right)):not(:has(#messaging-element)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}html body.mc-saranoni-pdp td.mc-pdp-media-td{display:table-cell!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;width:460px!important;max-width:460px!important;min-width:460px!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:auto!important;max-width:min(650px,100%)!important;height:auto!important;max-height:none!important;display:block!important;margin-left:0!important;margin-right:auto!important}}" +
       "html body.mc-saranoni-pdp td.mc-pdp-options-td>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-unified-pdp-info>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-pdp-options-td>#options_table:not(#mc-pdp-option-block #options_table),html body.mc-saranoni-pdp td.mc-pdp-options-td>table:has(>#options_table):not(:has(#mc-pdp-option-block)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}" +
-      "html body.mc-saranoni-pdp #mc-pdp-brand-logo,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-price-stack-host,html body.mc-saranoni-pdp #messaging-element,html body.mc-saranoni-pdp #mc-pdp-accordion,html body.mc-saranoni-pdp #mc-pdp-option-block,html body.mc-saranoni-pdp #mc-pdp-features,html body.mc-saranoni-pdp #mc-pdp-description-below-features,html body.mc-saranoni-pdp #mc-pdp-purchase-stack{order:unset!important}" +
+      "html body.mc-saranoni-pdp td.mc-unified-pdp-info,html body.mc-saranoni-pdp td.mc-pdp-options-td{display:flex!important;flex-direction:column!important;align-items:stretch!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-brand-logo{order:1!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-title-right{order:2!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-price-stack-host{order:3!important}" +
+      "html body.mc-saranoni-pdp #messaging-element{order:4!important}" +
+      "html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper,html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(>#mc-configured-color-swatch-wrapper),html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(>.mc-configured-color-swatches){order:5!important}" +
+      "html body.mc-saranoni-pdp #mc-saranoni-size-label{order:6!important}" +
+      "html body.mc-saranoni-pdp #mc-saranoni-size-thumbs{order:7!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-option-block{order:8!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-accordion{order:9!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack,html body.mc-saranoni-pdp #mc-unified-purchase-controls{order:10!important}" +
+      "html body.mc-saranoni-pdp td.mc-unified-pdp-info>.mc-configured-color-swatches,html body.mc-saranoni-pdp td.mc-pdp-options-td>.mc-configured-color-swatches{order:5!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-option-block{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;pointer-events:none!important}";
   }
 
@@ -9153,6 +9221,27 @@
     ].forEach(function (rail) {
       if (!rail || !rail.parentNode) return;
       var host = rail.parentNode;
+      /* Never promote the whole info column into a scroll host — that orphans
+         the rail above the logo and parks arrow buttons as column siblings. */
+      if (
+        host &&
+        host.matches &&
+        host.matches(
+          "td.mc-unified-pdp-info, td.mc-pdp-options-td, td.mc-pdp-media-td, td.mc-unified-pdp-media"
+        )
+      ) {
+        var wrapHost = global.document.getElementById("mc-configured-color-swatch-wrapper");
+        if (wrapHost) {
+          try {
+            wrapHost.appendChild(rail);
+            host = wrapHost;
+          } catch (eRehost) {
+            return;
+          }
+        } else {
+          return;
+        }
+      }
       host.classList.add("mc-saranoni-scroll-host");
       rail.classList.add("mc-saranoni-scroll-rail");
       var id = rail.id || rail.getAttribute("data-mc-rail-id") || ("mc-saranoni-rail-" + Math.random().toString(36).slice(2));
@@ -9209,15 +9298,14 @@
     if (!wrap || !isSaranoniPdpPage()) return;
     wrap.setAttribute("data-mc-saranoni-swatches", "1");
     var col = findPdpHeroColumnTd();
-    if (col && wrap.parentNode !== col) {
+    if (col) {
       try {
-        // Insert after price-stack (index 2 in SARANONI_INFO_COLUMN_ORDER) so
-        // swatches land in the correct position immediately, not at the bottom
-        // of the column where they'd flash below the ATC until finalize runs.
+        // Always place after price when possible — even if wrap is already in col
+        // but sitting above the logo from an earlier race.
         var priceAnchor = global.document.getElementById("mc-pdp-price-stack-host");
         if (priceAnchor && priceAnchor.parentNode === col) {
           insertNodeAfter(col, priceAnchor, wrap);
-        } else {
+        } else if (wrap.parentNode !== col) {
           col.appendChild(wrap);
         }
       } catch (eCol) {}
@@ -9228,6 +9316,9 @@
       wrap.style.setProperty("margin", "12px 0 8px 0", "important");
       wrap.style.setProperty("padding", "0", "important");
     } catch (eWrapStyle) {}
+    try {
+      ensureSaranoniVariantsBelowPrice();
+    } catch (eOrd) {}
     ensureSaranoniRailArrows();
   }
 
