@@ -17839,7 +17839,13 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description li {
   text-transform: none !important;
 }
 
-html body.mc-pdp-unified-ready #mc-pdp-description-below-features:not(:empty),
+/* Hide loose description shells outside the accordion only.
+   #mc-pdp-description-below-features inside #mc-pdp-accordion IS the
+   PRODUCT DETAILS body (Volusion productdescription) — never hide it. */
+html body.mc-pdp-unified-ready td.mc-unified-pdp-info > #mc-pdp-description-below-features:not(:empty),
+html body.mc-pdp-unified-ready td.mc-pdp-options-td > #mc-pdp-description-below-features:not(:empty),
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-info > #mc-pdp-description-below-features:not(:empty),
+html body.mc-product-page.mc-pdp-unified-ready td.mc-pdp-options-td > #mc-pdp-description-below-features:not(:empty),
 html body.mc-pdp-unified-ready #mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-gatlin-description-below,
@@ -17850,6 +17856,38 @@ html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidde
 html body.mc-pdp-unified-ready td.mc-unified-pdp-info:has(.mc-unified-purchase-controls input[name="btnaddtocart"]) #v65-productdetail-action-wrapper {
   display: none !important;
 }
+
+html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-cordaroys-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-bean-bag-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-acc-saranoni-product-details-host,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #ProductDetail_ProductDetails_div,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #product_description {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html body #mc-pdp-accordion #mc-pdp-description-below-features,
+html body #mc-pdp-accordion #mc-pdp-description-below-features *,
+html body #mc-pdp-accordion #mc-acc-saranoni-product-details-host,
+html body #mc-pdp-accordion #mc-acc-saranoni-product-details-host *,
+html body #mc-pdp-accordion #ProductDetail_ProductDetails_div,
+html body #mc-pdp-accordion #ProductDetail_ProductDetails_div *,
+html body #mc-pdp-accordion #product_description,
+html body #mc-pdp-accordion #product_description * {
+  color: #d8d8d8 !important;
+}
+html body #mc-pdp-accordion #mc-pdp-description-below-features a,
+html body #mc-pdp-accordion #product_description a {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
 
 /* Gatlin / fixed -SECT sectionals: unified purchase stack below logo + features */
 html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host {

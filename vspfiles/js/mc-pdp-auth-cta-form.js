@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725corda3 — mattress accordion content + unified qty/ATC stack
-  var MC_DEPLOY_FINGERPRINT = "20260725corda3";
-  var VERSION = "20260725corda3";
+  // MC_DEPLOY_FINGERPRINT_20260725desc2 — show Volusion productdescription in PRODUCT DETAILS
+  var MC_DEPLOY_FINGERPRINT = "20260725desc2";
+  var VERSION = "20260725desc2";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725012;
+  var DEPLOY_RANK = 20260725014;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -5179,22 +5179,36 @@
       description.id = "mc-pdp-description-below-features";
       description.className = "mc-pdp-description-below-features";
     }
+    /* Always prefer the live Volusion productdescription node. */
+    try {
+      var liveDesc =
+        global.document.getElementById("ProductDetail_ProductDetails_div") ||
+        global.document.getElementById("product_description") ||
+        global.document.getElementById("ProductDetail_ProductDetails_div2") ||
+        resolveGenericProductDescriptionNode();
+      if (liveDesc && description.contains && description.contains(liveDesc)) {
+        /* already mounted */
+      } else if (liveDesc && liveDesc !== description && hostHasMeaningfulText(liveDesc)) {
+        while (description.firstChild) description.removeChild(description.firstChild);
+        if (liveDesc.id === "product_description") {
+          var wrapDiv = global.document.getElementById("ProductDetail_ProductDetails_div");
+          if (wrapDiv && wrapDiv.contains(liveDesc)) description.appendChild(wrapDiv);
+          else description.appendChild(liveDesc);
+        } else {
+          description.appendChild(liveDesc);
+        }
+      }
+    } catch (eLiveDesc) {}
     if (!hostHasMeaningfulText(description)) {
       try {
-        var srcDesc =
-          global.document.getElementById("ProductDetail_ProductDetails_div2") ||
-          global.document.getElementById("ProductDetail_ProductDetails_div") ||
-          resolveGenericProductDescriptionNode();
-        if (srcDesc && srcDesc !== description && hostHasMeaningfulText(srcDesc)) {
-          while (description.firstChild) description.removeChild(description.firstChild);
-          description.appendChild(srcDesc.cloneNode(true));
-        } else if (/^MHH-/i.test(resolveSoftGoodsProductCode())) {
+        if (/^MHH-/i.test(resolveSoftGoodsProductCode())) {
           description.innerHTML = getCordaroysMattressFallbackContent().detailsHtml;
         } else {
           description.innerHTML = "<p>See product specifications and care details below.</p>";
         }
       } catch (eDescSeed) {}
     }
+    try { revealAccordionProductDescription(); } catch (eRevSeed) {}
     rows.push({ id: "details", label: "PRODUCT DETAILS", host: description });
     if (!rows.length) return null;
 
@@ -5264,8 +5278,56 @@
         else infoColumn.appendChild(purchase);
       } catch (eRescueAtc) {}
     }
+    try { revealAccordionProductDescription(); } catch (eRevBb) {}
     return acc;
   }
+
+  
+  function injectAccordionDescriptionVisibleCss() {
+    if (global.document.getElementById("mc-acc-desc-visible-css")) return;
+    var el = global.document.createElement("style");
+    el.id = "mc-acc-desc-visible-css";
+    el.textContent =
+      "html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-description-below-features," +
+      "html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-description-below-features," +
+      "html body.mc-cordaroys-pdp #mc-pdp-accordion #mc-pdp-description-below-features," +
+      "html body.mc-bean-bag-pdp #mc-pdp-accordion #mc-pdp-description-below-features," +
+      "html body #mc-pdp-accordion #mc-acc-saranoni-product-details-host," +
+      "html body #mc-pdp-accordion #ProductDetail_ProductDetails_div," +
+      "html body #mc-pdp-accordion #product_description{" +
+      "display:block!important;visibility:visible!important;opacity:1!important;" +
+      "height:auto!important;max-height:none!important;overflow:visible!important}" +
+      "html body #mc-pdp-accordion #mc-pdp-description-below-features," +
+      "html body #mc-pdp-accordion #mc-pdp-description-below-features *, " +
+      "html body #mc-pdp-accordion #ProductDetail_ProductDetails_div," +
+      "html body #mc-pdp-accordion #ProductDetail_ProductDetails_div *, " +
+      "html body #mc-pdp-accordion #product_description," +
+      "html body #mc-pdp-accordion #product_description *{color:#d8d8d8!important}";
+    (global.document.head || global.document.documentElement).appendChild(el);
+  }
+
+  function revealAccordionProductDescription() {
+    try {
+      var acc = global.document.getElementById("mc-pdp-accordion");
+      if (!acc) return;
+      var nodes = acc.querySelectorAll(
+        "#mc-pdp-description-below-features, #mc-acc-saranoni-product-details-host, #ProductDetail_ProductDetails_div, #ProductDetail_ProductDetails_div2, #product_description, .mc-pdp-description-below-features__inner, [itemprop='description']"
+      );
+      Array.prototype.forEach.call(nodes, function (el) {
+        if (!el || !el.style) return;
+        try {
+          el.style.setProperty("display", "block", "important");
+          el.style.setProperty("visibility", "visible", "important");
+          el.style.setProperty("opacity", "1", "important");
+          el.style.setProperty("height", "auto", "important");
+          el.style.setProperty("max-height", "none", "important");
+          el.style.setProperty("overflow", "visible", "important");
+          el.style.setProperty("color", "#d8d8d8", "important");
+        } catch (eShow) {}
+      });
+    } catch (eReveal) {}
+  }
+
   function ensurePdpAccordionVisible() {
     var acc = global.document.getElementById("mc-pdp-accordion");
     if (!acc) return;
@@ -5294,6 +5356,8 @@
         node.style.setProperty("visibility", "visible", "important");
       } catch (eHdr) {}
     });
+    try { injectAccordionDescriptionVisibleCss(); } catch (eInjAcc) {}
+    try { revealAccordionProductDescription(); } catch (eRevAcc) {}
   }
 
   function ensureSaranoniHeroImage() {
