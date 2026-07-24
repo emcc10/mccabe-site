@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725desc2 — show Volusion productdescription in PRODUCT DETAILS
-  var MC_DEPLOY_FINGERPRINT = "20260725desc2";
-  var VERSION = "20260725desc2";
+  // MC_DEPLOY_FINGERPRINT_20260725coast2b — Coaster logo above title + readable details/ATC
+  var MC_DEPLOY_FINGERPRINT = "20260725coast2b";
+  var VERSION = "20260725coast2b";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725014;
+  var DEPLOY_RANK = 20260725017;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -1720,9 +1720,11 @@
     if (!src || /clear1x1|spacer|pixel\.gif|1x1\.gif/.test(src)) return false;
     if (/swatch|leather|cover|configurator|sectional|thumbnail|altview/.test(src)) return false;
     if (img.closest && img.closest(MC_PDP_LOGO_SKIP)) return false;
+    /* Explicit manufacturer logos are valid even before naturalWidth loads. */
+    var isMfgPath = /manufacturers\//i.test(src) || /vCSS_img_mfg_logo/i.test(img.className || "");
     var w = img.naturalWidth || img.width || 0;
     var h = img.naturalHeight || img.height || 0;
-    if (w <= 1 && h <= 1) return false;
+    if (!isMfgPath && w <= 1 && h <= 1) return false;
     if (w > 520 || (h > 180 && w > 320)) return false;
     return true;
   }
@@ -2106,6 +2108,108 @@
     }
   }
 
+  function styleBrandLogoWrap(wrap, logo) {
+    if (!wrap) return;
+    try {
+      wrap.style.setProperty("display", "block", "important");
+      wrap.style.setProperty("visibility", "visible", "important");
+      wrap.style.setProperty("opacity", "1", "important");
+      wrap.style.setProperty("width", "100%", "important");
+      wrap.style.setProperty("max-width", "435px", "important");
+      wrap.style.setProperty("text-align", "center", "important");
+      wrap.style.setProperty("margin", "0 0 12px 0", "important");
+      wrap.style.setProperty("padding", "0", "important");
+    } catch (eWrap) {}
+    if (!logo) logo = wrap.querySelector("img");
+    if (!logo) return;
+    try {
+      logo.style.setProperty("display", "block", "important");
+      logo.style.setProperty("visibility", "visible", "important");
+      logo.style.setProperty("opacity", "1", "important");
+      logo.style.setProperty("margin", "0 auto", "important");
+      logo.style.setProperty("width", "auto", "important");
+      logo.style.setProperty("max-width", "230px", "important");
+      logo.style.setProperty("max-height", "72px", "important");
+      logo.style.setProperty("height", "auto", "important");
+      logo.style.setProperty("object-fit", "contain", "important");
+    } catch (eLogo) {}
+  }
+
+  function collapseEmptyMediaLogoCells() {
+    try {
+      var hero = global.document.getElementById("product_photo");
+      if (!hero) return;
+      var row = hero.closest("tr");
+      if (!row) return;
+      Array.prototype.slice.call(row.children).forEach(function (td) {
+        if (!td || td.tagName !== "TD") return;
+        if (td.contains(hero)) return;
+        if (td.querySelector("#product_photo, #mc-pdp-alt-view-row, .mc-pdp-alt-view-row")) return;
+        var txt = ((td.textContent || "") + "").replace(/\u00a0/g, " ").trim();
+        var hasUsefulImg = td.querySelector("img:not(.vCSS_img_mfg_logo)");
+        var hasMfgOnly = td.querySelector("img.vCSS_img_mfg_logo, img[src*='/manufacturers/']");
+        if (hasUsefulImg) return;
+        if (!txt && (!hasMfgOnly || (hasMfgOnly && hasMfgOnly.style && hasMfgOnly.style.display === "none"))) {
+          try { td.parentNode && td.parentNode.removeChild(td); } catch (eRm) {}
+          return;
+        }
+        if (!txt || hasMfgOnly) {
+          try {
+            td.style.setProperty("display", "none", "important");
+            td.style.setProperty("width", "0", "important");
+            td.style.setProperty("max-width", "0", "important");
+            td.style.setProperty("padding", "0", "important");
+            td.style.setProperty("margin", "0", "important");
+            td.setAttribute("aria-hidden", "true");
+          } catch (eHideTd) {}
+        }
+      });
+      var heroTd = hero.closest("td");
+      if (heroTd) {
+        try {
+          heroTd.style.setProperty("display", "block", "important");
+          heroTd.style.setProperty("width", "100%", "important");
+          heroTd.style.setProperty("max-width", "650px", "important");
+          heroTd.setAttribute("align", "center");
+        } catch (eTd) {}
+      }
+      var table = hero.closest("table");
+      if (table && (table.closest("td.mc-unified-pdp-media, td.mc-pdp-media-td, #product_photo_td") || table.querySelector("#product_photo"))) {
+        try {
+          table.style.setProperty("width", "100%", "important");
+          table.style.setProperty("max-width", "650px", "important");
+        } catch (eTbl) {}
+      }
+    } catch (eCollapse) {}
+  }
+
+  function restoreMediaHeroAfterLogoMove() {
+    var hero = global.document.getElementById("product_photo");
+    if (!hero) return;
+    try {
+      collapseEmptyMediaLogoCells();
+    } catch (eCol) {}
+    try {
+      hero.style.setProperty("display", "block", "important");
+      hero.style.setProperty("width", "100%", "important");
+      hero.style.setProperty("max-width", "650px", "important");
+      hero.style.setProperty("height", "auto", "important");
+      hero.style.setProperty("max-height", "none", "important");
+      hero.style.setProperty("margin-left", "auto", "important");
+      hero.style.setProperty("margin-right", "auto", "important");
+    } catch (eHero) {}
+    try {
+      global.document
+        .querySelectorAll("td.mc-unified-pdp-media img.vCSS_img_mfg_logo, td.mc-pdp-media-td img.vCSS_img_mfg_logo, #product_photo_td img.vCSS_img_mfg_logo")
+        .forEach(function (img) {
+          if (img.closest && img.closest("#mc-pdp-brand-logo")) return;
+          try {
+            img.style.setProperty("display", "none", "important");
+          } catch (eHide) {}
+        });
+    } catch (eHideMfg) {}
+  }
+
   function placeBrandLogoBelowTitle() {
     if (isSaranoniPdpPage()) {
       ensureSaranoniBrandLogo();
@@ -2115,25 +2219,29 @@
       ensureMahjongHouseBrandLogo();
       return;
     }
-    if (
-      isPdpLayoutMounted() &&
-      global.document.getElementById("mc-pdp-brand-logo") &&
-      global.document.getElementById("mc-pdp-brand-logo").querySelector("img")
-    ) {
+    if (isCordaroysBrandPdpPage()) {
+      try { ensureBeanBagBrandLogo(); } catch (eBbLogo) {}
       return;
     }
     var wrap = global.document.getElementById("mc-pdp-brand-logo");
-    if (wrap && wrap.querySelector("img")) {
+    var logoInWrap = wrap && wrap.querySelector("img");
+    var mediaLogo = global.document.querySelector(
+      "td.mc-unified-pdp-media img.vCSS_img_mfg_logo, td.mc-pdp-media-td img.vCSS_img_mfg_logo, #product_photo_td img.vCSS_img_mfg_logo, td.mc-unified-pdp-media img[src*='/manufacturers/'], td.mc-pdp-media-td img[src*='/manufacturers/']"
+    );
+    /* Keep retrying furniture PDPs until the mfg logo leaves the media column. */
+    if (logoInWrap && (!mediaLogo || wrap.contains(mediaLogo))) {
+      styleBrandLogoWrap(wrap, logoInWrap);
+      restoreMediaHeroAfterLogoMove();
       return;
     }
-    var logo = findManufacturerLogoImg();
+    var logo = findManufacturerLogoImg() || mediaLogo;
     if (!logo) return;
     if (!wrap) {
       wrap = global.document.createElement("div");
       wrap.id = "mc-pdp-brand-logo";
       wrap.className = "mc-pdp-brand-logo";
     }
-    wrap.appendChild(logo);
+    if (logo.parentNode !== wrap) wrap.appendChild(logo);
     var col = findPdpHeroColumnTd();
     var titleEl = global.document.getElementById("mc-pdp-title-right");
     if (col && titleEl && titleEl.parentNode === col) {
@@ -2142,9 +2250,11 @@
       } catch (eBeforeTitle) {}
     } else if (col && !col.contains(wrap)) {
       try {
-        col.appendChild(wrap);
+        col.insertBefore(wrap, col.firstChild);
       } catch (eCol) {}
     }
+    styleBrandLogoWrap(wrap, logo);
+    restoreMediaHeroAfterLogoMove();
   }
 
   var SARANONI_BRAND_LOGO_SRC = "/v/vspfiles/photos/manufacturers/saranoni%20blankets.jpg";
@@ -3371,7 +3481,7 @@
         wrap.style.setProperty("margin", "0", "important");
         wrap.style.setProperty("background", "#000", "important");
         wrap.style.setProperty("background-color", "#000", "important");
-        wrap.style.setProperty("border", "1px solid #000", "important");
+        wrap.style.setProperty("border", "1px solid #fff", "important");
       } catch (eWrapCol) {}
       var btn =
         wrap.querySelector("input[name='btnaddtocart'], button[name='btnaddtocart'], input[type='submit']") ||
@@ -3388,7 +3498,7 @@
           btn.style.setProperty("background", "#000", "important");
           btn.style.setProperty("background-color", "#000", "important");
           btn.style.setProperty("color", "#fff", "important");
-          btn.style.setProperty("border", "1px solid #000", "important");
+          btn.style.setProperty("border", "1px solid #fff", "important");
         } catch (eBtnCol) {}
       }
     }
@@ -3893,11 +4003,11 @@
 
   /** Logo → title → price → Klarna in the right column (non–bean-bag PDPs). */
   function ensureHeroColumnOrder() {
-    if (isPdpLayoutMounted()) return;
     if (isBeanBagPdpPage()) return;
     try {
       placeBrandLogoBelowTitle();
     } catch (eLogo) {}
+    if (isPdpLayoutMounted()) return;
     if (isSaranoniPdpPage()) {
       appendSaranoniInfoColumnOrder();
       return;
@@ -5297,12 +5407,12 @@
       "html body #mc-pdp-accordion #product_description{" +
       "display:block!important;visibility:visible!important;opacity:1!important;" +
       "height:auto!important;max-height:none!important;overflow:visible!important}" +
-      "html body #mc-pdp-accordion #mc-pdp-description-below-features," +
-      "html body #mc-pdp-accordion #mc-pdp-description-below-features *, " +
-      "html body #mc-pdp-accordion #ProductDetail_ProductDetails_div," +
-      "html body #mc-pdp-accordion #ProductDetail_ProductDetails_div *, " +
-      "html body #mc-pdp-accordion #product_description," +
-      "html body #mc-pdp-accordion #product_description *{color:#d8d8d8!important}";
+      "html body #mc-pdp-accordion .mc-acc-panel #mc-pdp-description-below-features," +
+      "html body #mc-pdp-accordion .mc-acc-panel #mc-pdp-description-below-features *, " +
+      "html body #mc-pdp-accordion .mc-acc-panel #ProductDetail_ProductDetails_div," +
+      "html body #mc-pdp-accordion .mc-acc-panel #ProductDetail_ProductDetails_div *, " +
+      "html body #mc-pdp-accordion .mc-acc-panel #product_description," +
+      "html body #mc-pdp-accordion .mc-acc-panel #product_description *{color:#333!important}";
     (global.document.head || global.document.documentElement).appendChild(el);
   }
 
@@ -5322,7 +5432,7 @@
           el.style.setProperty("height", "auto", "important");
           el.style.setProperty("max-height", "none", "important");
           el.style.setProperty("overflow", "visible", "important");
-          el.style.setProperty("color", "#d8d8d8", "important");
+          el.style.setProperty("color", "#333", "important");
         } catch (eShow) {}
       });
     } catch (eReveal) {}

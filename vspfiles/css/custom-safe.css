@@ -17850,7 +17850,7 @@ html body.mc-pdp-unified-ready #mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-gatlin-description-below,
 html body.mc-pdp-unified-ready #mc-pdp-price-atc-row,
-html body.mc-pdp-unified-ready .mc-pdp-purchase-controls,
+html body.mc-pdp-unified-ready .mc-pdp-purchase-controls:not(#mc-pdp-purchase-stack),
 html body.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidden="true"],
 html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidden="true"],
 html body.mc-pdp-unified-ready td.mc-unified-pdp-info:has(.mc-unified-purchase-controls input[name="btnaddtocart"]) #v65-productdetail-action-wrapper {
@@ -17872,20 +17872,38 @@ html body.mc-pdp-unified-ready #mc-pdp-accordion #product_description {
   overflow: visible !important;
 }
 
-html body #mc-pdp-accordion #mc-pdp-description-below-features,
-html body #mc-pdp-accordion #mc-pdp-description-below-features *,
-html body #mc-pdp-accordion #mc-acc-saranoni-product-details-host,
-html body #mc-pdp-accordion #mc-acc-saranoni-product-details-host *,
-html body #mc-pdp-accordion #ProductDetail_ProductDetails_div,
-html body #mc-pdp-accordion #ProductDetail_ProductDetails_div *,
-html body #mc-pdp-accordion #product_description,
-html body #mc-pdp-accordion #product_description * {
-  color: #d8d8d8 !important;
+html body #mc-pdp-accordion .mc-acc-panel #mc-pdp-description-below-features,
+html body #mc-pdp-accordion .mc-acc-panel #mc-pdp-description-below-features *,
+html body #mc-pdp-accordion .mc-acc-panel #mc-acc-saranoni-product-details-host,
+html body #mc-pdp-accordion .mc-acc-panel #mc-acc-saranoni-product-details-host *,
+html body #mc-pdp-accordion .mc-acc-panel #ProductDetail_ProductDetails_div,
+html body #mc-pdp-accordion .mc-acc-panel #ProductDetail_ProductDetails_div *,
+html body #mc-pdp-accordion .mc-acc-panel #product_description,
+html body #mc-pdp-accordion .mc-acc-panel #product_description * {
+  color: #333 !important;
 }
-html body #mc-pdp-accordion #mc-pdp-description-below-features a,
-html body #mc-pdp-accordion #product_description a {
-  color: #ffffff !important;
+html body #mc-pdp-accordion .mc-acc-panel #mc-pdp-description-below-features a,
+html body #mc-pdp-accordion .mc-acc-panel #product_description a {
+  color: #111 !important;
   text-decoration: underline !important;
+}
+
+/* Black ATC on black page needs a visible edge */
+html body.mc-pdp-unified-ready #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-pdp-unified-ready #mc-pdp-purchase-stack .mc-unified-atc-btn,
+html body.mc-pdp-unified-ready #mc-pdp-purchase-stack input.vCSS_input_addtocart {
+  border: 1px solid #fff !important;
+}
+
+/* Keep live purchase stack visible (JS rebuilds it; do not blanket-hide). */
+html body.mc-pdp-unified-ready #mc-pdp-purchase-stack.mc-pdp-purchase-controls,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-purchase-stack.mc-pdp-purchase-controls {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 
@@ -26069,3 +26087,30 @@ body.productdetails td.mc-pdp-media-td #mc-pdp-description-below-features {
     display: none !important;
   }
 }
+
+
+/* Furniture / unified PDP: readable title + price on black theme */
+html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent #mc-pdp-title-right,
+html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent #mc-pdp-title-right h1,
+html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent #mc-pdp-title-right h1 font,
+html body.mc-product-page.mc-pdp-unified-ready #content_area #mc-pdp-title-right,
+html body.mc-product-page.mc-pdp-unified-ready #content_area #mc-pdp-title-right h1,
+html body.mc-product-page.mc-pdp-unified-ready #content_area #mc-pdp-title-right h1 font,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-title-right [itemprop="name"],
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-title-right .vp-product-title {
+  color: #f2f2f2 !important;
+}
+html body.mc-pdp-unified-ready .colors_productprice,
+html body.mc-pdp-unified-ready .colors_productprice *,
+html body.mc-pdp-unified-ready #mc-pdp-price-stack-host,
+html body.mc-pdp-unified-ready #mc-pdp-price-stack-host .product_productprice,
+html body.mc-pdp-unified-ready #mc-pdp-price-stack-host .product_productprice * {
+  color: #ffffff !important;
+}
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media #product_photo,
+html body.mc-pdp-unified-ready td.mc-pdp-media-td #product_photo {
+  width: 100% !important;
+  max-width: 650px !important;
+  height: auto !important;
+}
+
