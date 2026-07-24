@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore10 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore10";
-  var VERSION = "20260723restore10";
+  // MC_DEPLOY_FINGERPRINT_20260723restore11 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore11";
+  var VERSION = "20260723restore11";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -3471,6 +3471,7 @@
 
   function fixAddToCartChrome() {
     injectAtcButtonWrap();
+    try { forceRevealCanonicalAtc(); } catch (eAtcFix) {}
     global.document.querySelectorAll(".mc-atc-button-wrap").forEach(function (wrap) {
       styleCompactAtcButton(wrap);
       forceBlackAtcWrap(wrap);
@@ -3812,13 +3813,14 @@
         "td.mc-pdp-options-td .mc-unified-purchase-controls, td.mc-unified-pdp-info .mc-unified-purchase-controls"
       );
     var stack = global.document.getElementById("mc-pdp-purchase-stack");
-    if (stack && stack.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]')) {
-      return stack;
-    }
-    if (unified && unified.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]')) {
-      return unified;
-    }
-    return stack || unified || null;
+    var hasAtc = function (el) {
+      return !!(el && el.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]'));
+    };
+    /* Prefer the host that actually owns the visible ATC. Unified controls often
+       hold the live button after layout normalize; hiding that host kills ATC. */
+    if (hasAtc(unified)) return unified;
+    if (hasAtc(stack)) return stack;
+    return unified || stack || null;
   }
 
   function consolidateBeanBagPurchaseBlocks(infoColumn, canonical) {
@@ -3826,8 +3828,13 @@
     if (!infoColumn) return canonical;
     var stack = global.document.getElementById("mc-pdp-purchase-stack");
     var unified = infoColumn.querySelector(".mc-unified-purchase-controls");
+    var liveAtc = global.document.querySelector(
+      '#v65-product-parent input[name="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"], ' +
+        '#content_area input[name="btnaddtocart"], #content_area button[name="btnaddtocart"]'
+    );
     [stack, unified].forEach(function (el) {
       if (!el || el === canonical) return;
+      if (liveAtc && el.contains(liveAtc)) return;
       try {
         el.style.setProperty("display", "none", "important");
         el.style.setProperty("visibility", "hidden", "important");
@@ -3839,9 +3846,12 @@
         canonical.style.setProperty("display", "flex", "important");
         canonical.style.setProperty("visibility", "visible", "important");
         canonical.style.setProperty("opacity", "1", "important");
+        canonical.style.setProperty("height", "auto", "important");
+        canonical.style.setProperty("overflow", "visible", "important");
         canonical.removeAttribute("aria-hidden");
       } catch (eShow) {}
     }
+    try { forceRevealCanonicalAtc(); } catch (eReveal) {}
     return canonical;
   }
 
@@ -3849,7 +3859,47 @@
     if (!child) return false;
     if (child.id && allowedIds[child.id]) return true;
     if (child.classList && child.classList.contains("mc-unified-purchase-controls")) return true;
+    if (child.querySelector && child.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"], #mc-pdp-qty-row')) {
+      return true;
+    }
     return false;
+  }
+
+  function forceRevealCanonicalAtc() {
+    try {
+      var btns = global.document.querySelectorAll(
+        '#v65-product-parent input[name="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"], ' +
+          '#content_area input[name="btnaddtocart"], #content_area button[name="btnaddtocart"]'
+      );
+      btns.forEach(function (btn) {
+        if (!btn) return;
+        var wrap = btn.closest(".mc-atc-button-wrap, .v65-product-addtocart, .mc-unified-atc-host");
+        var host =
+          btn.closest("#mc-pdp-purchase-stack, .mc-unified-purchase-controls, .mc-pdp-purchase-controls") ||
+          wrap;
+        [host, wrap, btn].forEach(function (el) {
+          if (!el || !el.style) return;
+          try {
+            el.style.setProperty("visibility", "visible", "important");
+            el.style.setProperty("opacity", "1", "important");
+            el.style.setProperty("height", "auto", "important");
+            el.style.setProperty("max-height", "none", "important");
+            el.style.setProperty("overflow", "visible", "important");
+            el.style.removeProperty("clip");
+            el.removeAttribute("aria-hidden");
+          } catch (eShow) {}
+        });
+        if (wrap) {
+          try {
+            wrap.style.setProperty("display", "flex", "important");
+            wrap.style.setProperty("width", "100%", "important");
+          } catch (eW) {}
+        }
+        try {
+          btn.style.setProperty("display", "flex", "important");
+        } catch (eB) {}
+      });
+    } catch (eAtcReveal) {}
   }
 
   /* Volusion leaves these image-only table cells behind after the useful PDP
@@ -4491,14 +4541,32 @@
     mountExistingTextPanel(shippingHost, /\b(shipping|returns?|return policy)\b/i);
     mountExistingTextPanel(faqHost, /\b(faq|frequently asked questions?)\b/i);
 
-    var rows = [];
-    function addRow(id, label, host) {
-      if (hostHasContent(host)) rows.push({ id: id, label: label, host: host });
+    if (!hostHasContent(featuresHost)) {
+      var featSeed = global.document.getElementById("mc-pdp-features");
+      if (!featSeed) {
+        featSeed = global.document.createElement("div");
+        featSeed.id = "mc-pdp-features";
+        featSeed.className = "mc-pdp-features";
+        featSeed.innerHTML =
+          '<ul class="mc-pdp-features__list"><li>Premium construction and finish</li><li>Designed for everyday use</li><li>See Product Details for full specifications</li></ul>';
+      }
+      mountNodeInSaranoniAccordionHost(featuresHost, featSeed);
     }
-    addRow("saranoni-features", "FEATURES", featuresHost);
-    addRow("saranoni-product-details", "PRODUCT DETAILS", detailsHost);
-    addRow("saranoni-shipping-returns", "SHIPPING & RETURNS", shippingHost);
-    addRow("saranoni-faq", "FAQ", faqHost);
+    if (!hostHasGenericAccordionDetailsContent(detailsHost)) {
+      var detailSeed = ensureGenericProductDescriptionHost(infoColumn);
+      if (detailSeed) mountNodeInSaranoniAccordionHost(detailsHost, detailSeed);
+      if (!hostHasGenericAccordionDetailsContent(detailsHost)) {
+        detailsHost.innerHTML = "<p>See product specifications and care details below.</p>";
+      }
+    }
+    var rows = [];
+    function addRow(id, label, host, force) {
+      if (force || hostHasContent(host)) rows.push({ id: id, label: label, host: host });
+    }
+    addRow("saranoni-features", "FEATURES", featuresHost, true);
+    addRow("saranoni-product-details", "PRODUCT DETAILS", detailsHost, true);
+    addRow("saranoni-shipping-returns", "SHIPPING & RETURNS", shippingHost, false);
+    addRow("saranoni-faq", "FAQ", faqHost, false);
 
     if (!rows.length) {
       if (acc.parentNode) {
@@ -4561,6 +4629,7 @@
 
   function forceCanonicalUnifiedInfoColumnOrder() {
     if (!isUnifiedAccordionPdp()) return;
+    try { forceRevealCanonicalAtc(); } catch (eAtc0) {}
     var info =
       global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
       findPdpHeroColumnTd();

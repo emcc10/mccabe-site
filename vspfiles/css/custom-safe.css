@@ -25851,3 +25851,59 @@ html body.mc-pdp-accordion-pdp #mc-pdp-accordion {
     margin-right: auto !important;
   }
 }
+
+
+/* MC_RESTORE11_ATC_FREE_SHIP_20260723 */
+html body.mc-product-page .mc-atc-button-wrap,
+html body.productdetails .mc-atc-button-wrap,
+html body.mc-pdp-unified-ready .mc-atc-button-wrap,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+html body.mc-product-page input[name="btnaddtocart"],
+html body.productdetails input[name="btnaddtocart"],
+html body.mc-product-page button[name="btnaddtocart"],
+html body.productdetails button[name="btnaddtocart"],
+html body.mc-pdp-unified-ready input[name="btnaddtocart"],
+html body.mc-pdp-unified-ready button[name="btnaddtocart"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: 48px !important;
+  min-height: 48px !important;
+}
+html body.mc-product-page td.mc-pdp-media-td,
+html body.productdetails td.mc-pdp-media-td,
+html body.mc-pdp-unified-ready td.mc-pdp-media-td,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media {
+  width: 650px !important;
+  max-width: 650px !important;
+  flex: 0 0 650px !important;
+}
+.v-product img.mc-plp-free-ship-img,
+.v-product .mc-plp-free-ship img,
+body.category img.mc-plp-free-ship-img,
+body.is-category-or-listing-page img.mc-plp-free-ship-img {
+  display: inline-block !important;
+  visibility: visible !important;
+  width: auto !important;
+  height: 18px !important;
+  max-height: 18px !important;
+  max-width: 120px !important;
+  margin: 4px auto 0 !important;
+  object-fit: contain !important;
+}
+body.mc-product-page .mc-unified-pdp-description--media,
+body.productdetails .mc-unified-pdp-description--media,
+body.mc-product-page td.mc-pdp-media-td #mc-pdp-description-below-features,
+body.productdetails td.mc-pdp-media-td #mc-pdp-description-below-features {
+  display: none !important;
+}
