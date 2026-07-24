@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260724altfix3 - saranoni logo-first order + alt flicker stop */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260724sizeimg1 - restore saranoni size image grid */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -26074,6 +26074,15 @@ html body.mc-saranoni-pdp #mc-saranoni-size-label { order: 6 !important; }
 html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
 html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(#mc-saranoni-size-thumbs) {
   order: 7 !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
 }
 html body.mc-saranoni-pdp #mc-pdp-option-block { order: 8 !important; }
 html body.mc-saranoni-pdp #mc-pdp-accordion { order: 9 !important; }
@@ -26108,16 +26117,24 @@ html body.mc-saranoni-pdp .mc-unified-purchase-controls {
     margin: 10px 0 8px !important;
   }
   html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches {
-    display: block !important;
+    display: flex !important;
   }
   html body.mc-saranoni-pdp #mc-saranoni-size-label { order: 6 !important; }
   html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
   html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(#mc-saranoni-size-thumbs) {
     order: 7 !important;
     display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 0 12px !important;
+  }
+  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb img {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
   }
   html body.mc-saranoni-pdp #mc-pdp-option-block { order: 8 !important; }
   html body.mc-saranoni-pdp #mc-pdp-accordion { order: 9 !important; }

@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260724hang1 — break FEATURES/accordion infinite recursion
-  var MC_DEPLOY_FINGERPRINT = "20260724hang1";
-  var VERSION = "20260724hang1";
+  // MC_DEPLOY_FINGERPRINT_20260724sizeimg1 — restore Saranoni size image grid
+  var MC_DEPLOY_FINGERPRINT = "20260724sizeimg1";
+  var VERSION = "20260724sizeimg1";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -5109,9 +5109,8 @@
         );
       var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
       var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
-      if (sizes && sizes.closest && sizes.closest(".mc-saranoni-scroll-host")) {
-        sizes = sizes.closest(".mc-saranoni-scroll-host");
-      }
+      /* Never promote size row to a scroll-host — that collapses the 4-col
+         image grid into stacked text chips. */
       /* Always force DOM order from the top — CSS order alone is unreliable
          when flex is only applied on some breakpoints. */
       var chain = [logo, title, price, colors, sizeLabel, sizes].filter(Boolean);
@@ -5135,7 +5134,11 @@
         if (price) price.style.setProperty("order", "3", "important");
         if (colors) colors.style.setProperty("order", "5", "important");
         if (sizeLabel) sizeLabel.style.setProperty("order", "6", "important");
-        if (sizes) sizes.style.setProperty("order", "7", "important");
+        if (sizes) {
+          sizes.style.setProperty("order", "7", "important");
+          sizes.style.setProperty("display", "grid", "important");
+          sizes.style.setProperty("grid-template-columns", "repeat(4,minmax(0,1fr))", "important");
+        }
       } catch (eOrdLock) {}
       /* Remount races push variants above logo after first paint — re-lock. */
       if (!global.__MC_SAR_ORDER_RELOCK__) {
@@ -5144,6 +5147,9 @@
           global.setTimeout(function () {
             try {
               applySaranoniInfoColumnOrder(infoColumn);
+              try {
+                ensureSaranoniVariantUi();
+              } catch (eVarUi) {}
             } catch (eRelock) {}
           }, ms);
         });
@@ -8085,7 +8091,23 @@
     }
     var signature =
       ctx.productCode + "|" + ctx.entries.map(function (e) { return e.optionId; }).join(",");
-    if (row.getAttribute("data-mc-signature") === signature && row.querySelector(".mc-saranoni-size-thumb")) {
+    var existingThumbs = row.querySelectorAll(".mc-saranoni-size-thumb");
+    var imgsOk = false;
+    if (existingThumbs.length) {
+      Array.prototype.some.call(existingThumbs, function (thumb) {
+        var im = thumb.querySelector("img");
+        if (im && im.getAttribute("src") && im.style.display !== "none") {
+          imgsOk = true;
+          return true;
+        }
+        return false;
+      });
+    }
+    if (
+      row.getAttribute("data-mc-signature") === signature &&
+      existingThumbs.length &&
+      imgsOk
+    ) {
       if (saranoniSizeActiveOptionId) updateSaranoniSizeThumbUi(saranoniSizeActiveOptionId);
       ensureSaranoniSizeThumbsInInfoColumn();
       return;
