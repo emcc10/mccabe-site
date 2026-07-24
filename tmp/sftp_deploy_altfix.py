@@ -1,11 +1,12 @@
-#!/usr/bin/env python3
+﻿# -*- coding: utf-8 -*-
 from __future__ import annotations
 import base64, os, sys
 from pathlib import Path
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from verify_template_sftp import connect_paramiko_transport
+
 FILES = [
     "vspfiles/js/mc-pdp-alt-view-row.js",
     "vspfiles/js/mc-pdp-auth-cta-form.js",
@@ -13,25 +14,28 @@ FILES = [
     "vspfiles/css/custom-safe.css",
     "template_266.html",
 ]
+
 def load_filezilla_creds():
-    root = ET.parse(Path.home() / "AppData/Roaming/FileZilla/sitemanager.xml").getroot()
+    root = ET.parse(str(Path.home() / "AppData/Roaming/FileZilla/sitemanager.xml")).getroot()
     for s in root.findall(".//Server"):
         if (s.findtext("Name") or "").strip() == "mccabe-site":
             host = (s.findtext("Host") or "").strip()
-            port = int((s.findtext("Port") or "2222").strip() or "2222")
+            port = int((s.findtext("Port") or "22").strip() or "22")
             user = (s.findtext("User") or "").strip()
             pw = base64.b64decode((s.find("Pass").text or "").encode()).decode("utf-8")
             return host, port, user, pw
     raise SystemExit("FileZilla site mccabe-site not found")
-def remotes_for(local):
+
+def remotes_for(local: str):
     rel = local.replace("\\", "/")
     if rel == "template_266.html":
-        return ["/v/template_266.html", "template_266.html"]
+        return ["v/template_266.html", "template_266.html"]
     return ["/v/" + rel, rel]
+
 def main():
     os.chdir(ROOT)
     host, port, user, pw = load_filezilla_creds()
-    print("Connecting %s:%s as %s" % (host, port, user), flush=True)
+    print(f"Connecting {host}:{port} as {user}", flush=True)
     import paramiko
     transport = connect_paramiko_transport(host, port, user, pw)
     ok = 0
@@ -61,14 +65,15 @@ def main():
                         sftp.rename(tmp, remote)
                     except OSError:
                         sftp.put(str(path), remote, confirm=False)
-                    print("PUT_OK %s -> %s (%s bytes)" % (local, remote, len(data)), flush=True)
+                    print(f"PUTOK {local} -> {remote} ({len(data)} bytes)", flush=True)
                     ok += 1
                 except Exception as exc:
-                    print("PUT_FAIL %s -> %s: %s" % (local, remote, exc), flush=True)
+                    print(f"PUTFAIL {local} -> {remote}: {exc}", flush=True)
         sftp.close()
     finally:
         transport.close()
-    print("Done puts=%s" % ok, flush=True)
+    print(f"Done puts={ok}", flush=True)
     return 0 if ok else 1
+
 if __name__ == "__main__":
     raise SystemExit(main())
