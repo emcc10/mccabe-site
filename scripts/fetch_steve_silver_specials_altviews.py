@@ -39,9 +39,11 @@ PAGES = {
         "https://stevesilverspecials.com/product/burlington-5-piece-52-round-dining-set/",
         "https://stevesilver.com/product/burlington-52-inch-round-table/",
     ),
+    # Live Canova-Dining-Set PDP is the Camolson counter-height set
+    # (Carrara triangular table + Olson khaki chairs), not the round CV520 Canova.
+    # Round gray-marble Canova lives under SS-CV520-D5PC-G.
     "Canova-Dining-Set": (
-        "https://stevesilverspecials.com/product/canova-5-piece-gray-marble-dining-settable-4-side-chairs/",
-        "https://stevesilver.com/product/canova-round-gray-marble-top-dining-table/",
+        "https://stevesilverspecials.com/product/camolson-7-piece-marble-top-dining-set/",
     ),
     "Grayson-Dining-Set": (
         "https://stevesilver.com/product/grayson-5-piece-marble-top-counter-storage-dining-set/",
@@ -89,7 +91,26 @@ def page_images(html: str) -> list[str]:
             if canonical in seen or not re.search(r"\.(?:jpe?g|png|webp)(?:\?|$)", canonical, re.I):
                 continue
             filename = canonical.rsplit("/", 1)[-1].upper()
-            if any(token in filename for token in ("LOGO", "ICON", "DTL", "DIMENSION", "HARDWARE", "AMP1")):
+            if any(
+                token in filename
+                for token in (
+                    "LOGO",
+                    "ICON",
+                    "DTL",
+                    "DIMENSION",
+                    "HARDWARE",
+                    "AMP1",
+                    "MAILCHIMP",
+                    "APPLEOS",
+                    "ANDROID",
+                    # Related-product carousels on Steve Silver Specials pages
+                    "ZEN500",
+                    "ALFRESCO",
+                    "NIX-",
+                    "LOFTON",
+                    "EVELYN",
+                )
+            ):
                 continue
             seen.add(canonical)
             urls.append(canonical)

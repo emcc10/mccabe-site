@@ -1,10 +1,10 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260723altscrl — block scroll-host + inline-flex track so
-     closeout/SS alt thumbs can scroll inside Volusion table cells (flex
-     scrollports fail there: scrollLeft stays 0). */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__) return;
+  /* MC_ALT_VIEW_ROW_20260725camolson — Canova/Camolson gallery fix + always
+     probe -altviewN on closeout PDPs (native hero alone used to short-circuit). */
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725camolson__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260725camolson__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723close1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723mob1__ = true;
@@ -18,6 +18,7 @@
   var ROW_ID = "mc-pdp-alt-view-row";
   var TRACK_CLASS = "mc-pdp-alt-view-row__track";
   var MAX_ALT_VIEWS = 64;
+  var ALT_PROBE_VER = "20260725camolson";
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
@@ -318,7 +319,13 @@
 
     for (var slot = 1; slot <= MAX_ALT_VIEWS; slot += 1) {
       (function (photoSlot) {
-        var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
+        var src =
+          "/v/vspfiles/photos/" +
+          code +
+          "-altview" +
+          photoSlot +
+          ".jpg?v=" +
+          ALT_PROBE_VER;
         probeImage(src, function () {
           discoveredByCode[code].push({
             slot: photoSlot,
@@ -363,7 +370,13 @@
 
     for (var altSlot = 1; altSlot <= MAX_ALT_VIEWS; altSlot += 1) {
       (function (photoSlot) {
-        var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
+        var src =
+          "/v/vspfiles/photos/" +
+          code +
+          "-altview" +
+          photoSlot +
+          ".jpg?v=" +
+          ALT_PROBE_VER;
         probeImage(src, function () {
           addItem(photoSlot, src, "Alternate product view");
           completeOne();
@@ -497,10 +510,23 @@
     }
 
     var items = collectItems(code);
+    /* Always probe -altviewN for furniture/closeout PDPs. Native #altviews often
+       only exposes the hero (-1/-2T), which previously short-circuited probing and
+       left mismatched or missing alt galleries (Canova/Camolson, 2026-07-25). */
+    if (
+      isGenericPdp &&
+      !probeInFlight[code] &&
+      !Object.prototype.hasOwnProperty.call(discoveredByCode, code)
+    ) {
+      probeGenericAltViews(code);
+    }
     if (!items.length) {
       if (row) row.style.setProperty("display", "none", "important");
-      if (isGenericPdp) probeGenericAltViews(code);
-      else probeAltViews(code);
+      if (isGenericPdp) {
+        /* probe already kicked off above */
+      } else {
+        probeAltViews(code);
+      }
       return;
     }
 
