@@ -1793,6 +1793,20 @@
           try { glyph.style.setProperty("display", "none", "important"); } catch (eHide) {}
         }
       });
+      /* Collapse nested free-ship wrappers so one GIF badge shows under price. */
+      var wrappers = card.querySelectorAll(".vol-free-shipping-icon, .mc-plp-free-ship");
+      if (wrappers.length > 1) {
+        var keep = wrappers[0];
+        var keepImg = keep.querySelector("img") || keep;
+        Array.prototype.forEach.call(wrappers, function (wrap, idx) {
+          if (idx === 0) return;
+          try { wrap.parentNode && wrap.parentNode.removeChild(wrap); } catch (eDup) {}
+        });
+        if (keepImg && keepImg.tagName === "IMG") {
+          keepImg.src = gif;
+          keepImg.classList.add("mc-plp-free-ship-img");
+        }
+      }
       var nativeIcon = card.querySelector(
         'img[alt="Free Shipping" i], img[src*="Icon_FreeShipping" i], img.mc-plp-free-ship-img'
       );
