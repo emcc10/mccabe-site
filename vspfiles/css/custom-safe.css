@@ -25738,3 +25738,23 @@ html body.mc-pdp-accordion-pdp:not(.mc-steve-silver-altview-pdp):not(.mc-saranon
   padding: 0 !important;
 }
 /* END REMOVABLE: generic furniture accordion desc 20260723restore2 */
+
+/* BEGIN REMOVABLE: unified accordion layout 20260723restore4 */
+html body.mc-product-page td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+html body.mc-product-page td.mc-pdp-media-td .mc-unified-pdp-description--media,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description--media,
+html body.mc-pdp-unified-ready td.mc-pdp-media-td .mc-unified-pdp-description--media {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+}
+html body.mc-product-page #mc-pdp-accordion,
+html body.mc-pdp-unified-ready #mc-pdp-accordion,
+html body.mc-pdp-accordion-pdp #mc-pdp-accordion {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+/* END REMOVABLE: unified accordion layout 20260723restore4 */

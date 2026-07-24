@@ -15288,11 +15288,13 @@ body.mc-product-page .mc-pdp-top-retail-row--regular-only {
   visibility: hidden !important;
 }
 
-/* Hide accordion on PDPs that don't use the McCabe accordion layout */
-body:not(.mc-saranoni-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-mahjong-house-pdp):not(.mc-bean-bag-pdp):not(.mc-pdp-accordion-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])) #mc-pdp-accordion,
-body:not(.mc-saranoni-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-mahjong-house-pdp):not(.mc-bean-bag-pdp):not(.mc-pdp-accordion-pdp):not(:has(#v65-product-parent input[name="ProductCode"][value^="SS-"])) .mc-pdp-accordion {
-  display: none !important;
-  visibility: hidden !important;
+/* Unified PDP accordion: same shell on every product page */
+html body.mc-product-page #mc-pdp-accordion,
+html body.productdetails #mc-pdp-accordion,
+html body.mc-pdp-unified-ready #mc-pdp-accordion,
+html body.mc-pdp-accordion-pdp #mc-pdp-accordion {
+  display: block !important;
+  visibility: visible !important;
 }
 
 /* Steve Silver / Mahjong: keep accordion visible (beats legacy unscoped hide rules) */

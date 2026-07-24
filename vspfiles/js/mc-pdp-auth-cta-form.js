@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore3 — product description into Product Details accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore3";
-  var VERSION = "20260723restore3";
+  // MC_DEPLOY_FINGERPRINT_20260723restore4 — one unified accordion layout for all PDPs
+  var MC_DEPLOY_FINGERPRINT = "20260723restore4";
+  var VERSION = "20260723restore4";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -823,7 +823,6 @@
     if (!isProductPdp()) return false;
     if (isFixedSectionalUnifiedPdp()) return true;
     if (isSectionalPdpPage()) return false;
-    if (isSoftGoodsPdpPage()) return false;
     try {
       if (
         global.document.body &&
@@ -836,16 +835,25 @@
     return true;
   }
 
-  /** Coaster and other generic unified furniture PDPs (not SS/closeout/Saranoni/bean bag). */
-  function isGenericUnifiedFurnitureAccordionPdp() {
-    if (!shouldDeferToUnifiedPdpLayout()) return false;
-    if (isSteveSilverPdpPage() || isCloseoutPdpPage()) return false;
-    if (isSaranoniPdpPage() || isMahjongHousePdpPage()) return false;
-    if (isBeanBagPdpPage()) return false;
+  /** One accordion PDP shell for every non-sectional product (same layout everywhere). */
+  function isUnifiedAccordionPdp() {
+    if (!isProductPdp()) return false;
+    if (isSectionalPdpPage() && !isFixedSectionalUnifiedPdp()) return false;
     try {
-      if (typeof isGameRoomBarPdpPage === "function" && isGameRoomBarPdpPage()) return false;
-    } catch (eBar) {}
+      if (
+        global.document.body &&
+        (global.document.body.classList.contains("mc-theater-seating-pdp") ||
+          global.document.documentElement.classList.contains("mc-paragon-pdp"))
+      ) {
+        return false;
+      }
+    } catch (eAcc) {}
     return true;
+  }
+
+  /** @deprecated use isUnifiedAccordionPdp */
+  function isGenericUnifiedFurnitureAccordionPdp() {
+    return isUnifiedAccordionPdp();
   }
 
   function isPalliserPdpPage() {
@@ -4354,7 +4362,7 @@
   }
 
   function repairGenericAccordionProductDetails() {
-    if (!isGenericUnifiedFurnitureAccordionPdp()) return;
+    if (!isUnifiedAccordionPdp()) return;
     var infoColumn = resolveSaranoniInfoColumn() || findPdpHeroColumnTd();
     var detailsHost = global.document.getElementById("mc-acc-saranoni-product-details-host");
     var panel = global.document.querySelector(
@@ -4389,14 +4397,7 @@
   }
 
   function ensureSaranoniPdpAccordion() {
-    if (
-      !isSaranoniPdpPage() &&
-      !isSteveSilverPdpPage() &&
-      !isMahjongHousePdpPage() &&
-      !isCloseoutPdpPage() &&
-      !(typeof isGameRoomBarPdpPage === "function" && isGameRoomBarPdpPage()) &&
-      !isGenericUnifiedFurnitureAccordionPdp()
-    ) {
+    if (!isUnifiedAccordionPdp()) {
       return null;
     }
     var infoColumn = resolveSaranoniInfoColumn();
@@ -4484,21 +4485,19 @@
         mountNodeInSaranoniAccordionHost(detailsHost, closeoutDesc);
       }
     }
-    if (isGenericUnifiedFurnitureAccordionPdp()) {
-      ensureGenericProductDescriptionHost(infoColumn);
-      mountNodeInSaranoniAccordionHost(
-        detailsHost,
-        global.document.getElementById("mc-pdp-description-below-features")
-      );
-      if (!hostHasGenericAccordionDetailsContent(detailsHost)) {
-        var genericDesc = resolveGenericProductDescriptionNode();
-        if (genericDesc) {
-          if (genericDesc.id === "mc-pdp-description-below-features") {
-            mountNodeInSaranoniAccordionHost(detailsHost, genericDesc);
-          } else {
-            var genericHost = ensureGenericProductDescriptionHost(infoColumn);
-            if (genericHost) mountNodeInSaranoniAccordionHost(detailsHost, genericHost);
-          }
+    ensureGenericProductDescriptionHost(infoColumn);
+    mountNodeInSaranoniAccordionHost(
+      detailsHost,
+      global.document.getElementById("mc-pdp-description-below-features")
+    );
+    if (!hostHasGenericAccordionDetailsContent(detailsHost)) {
+      var genericDesc = resolveGenericProductDescriptionNode();
+      if (genericDesc) {
+        if (genericDesc.id === "mc-pdp-description-below-features") {
+          mountNodeInSaranoniAccordionHost(detailsHost, genericDesc);
+        } else {
+          var genericHost = ensureGenericProductDescriptionHost(infoColumn);
+          if (genericHost) mountNodeInSaranoniAccordionHost(detailsHost, genericHost);
         }
       }
     }
@@ -4556,35 +4555,48 @@
     if (isMahjongHousePdpPage()) {
       applyMahjongHouseInfoColumnOrder(infoColumn);
     }
-    if (isSteveSilverPdpPage() || isMahjongHousePdpPage() || isCloseoutPdpPage() || isGenericUnifiedFurnitureAccordionPdp()) {
-      try {
-        if (global.document.body) {
-          global.document.body.classList.add("mc-pdp-accordion-pdp");
-          if (isCloseoutPdpPage()) {
-            global.document.body.classList.add("mc-closeout-pdp");
-          }
+    try {
+      if (global.document.body) {
+        global.document.body.classList.add("mc-pdp-accordion-pdp");
+        if (isCloseoutPdpPage()) {
+          global.document.body.classList.add("mc-closeout-pdp");
         }
-      } catch (eAccBody) {}
-      ensurePdpAccordionVisible();
-      if (isMahjongHousePdpPage()) {
-        ensureMahjongAccordionClosed();
-        markMahjongPdpReady();
       }
+    } catch (eAccBody) {}
+    ensurePdpAccordionVisible();
+    if (isMahjongHousePdpPage()) {
+      ensureMahjongAccordionClosed();
+      markMahjongPdpReady();
     }
     return acc;
   }
 
-  function finalizeGenericFurniturePdpAccordion() {
-    if (!isGenericUnifiedFurnitureAccordionPdp()) return null;
+  function finalizeUnifiedPdpAccordion() {
+    if (!isUnifiedAccordionPdp()) return null;
     try {
+      if (isBeanBagPdpPage()) {
+        try {
+          if (!global.document.getElementById("mc-pdp-features")) mountPdpFeaturesBlock();
+          if (!global.document.getElementById("mc-pdp-description-below-features")) {
+            mountDescriptionBelowFeatures();
+          }
+        } catch (eBbPrep) {}
+      }
       mountPdpFeaturesBlock();
       mountDescriptionBelowFeatures();
       ensureSaranoniPdpAccordion();
       repairGenericAccordionProductDetails();
       ensureSaranoniPdpAccordion();
       ensurePdpAccordionVisible();
-    } catch (eGenAcc) {}
+      if (global.document.body) {
+        global.document.body.classList.add("mc-pdp-accordion-pdp");
+      }
+    } catch (eUnifiedAcc) {}
     return global.document.getElementById("mc-pdp-accordion");
+  }
+
+  function finalizeGenericFurniturePdpAccordion() {
+    return finalizeUnifiedPdpAccordion();
   }
 
   /* Bean Bag PDPs already own their Features and optional description nodes.
@@ -9954,6 +9966,8 @@
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcHideNativeVolusionTabPanels = hideNativeVolusionTabPanels;
   global.mcMountDescriptionBelowFeatures = mountDescriptionBelowFeatures;
+  global.mcIsUnifiedAccordionPdp = isUnifiedAccordionPdp;
+  global.mcFinalizeUnifiedPdpAccordion = finalizeUnifiedPdpAccordion;
   global.mcIsGenericUnifiedFurnitureAccordionPdp = isGenericUnifiedFurnitureAccordionPdp;
   global.mcFinalizeGenericFurniturePdpAccordion = finalizeGenericFurniturePdpAccordion;
   global.mcRepairGenericAccordionProductDetails = repairGenericAccordionProductDetails;
@@ -11953,7 +11967,6 @@ function revealBeanBagRelated() {
   }
 
   function ensureUnifiedPdpLayout() {
-    if (isSoftGoodsPdpPage()) return;
     if (isMtlSectionalConfiguratorPdp()) return;
     if (isUnifiedPdpReady() || global.__MC_UNIFIED_PDP_STABLE__) return;
     function runNorm() {
@@ -12044,24 +12057,22 @@ function revealBeanBagRelated() {
       ensurePdpStackCriticalCss();
       ensurePdpHeroCriticalCss();
       disableQuantityHiders();
-      if (!sectional && isSoftGoodsPdpPage()) {
-        reassertSoftGoodsHeroOrder();
-        stripPriceZeroCents();
-      } else if (shouldDeferToUnifiedPdpLayout()) {
-        prepareDeferredUnifiedPdpHero();
-        forceRebuildCleanPriceStack();
-        ensureUnifiedPdpLayout();
-        retryDeferredUnifiedNormalize();
-        if (
-          global.document.body &&
-          !global.document.body.classList.contains("mc-pdp-unified-ready")
-        ) {
-          fixAddToCartChrome();
-        }
-        stripPriceZeroCents();
-      } else if (!sectional && isUnifiedPdpReady()) {
-        stripPriceZeroCents();
-      } else if (!sectional && isPdpLayoutMounted()) {
+      if (!sectional) {
+        if (shouldDeferToUnifiedPdpLayout() || isSoftGoodsPdpPage()) {
+          prepareDeferredUnifiedPdpHero();
+          forceRebuildCleanPriceStack();
+          ensureUnifiedPdpLayout();
+          retryDeferredUnifiedNormalize();
+          if (
+            global.document.body &&
+            !global.document.body.classList.contains("mc-pdp-unified-ready")
+          ) {
+            fixAddToCartChrome();
+          }
+          stripPriceZeroCents();
+        } else if (isUnifiedPdpReady()) {
+          stripPriceZeroCents();
+        } else if (isPdpLayoutMounted()) {
         forceRebuildCleanPriceStack();
         if (!isSoftGoodsPdpPage()) {
           ensureUnifiedPdpLayout();
@@ -12120,20 +12131,22 @@ function revealBeanBagRelated() {
           appendMahjongHouseInfoColumnOrder();
         } catch (eTmhFinal) {}
       }
-      if (isSteveSilverPdpPage() || isCloseoutPdpPage()) {
+      if (!sectional && isUnifiedAccordionPdp()) {
         try {
-          markCloseoutPdpPage();
-          mountPdpFeaturesBlock();
-          mountDescriptionBelowFeatures();
-          ensureSaranoniPdpAccordion();
-          appendSteveSilverInfoColumnOrder();
-          ensurePdpAccordionVisible();
-        } catch (eSsFinal) {}
-      }
-      if (isGenericUnifiedFurnitureAccordionPdp()) {
-        try {
-          finalizeGenericFurniturePdpAccordion();
-        } catch (eGenFinal) {}
+          finalizeUnifiedPdpAccordion();
+          if (isSteveSilverPdpPage() || isCloseoutPdpPage()) {
+            appendSteveSilverInfoColumnOrder();
+          }
+          if (isMahjongHousePdpPage()) {
+            appendMahjongHouseInfoColumnOrder();
+          }
+          if (isSaranoniPdpPage()) {
+            finalizeSaranoniInfoColumnOrder();
+          }
+          if (isBeanBagPdpPage()) {
+            appendBeanBagInfoColumnOrder();
+          }
+        } catch (eUnifiedFinal) {}
       }
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
         prepareDeferredUnifiedPdpHero();

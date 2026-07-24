@@ -1047,10 +1047,6 @@
   }
 
   function orderInfoColumn(infoTd) {
-    if (isMahjongHousePdp()) {
-      finalizeMahjongHouseInfoColumn();
-      return;
-    }
     var title =
       qs("#mc-pdp-title-right", infoTd) ||
       qs('h1[itemprop="name"]', infoTd) ||
@@ -1337,108 +1333,44 @@
   }
 
   function ensureDescriptionRow(mainRow, table, descNode, mediaTd) {
+    qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
+      if (!stray) return;
+      try {
+        stray.style.setProperty("display", "none", "important");
+        stray.setAttribute("aria-hidden", "true");
+      } catch (eHideStray) {}
+    });
+    var descRowAny = qs("tr.mc-pdp-description-row", table.tBodies && table.tBodies[0] ? table.tBodies[0] : table);
+    if (descRowAny) {
+      descRowAny.style.setProperty("display", "none", "important");
+      descRowAny.setAttribute("aria-hidden", "true");
+    }
+    hideLegacyVolusionTabPanels(mediaTd);
+    try {
+      if (typeof global.mcFinalizeUnifiedPdpAccordion === "function") {
+        global.mcFinalizeUnifiedPdpAccordion();
+      } else if (typeof global.mcFinalizeGenericFurniturePdpAccordion === "function") {
+        global.mcFinalizeGenericFurniturePdpAccordion();
+      } else if (typeof global.mcMountDescriptionBelowFeatures === "function") {
+        global.mcMountDescriptionBelowFeatures();
+      }
+      if (typeof global.mcRepairGenericAccordionProductDetails === "function") {
+        global.mcRepairGenericAccordionProductDetails();
+      }
+      if (typeof global.mcSyncPdpDescriptionViewMore === "function") {
+        global.mcSyncPdpDescriptionViewMore();
+      }
+      if (typeof global.mcHideNativeVolusionTabPanels === "function") {
+        global.mcHideNativeVolusionTabPanels();
+      }
+    } catch (eUnifiedDesc) {}
     if (isMahjongHousePdp()) {
-      if (isMahjongPdpReady()) return;
-      qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
-        if (!stray) return;
-        try {
-          stray.style.setProperty("display", "none", "important");
-          stray.setAttribute("aria-hidden", "true");
-        } catch (eTmhStray) {}
-      });
-      hideLegacyVolusionTabPanels(mediaTd);
-      try {
-        if (typeof global.mcMountDescriptionBelowFeatures === "function") {
-          global.mcMountDescriptionBelowFeatures();
-        }
-        if (typeof global.mcHideNativeVolusionTabPanels === "function") {
-          global.mcHideNativeVolusionTabPanels();
-        }
-        if (typeof global.mcSyncPdpDescriptionViewMore === "function") {
-          global.mcSyncPdpDescriptionViewMore();
-        }
-      } catch (eTmhDesc) {}
       finalizeMahjongHouseInfoColumn();
-      return;
     }
-    if (isSteveSilverPdp()) {
-      qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
-        if (!stray) return;
-        try {
-          stray.style.setProperty("display", "none", "important");
-          stray.setAttribute("aria-hidden", "true");
-        } catch (eStray) {}
-      });
-      var descRowSs = qs("tr.mc-pdp-description-row", table.tBodies && table.tBodies[0] ? table.tBodies[0] : table);
-      if (descRowSs) {
-        descRowSs.style.setProperty("display", "none", "important");
-        descRowSs.setAttribute("aria-hidden", "true");
-      }
-      hideLegacyVolusionTabPanels(mediaTd);
-      try {
-        if (typeof global.mcMountDescriptionBelowFeatures === "function") {
-          global.mcMountDescriptionBelowFeatures();
-        }
-        if (typeof global.mcAppendSteveSilverInfoColumnOrder === "function") {
-          global.mcAppendSteveSilverInfoColumnOrder();
-        }
-        if (typeof global.mcSyncPdpDescriptionViewMore === "function") {
-          global.mcSyncPdpDescriptionViewMore();
-        }
-        if (typeof global.mcHideNativeVolusionTabPanels === "function") {
-          global.mcHideNativeVolusionTabPanels();
-        }
-      } catch (eSsDesc) {}
-      try {
-        var host = qs("#mc-pdp-description-below-features");
-        var hostText = host ? String(host.textContent || "").replace(/\s+/g, " ").trim() : "";
-        var descText = descNode ? String(descNode.textContent || "").replace(/\s+/g, " ").trim() : "";
-        if (host && descNode && descNode !== host && descText.length >= 40 && hostText.length < 20) {
-          host.appendChild(descNode);
-          global.setTimeout(syncUnifiedDescriptionViewMore, 0);
-          global.setTimeout(syncUnifiedDescriptionViewMore, 250);
-        }
-      } catch (eSsDescMove) {}
-      return;
-    }
+    return;
+  }
 
-    if (
-      typeof global.mcIsGenericUnifiedFurnitureAccordionPdp === "function" &&
-      global.mcIsGenericUnifiedFurnitureAccordionPdp()
-    ) {
-      qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
-        if (!stray) return;
-        try {
-          stray.style.setProperty("display", "none", "important");
-          stray.setAttribute("aria-hidden", "true");
-        } catch (eGenStray) {}
-      });
-      var descRowGen = qs("tr.mc-pdp-description-row", table.tBodies && table.tBodies[0] ? table.tBodies[0] : table);
-      if (descRowGen) {
-        descRowGen.style.setProperty("display", "none", "important");
-        descRowGen.setAttribute("aria-hidden", "true");
-      }
-      hideLegacyVolusionTabPanels(mediaTd);
-      try {
-        if (typeof global.mcFinalizeGenericFurniturePdpAccordion === "function") {
-          global.mcFinalizeGenericFurniturePdpAccordion();
-        } else if (typeof global.mcMountDescriptionBelowFeatures === "function") {
-          global.mcMountDescriptionBelowFeatures();
-        }
-        if (typeof global.mcRepairGenericAccordionProductDetails === "function") {
-          global.mcRepairGenericAccordionProductDetails();
-        }
-        if (typeof global.mcSyncPdpDescriptionViewMore === "function") {
-          global.mcSyncPdpDescriptionViewMore();
-        }
-        if (typeof global.mcHideNativeVolusionTabPanels === "function") {
-          global.mcHideNativeVolusionTabPanels();
-        }
-      } catch (eGenDesc) {}
-      return;
-    }
-
-    if (!mainRow || !table || !mediaTd) return;
+  function ensureDescriptionRowLegacyMedia(mainRow, table, descNode, mediaTd) {
     var tbody = table.tBodies && table.tBodies[0] ? table.tBodies[0] : table;
     var descRow = qs("tr.mc-pdp-description-row", tbody);
     var wrapEl = qs(".mc-unified-pdp-description", mediaTd);
@@ -1537,54 +1469,6 @@
     unwrapBadWrapper();
     tagProductBodyClasses();
     global.document.body.classList.add("mc-product-page");
-
-    if (global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp")) {
-      var bbMain =
-        qs("#product_photo") ||
-        qs("#product_photo_td") ||
-        qs(".vCSS_img_wrap img") ||
-        qs("img#main-image");
-      var bbAtc = findAtcButton();
-      if (bbMain && bbAtc) {
-        var bbLayout = findOuterProductRow(bbMain, bbAtc);
-        if (bbLayout && bbLayout.table) {
-          var bbRow = bbLayout.row;
-          var bbMediaTd = bbLayout.mediaCell;
-          var bbInfoTd = bbLayout.infoCell;
-          if (!bbRow.classList.contains("mc-unified-pdp-row")) {
-            bbRow.classList.add("mc-unified-pdp-row", "mc-pdp-main-row");
-          }
-          if (!bbMediaTd.classList.contains("mc-unified-pdp-media")) {
-            bbMediaTd.classList.add("mc-unified-pdp-media", "mc-pdp-media-td");
-          }
-          if (!bbInfoTd.classList.contains("mc-unified-pdp-info")) {
-            bbInfoTd.classList.add("mc-unified-pdp-info", "mc-pdp-options-td");
-          }
-          normalizeMediaColumn(bbMediaTd);
-          try {
-            if (typeof global.mcReassertBeanBagHeroMedia === "function") {
-              global.mcReassertBeanBagHeroMedia();
-            }
-          } catch (eBbMedia) {}
-          ensureReturnRow(bbRow, bbLayout.table);
-        }
-      }
-      try {
-        if (typeof global.mcEnsureSoftGoodsPdpLayout === "function") {
-          global.mcEnsureSoftGoodsPdpLayout();
-        } else if (typeof global.mcAppendBeanBagInfoColumnOrder === "function") {
-          global.mcAppendBeanBagInfoColumnOrder();
-        }
-      } catch (eBbLayout) {}
-      global.document.body.classList.add("mc-pdp-unified-ready", "mc-pdp-hero-ready");
-      global.document.documentElement.dataset.mcPdpNormalized = "1";
-      global.document.body.dataset.mcPdpLayoutMounted = "1";
-      global.document.body.dataset.mcPdpLayoutVer = AUTH_LAYOUT_VER;
-      global.document.body.dataset.mcUnifiedPdpVer = LAYOUT_VER;
-      global.__MC_PDP_HERO_READY_LOCKED__ = true;
-      markUnifiedStable();
-      return true;
-    }
 
     var main =
       qs("#product_photo") ||
