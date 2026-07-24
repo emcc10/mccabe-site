@@ -6417,7 +6417,7 @@
         applyMahjongHouseInfoColumnOrder(findPdpHeroColumnTd());
       }
       hideNativeVolusionTabPanels();
-      if (isGenericUnifiedFurnitureAccordionPdp()) {
+      if (isUnifiedAccordionPdp()) {
         try {
           mountDescriptionBelowFeatures();
           ensureSaranoniPdpAccordion();
@@ -9442,10 +9442,7 @@
     if (!shouldUseDescriptionBelowFeaturesLayout()) return;
     if (
       isPdpLayoutMounted() &&
-      !isSoftGoodsPdpPage() &&
-      !isSteveSilverPdpPage() &&
-      !isMahjongHousePdpPage() &&
-      !isGenericUnifiedFurnitureAccordionPdp()
+      !isUnifiedAccordionPdp()
     ) {
       return;
     }
