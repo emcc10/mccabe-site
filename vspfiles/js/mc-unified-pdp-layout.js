@@ -702,6 +702,14 @@
     if (/^BB|BEAN\s*BAG|NEST/.test(pc) || /BEAN\s*BAG|NEST/.test(title)) {
       return { name: "Bean Bags", href: "/bean-bag-seating-s/103.htm" };
     }
+    if (/^MHH-/i.test(pc) || /MATTRESS/.test(title)) {
+      var bedBc = lookupCategoryById("209");
+      if (bedBc && bedBc.name) return bedBc;
+      return { name: "Bedding", href: "/category-s/209.htm" };
+    }
+    if (/^FC-/i.test(pc) || /DOG\s*BED/.test(title)) {
+      return { name: "Dog Beds", href: "/category-s/103.htm" };
+    }
     if (/MAHJONG/.test(hay) && /(MAT|RACK)/.test(hay)) {
       return { name: "Mats and Racks", href: "/category-s/203.htm" };
     }
@@ -995,6 +1003,7 @@
         if (
           global.document.body &&
           (global.document.body.classList.contains("mc-bean-bag-pdp") ||
+            global.document.body.classList.contains("mc-cordaroys-pdp") ||
             global.document.body.classList.contains("mc-saranoni-pdp") ||
             global.document.body.classList.contains("mc-mahjong-house-pdp"))
         ) {

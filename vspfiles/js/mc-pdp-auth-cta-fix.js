@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725order3 — soft-goods keep own frame; features/details in accordion
-  var MC_DEPLOY_FINGERPRINT = "20260725order3";
-  var VERSION = "20260725order3";
+  // MC_DEPLOY_FINGERPRINT_20260725corda1 — Cordaroys mattress/dog/outdoor soft frame + qty above ATC
+  var MC_DEPLOY_FINGERPRINT = "20260725corda1";
+  var VERSION = "20260725corda1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725009;
+  var DEPLOY_RANK = 20260725010;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -2199,7 +2199,7 @@
   }
 
   function ensureBeanBagBrandLogo() {
-    if (!isBeanBagPdpPage()) return;
+    if (!isCordaroysBrandPdpPage()) return;
     var wrap = global.document.getElementById("mc-pdp-brand-logo");
     if (!wrap) {
       wrap = global.document.createElement("div");
@@ -3072,7 +3072,7 @@
   function ensureQuantityAboveAtc() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
-    if (shouldDeferToUnifiedPdpLayout()) return;
+    if (shouldDeferToUnifiedPdpLayout() && !isSoftGoodsPdpPage()) return;
     if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
     if (isSaranoniPdpPage()) {
       var sarCol = resolveSaranoniInfoColumn();
@@ -3153,7 +3153,7 @@
   function ensurePurchaseStackCentered() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
-    if (shouldDeferToUnifiedPdpLayout()) return;
+    if (shouldDeferToUnifiedPdpLayout() && !isSoftGoodsPdpPage()) return;
     if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
     try {
       if (
@@ -3275,6 +3275,81 @@
       }
       hideSaranoniLeftoverNativeShell(sarColPin);
     }
+  }
+
+
+  function ejectQtyFromAtcWrap() {
+    try {
+      global.document.querySelectorAll(".mc-atc-button-wrap, .mc-unified-atc-host, .v65-product-addtocart").forEach(function (wrap) {
+        if (!wrap) return;
+        var qtyRow = wrap.querySelector("#mc-pdp-qty-row, .mc-unified-qty-row, .mc-pdp-qty-row");
+        var qtyInput = wrap.querySelector('input[name^="QTY."], input.v65-productdetail-cartqty, input[name="QTY"], input[name="quantity"]');
+        if (!qtyRow && qtyInput) {
+          qtyRow = qtyInput.closest("#mc-pdp-qty-row, .mc-unified-qty-row, .mc-pdp-qty-row");
+        }
+        if (!qtyRow && !qtyInput) return;
+        var purchase =
+          wrap.closest("#mc-pdp-purchase-stack, .mc-unified-purchase-controls, .mc-pdp-purchase-controls, .mc-pdp-cart-row") ||
+          wrap.parentElement;
+        if (!purchase) return;
+        if (qtyRow) {
+          if (qtyRow.parentNode === wrap || wrap.contains(qtyRow)) {
+            purchase.insertBefore(qtyRow, wrap);
+          }
+        } else if (qtyInput && wrap.contains(qtyInput)) {
+          var row = global.document.getElementById("mc-pdp-qty-row");
+          if (!row) {
+            row = global.document.createElement("div");
+            row.id = "mc-pdp-qty-row";
+            row.className = "mc-pdp-qty-row mc-unified-qty-row";
+          }
+          row.appendChild(qtyInput);
+          purchase.insertBefore(row, wrap);
+        }
+      });
+    } catch (eEject) {}
+  }
+
+  function finalizeCordaroysPurchaseStack() {
+    if (!isCordaroysBrandPdpPage()) return;
+    try { ejectQtyFromAtcWrap(); } catch (eEj0) {}
+    try { ensureQuantityAboveAtc(); } catch (eQty0) {}
+    try { ensurePurchaseStackCentered(); } catch (eStack0) {}
+    var info =
+      global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
+      findPdpHeroColumnTd();
+    var purchase = resolveSoftGoodsPurchaseElement(info);
+    if (!purchase) return;
+    try {
+      purchase.id = purchase.id || "mc-pdp-purchase-stack";
+      purchase.classList.add("mc-pdp-purchase-controls", "mc-pdp-cart-row", "mc-soft-goods-purchase-stack");
+      if (isBeanBagPdpPage()) purchase.classList.add("mc-bean-bag-purchase-stack");
+      if (isCordaroysExtendedPdpPage()) purchase.classList.add("mc-cordaroys-purchase-stack");
+      purchase.style.setProperty("display", "flex", "important");
+      purchase.style.setProperty("flex-direction", "column", "important");
+      purchase.style.setProperty("align-items", "stretch", "important");
+      purchase.style.setProperty("justify-content", "flex-start", "important");
+      purchase.style.setProperty("width", "100%", "important");
+      purchase.style.setProperty("max-width", "435px", "important");
+      purchase.style.setProperty("gap", "10px", "important");
+      purchase.style.setProperty("margin", "18px 0 0 0", "important");
+    } catch (ePur) {}
+    var qtyRow = global.document.getElementById("mc-pdp-qty-row");
+    var wrap =
+      purchase.querySelector(".mc-atc-button-wrap, .mc-unified-atc-host, .v65-product-addtocart") ||
+      null;
+    if (qtyRow && wrap && qtyRow.parentNode === purchase) {
+      try {
+        if (qtyRow.nextElementSibling !== wrap) purchase.insertBefore(qtyRow, wrap);
+        qtyRow.style.setProperty("order", "1", "important");
+        qtyRow.style.setProperty("width", "100%", "important");
+        qtyRow.style.setProperty("display", "flex", "important");
+        qtyRow.style.setProperty("justify-content", "center", "important");
+        wrap.style.setProperty("order", "2", "important");
+      } catch (eOrd) {}
+    }
+    applySoftGoodsColumnPurchaseStackLayout(purchase, qtyRow, wrap);
+    try { ejectQtyFromAtcWrap(); } catch (eEj1) {}
   }
 
   function applySoftGoodsColumnPurchaseStackLayout(stack, qtyRow, stackNode) {
@@ -3583,12 +3658,17 @@
         btn.setAttribute("data-mc-atc-styled", VERSION);
       });
     if (isSoftGoodsPdpPage()) {
-      var purchaseTarget = resolveAtcPurchaseTarget();
-      applySoftGoodsColumnPurchaseStackLayout(
-        global.document.getElementById("mc-pdp-purchase-stack"),
-        global.document.getElementById("mc-pdp-qty-row"),
-        purchaseTarget ? purchaseTarget.stackNode : null
-      );
+      try { ejectQtyFromAtcWrap(); } catch (eEjAtc) {}
+      if (isCordaroysBrandPdpPage()) {
+        try { finalizeCordaroysPurchaseStack(); } catch (eFinCor) {}
+      } else {
+        var purchaseTarget = resolveAtcPurchaseTarget();
+        applySoftGoodsColumnPurchaseStackLayout(
+          global.document.getElementById("mc-pdp-purchase-stack"),
+          global.document.getElementById("mc-pdp-qty-row"),
+          purchaseTarget ? purchaseTarget.stackNode : null
+        );
+      }
     }
     try {
       normalizeCloseoutPurchaseControls();
@@ -3718,19 +3798,24 @@
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-bean-bag-purchase-stack," +
-      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls{" +
+      "html body.mc-cordaroys-pdp #mc-pdp-purchase-stack,html body.mc-cordaroys-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-cordaroys-pdp #mc-pdp-purchase-stack.mc-cordaroys-purchase-stack," +
+      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls,html body.mc-cordaroys-pdp .mc-unified-purchase-controls,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls{" +
       "display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;" +
       "text-align:center!important;width:100%!important;max-width:435px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important;visibility:visible!important;opacity:1!important}" +
-      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls .mc-unified-qty-row{order:1!important;width:100%!important;justify-content:center!important;visibility:visible!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-cordaroys-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-cordaroys-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls .mc-unified-qty-row{order:1!important;width:100%!important;justify-content:center!important;visibility:visible!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
-      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls .v65-product-addtocart,html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap{order:2!important;width:100%!important;max-width:100%!important}" +
+      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls .v65-product-addtocart,html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap," +
+      "html body.mc-cordaroys-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-cordaroys-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
+      "html body.mc-cordaroys-pdp .mc-unified-purchase-controls .v65-product-addtocart,html body.mc-cordaroys-pdp .mc-unified-purchase-controls .mc-atc-button-wrap{order:2!important;width:100%!important;max-width:100%!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button," +
-      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap input,html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap button{width:100%!important;box-sizing:border-box!important;display:block!important}" +
+      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap input,html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap button," +
+      "html body.mc-cordaroys-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-cordaroys-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button," +
+      "html body.mc-cordaroys-pdp .mc-unified-purchase-controls .mc-atc-button-wrap input,html body.mc-cordaroys-pdp .mc-unified-purchase-controls .mc-atc-button-wrap button{width:100%!important;box-sizing:border-box!important;display:block!important}" +
       "body.productdetails #mc-pdp-purchase-stack *,body.mc-product-page #mc-pdp-purchase-stack *{" +
       "text-align:center!important}" +
-      "body.productdetails:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #mc-pdp-features+#mc-pdp-purchase-stack,body.mc-product-page:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #mc-pdp-features+#mc-pdp-purchase-stack{" +
+      "body.productdetails:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp) #mc-pdp-features+#mc-pdp-purchase-stack,body.mc-product-page:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp) #mc-pdp-features+#mc-pdp-purchase-stack{" +
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox,body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox," +
@@ -3753,12 +3838,12 @@
       "html body.mc-bean-bag-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-ruched-blanket-pdp #mc-pdp-title-right," +
       "html body.mc-bean-bag-pdp #mc-pdp-brand-logo,html body.mc-saranoni-pdp #mc-pdp-brand-logo,html body.mc-ruched-blanket-pdp #mc-pdp-brand-logo{" +
       "margin-top:0!important;padding-top:0!important}" +
-      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
-      "body.mc-product-page.mc-bean-bag-pdp #content_area .mc-atc-button-wrap,body.mc-product-page.mc-saranoni-pdp #content_area .mc-atc-button-wrap,body.mc-product-page.mc-ruched-blanket-pdp #content_area .mc-atc-button-wrap{" +
+      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,html body.mc-cordaroys-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
+      "body.mc-product-page.mc-bean-bag-pdp #content_area .mc-atc-button-wrap,body.mc-product-page.mc-cordaroys-pdp #content_area .mc-atc-button-wrap,body.mc-product-page.mc-saranoni-pdp #content_area .mc-atc-button-wrap,body.mc-product-page.mc-ruched-blanket-pdp #content_area .mc-atc-button-wrap{" +
       "background:#111!important;background-color:#111!important;border:1px solid #111!important;border-radius:0!important;" +
       "box-shadow:none!important;padding:0!important;margin:0!important;margin-top:0!important;min-width:0!important;gap:0!important;color:#fff!important}" +
-      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input," +
-      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button{" +
+      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-cordaroys-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input," +
+      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,html body.mc-cordaroys-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button{" +
       "background:#111!important;background-color:#111!important;background-image:none!important;color:#fff!important;" +
       "border:1px solid #111!important;border-radius:0!important;font-size:13px!important;font-weight:600!important;" +
       "letter-spacing:.12em!important;text-transform:uppercase!important;min-height:48px!important;padding:0 28px!important;opacity:1!important;outline:none!important;box-shadow:none!important;transition:none!important}" +
@@ -4080,7 +4165,7 @@
   }
 
   function repairBeanBagDesktopMainRow() {
-    if (!isBeanBagPdpPage()) return;
+    if (!isCordaroysBrandPdpPage()) return;
     try {
       if (!global.matchMedia || !global.matchMedia("(min-width: 992px)").matches) return;
     } catch (eMq) {
@@ -4089,7 +4174,11 @@
     try {
       if (global.document.body) {
         global.document.body.classList.remove("mc-theater-seating-pdp", "category", "is-category-or-listing-page");
-        global.document.body.classList.add("mc-bean-bag-pdp");
+        if (isBeanBagPdpPage()) global.document.body.classList.add("mc-bean-bag-pdp");
+        if (isCordaroysExtendedPdpPage()) {
+          global.document.body.classList.add("mc-cordaroys-pdp");
+          global.document.body.classList.remove("mc-bean-bag-pdp");
+        }
         if (global.document.documentElement) {
           global.document.documentElement.classList.remove("is-category-or-listing-page", "category");
         }
@@ -4156,7 +4245,7 @@
   }
 
   function appendBeanBagInfoColumnOrder() {
-    if (!isBeanBagPdpPage()) return;
+    if (!isCordaroysBrandPdpPage()) return;
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
     hideLegacyPdpFrameBits();
@@ -4815,7 +4904,7 @@
     if (!isUnifiedAccordionPdp()) return;
     /* Soft goods (Cordaroys / Saranoni) keep their approved frames. The
        dining/closeout 650/420 lock must not shrink heroes or wipe logos. */
-    if (isBeanBagPdpPage()) {
+    if (isBeanBagPdpPage() || isCordaroysExtendedPdpPage()) {
       try { forceRevealCanonicalAtc(); } catch (eAtcBb) {}
       try { ensureBeanBagBrandLogo(); } catch (eLogoBb) {}
       try { mountPdpFeaturesBlock(); } catch (eFeatBb) {}
@@ -4823,6 +4912,7 @@
       try { ensureBeanBagPdpAccordion(); } catch (eAccBb) {}
       try { appendBeanBagInfoColumnOrder(); } catch (eOrdBb) {}
       try { repairBeanBagDesktopMainRow(); } catch (eRowBb) {}
+      try { finalizeCordaroysPurchaseStack(); } catch (ePurBb) {}
       try { ensureFeaturesInsideAccordion(); } catch (eFeatInBb) {}
       return;
     }
@@ -4933,7 +5023,7 @@
     try {
       mountPdpFeaturesBlock();
       mountDescriptionBelowFeatures();
-      if (isBeanBagPdpPage()) {
+      if (isBeanBagPdpPage() || isCordaroysExtendedPdpPage()) {
         try { ensureBeanBagBrandLogo(); } catch (eBbLogoFin) {}
         ensureBeanBagPdpAccordion();
         repairGenericAccordionProductDetails();
@@ -4960,7 +5050,7 @@
      Mount those existing nodes in the same accessible accordion component used by
      the other soft-goods PDPs; do not duplicate or rewrite their content. */
   function ensureBeanBagPdpAccordion() {
-    if (!isBeanBagPdpPage()) return null;
+    if (!isCordaroysBrandPdpPage()) return null;
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return null;
     var features = global.document.getElementById("mc-pdp-features");
@@ -6236,7 +6326,7 @@
 
   function ensurePdpInfoColumnOrder() {
     if (isPdpLayoutMounted()) return;
-    if (isBeanBagPdpPage() || isSaranoniPdpPage()) return;
+    if (isBeanBagPdpPage() || isSaranoniPdpPage() || isCordaroysExtendedPdpPage()) return;
     var col = findPdpHeroColumnTd();
     if (!col) {
       var box = global.document.querySelector("#v65-product-parent .colors_pricebox");
@@ -6287,7 +6377,7 @@
   }
   function ensurePdpContentColumnOrder() {
     if (isPdpLayoutMounted()) return;
-    if (isBeanBagPdpPage() || isSaranoniPdpPage()) return;
+    if (isBeanBagPdpPage() || isSaranoniPdpPage() || isCordaroysExtendedPdpPage()) return;
     var col = findPdpHeroColumnTd();
     if (!col) return;
     var head =
@@ -6525,6 +6615,37 @@
     return false;
   }
 
+
+  function isCordaroysExtendedPdpPage() {
+    /* Mattresses / dog beds / outdoor: Cordaroys brand, not bean-bag SKUs. */
+    try {
+      if (isSaranoniPdpPage()) return false;
+      if (isBeanBagPdpPage()) return false;
+      var pc = resolveSoftGoodsProductCode();
+      if (/^MHH-/i.test(pc) || /^FC-/i.test(pc) || /^PC\d*-/i.test(pc)) return true;
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (/product-p\/(?:mhh-|fc-|pc\d*-)/i.test(p)) return true;
+      var title = "";
+      try {
+        var te = global.document.querySelector('[itemprop="name"], h1, .productnamecolor, .colors_productname');
+        title = String((te && te.textContent) || global.document.title || "");
+      } catch (eT) {}
+      var mfg = "";
+      try {
+        var me = global.document.querySelector('.product_manufacturer, [itemprop="brand"], #manufacturer_name');
+        mfg = String((me && me.textContent) || "");
+      } catch (eM) {}
+      var hay = (title + " " + mfg).toLowerCase();
+      if (/corda\s*roy/.test(hay) && /(mattress|dog\s*bed|outdoor)/.test(hay)) return true;
+      if (global.document.body && global.document.body.classList.contains("mc-cordaroys-pdp")) return true;
+    } catch (eCx) {}
+    return false;
+  }
+
+  function isCordaroysBrandPdpPage() {
+    return isBeanBagPdpPage() || isCordaroysExtendedPdpPage();
+  }
+
   function isSaranoniPdpPage() {
     try {
       var pc = resolveSoftGoodsProductCode();
@@ -6546,7 +6667,7 @@
   }
 
   function isSoftGoodsPdpPage() {
-    return isBeanBagPdpPage() || isSaranoniPdpPage();
+    return isBeanBagPdpPage() || isSaranoniPdpPage() || isCordaroysExtendedPdpPage();
   }
 
   function isGameRoomBarPdpPage() {
@@ -12105,6 +12226,10 @@ function revealBeanBagRelated() {
         body.classList.remove("mc-saranoni-pdp", "mc-saranoni-pdp-init", "mc-saranoni-pdp-ready");
       }
       if (isBeanBagPdpPage()) body.classList.add("mc-bean-bag-pdp");
+      if (isCordaroysExtendedPdpPage()) {
+        body.classList.add("mc-cordaroys-pdp");
+        body.classList.remove("mc-bean-bag-pdp");
+      }
     } catch (eTag) {}
   }
 
@@ -12515,6 +12640,15 @@ function revealBeanBagRelated() {
       moveAltViewsUnderMainImage();
       sanitizeBeanBagAltviews();
       mountPdpFeaturesBlock();
+    } else if (isCordaroysExtendedPdpPage()) {
+      ensureBeanBagBrandLogo();
+      moveAltViewsUnderMainImage();
+      mountPdpFeaturesBlock();
+      mountDescriptionBelowFeatures();
+      ensureBeanBagPdpAccordion();
+      repairBeanBagDesktopMainRow();
+      appendBeanBagInfoColumnOrder();
+      finalizeCordaroysPurchaseStack();
     } else if (isSaranoniPdpPage()) {
       ensureSaranoniPdpLayoutCss();
       ensureSaranoniBrandLogo();
@@ -12533,6 +12667,10 @@ function revealBeanBagRelated() {
     if (isBeanBagPdpPage()) {
       ensureBeanBagPurchaseStack();
       appendBeanBagInfoColumnOrder();
+      finalizeCordaroysPurchaseStack();
+    } else if (isCordaroysExtendedPdpPage()) {
+      appendBeanBagInfoColumnOrder();
+      finalizeCordaroysPurchaseStack();
     } else if (isSaranoniPdpPage()) {
       appendSaranoniInfoColumnOrder();
       finalizeSaranoniInfoColumnOrder();
