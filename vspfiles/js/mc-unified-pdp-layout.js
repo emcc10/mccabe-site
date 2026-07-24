@@ -1171,7 +1171,8 @@
     var isDesktop = global.matchMedia && global.matchMedia("(min-width: 992px)").matches;
     var isSaranoni =
       global.document.body && global.document.body.classList.contains("mc-saranoni-pdp");
-    var imgMaxW = isBeanBag ? "600px" : isSaranoni ? "720px" : "650px";
+    /* One media width for every PDP — matches Saranoni/Steve Silver gap. */
+    var imgMaxW = "650px";
     var img = qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image", mediaTd) || qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image");
     if (img && img.style) {
       var imgNormVer = img.getAttribute("data-mc-media-norm") || "";

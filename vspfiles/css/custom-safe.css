@@ -25758,3 +25758,77 @@ html body.mc-pdp-accordion-pdp #mc-pdp-accordion {
   opacity: 1 !important;
 }
 /* END REMOVABLE: unified accordion layout 20260723restore4 */
+
+/* MC_RESTORE6_UNIFIED_WIDTH — one media/info gap for every PDP */
+@media (min-width: 992px) {
+  html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
+  html body.mc-pdp-unified-ready #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-pdp-accordion-pdp #v65-product-parent tr.mc-unified-pdp-row,
+  html body.mc-pdp-accordion-pdp #v65-product-parent tr.mc-pdp-main-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    gap: 0 !important;
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+  }
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-media,
+  html body.mc-pdp-unified-ready td.mc-pdp-media-td,
+  html body.mc-pdp-accordion-pdp td.mc-unified-pdp-media,
+  html body.mc-pdp-accordion-pdp td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-media,
+  html body.mc-bean-bag-pdp td.mc-pdp-media-td {
+    flex: 0 0 650px !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    padding-right: 24px !important;
+    box-sizing: border-box !important;
+  }
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-info,
+  html body.mc-pdp-unified-ready td.mc-pdp-options-td,
+  html body.mc-pdp-accordion-pdp td.mc-unified-pdp-info,
+  html body.mc-pdp-accordion-pdp td.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp td.mc-pdp-options-td {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: 520px !important;
+    padding-left: 0 !important;
+    box-sizing: border-box !important;
+  }
+  html body.mc-pdp-unified-ready #product_photo,
+  html body.mc-pdp-accordion-pdp #product_photo,
+  html body.mc-bean-bag-pdp #product_photo {
+    width: 100% !important;
+    max-width: 650px !important;
+    height: auto !important;
+  }
+  html body #mc-pdp-description-under-media,
+  html body .mc-unified-pdp-description--media {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+  html body.mc-product-page #mc-pdp-accordion {
+    display: block !important;
+    visibility: visible !important;
+  }
+}
+
+/* MC_RESTORE6_FREE_SHIP — kill icon-font glyphs; show GIF only */
+:is(html.category, body.category) #content_area .icon-free-shipping:not(img),
+:is(html.category, body.category) #content_area i.icon-free-shipping,
+:is(html.category, body.category) #content_area span.icon-free-shipping {
+  display: none !important;
+}
+:is(html.category, body.category) #content_area img[src*="Icon_FreeShipping"],
+:is(html.category, body.category) #content_area img.mc-plp-free-ship-img {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  max-height: 18px !important;
+  width: auto !important;
+  height: auto !important;
+}

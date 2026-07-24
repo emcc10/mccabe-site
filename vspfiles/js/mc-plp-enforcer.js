@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260723restore1 — bean bag free-ship img fallback (no icon font)
+ * MC_PLP_ENFORCER_20260723restore6 — bean bag free-ship img fallback (no icon font)
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
@@ -1778,14 +1778,27 @@
      build the synthetic fallback badge when no icon — native or synthetic —
      exists at all. */
   function ensureBeanBagCategoryShippingBadges() {
-    var path = String(global.location.pathname || "").toLowerCase();
-    if (!/bean-bag-seating-s\/103\.htm/.test(path)) return;
-    global.document.querySelectorAll("#content_area .v-product-grid .v-product").forEach(function (card) {
+    var cards = global.document.querySelectorAll("#content_area .v-product-grid .v-product, #content_area .v-product");
+    if (!cards.length) return;
+    var gif = "/v/vspfiles/templates/266/images/Icon_FreeShipping_Small.gif";
+    cards.forEach(function (card) {
+      card.querySelectorAll(".icon-free-shipping, i.icon-free-shipping, span.icon-free-shipping").forEach(function (glyph) {
+        var img = global.document.createElement("img");
+        img.className = "vCSS_img_icon_free_shipping mc-plp-free-ship-img";
+        img.alt = "Free Shipping";
+        img.src = gif;
+        try {
+          glyph.parentNode.replaceChild(img, glyph);
+        } catch (eRep) {
+          try { glyph.style.setProperty("display", "none", "important"); } catch (eHide) {}
+        }
+      });
       var nativeIcon = card.querySelector(
-        'img[alt="Free Shipping" i], img[src*="Icon_FreeShipping" i]'
+        'img[alt="Free Shipping" i], img[src*="Icon_FreeShipping" i], img.mc-plp-free-ship-img'
       );
       if (nativeIcon) {
         try {
+          nativeIcon.src = gif;
           nativeIcon.style.setProperty("display", "inline-block", "important");
           nativeIcon.style.setProperty("visibility", "visible", "important");
           nativeIcon.style.setProperty("opacity", "1", "important");
@@ -1795,14 +1808,13 @@
         } catch (eNativeShip) {}
         return;
       }
-      if (card.querySelector(".vol-free-shipping-icon, .mc-plp-free-ship")) return;
-      var price = card.querySelector(".v-product__price, .product_productprice");
+      if (card.querySelector(".vol-free-shipping-icon img, .mc-plp-free-ship img")) return;
+      var price = card.querySelector(".v-product__price, .product_productprice, .mc-cat-prodcard__price");
       if (!price || !price.parentNode) return;
       var shipping = global.document.createElement("div");
       shipping.className = "vol-free-shipping-icon mc-plp-free-ship";
       shipping.innerHTML =
-        '<img class="vCSS_img_icon_free_shipping mc-plp-free-ship-img" alt="Free Shipping" ' +
-        'src="/v/vspfiles/templates/266/images/Icon_FreeShipping_Small.gif" />';
+        '<img class="vCSS_img_icon_free_shipping mc-plp-free-ship-img" alt="Free Shipping" src="' + gif + '" />';
       try {
         price.parentNode.insertBefore(shipping, price.nextSibling);
       } catch (eShippingBadge) {}
