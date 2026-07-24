@@ -9,7 +9,7 @@
 
   /* forceLoveyStyleCta REMOVED 20260722manual4 — was unloading CTA and freezing lovey PDPs */
 
-  var VERSION = "20260725bbatc3";
+  var VERSION = "20260725fix2";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -24,8 +24,8 @@
   function upgradePdpAuthCtaForm() {
     try {
       if (!global.document.getElementById("v65-product-parent")) return;
-      var WANT = "20260725bbatc3";
-      var WANT_RANK = 20260725020;
+      var WANT = "20260725fix2";
+      var WANT_RANK = 20260725024;
       var curRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
       if (curRank >= WANT_RANK) return;
       if (String(global.__MC_DEPLOY_FP__ || "") === WANT) return;
@@ -2097,7 +2097,7 @@
      re-inject the script on every call. Confirmed against the live deployed script on
      20260713 — update this if mc-pdp-auth-cta-fix.js's VERSION is bumped again.
      MC_PDP_AUTH_VERSION_GUARD_FIX_20260713 */
-  var PDP_AUTH_WANT = "20260725bbatc3";
+  var PDP_AUTH_WANT = "20260725fix2";
 
   function isSaranoniPdpPage() {
     try {

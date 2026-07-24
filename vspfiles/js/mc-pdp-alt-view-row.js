@@ -1,10 +1,10 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260725camolson — Canova/Camolson gallery fix + always
+  /* MC_ALT_VIEW_ROW_20260725fix2 — Canova/Camolson gallery fix + always
      probe -altviewN on closeout PDPs (native hero alone used to short-circuit). */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725camolson__) return;
-  window.__MC_TMH_ALT_VIEW_ROW_20260725camolson__ = true;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725fix2__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260725fix2__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723close1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723mob1__ = true;
@@ -18,7 +18,7 @@
   var ROW_ID = "mc-pdp-alt-view-row";
   var TRACK_CLASS = "mc-pdp-alt-view-row__track";
   var MAX_ALT_VIEWS = 64;
-  var ALT_PROBE_VER = "20260725camolson";
+  var ALT_PROBE_VER = "20260725fix2";
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
