@@ -12353,12 +12353,32 @@ function revealBeanBagRelated() {
 
 
   function ensureBedroomCollectionSection() {
-    if (global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ || global.__MC_BEDROOM_COLLECTION_SECTION_20260620__) return;
-    if (global.document.querySelector("script[src*='mc-bedroom-collection-section.js']")) return;
+    if (global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__) return;
+    if (global.__MC_BEDROOM_COLLECTION_SECTION_20260724coll1__) return;
+    if (
+      global.document.querySelector(
+        "script[src*='mc-bedroom-collection-section.js'][src*='20260724coll1']"
+      )
+    ) {
+      return;
+    }
     try {
+      global.document
+        .querySelectorAll('script[src*="mc-bedroom-collection-section.js"]')
+        .forEach(function (old) {
+          try {
+            old.remove();
+          } catch (eRmBed) {}
+        });
+      try {
+        delete global.__MC_BEDROOM_COLLECTION_SECTION_20260723mob1__;
+        delete global.__MC_BEDROOM_COLLECTION_SECTION_20260620__;
+      } catch (eFlagsBed) {}
       global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = true;
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection1&mcrd=" + Date.now();
+      s.src =
+        "/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260724coll1&mcrd=" +
+        Date.now();
       s.async = true;
       s.onload = function () {
         global.__MC_BEDROOM_COLLECTION_SECTION_LOADING__ = false;
