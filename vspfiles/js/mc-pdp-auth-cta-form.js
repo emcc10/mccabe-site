@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260724altfix3 — stop Saranoni alt flicker; lock variants below logo
-  var MC_DEPLOY_FINGERPRINT = "20260724altfix3";
-  var VERSION = "20260724altfix3";
+  // MC_DEPLOY_FINGERPRINT_20260724altfix4 — Molly gallery + FEATURES + saranoni order relock
+  var MC_DEPLOY_FINGERPRINT = "20260724altfix4";
+  var VERSION = "20260724altfix4";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -4553,6 +4553,9 @@
 
     /* FEATURES = Volusion TechSpecs only. Never invent placeholder bullets when
        TechSpecs is empty — hide the FEATURES row instead. */
+    try {
+      mountPdpFeaturesBlock();
+    } catch (eFeatMount) {}
     if (!hostHasContent(featuresHost)) {
       var featExisting = global.document.getElementById("mc-pdp-features");
       if (featExisting && String(featExisting.textContent || "").replace(/\s+/g, " ").trim()) {
@@ -5111,6 +5114,17 @@
         if (sizeLabel) sizeLabel.style.setProperty("order", "6", "important");
         if (sizes) sizes.style.setProperty("order", "7", "important");
       } catch (eOrdLock) {}
+      /* Remount races push variants above logo after first paint — re-lock. */
+      if (!global.__MC_SAR_ORDER_RELOCK__) {
+        global.__MC_SAR_ORDER_RELOCK__ = true;
+        [120, 400, 900, 1800].forEach(function (ms) {
+          global.setTimeout(function () {
+            try {
+              applySaranoniInfoColumnOrder(infoColumn);
+            } catch (eRelock) {}
+          }, ms);
+        });
+      }
     } catch (eSarOrder) {}
   }
 
@@ -8710,10 +8724,10 @@
     ) {
       return;
     }
-    /* MC_ALT_VIEW_ROW_20260724altfix3 — gate on newest flag; boot once only. */
-    var want = "20260724altfix3";
+    /* MC_ALT_VIEW_ROW_20260724altfix4 — gate on newest flag; boot once only. */
+    var want = "20260724altfix4";
     try {
-      if (global["__MC_TMH_ALT_VIEW_ROW_20260724altfix3__"]) {
+      if (global["__MC_TMH_ALT_VIEW_ROW_20260724altfix4__"]) {
         global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
         return;
       }
@@ -8725,6 +8739,7 @@
         } catch (eRmAlt) {}
       });
       try {
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260724altfix4__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260724altfix3__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260724altfix1__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__;

@@ -1,9 +1,10 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260724altfix3 — stop flicker (ignore self-mutations) + block scroll */
+  /* MC_ALT_VIEW_ROW_20260724altfix4 — main-first gallery; Molly SKU-only alts */
   if (!window || !document) return;
-  if (window.__MC_TMH_ALT_VIEW_ROW_20260724altfix3__) return;
+  if (window.__MC_TMH_ALT_VIEW_ROW_20260724altfix4__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260724altfix4__ = true;
   /* Bump generation so any prior boot (stale ?v= then force-refresh) stops scheduling. */
   try {
     if (window.__MC_ALT_VIEW_ROW_MO__) {
@@ -180,9 +181,29 @@
     return upper.indexOf(needle) !== -1 || upper.indexOf(needle2) !== -1;
   }
 
+  function prependMainHero(items, code) {
+    var hero = heroImage();
+    var heroSrc = absoluteUrl(
+      (hero && (hero.currentSrc || hero.getAttribute("src"))) ||
+        (code ? "/v/vspfiles/photos/" + code + "-1.jpg" : "")
+    );
+    if (!heroSrc || !urlBelongsToProduct(heroSrc, code)) return items;
+    var heroKey = canonicalUrl(heroSrc);
+    items = items.filter(function (item) {
+      return canonicalUrl(item.full) !== heroKey;
+    });
+    items.unshift({
+      slot: 0,
+      full: heroSrc,
+      alt: "Main product image"
+    });
+    return items;
+  }
+
   function collectItems(code) {
     var items = [];
     var seen = {};
+    /* Only native #altviews + SKU-probed photos — never scrape the full page. */
     var nativeAlt = nativeAltContainer();
     if (nativeAlt) {
       Array.prototype.forEach.call(nativeAlt.querySelectorAll("img"), function (image) {
@@ -209,14 +230,15 @@
     });
     items.sort(function (a, b) { return a.slot - b.slot; });
     if (code === "MOLLY-OLSON-DINING-SET") {
-      // The first supplier alt is the hero image repeated under a different
-      // filename. Keep the three distinct chair/detail views instead.
-      // altview9 is a mismatched supplier photo -- a dark wood ladder-back
-      // chair on a jute rug, nothing like the Molly Olson's khaki upholstered
-      // mid-century chairs or its round pedestal table shown in the other
-      // alt views. Confirmed visually 2026-07-21.
+      /* Keep dining alts 2–8 only. altview1 duplicates hero; 9+ are unrelated
+         bedroom/other-SKU supplier dumps under this product code. */
       items = items.filter(function (item) {
-        return !/(?:-altview1|-altview9|-1|-2t)\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full);
+        var m = String(item.full || "").match(/-altview(\d+)\./i);
+        if (m) {
+          var n = parseInt(m[1], 10);
+          return n >= 2 && n <= 8;
+        }
+        return false;
       });
     }
     /* Drop legacy -N.jpg / -NT.jpg thumbs when -altviewN exists — those numbered
@@ -229,7 +251,7 @@
         return !/-\d+T?\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full) || /-altview\d+\./i.test(item.full);
       });
     }
-    return items;
+    return prependMainHero(items, code);
   }
 
   function publishActiveHero(full) {
@@ -352,7 +374,8 @@
     discoveredByCode[code] = [];
     /* Closeout / furniture: prefer -altviewN only. Legacy -2/-3/-4.jpg slots on
        products like TYLER-BAR-SET often contain unrelated supplier photos. */
-    var remaining = MAX_ALT_VIEWS;
+    var maxSlot = code === "MOLLY-OLSON-DINING-SET" ? 8 : MAX_ALT_VIEWS;
+    var remaining = maxSlot;
 
     function completeOne() {
       remaining -= 1;
@@ -375,7 +398,7 @@
       schedule();
     }
 
-    for (var altSlot = 1; altSlot <= MAX_ALT_VIEWS; altSlot += 1) {
+    for (var altSlot = 1; altSlot <= maxSlot; altSlot += 1) {
       (function (photoSlot) {
         var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
         probeImage(src, function () {
@@ -491,14 +514,14 @@
     var row = document.getElementById(ROW_ID);
 
     if (isSaranoni) {
-      var heroCanon = canonicalUrl(hero.currentSrc || hero.getAttribute("src") || "");
       var sarItems = (discoveredByCode[code] || [])
         .slice()
         .filter(function (item) {
-          return canonicalUrl(item.full) !== heroCanon;
+          return urlBelongsToProduct(item.full, code);
         })
         .sort(function (a, b) { return a.slot - b.slot; });
-      if (!sarItems.length) {
+      sarItems = prependMainHero(sarItems, code);
+      if (sarItems.length <= 1 && !(discoveredByCode[code] || []).length) {
         /* Keep an already-built row visible while re-probing. */
         if (!(row && row.children && row.children.length)) {
           if (row) row.style.setProperty("display", "none", "important");
@@ -506,7 +529,7 @@
         probeSaranoniAltViews(code);
         return;
       }
-      renderRow(hero, mediaCell, row, sarItems);
+      if (sarItems.length) renderRow(hero, mediaCell, row, sarItems);
       return;
     }
 
