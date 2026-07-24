@@ -25998,12 +25998,18 @@ body.productdetails td.mc-pdp-media-td #mc-pdp-description-below-features {
   html body.mc-saranoni-pdp #mc-pdp-price-stack-host { order: 3 !important; }
   html body.mc-saranoni-pdp #messaging-element { order: 4 !important; display: none !important; }
   html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper,
-  html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(#mc-configured-color-swatch-wrapper) {
+  html body.mc-saranoni-pdp .mc-configured-color-swatch-wrapper,
+  html body.mc-saranoni-pdp .mc-configured-color-swatches,
+  html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(#mc-configured-color-swatch-wrapper),
+  html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(.mc-configured-color-swatches) {
     order: 5 !important;
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 10px 0 8px !important;
+  }
+  html body.mc-saranoni-pdp .mc-configured-color-swatches {
+    display: flex !important;
   }
   html body.mc-saranoni-pdp #mc-saranoni-size-label { order: 6 !important; }
   html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,

@@ -9,7 +9,7 @@
 
   /* forceLoveyStyleCta REMOVED 20260722manual4 — was unloading CTA and freezing lovey PDPs */
 
-  var VERSION = "20260723restore13";
+  var VERSION = "20260723restore14";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -24,7 +24,7 @@
   function upgradePdpAuthCtaForm() {
     try {
       if (!global.document.getElementById("v65-product-parent")) return;
-      var WANT = "20260723restore13";
+      var WANT = "20260723restore14";
       if (String(global.__MC_DEPLOY_FP__ || "") === WANT) return;
       if (global.document.documentElement.getAttribute("data-mc-plp-form-upgrade") === WANT) return;
       global.document.documentElement.setAttribute("data-mc-plp-form-upgrade", WANT);

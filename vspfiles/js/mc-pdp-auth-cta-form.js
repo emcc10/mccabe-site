@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore13 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore13";
-  var VERSION = "20260723restore13";
+  // MC_DEPLOY_FINGERPRINT_20260723restore14 — saranoni mobile variants below price
+  var MC_DEPLOY_FINGERPRINT = "20260723restore14";
+  var VERSION = "20260723restore14";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -5341,7 +5341,18 @@
       findPdpHeroColumnTd();
     if (!info) return;
     var price = global.document.getElementById("mc-pdp-price-stack-host");
-    var colors = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    var colors =
+      global.document.getElementById("mc-configured-color-swatch-wrapper") ||
+      global.document.querySelector(
+        ".mc-configured-color-swatch-wrapper, .mc-saranoni-scroll-host:has(.mc-configured-color-swatches), .mc-configured-color-swatches"
+      );
+    /* Prefer the scroll host / wrapper over bare swatch row so labels stay with images. */
+    if (colors && colors.classList && colors.classList.contains("mc-configured-color-swatches")) {
+      var wrapHost = colors.closest(
+        ".mc-saranoni-scroll-host, .mc-configured-color-swatch-wrapper, #mc-configured-color-swatch-wrapper"
+      );
+      if (wrapHost) colors = wrapHost;
+    }
     var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
     var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
     var anchor = price;
@@ -5354,13 +5365,22 @@
           anchor = el;
         } else if (el.parentNode !== info) {
           info.appendChild(el);
+        } else if (anchor && el !== anchor) {
+          /* Already in info but above price — reinsert after anchor. */
+          if (anchor.nextSibling) info.insertBefore(el, anchor.nextSibling);
+          else info.appendChild(el);
+          anchor = el;
         }
         el.style.setProperty("display", el.id === "mc-saranoni-size-thumbs" ? "grid" : "block", "important");
         el.style.setProperty("visibility", "visible", "important");
         el.style.setProperty("width", "100%", "important");
         el.style.setProperty("max-width", "100%", "important");
+        el.style.setProperty("order", el === colors ? "5" : el === sizeLabel ? "6" : "7", "important");
       } catch (eMove) {}
     });
+    if (price) {
+      try { price.style.setProperty("order", "3", "important"); } catch (eOrd) {}
+    }
   }
 
   function finalizeSaranoniInfoColumnOrder() {
@@ -12571,7 +12591,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE_20260723restore13 — pull fresh form when baked pages pin stale ?v= */
 (function (g, d) {
-  var WANT = "20260723restore13";
+  var WANT = "20260723restore14";
   try {
     if (String(g.__MC_DEPLOY_FP__ || "") === WANT) return;
     if (d.documentElement.getAttribute("data-mc-pdp-auth-self-upgrade") === WANT) return;
