@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore8 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore8";
-  var VERSION = "20260723restore8";
+  // MC_DEPLOY_FINGERPRINT_20260723restore9 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore9";
+  var VERSION = "20260723restore9";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
