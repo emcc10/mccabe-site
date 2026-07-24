@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260723restore6 — bean bag free-ship img fallback (no icon font)
+ * MC_PLP_ENFORCER_20260723restore12 — bean bag free-ship img fallback (no icon font)
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
@@ -9,7 +9,7 @@
 
   /* forceLoveyStyleCta REMOVED 20260722manual4 — was unloading CTA and freezing lovey PDPs */
 
-  var VERSION = "20260723restore1";
+  var VERSION = "20260723restore12";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -1021,7 +1021,10 @@
           detailCell.querySelector(
             'img[alt="Free Shipping" i], img[src*="Icon_FreeShipping" i]'
           );
-        if (shipping) price.appendChild(shipping.cloneNode(true));
+        /* Only carry free-ship onto cards that qualify for the promo. */
+        if (shipping && plpCardQualifiesFreeShipping(card)) {
+          price.appendChild(shipping.cloneNode(true));
+        }
         card.appendChild(price);
       }
       grid.appendChild(card);
@@ -1777,11 +1780,49 @@
      directly (belt-and-suspenders alongside the CSS !important rules); only
      build the synthetic fallback badge when no icon — native or synthetic —
      exists at all. */
+  function plpCardQualifiesFreeShipping(card) {
+    if (!card) return false;
+    var href = "";
+    try {
+      var a = card.querySelector('a[href*="/product-p/"]');
+      href = String((a && (a.getAttribute("href") || a.href)) || "").toLowerCase();
+    } catch (eH) {}
+    var imgSrc = "";
+    try {
+      var img = card.querySelector("img[src*='/photos/'], img[src*='vspfiles/photos']");
+      imgSrc = String((img && img.getAttribute("src")) || "").toLowerCase();
+    } catch (eI) {}
+    var blob = href + " " + imgSrc;
+    /* Promo: free ship on bean bags & mattresses; Saranoni $99+. */
+    if (/\/product-p\/(bb-|xl-)/.test(blob) || /\/(bb-|xl-)[a-z0-9_-]+/i.test(blob)) return true;
+    if (/\/product-p\/(mhh-|fc-|pc\d*-)/.test(blob) || /\/(mhh-|fc-|pc\d*-)[a-z0-9_-]+/i.test(blob)) return true;
+    if (/\/product-p\/sar-|\/sar-[a-z0-9_-]+/i.test(blob)) {
+      var priceEl = card.querySelector(".v-product__price, .product_productprice, .mc-cat-prodcard__price, .product_sale_price");
+      var txt = String((priceEl && priceEl.textContent) || "").replace(/[^0-9.]/g, " ");
+      var nums = txt.trim().split(/\s+/).map(parseFloat).filter(function (n) { return !isNaN(n) && n > 0; });
+      var price = nums.length ? Math.min.apply(null, nums) : 0;
+      return price >= 99;
+    }
+    return false;
+  }
+
   function ensureBeanBagCategoryShippingBadges() {
     var cards = global.document.querySelectorAll("#content_area .v-product-grid .v-product, #content_area .v-product");
     if (!cards.length) return;
     var gif = "/v/vspfiles/templates/266/images/Icon_FreeShipping_Small.gif";
     cards.forEach(function (card) {
+      var qualifies = plpCardQualifiesFreeShipping(card);
+      if (!qualifies) {
+        /* Strip synthetic AND native free-ship badges — Volusion often marks every card. */
+        card.querySelectorAll(
+          ".mc-plp-free-ship, img.mc-plp-free-ship-img, .vol-free-shipping-icon, " +
+          "img[alt='Free Shipping' i], img[src*='Icon_FreeShipping' i], " +
+          ".icon-free-shipping, i.icon-free-shipping, span.icon-free-shipping"
+        ).forEach(function (el) {
+          try { el.parentNode && el.parentNode.removeChild(el); } catch (eRm) {}
+        });
+        return;
+      }
       card.querySelectorAll(".icon-free-shipping, i.icon-free-shipping, span.icon-free-shipping").forEach(function (glyph) {
         var img = global.document.createElement("img");
         img.className = "vCSS_img_icon_free_shipping mc-plp-free-ship-img";

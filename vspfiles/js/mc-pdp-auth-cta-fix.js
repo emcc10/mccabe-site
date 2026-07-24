@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore11 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore11";
-  var VERSION = "20260723restore11";
+  // MC_DEPLOY_FINGERPRINT_20260723restore12 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore12";
+  var VERSION = "20260723restore12";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -5294,6 +5294,36 @@
     });
   }
 
+  function ensureSaranoniVariantsBelowPriceMobile() {
+    if (!isSaranoniPdpPage()) return;
+    if (!global.matchMedia || !global.matchMedia("(max-width: 991px)").matches) return;
+    var info =
+      global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
+      findPdpHeroColumnTd();
+    if (!info) return;
+    var price = global.document.getElementById("mc-pdp-price-stack-host");
+    var colors = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
+    var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
+    var anchor = price;
+    [colors, sizeLabel, sizes].forEach(function (el) {
+      if (!el) return;
+      try {
+        if (anchor && anchor.parentNode === info) {
+          if (anchor.nextSibling) info.insertBefore(el, anchor.nextSibling);
+          else info.appendChild(el);
+          anchor = el;
+        } else if (el.parentNode !== info) {
+          info.appendChild(el);
+        }
+        el.style.setProperty("display", el.id === "mc-saranoni-size-thumbs" ? "grid" : "block", "important");
+        el.style.setProperty("visibility", "visible", "important");
+        el.style.setProperty("width", "100%", "important");
+        el.style.setProperty("max-width", "100%", "important");
+      } catch (eMove) {}
+    });
+  }
+
   function finalizeSaranoniInfoColumnOrder() {
     if (saranoniLayoutFinalizing) return;
     saranoniLayoutFinalizing = true;
@@ -5331,6 +5361,7 @@
         applySaranoniInfoColumnAlignment();
         hideSaranoniLeftoverNativeShell(infoColumn);
         ensureSaranoniHeroImage();
+        try { ensureSaranoniVariantsBelowPriceMobile(); } catch (eSarMobFin) {}
       }
 
       revealSaranoniRelated();
@@ -12316,6 +12347,7 @@ function revealBeanBagRelated() {
           }
           if (isSaranoniPdpPage()) {
             finalizeSaranoniInfoColumnOrder();
+            try { ensureSaranoniVariantsBelowPriceMobile(); } catch (eSarMob0) {}
           }
           if (isBeanBagPdpPage()) {
             appendBeanBagInfoColumnOrder();

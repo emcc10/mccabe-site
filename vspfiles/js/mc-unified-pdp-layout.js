@@ -1172,7 +1172,7 @@
     var isSaranoni =
       global.document.body && global.document.body.classList.contains("mc-saranoni-pdp");
     /* One media width for every PDP — matches Saranoni/Steve Silver gap. */
-    var imgMaxW = "650px";
+    var imgMaxW = "620px";
     var img = qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image", mediaTd) || qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image");
     if (img && img.style) {
       var imgNormVer = img.getAttribute("data-mc-media-norm") || "";
@@ -1186,7 +1186,7 @@
         img.style.setProperty("max-height", "none", "important");
         img.style.setProperty("object-fit", "contain", "important");
         if (isSteveSilver) {
-          img.style.setProperty("width", isDesktop ? "650px" : "100%", "important");
+          img.style.setProperty("width", isDesktop ? "620px" : "100%", "important");
           img.style.setProperty("max-width", imgMaxW, "important");
           img.style.setProperty("margin", isDesktop ? "0" : "0 auto", "important");
         } else {
