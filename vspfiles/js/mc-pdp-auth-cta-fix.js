@@ -4689,9 +4689,9 @@
   function ensureBeanBagPdpAccordion() {
     if (!isBeanBagPdpPage()) return null;
     var infoColumn = findPdpHeroColumnTd();
+    if (!infoColumn) return null;
     var features = global.document.getElementById("mc-pdp-features");
     var description = global.document.getElementById("mc-pdp-description-below-features");
-    if (!infoColumn || (!features && !description)) return null;
 
     var acc = global.document.getElementById("mc-pdp-accordion");
     if (!acc) {
