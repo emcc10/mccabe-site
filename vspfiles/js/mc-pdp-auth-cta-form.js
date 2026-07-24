@@ -6,13 +6,16 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260724fix3 — rocker label swatches; bedroom collection imgs; humidor 650px
-  var MC_DEPLOY_FINGERPRINT = "20260724fix3";
-  var VERSION = "20260724fix3";
-  /* Stale template/CDN copies often inject older ?v= after a fresh boot.
-     Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
+  // MC_DEPLOY_FINGERPRINT_20260725fix3 — rocker label swatches; bedroom collection imgs; humidor 650px
+  var MC_DEPLOY_FINGERPRINT = "20260725fix3";
+  var VERSION = "20260725fix3";
+  /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
+     lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
+  var DEPLOY_RANK = 20260725003;
   try {
-    if (String(global.__MC_PDP_AUTH_CTA_MAX_VER__ || "") >= VERSION) return;
+    var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
+    if (prevRank >= DEPLOY_RANK) return;
+    global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ = DEPLOY_RANK;
     global.__MC_PDP_AUTH_CTA_MAX_VER__ = VERSION;
   } catch (eMax) {}
   /* Baked Volusion pages still inject ancient mc-pdp-auth-cta-fix.js (?v=sarmob1).
@@ -62,7 +65,7 @@
     markCloseoutPdpPage();
     applySteveSilverBarSetFrame();
     alignSaranoniInfoToHeroTop();
-    [150, 400, 900, 1600, 2800].forEach(function (ms) {
+    [0, 150, 400, 900, 1600, 2800].forEach(function (ms) {
       global.setTimeout(function () {
         try {
           markGameRoomBarPdpPage();
@@ -71,6 +74,11 @@
           alignSaranoniInfoToHeroTop();
           if (typeof hideSaranoniStrayVariantLabels === "function") hideSaranoniStrayVariantLabels();
           ensureSaranoniPdpAccordion();
+          if (typeof isHumidorOrSaunaPdpPage === "function" && isHumidorOrSaunaPdpPage()) {
+            ensureSteveSilverHeroImageSize();
+          } else if (typeof applyPdpMainImageCap === "function") {
+            applyPdpMainImageCap();
+          }
         } catch (eTick) {}
       }, ms);
     });
