@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore12 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore12";
-  var VERSION = "20260723restore12";
+  // MC_DEPLOY_FINGERPRINT_20260723restore13 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore13";
+  var VERSION = "20260723restore13";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -637,7 +637,7 @@
       return;
     }
     var img = global.document.getElementById("product_photo");
-    var maxW = "650px";
+    var maxW = "700px";
     if (img) {
       try {
         img.style.setProperty("max-width", maxW, "important");
@@ -4706,21 +4706,60 @@
       } catch (eDesc2) {}
     }
     var media = global.document.querySelector("td.mc-unified-pdp-media, td.mc-pdp-media-td");
-    if (media && global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
-      try {
-        media.style.setProperty("width", "650px", "important");
-        media.style.setProperty("max-width", "650px", "important");
-        media.style.setProperty("flex", "0 0 650px", "important");
-        media.style.setProperty("padding-right", "24px", "important");
-      } catch (eMed) {}
-    }
+    var row = global.document.querySelector("tr.mc-pdp-main-row, tr.mc-unified-pdp-row");
+    var parent = global.document.getElementById("v65-product-parent");
     if (global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
       try {
-        info.style.setProperty("width", "auto", "important");
-        info.style.setProperty("max-width", "520px", "important");
-        info.style.setProperty("flex", "0 1 520px", "important");
+        if (parent) {
+          parent.style.setProperty("width", "1280px", "important");
+          parent.style.setProperty("max-width", "1280px", "important");
+          parent.style.setProperty("margin-left", "auto", "important");
+          parent.style.setProperty("margin-right", "auto", "important");
+        }
+        if (row) {
+          row.style.setProperty("display", "flex", "important");
+          row.style.setProperty("flex-wrap", "nowrap", "important");
+          row.style.setProperty("align-items", "flex-start", "important");
+          row.style.setProperty("justify-content", "center", "important");
+          row.style.setProperty("gap", "48px", "important");
+          row.style.setProperty("column-gap", "48px", "important");
+          row.style.setProperty("width", "100%", "important");
+          row.style.setProperty("max-width", "1280px", "important");
+        }
+        if (media) {
+          media.style.setProperty("width", "700px", "important");
+          media.style.setProperty("max-width", "700px", "important");
+          media.style.setProperty("min-width", "700px", "important");
+          media.style.setProperty("flex", "0 0 700px", "important");
+          media.style.setProperty("padding-right", "0", "important");
+          media.querySelectorAll("table, td, a#product_photo_zoom_url, a#product_photo_zoom_url2").forEach(function (n) {
+            try {
+              n.style.setProperty("width", "100%", "important");
+              n.style.setProperty("max-width", "700px", "important");
+              n.style.setProperty("display", "block", "important");
+            } catch (eN) {}
+          });
+          var img = global.document.getElementById("product_photo");
+          if (img) {
+            img.style.setProperty("width", "100%", "important");
+            img.style.setProperty("max-width", "700px", "important");
+            img.style.setProperty("height", "auto", "important");
+            img.style.setProperty("object-fit", "contain", "important");
+          }
+        }
+        info.style.setProperty("width", "400px", "important");
+        info.style.setProperty("max-width", "400px", "important");
+        info.style.setProperty("min-width", "320px", "important");
+        info.style.setProperty("flex", "0 1 400px", "important");
         info.style.setProperty("padding-left", "0", "important");
-      } catch (eInfo) {}
+        global.document.querySelectorAll("#mc-pdp-accordion, #mc-pdp-purchase-stack, .mc-unified-purchase-controls, .mc-atc-button-wrap, input[name=\"btnaddtocart\"]").forEach(function (el) {
+          try {
+            el.style.setProperty("width", "100%", "important");
+            el.style.setProperty("max-width", "400px", "important");
+            el.style.setProperty("box-sizing", "border-box", "important");
+          } catch (eEl) {}
+        });
+      } catch (eLay) {}
     }
   }
 
@@ -12530,12 +12569,24 @@ function revealBeanBagRelated() {
   g.addEventListener("load", bootCloseoutFrame);
 })(window, document);
 
-/* MC_PDP_AUTH_SELF_UPGRADE disabled 20260722manual4 — stop lovey freeze */
+/* MC_PDP_AUTH_SELF_UPGRADE_20260723restore13 — pull fresh form when baked pages pin stale ?v= */
 (function (g, d) {
+  var WANT = "20260723restore13";
   try {
-    g.__MC_DEPLOY_FP__ = g.__MC_DEPLOY_FP__ || "20260722manual4";
-    if (d && d.documentElement) d.documentElement.setAttribute("data-mc-pdp-auth-reload", "20260722manual4");
-  } catch (e) {}
+    if (String(g.__MC_DEPLOY_FP__ || "") === WANT) return;
+    if (d.documentElement.getAttribute("data-mc-pdp-auth-self-upgrade") === WANT) return;
+    if (!d.getElementById("v65-product-parent")) return;
+    d.documentElement.setAttribute("data-mc-pdp-auth-self-upgrade", WANT);
+    d.querySelectorAll('script[src*="mc-pdp-auth-cta-form.js"],script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+      var src = String(old.getAttribute("src") || "");
+      if (src.indexOf(WANT) !== -1) return;
+      try { old.remove(); } catch (eRm) {}
+    });
+    var s = d.createElement("script");
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=" + WANT + "&mcrd=" + Date.now();
+    s.async = false;
+    (d.head || d.documentElement).appendChild(s);
+  } catch (eUp) {}
 })(window, document);
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */

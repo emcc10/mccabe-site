@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260723restore12 — bean bag free-ship img fallback (no icon font)
+ * MC_PLP_ENFORCER_20260723restore13 — bean bag free-ship img fallback (no icon font)
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
@@ -9,7 +9,7 @@
 
   /* forceLoveyStyleCta REMOVED 20260722manual4 — was unloading CTA and freezing lovey PDPs */
 
-  var VERSION = "20260723restore12";
+  var VERSION = "20260723restore13";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -20,6 +20,27 @@
   if (plpVerNum(global.__MC_PLP_ENFORCER_VER__) >= plpVerNum(VERSION)) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
+
+  function upgradePdpAuthCtaForm() {
+    try {
+      if (!global.document.getElementById("v65-product-parent")) return;
+      var WANT = "20260723restore13";
+      if (String(global.__MC_DEPLOY_FP__ || "") === WANT) return;
+      if (global.document.documentElement.getAttribute("data-mc-plp-form-upgrade") === WANT) return;
+      global.document.documentElement.setAttribute("data-mc-plp-form-upgrade", WANT);
+      global.document.querySelectorAll('script[src*="mc-pdp-auth-cta-form.js"],script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+        var src = String(old.getAttribute("src") || "");
+        if (src.indexOf(WANT) !== -1) return;
+        try { old.remove(); } catch (eRm) {}
+      });
+      var s = global.document.createElement("script");
+      s.id = "mc-pdp-auth-cta-form-js";
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=" + WANT + "&mcrd=" + Date.now();
+      s.async = false;
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eUp) {}
+  }
+
 
   function injectCriticalThumbCss() {
     if (document.getElementById("mc-plp-critical-css")) return;
@@ -1974,6 +1995,14 @@
     }
   }
 
+  try { upgradePdpAuthCtaForm(); } catch (eUp0) {}
+  if (global.document.readyState === "loading") {
+    global.document.addEventListener("DOMContentLoaded", function () { try { upgradePdpAuthCtaForm(); } catch (eUp1) {} });
+  }
+  global.addEventListener("load", function () { try { upgradePdpAuthCtaForm(); } catch (eUp2) {} });
+  [0, 300, 1200, 2800].forEach(function (ms) {
+    global.setTimeout(function () { try { upgradePdpAuthCtaForm(); } catch (eUp3) {} }, ms);
+  });
   global.mcPlpEnforcerRun = run;
 
   var PRICE_ZERO_CENT_SELECTOR =
