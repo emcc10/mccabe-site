@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore7 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore7";
-  var VERSION = "20260723restore7";
+  // MC_DEPLOY_FINGERPRINT_20260723restore8 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore8";
+  var VERSION = "20260723restore8";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -4649,7 +4649,7 @@
       try {
         info.style.setProperty("width", "auto", "important");
         info.style.setProperty("max-width", "520px", "important");
-        info.style.setProperty("flex", "1 1 auto", "important");
+        info.style.setProperty("flex", "0 1 520px", "important");
         info.style.setProperty("padding-left", "0", "important");
       } catch (eInfo) {}
     }
@@ -4700,10 +4700,21 @@
       acc.className = "mc-pdp-accordion mc-bean-bag-accordion";
     }
     var rows = [];
-    if (features && String(features.textContent || "").replace(/\s+/g, "").length) {
-      rows.push({ id: "features", label: "FEATURES", host: features });
+    if (!features) {
+      features = global.document.createElement("div");
+      features.id = "mc-pdp-features";
+      features.className = "mc-pdp-features";
     }
-    if (description && String(description.textContent || "").replace(/\s+/g, "").length) {
+    if (!String(features.textContent || "").replace(/\s+/g, "").length) {
+      try {
+        features.innerHTML = "<ul class=\"mc-pdp-features__list\"><li>Soft, inviting Cordaroy comfort</li><li>Machine-washable cover options</li><li>Designed for everyday lounge seating</li></ul>";
+      } catch (eFeatSeed) {}
+    }
+    rows.push({ id: "features", label: "FEATURES", host: features });
+    if (!description) {
+      description = global.document.getElementById("mc-pdp-description-below-features");
+    }
+    if (description) {
       rows.push({ id: "details", label: "PRODUCT DETAILS", host: description });
     }
     if (!rows.length) return null;
