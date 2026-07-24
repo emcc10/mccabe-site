@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore14 — saranoni mobile variants below price
-  var MC_DEPLOY_FINGERPRINT = "20260723restore14";
-  var VERSION = "20260723restore14";
+  // MC_DEPLOY_FINGERPRINT_20260723restore15 — closeout features stay inside accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore15";
+  var VERSION = "20260723restore15";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -4623,6 +4623,18 @@
       ensureMahjongAccordionClosed();
       markMahjongPdpReady();
     }
+    /* Final sweep: any features/description that escaped back into the info
+       column must return to their accordion hosts (closeout/SS race). */
+    try {
+      var featLoose = global.document.getElementById("mc-pdp-features");
+      if (featLoose && !featLoose.closest("#mc-pdp-accordion") && featuresHost) {
+        mountNodeInSaranoniAccordionHost(featuresHost, featLoose);
+      }
+      var descLoose = global.document.getElementById("mc-pdp-description-below-features");
+      if (descLoose && !descLoose.closest("#mc-pdp-accordion") && detailsHost) {
+        mountNodeInSaranoniAccordionHost(detailsHost, descLoose);
+      }
+    } catch (eSweep) {}
     return acc;
   }
 
@@ -6655,6 +6667,26 @@
     try {
       block.style.removeProperty("display");
     } catch (eShow) {}
+    /* Unified accordion PDPs (closeout / SS / humidors / etc.): features belong
+       inside FEATURES only — never leave a loose sibling under the headers. */
+    if (isUnifiedAccordionPdp()) {
+      try {
+        ensureSaranoniPdpAccordion();
+        var featHost = global.document.getElementById("mc-acc-saranoni-features-host");
+        if (featHost && block.parentNode !== featHost) {
+          mountNodeInSaranoniAccordionHost(featHost, block);
+        }
+        var featHeading = block.querySelector(".mc-pdp-features__heading");
+        if (featHeading) {
+          try {
+            featHeading.style.setProperty("display", "none", "important");
+          } catch (eHideFeat2) {}
+        }
+        repairGenericAccordionProductDetails();
+        ensurePdpAccordionVisible();
+      } catch (eUniFeat) {}
+      return;
+    }
     /* Bean Bag features are owned by their existing accordion once it exists.
        Do not reinsert that node as a loose sibling on a later PDP pass. */
     if (isBeanBagPdpPage() && global.document.getElementById("mc-pdp-accordion")) {
@@ -12591,7 +12623,7 @@ function revealBeanBagRelated() {
 
 /* MC_PDP_AUTH_SELF_UPGRADE_20260723restore13 — pull fresh form when baked pages pin stale ?v= */
 (function (g, d) {
-  var WANT = "20260723restore14";
+  var WANT = "20260723restore15";
   try {
     if (String(g.__MC_DEPLOY_FP__ || "") === WANT) return;
     if (d.documentElement.getAttribute("data-mc-pdp-auth-self-upgrade") === WANT) return;
