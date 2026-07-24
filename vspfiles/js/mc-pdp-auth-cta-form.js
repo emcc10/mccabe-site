@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260724style1 — style options (Bear/Elephant) use image swatches not Size text
-  var MC_DEPLOY_FINGERPRINT = "20260724style1";
-  var VERSION = "20260724style1";
+  // MC_DEPLOY_FINGERPRINT_20260724fix3 — rocker label swatches; bedroom collection imgs; humidor 650px
+  var MC_DEPLOY_FINGERPRINT = "20260724fix3";
+  var VERSION = "20260724fix3";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -543,6 +543,31 @@
     return true;
   }
 
+  function isHumidorOrSaunaPdpPage() {
+    if (!isProductPdp()) return false;
+    try {
+      if (
+        global.document.body &&
+        (global.document.body.classList.contains("mc-humidor-pdp") ||
+          global.document.body.classList.contains("mc-sauna-pdp"))
+      ) {
+        return true;
+      }
+      var path = String((global.location && global.location.pathname) || "").toLowerCase();
+      if (/humidor|sauna|fridgador/.test(path)) return true;
+      var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pc = String((pcEl && pcEl.value) || global.global_Current_ProductCode || "")
+        .trim()
+        .toUpperCase();
+      if (/HUMIDOR|SAUNA|FRIDGADOR|CE-HUM|KL-HUM|KL-CAB/.test(pc)) return true;
+      var title = String(
+        (global.document.querySelector("h1, .productnamecolorLARGE, #productname") || {}).textContent || ""
+      ).toLowerCase();
+      if (/humidor|sauna|fridgador/.test(title)) return true;
+    } catch (eHum) {}
+    return false;
+  }
+
   function ensureSteveSilverHeroImageSize() {
     if (!isProductPdp()) return;
     ensureSteveSilverHeroPhotoSrc();
@@ -559,10 +584,14 @@
           .toUpperCase();
         return /^SS-/.test(pc);
       })();
-    if (!isSs) return;
+    var isHumidorSauna = isHumidorOrSaunaPdpPage();
+    if (!isSs && !isHumidorSauna) return;
     try {
       if (global.document.body) {
-        global.document.body.classList.add("mc-steve-silver-altview-pdp");
+        global.document.body.classList.add("mc-steve-silver-altview-pdp", "mc-pdp-unified-ready");
+        if (isHumidorSauna) {
+          global.document.body.classList.add("mc-humidor-pdp");
+        }
       }
     } catch (eBody) {}
     var isDesktop =
@@ -584,6 +613,9 @@
         mediaCell.style.setProperty("grid-template-rows", "none", "important");
         mediaCell.style.setProperty("max-width", isDesktop ? "650px" : "100%", "important");
         mediaCell.style.setProperty("width", isDesktop ? "650px" : "100%", "important");
+        if (isDesktop) {
+          mediaCell.style.setProperty("flex", "0 0 650px", "important");
+        }
       } catch (eCell) {}
     }
     if (img) {
@@ -629,10 +661,11 @@
   function applyPdpMainImageCap() {
     if (!isProductPdp()) return;
     var isSs = isSteveSilverPdpPage();
-    if (!isSs && global.__MC_PDP_MAIN_IMAGE_CAP_VER__ === VERSION) return;
-    if (!isSs) global.__MC_PDP_MAIN_IMAGE_CAP_VER__ = VERSION;
+    var isHumidorSauna = isHumidorOrSaunaPdpPage();
+    if (!isSs && !isHumidorSauna && global.__MC_PDP_MAIN_IMAGE_CAP_VER__ === VERSION) return;
+    if (!isSs && !isHumidorSauna) global.__MC_PDP_MAIN_IMAGE_CAP_VER__ = VERSION;
     fixTmhMatPhotoUrls(global.document);
-    if (isSs) {
+    if (isSs || isHumidorSauna) {
       ensureSteveSilverHeroImageSize();
       return;
     }
@@ -6713,11 +6746,69 @@
     return /-[2-9]\d*T?\.(jpg|jpeg|png|webp)$/i.test(file);
   }
 
-  function configuredColorImageMatchesOption(src, productCode, optionId) {
+  function configuredColorImageMatchesOption(src, productCode, optionId, label) {
     if (!configuredColorImageBelongsToProduct(src, productCode)) return false;
     var id = String(optionId || "").trim();
-    if (!id) return true;
-    return new RegExp("(^|[^0-9])" + escapeRegexLiteral(id) + "([^0-9]|$)").test(String(src));
+    var lab = String(label || "")
+      .split(/[:(]/)[0]
+      .replace(/\s+/g, " ")
+      .trim();
+    var slug = lab.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    var hay = String(src || "");
+    if (id && new RegExp("(^|[^0-9A-Za-z])" + escapeRegexLiteral(id) + "([^0-9A-Za-z]|$)", "i").test(hay)) {
+      return true;
+    }
+    if (slug && new RegExp("(^|[^0-9A-Za-z])" + escapeRegexLiteral(slug) + "([^0-9A-Za-z]|$)", "i").test(hay)) {
+      return true;
+    }
+    if (!id && !slug) return true;
+    return false;
+  }
+
+  function saranoniLabelSlug(label) {
+    return String(label || "")
+      .split(/[:(]/)[0]
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/[^A-Za-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function buildDataDrivenSaranoniEntries(select, productCode) {
+    if (!select || !select.options || !productCode) return [];
+    var out = [];
+    var seen = {};
+    var i;
+    for (i = 0; i < select.options.length; i++) {
+      var opt = select.options[i];
+      var val = String(opt.value || "").trim();
+      if (!val) continue;
+      var text = String(opt.text || "").replace(/\s+/g, " ").trim();
+      if (!text || /^(--|please\b|select\b|choose\b)/i.test(text)) continue;
+      if (seen[val]) continue;
+      seen[val] = true;
+      var slug = saranoniLabelSlug(text);
+      /* Prefer label slug files when present (Bear-S / Elephant-S). Numeric
+         optionIds often point at missing/tiny CDN stubs (1536-S 404). */
+      var swatchImage =
+        slug && slug.toLowerCase() !== val.toLowerCase()
+          ? productCode + "-" + slug + "-S.jpg"
+          : productCode + "-" + val + "-S.jpg";
+      var mainImage =
+        slug && slug.toLowerCase() !== val.toLowerCase()
+          ? productCode + "-" + slug + "-T.jpg"
+          : productCode + "-" + val + "-T.jpg";
+      out.push({
+        optionId: val,
+        label: text,
+        labelSlug: slug,
+        swatchImage: swatchImage,
+        mainImage: mainImage,
+        swatchImageAlt: productCode + "-" + val + "-S.jpg",
+        mainImageAlt: productCode + "-" + val + "-T.jpg",
+      });
+    }
+    return out;
   }
 
   function isConfiguredProductDefaultHero(src, productCode) {
@@ -6913,31 +7004,6 @@
     return out;
   }
 
-  function buildDataDrivenSaranoniEntries(select, productCode) {
-    if (!select || !select.options || !productCode) return [];
-    var out = [];
-    var seen = {};
-    var i;
-    for (i = 0; i < select.options.length; i++) {
-      var opt = select.options[i];
-      var val = String(opt.value || "").trim();
-      if (!val) continue;
-      var text = String(opt.text || "").replace(/\s+/g, " ").trim();
-      if (!text || /^(--|please\b|select\b|choose\b)/i.test(text)) continue;
-      if (seen[val]) continue;
-      seen[val] = true;
-      out.push({
-        optionId: val,
-        label: text,
-        // Repository convention, verified live for SAR-DBL-RCH-FX-FUR:
-        // /v/vspfiles/photos/{ProductCode}-{optionId}-S.jpg (swatch) and -T.jpg (main).
-        swatchImage: productCode + "-" + val + "-S.jpg",
-        mainImage: productCode + "-" + val + "-T.jpg",
-      });
-    }
-    return out;
-  }
-
   function saranoniOptionLabelHaystack(select) {
     if (!select) return "";
     try {
@@ -7057,11 +7123,22 @@
 
   function buildConfiguredColorThumbCandidates(entry, productCode) {
     var out = buildProductScopedColorImageCandidates(productCode, entry.swatchImage);
-    // Saranoni swatches use per-option -S files; do not reuse hero (-T) images in the rail.
-    if (!/^SAR/i.test(String(productCode || ""))) {
+    if (entry.swatchImageAlt) {
+      buildProductScopedColorImageCandidates(productCode, entry.swatchImageAlt).forEach(function (candidate) {
+        if (candidate && out.indexOf(candidate) === -1) out.push(candidate);
+      });
+    }
+    // Saranoni swatches use per-option -S files; do not reuse hero (-T) images in the rail
+    // unless the -S stub is missing (rocker numeric optionIds).
+    if (!/^SAR/i.test(String(productCode || "")) || !out.length) {
       buildProductScopedColorImageCandidates(productCode, entry.mainImage).forEach(function (candidate) {
         if (candidate && out.indexOf(candidate) === -1) out.push(candidate);
       });
+      if (entry.mainImageAlt) {
+        buildProductScopedColorImageCandidates(productCode, entry.mainImageAlt).forEach(function (candidate) {
+          if (candidate && out.indexOf(candidate) === -1) out.push(candidate);
+        });
+      }
     }
     return out;
   }
@@ -9239,7 +9316,12 @@
             var normalized = normalizeConfiguredColorAssetUrl(liveSrc);
             if (
               liveSrc &&
-              configuredColorImageMatchesOption(liveSrc, productCode, entry.optionId) &&
+              configuredColorImageMatchesOption(
+                liveSrc,
+                productCode,
+                entry.optionId,
+                entry.label || entry.labelSlug
+              ) &&
               (!normalized || !probeState.usedSrc[normalized])
             ) {
               if (normalized) probeState.usedSrc[normalized] = true;
@@ -9257,7 +9339,15 @@
             finishDataDrivenSaranoniSwatchProbe(wrap, ctx.select, ctx, probeState);
           }
           function acceptResolvedSrc(resolvedSrc, next) {
-            if (resolvedSrc && configuredColorImageMatchesOption(resolvedSrc, productCode, entry.optionId)) {
+            if (
+              resolvedSrc &&
+              configuredColorImageMatchesOption(
+                resolvedSrc,
+                productCode,
+                entry.optionId,
+                entry.label || entry.labelSlug
+              )
+            ) {
               settleDataDrivenSwatch(resolvedSrc);
             } else if (typeof next === "function") {
               next();
@@ -9284,9 +9374,13 @@
             img.onerror = function () {
               loadProductScopedColorImage(productCode, entry.swatchImage, function (swatchSrc) {
                 acceptResolvedSrc(swatchSrc, function () {
-                  loadProductScopedColorImage(productCode, entry.mainImage, function (mainSrc) {
-                    acceptResolvedSrc(mainSrc, function () {
-                      settleDataDrivenSwatch("");
+                  loadProductScopedColorImage(productCode, entry.swatchImageAlt || entry.mainImage, function (altSrc) {
+                    acceptResolvedSrc(altSrc, function () {
+                      loadProductScopedColorImage(productCode, entry.mainImage, function (mainSrc) {
+                        acceptResolvedSrc(mainSrc, function () {
+                          settleDataDrivenSwatch("");
+                        });
+                      });
                     });
                   });
                 });
