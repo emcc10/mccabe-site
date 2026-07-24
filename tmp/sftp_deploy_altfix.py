@@ -9,7 +9,9 @@ from verify_template_sftp import connect_paramiko_transport
 
 FILES = [
     "vspfiles/js/mc-pdp-alt-view-row.js",
+    "vspfiles/js/mc-pdp-auth-cta-fix.js",
     "vspfiles/js/mc-pdp-auth-cta-form.js",
+    "vspfiles/js/mc-plp-enforcer.js",
     "vspfiles/js/mc-bedroom-collection-section.js",
     "vspfiles/css/custom-safe.css",
     "template_266.html",

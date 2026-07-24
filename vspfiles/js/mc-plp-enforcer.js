@@ -9,7 +9,7 @@
 
   /* forceLoveyStyleCta REMOVED 20260722manual4 — was unloading CTA and freezing lovey PDPs */
 
-  var VERSION = "20260723restore16";
+  var VERSION = "20260725order3";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -24,7 +24,10 @@
   function upgradePdpAuthCtaForm() {
     try {
       if (!global.document.getElementById("v65-product-parent")) return;
-      var WANT = "20260723restore16";
+      var WANT = "20260725order3";
+      var WANT_RANK = 20260725009;
+      var curRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
+      if (curRank >= WANT_RANK) return;
       if (String(global.__MC_DEPLOY_FP__ || "") === WANT) return;
       if (global.document.documentElement.getAttribute("data-mc-plp-form-upgrade") === WANT) return;
       global.document.documentElement.setAttribute("data-mc-plp-form-upgrade", WANT);
@@ -35,7 +38,7 @@
       });
       var s = global.document.createElement("script");
       s.id = "mc-pdp-auth-cta-form-js";
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=" + WANT + "&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" + WANT + "&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eUp) {}
