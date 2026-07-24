@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore12 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
-  var MC_DEPLOY_FINGERPRINT = "20260723restore12";
-  var VERSION = "20260723restore12";
+  // MC_DEPLOY_FINGERPRINT_20260724style1 — style options (Bear/Elephant) use image swatches not Size text
+  var MC_DEPLOY_FINGERPRINT = "20260724style1";
+  var VERSION = "20260724style1";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -6959,10 +6959,50 @@
     }
   }
 
+  function saranoniOptionLabelsLookLikeSizes(select) {
+    if (!select || !select.options) return false;
+    var sizeRe =
+      /^(mini|receiving|toddler|xl|xs|s|m|l|large|small|medium|crib|king|queen|twin|throw|adult|one\s*size)\b/i;
+    var hits = 0;
+    var n = 0;
+    var i;
+    for (i = 0; i < select.options.length; i++) {
+      var t = String(select.options[i].text || "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!t || /^(--|please\b|select\b|choose\b|size\b|color\b|style\b)/i.test(t)) continue;
+      n += 1;
+      var name = t.split(/[:(]/)[0].replace(/\s+/g, " ").trim();
+      if (sizeRe.test(name)) hits += 1;
+    }
+    return n > 0 && hits >= Math.ceil(n / 2);
+  }
+
+  function saranoniOptionLabelsLookLikeStyles(select) {
+    if (!select || !select.options) return false;
+    var styleRe =
+      /^(bear|elephant|puppy|bunny|rabbit|fox|unicorn|dinosaur|giraffe|lion|tiger|deer|owl|lamb|sheep|cat|dog|moose|penguin|duck|chick)\b/i;
+    var hits = 0;
+    var n = 0;
+    var i;
+    for (i = 0; i < select.options.length; i++) {
+      var t = String(select.options[i].text || "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!t || /^(--|please\b|select\b|choose\b|size\b|color\b|style\b)/i.test(t)) continue;
+      n += 1;
+      var name = t.split(/[:(]/)[0].replace(/\s+/g, " ").trim();
+      if (styleRe.test(name)) hits += 1;
+    }
+    return n > 0 && hits >= Math.ceil(n / 2);
+  }
+
   function isSaranoniColorSelect(select) {
     if (!select || !select.name) return false;
     if (select.classList && select.classList.contains("mc-native-leather")) return false;
     if (!/^SAR/i.test(parseProductCodeFromSelectName(select.name))) return false;
+    /* Style options mislabeled "Size" in Volusion (Bear/Elephant/Puppy rockers). */
+    if (saranoniOptionLabelsLookLikeStyles(select)) return true;
     if (parseOptionCategoryFromSelectName(select.name) === SARANONI_COLOR_OPTION_CATEGORY) return true;
     var labelHay = saranoniOptionLabelHaystack(select);
     /* Select Style (Bear/Bunny/etc. on Stuffed Animal Loveys) is this product's only
@@ -6974,6 +7014,10 @@
     if (!select || !select.name) return false;
     if (select.classList && select.classList.contains("mc-native-leather")) return false;
     if (!/^SAR/i.test(parseProductCodeFromSelectName(select.name))) return false;
+    /* Never treat animal/style options as Size — even if Volusion labels the
+       option "Size" (Stuffed Animal Rockers). */
+    if (saranoniOptionLabelsLookLikeStyles(select)) return false;
+    if (!saranoniOptionLabelsLookLikeSizes(select)) return false;
     if (parseOptionCategoryFromSelectName(select.name) === SARANONI_SIZE_OPTION_CATEGORY) return true;
     var labelHay = "";
     try {
@@ -7993,6 +8037,15 @@
           strayWrap.parentNode.removeChild(strayWrap);
         } catch (eRmWrap) {}
       }
+    }
+    /* Drop orphan Size UI when this product is style/color-only (rockers). */
+    if (!sizeCtx) {
+      try {
+        ["mc-saranoni-size-label", "mc-saranoni-size-thumbs"].forEach(function (id) {
+          var el = global.document.getElementById(id);
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        });
+      } catch (eRmSize) {}
     }
     if (!colorCtx && !sizeCtx) return;
     hideSaranoniNativeOptionPricing();
