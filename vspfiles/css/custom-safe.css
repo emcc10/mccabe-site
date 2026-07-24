@@ -17839,7 +17839,12 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description li {
   text-transform: none !important;
 }
 
-html body.mc-pdp-unified-ready #mc-pdp-description-below-features:not(:empty),
+/* Hide loose description copies under media / as direct info-column children —
+   NOT the copy mounted inside PRODUCT DETAILS accordion. */
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-below-features:not(:empty),
+html body.mc-pdp-unified-ready td.mc-pdp-media-td #mc-pdp-description-below-features:not(:empty),
+html body.mc-pdp-unified-ready td.mc-unified-pdp-info > #mc-pdp-description-below-features:not(:empty),
+html body.mc-pdp-unified-ready td.mc-pdp-options-td > #mc-pdp-description-below-features:not(:empty),
 html body.mc-pdp-unified-ready #mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-gatlin-description-below,
@@ -17849,6 +17854,21 @@ html body.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidden="true"],
 html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidden="true"],
 html body.mc-pdp-unified-ready td.mc-unified-pdp-info:has(.mc-unified-purchase-controls input[name="btnaddtocart"]) #v65-productdetail-action-wrapper {
   display: none !important;
+}
+
+/* Always show description once it lives in the PRODUCT DETAILS accordion panel. */
+html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-description-below-features,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-acc-saranoni-product-details-host,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #ProductDetail_ProductDetails_div,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #ProductDetail_ProductDetails_div2,
+html body.mc-pdp-unified-ready #mc-pdp-accordion #product_description,
+html body.mc-product-page #mc-pdp-accordion #mc-pdp-description-below-features {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 /* Gatlin / fixed -SECT sectionals: unified purchase stack below logo + features */
