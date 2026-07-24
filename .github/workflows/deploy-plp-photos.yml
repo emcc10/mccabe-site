@@ -9,6 +9,7 @@ on:
       - "vspfiles/swatches/**"
       - "scripts/upload_missing_stock_photos.py"
       - "scripts/upload_altview_photos.py"
+      - "scripts/upload_humidor_sauna_altviews.py"
       - "scripts/upload_beanbag_swatches.py"
       - "scripts/upload_recliner_plp_photos.py"
       - "scripts/fetch_recliner_plp_photos.py"
@@ -111,9 +112,19 @@ jobs:
           DEPLOY_STRICT: "1"
         run: bash .github/scripts/deploy-volusion.sh
 
+      - name: Upload humidor/sauna altviews (CE-/KL-/39F-)
+        # Targeted replace + remote deletes for Faire gallery altviews.
+        if: ${{ always() && !cancelled() && (github.event_name == 'workflow_dispatch' || contains(env.DEPLOY_CHANGED_FILES, 'CE-') || contains(env.DEPLOY_CHANGED_FILES, 'KL-') || contains(env.DEPLOY_CHANGED_FILES, '39F-') || contains(env.DEPLOY_CHANGED_FILES, '.humidor-sauna-altview-reupload') || contains(env.DEPLOY_CHANGED_FILES, '.altview-remote-deletes')) }}
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_humidor_sauna_altviews.py
+
       - name: Upload all altview photos (*-altviewN.jpg)
-        # Full altview set — used when altviews change or a reupload marker is pushed.
-        if: ${{ always() && !cancelled() && (github.event_name == 'workflow_dispatch' || contains(env.DEPLOY_CHANGED_FILES, '-altview') || contains(env.DEPLOY_CHANGED_FILES, '.altview-reupload')) }}
+        # Full altview set — only on explicit reupload marker or manual dispatch (not every altview tweak).
+        if: ${{ always() && !cancelled() && (github.event_name == 'workflow_dispatch' || contains(env.DEPLOY_CHANGED_FILES, '.altview-reupload')) }}
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
