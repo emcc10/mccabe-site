@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725order1 — saranoni variants below price (not above logo)
-  var MC_DEPLOY_FINGERPRINT = "20260725order1";
-  var VERSION = "20260725order1";
+  // MC_DEPLOY_FINGERPRINT_20260725order2 — saranoni variants below price (not above logo)
+  var MC_DEPLOY_FINGERPRINT = "20260725order2";
+  var VERSION = "20260725order2";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725004;
+  var DEPLOY_RANK = 20260725005;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -65,7 +65,7 @@
     markCloseoutPdpPage();
     applySteveSilverBarSetFrame();
     alignSaranoniInfoToHeroTop();
-    [0, 150, 400, 900, 1600, 2800].forEach(function (ms) {
+    [0, 150, 400, 900, 1600, 2800, 4500, 7000].forEach(function (ms) {
       global.setTimeout(function () {
         try {
           markGameRoomBarPdpPage();
@@ -5382,6 +5382,11 @@
       findPdpHeroColumnTd();
     if (!info) return;
     repairSaranoniOrphanSwatchRail(info);
+    try {
+      info.style.setProperty("display", "flex", "important");
+      info.style.setProperty("flex-direction", "column", "important");
+      info.style.setProperty("align-items", "stretch", "important");
+    } catch (eFlex) {}
     var logo = global.document.getElementById("mc-pdp-brand-logo");
     var title = global.document.getElementById("mc-pdp-title-right");
     var price = global.document.getElementById("mc-pdp-price-stack-host");
@@ -5393,8 +5398,9 @@
       global.document.getElementById("mc-pdp-purchase-stack") ||
       global.document.getElementById("mc-unified-purchase-controls");
     var stack = [logo, title, price, colors, sizeLabel, sizes, accordion, purchase];
+    var orders = [1, 2, 3, 5, 6, 7, 9, 10];
     var anchor = null;
-    stack.forEach(function (el) {
+    stack.forEach(function (el, idx) {
       if (!el) return;
       try {
         if (el.parentNode !== info) info.appendChild(el);
@@ -5404,6 +5410,7 @@
           info.insertBefore(el, info.firstElementChild);
         }
         if (el.parentNode === info) anchor = el;
+        el.style.setProperty("order", String(orders[idx]), "important");
         if (el === colors || el === sizes || el === sizeLabel) {
           el.style.setProperty(
             "display",
@@ -5544,6 +5551,9 @@
     applySaranoniInfoColumnAlignment();
     hideSaranoniLeftoverNativeShell(infoColumn);
     ensureSaranoniHeroImage();
+    try {
+      ensureSaranoniVariantsBelowPrice();
+    } catch (eOrdAppend) {}
     markSaranoniPdpReady();
   }
 
@@ -7810,7 +7820,9 @@
           directMedia.style.setProperty("box-sizing", "border-box", "important");
         }
         if (directInfo) {
-          directInfo.style.setProperty("display", "block", "important");
+          directInfo.style.setProperty("display", "flex", "important");
+          directInfo.style.setProperty("flex-direction", "column", "important");
+          directInfo.style.setProperty("align-items", "stretch", "important");
           directInfo.style.setProperty("flex", "0 0 400px", "important");
           directInfo.style.setProperty("flex-basis", "400px", "important");
           directInfo.style.setProperty("flex-shrink", "0", "important");
@@ -7832,7 +7844,7 @@
       (global.document.head || global.document.documentElement).appendChild(st);
     }
     st.textContent =
-      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #v65-product-parent tbody:has(>tr.mc-pdp-main-row){display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:0!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 650px!important;flex-basis:650px!important;max-width:650px!important;min-width:0!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;min-width:460px!important;max-width:460px!important;width:460px!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp.mc-saranoni-pdp-ready tr.mc-pdp-main-row>td:last-child table.colors_pricebox:not(:has(#mc-pdp-option-block)):not(:has(#mc-pdp-accordion)):not(:has(#mc-pdp-features)):not(:has(#mc-pdp-purchase-stack)):not(:has(#mc-pdp-price-stack-host)):not(:has(#mc-pdp-title-right)):not(:has(#messaging-element)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}html body.mc-saranoni-pdp td.mc-pdp-media-td{display:table-cell!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-options-td{display:block!important;flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;width:460px!important;max-width:460px!important;min-width:460px!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:auto!important;max-width:min(650px,100%)!important;height:auto!important;max-height:none!important;display:block!important;margin-left:0!important;margin-right:auto!important}}" +
+      "@media (min-width:992px){html body.mc-saranoni-pdp #v65-product-parent,html body.mc-saranoni-pdp #content_area #v65-product-parent{width:100%!important;max-width:100%!important;table-layout:fixed!important}html body.mc-saranoni-pdp #v65-product-parent table:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent td:has(tr.mc-pdp-main-row),html body.mc-saranoni-pdp #v65-product-parent table:has(td.mc-pdp-media-td),html body.mc-saranoni-pdp #v65-product-parent td:has(td.mc-pdp-media-td){width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #v65-product-parent tbody:has(>tr.mc-pdp-main-row){display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:0!important;width:100%!important;max-width:100%!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td{display:block!important;flex:1 1 0%!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:first-child{flex:1 1 650px!important;flex-basis:650px!important;max-width:650px!important;min-width:0!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child{flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;min-width:460px!important;max-width:460px!important;width:460px!important}html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td>table>tbody>tr>td,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tbody,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table tr,html body.mc-saranoni-pdp tr.mc-pdp-main-row>td:last-child table td{width:100%!important;max-width:100%!important;box-sizing:border-box!important}html body.mc-saranoni-pdp.mc-saranoni-pdp-ready tr.mc-pdp-main-row>td:last-child table.colors_pricebox:not(:has(#mc-pdp-option-block)):not(:has(#mc-pdp-accordion)):not(:has(#mc-pdp-features)):not(:has(#mc-pdp-purchase-stack)):not(:has(#mc-pdp-price-stack-host)):not(:has(#mc-pdp-title-right)):not(:has(#messaging-element)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}html body.mc-saranoni-pdp td.mc-pdp-media-td{display:table-cell!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-options-td{display:flex!important;flex-direction:column!important;align-items:stretch!important;flex:0 0 460px!important;flex-basis:460px!important;flex-shrink:0!important;width:460px!important;max-width:460px!important;min-width:460px!important;box-sizing:border-box!important}html body.mc-saranoni-pdp td.mc-pdp-media-td img#product_photo,html body.mc-saranoni-pdp td.mc-pdp-media-td a#product_photo_zoom_url{width:auto!important;max-width:min(650px,100%)!important;height:auto!important;max-height:none!important;display:block!important;margin-left:0!important;margin-right:auto!important}}" +
       "html body.mc-saranoni-pdp td.mc-pdp-options-td>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-unified-pdp-info>table.colors_pricebox,html body.mc-saranoni-pdp td.mc-pdp-options-td>#options_table:not(#mc-pdp-option-block #options_table),html body.mc-saranoni-pdp td.mc-pdp-options-td>table:has(>#options_table):not(:has(#mc-pdp-option-block)){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}" +
       "html body.mc-saranoni-pdp td.mc-unified-pdp-info,html body.mc-saranoni-pdp td.mc-pdp-options-td{display:flex!important;flex-direction:column!important;align-items:stretch!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-brand-logo{order:1!important}" +
@@ -12284,6 +12296,7 @@ function revealBeanBagRelated() {
 
   global.mcEnsureSoftGoodsPdpLayout = reassertSoftGoodsHeroOrder;
   global.mcFinalizeSaranoniInfoColumnOrder = finalizeSaranoniInfoColumnOrder;
+  global.mcEnsureSaranoniVariantsBelowPrice = ensureSaranoniVariantsBelowPrice;
 
   function isPdpLayoutReady() {
     return !!global.document.querySelector(
