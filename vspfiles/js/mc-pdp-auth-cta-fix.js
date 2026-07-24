@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725corda1 — Cordaroys mattress/dog/outdoor soft frame + qty above ATC
-  var MC_DEPLOY_FINGERPRINT = "20260725corda1";
-  var VERSION = "20260725corda1";
+  // MC_DEPLOY_FINGERPRINT_20260725corda3 — mattress accordion content + unified qty/ATC stack
+  var MC_DEPLOY_FINGERPRINT = "20260725corda3";
+  var VERSION = "20260725corda3";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725010;
+  var DEPLOY_RANK = 20260725012;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -3072,8 +3072,8 @@
   function ensureQuantityAboveAtc() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
-    if (shouldDeferToUnifiedPdpLayout() && !isSoftGoodsPdpPage()) return;
-    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
+    if (shouldDeferToUnifiedPdpLayout() && !isSoftGoodsPdpPage() && !isUnifiedAccordionPdp()) return;
+    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage() && !isUnifiedAccordionPdp()) return;
     if (isSaranoniPdpPage()) {
       var sarCol = resolveSaranoniInfoColumn();
       var sarStack = global.document.getElementById("mc-pdp-purchase-stack");
@@ -3153,8 +3153,8 @@
   function ensurePurchaseStackCentered() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
-    if (shouldDeferToUnifiedPdpLayout() && !isSoftGoodsPdpPage()) return;
-    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
+    if (shouldDeferToUnifiedPdpLayout() && !isSoftGoodsPdpPage() && !isUnifiedAccordionPdp()) return;
+    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage() && !isUnifiedAccordionPdp()) return;
     try {
       if (
         global.document.body &&
@@ -3311,7 +3311,13 @@
   }
 
   function finalizeCordaroysPurchaseStack() {
-    if (!isCordaroysBrandPdpPage()) return;
+    return finalizeColumnPurchaseStack();
+  }
+
+  function finalizeColumnPurchaseStack() {
+    if (!isProductPdp()) return;
+    if (isSectionalPdpPage() && !isFixedSectionalUnifiedPdp()) return;
+    if (!isSoftGoodsPdpPage() && !isUnifiedAccordionPdp()) return;
     try { ejectQtyFromAtcWrap(); } catch (eEj0) {}
     try { ensureQuantityAboveAtc(); } catch (eQty0) {}
     try { ensurePurchaseStackCentered(); } catch (eStack0) {}
@@ -3319,10 +3325,16 @@
       global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
       findPdpHeroColumnTd();
     var purchase = resolveSoftGoodsPurchaseElement(info);
+    if (!purchase) {
+      purchase =
+        global.document.getElementById("mc-pdp-purchase-stack") ||
+        global.document.querySelector(".mc-unified-purchase-controls, .mc-pdp-purchase-controls");
+    }
     if (!purchase) return;
     try {
       purchase.id = purchase.id || "mc-pdp-purchase-stack";
-      purchase.classList.add("mc-pdp-purchase-controls", "mc-pdp-cart-row", "mc-soft-goods-purchase-stack");
+      purchase.classList.add("mc-pdp-purchase-controls", "mc-pdp-cart-row");
+      if (isSoftGoodsPdpPage()) purchase.classList.add("mc-soft-goods-purchase-stack");
       if (isBeanBagPdpPage()) purchase.classList.add("mc-bean-bag-purchase-stack");
       if (isCordaroysExtendedPdpPage()) purchase.classList.add("mc-cordaroys-purchase-stack");
       purchase.style.setProperty("display", "flex", "important");
@@ -3348,7 +3360,41 @@
         wrap.style.setProperty("order", "2", "important");
       } catch (eOrd) {}
     }
-    applySoftGoodsColumnPurchaseStackLayout(purchase, qtyRow, wrap);
+    if (wrap) {
+      try {
+        wrap.style.setProperty("display", "flex", "important");
+        wrap.style.setProperty("flex-direction", "row", "important");
+        wrap.style.setProperty("align-items", "center", "important");
+        wrap.style.setProperty("justify-content", "center", "important");
+        wrap.style.setProperty("width", "100%", "important");
+        wrap.style.setProperty("max-width", "100%", "important");
+        wrap.style.setProperty("margin", "0", "important");
+        wrap.style.setProperty("background", "#000", "important");
+        wrap.style.setProperty("background-color", "#000", "important");
+        wrap.style.setProperty("border", "1px solid #000", "important");
+      } catch (eWrapCol) {}
+      var btn =
+        wrap.querySelector("input[name='btnaddtocart'], button[name='btnaddtocart'], input[type='submit']") ||
+        (wrap.matches && wrap.matches("input[name='btnaddtocart'], button[name='btnaddtocart']") ? wrap : null);
+      if (btn) {
+        try {
+          btn.style.setProperty("width", "100%", "important");
+          btn.style.setProperty("max-width", "100%", "important");
+          btn.style.setProperty("display", "flex", "important");
+          btn.style.setProperty("align-items", "center", "important");
+          btn.style.setProperty("justify-content", "center", "important");
+          btn.style.setProperty("min-height", "48px", "important");
+          btn.style.setProperty("box-sizing", "border-box", "important");
+          btn.style.setProperty("background", "#000", "important");
+          btn.style.setProperty("background-color", "#000", "important");
+          btn.style.setProperty("color", "#fff", "important");
+          btn.style.setProperty("border", "1px solid #000", "important");
+        } catch (eBtnCol) {}
+      }
+    }
+    if (isSoftGoodsPdpPage()) {
+      applySoftGoodsColumnPurchaseStackLayout(purchase, qtyRow, wrap);
+    }
     try { ejectQtyFromAtcWrap(); } catch (eEj1) {}
   }
 
@@ -3657,18 +3703,9 @@
         forceBlackAtcButton(btn);
         btn.setAttribute("data-mc-atc-styled", VERSION);
       });
-    if (isSoftGoodsPdpPage()) {
-      try { ejectQtyFromAtcWrap(); } catch (eEjAtc) {}
-      if (isCordaroysBrandPdpPage()) {
-        try { finalizeCordaroysPurchaseStack(); } catch (eFinCor) {}
-      } else {
-        var purchaseTarget = resolveAtcPurchaseTarget();
-        applySoftGoodsColumnPurchaseStackLayout(
-          global.document.getElementById("mc-pdp-purchase-stack"),
-          global.document.getElementById("mc-pdp-qty-row"),
-          purchaseTarget ? purchaseTarget.stackNode : null
-        );
-      }
+    try { ejectQtyFromAtcWrap(); } catch (eEjAtc) {}
+    if (isSoftGoodsPdpPage() || isUnifiedAccordionPdp()) {
+      try { finalizeColumnPurchaseStack(); } catch (eFinCol) {}
     }
     try {
       normalizeCloseoutPurchaseControls();
@@ -4554,7 +4591,7 @@
      passes were re-inserting it as a loose sibling under the info column. */
   function ensureFeaturesInsideAccordion() {
     if (!isUnifiedAccordionPdp()) return;
-    if (isBeanBagPdpPage()) {
+    if (isCordaroysBrandPdpPage()) {
       try {
         ensureBeanBagPdpAccordion();
       } catch (eBbAccFeat) {}
@@ -4564,6 +4601,13 @@
         try {
           panelBb.appendChild(featuresBb);
         } catch (eBbFeatMount) {}
+      }
+      var descBb = global.document.getElementById("mc-pdp-description-below-features");
+      var detailsBb = global.document.querySelector("#mc-acc-row-details .mc-acc-panel");
+      if (descBb && detailsBb && descBb.parentNode !== detailsBb) {
+        try {
+          detailsBb.appendChild(descBb);
+        } catch (eBbDescMount) {}
       }
       return;
     }
@@ -4700,7 +4744,7 @@
     /* Bean bags own their accordion (features/details hosts). Never rebuild
        them with saranoni-* row ids — that destroys #mc-pdp-features via
        innerHTML="" and leaves empty FEATURES / PRODUCT DETAILS bars. */
-    if (isBeanBagPdpPage()) {
+    if (isBeanBagPdpPage() || isCordaroysExtendedPdpPage()) {
       try {
         return ensureBeanBagPdpAccordion();
       } catch (eBbOwnAcc) {
@@ -5016,6 +5060,7 @@
         info.style.setProperty("padding-left", "0", "important");
       } catch (eInfo) {}
     }
+    try { finalizeColumnPurchaseStack(); } catch (ePurCanon) {}
   }
 
   function finalizeUnifiedPdpAccordion() {
@@ -5046,6 +5091,42 @@
     return finalizeUnifiedPdpAccordion();
   }
 
+
+  function getCordaroysMattressFallbackContent(pc) {
+    var code = String(pc || resolveSoftGoodsProductCode() || "").toUpperCase();
+    var size = "Queen";
+    if (/^MHH-T-BD/.test(code) || /TWIN/.test(code)) size = "Twin";
+    else if (/^MHH-K-BD/.test(code) || /KING/.test(code)) size = "King";
+    else if (/^MHH-Q-BD/.test(code) || /QUEEN/.test(code)) size = "Queen";
+    var featuresHtml =
+      '<ul class="mc-pdp-features__list">' +
+      "<li>Five-layer hybrid build with graphite Visco Gel, copper Energex foam, and micro-coil support</li>" +
+      "<li>Medium-firm feel (about 7/10) for side, back, and stomach sleepers</li>" +
+      "<li>Cooling yarns and copper gel beads help pull heat away overnight</li>" +
+      "<li>100-night in-home trial and limited lifetime guarantee</li>" +
+      "<li>Made in the USA (Arizona)</li>" +
+      "</ul>";
+    var detailsHtml =
+      "<p>Meet CordaRoy&#39;s Hybrid Mattress. Contouring comfort, advanced cooling, and durable support in a medium-firm hybrid built for everyday sleep.</p>" +
+      "<p><b>Dimensions:</b> " +
+      size +
+      " mattress</p>" +
+      "<ul>" +
+      "<li>Five-layer hybrid build with graphite Visco Gel, copper Energex foam, and micro-coil support</li>" +
+      "<li>Medium-firm feel (about 7/10) for side, back, and stomach sleepers</li>" +
+      "<li>Cooling yarns and copper gel beads help pull heat away overnight</li>" +
+      "<li>100-night in-home trial and limited lifetime guarantee</li>" +
+      "<li>Made in the USA (Arizona)</li>" +
+      "</ul>";
+    return { featuresHtml: featuresHtml, detailsHtml: detailsHtml };
+  }
+
+  function hostHasMeaningfulText(host) {
+    if (!host) return false;
+    return String(host.textContent || "").replace(/\s+/g, " ").trim().length >= 20;
+  }
+
+
   /* Bean Bag PDPs already own their Features and optional description nodes.
      Mount those existing nodes in the same accessible accordion component used by
      the other soft-goods PDPs; do not duplicate or rewrite their content. */
@@ -5068,9 +5149,25 @@
       features.id = "mc-pdp-features";
       features.className = "mc-pdp-features";
     }
-    if (!String(features.textContent || "").replace(/\s+/g, "").length) {
+    if (!hostHasMeaningfulText(features)) {
       try {
-        features.innerHTML = "<ul class=\"mc-pdp-features__list\"><li>Soft, inviting Cordaroy comfort</li><li>Machine-washable cover options</li><li>Designed for everyday lounge seating</li></ul>";
+        var featHtml = extractTechSpecsBodyHtml() || extractDescriptionFeaturesHtml();
+        if (!featHtml && /^MHH-/i.test(resolveSoftGoodsProductCode())) {
+          featHtml = getCordaroysMattressFallbackContent().featuresHtml;
+        }
+        if (!featHtml) {
+          featHtml = /^MHH-/i.test(resolveSoftGoodsProductCode())
+            ? getCordaroysMattressFallbackContent().featuresHtml
+            : "<ul class=\"mc-pdp-features__list\"><li>Soft, inviting Cordaroy comfort</li><li>Machine-washable cover options</li><li>Designed for everyday lounge seating</li></ul>";
+        }
+        if (featHtml.indexOf("mc-pdp-features__") === -1 && featHtml.indexOf("<ul") !== -1) {
+          features.innerHTML =
+            '<div class="mc-pdp-features__heading" style="display:none">Features:</div><div class="mc-pdp-features__body">' +
+            featHtml +
+            "</div>";
+        } else {
+          features.innerHTML = featHtml;
+        }
       } catch (eFeatSeed) {}
     }
     rows.push({ id: "features", label: "FEATURES", host: features });
@@ -5081,10 +5178,21 @@
       description = global.document.createElement("div");
       description.id = "mc-pdp-description-below-features";
       description.className = "mc-pdp-description-below-features";
+    }
+    if (!hostHasMeaningfulText(description)) {
       try {
-        var srcDesc = global.document.getElementById("ProductDetail_ProductDetails_div2") || global.document.getElementById("ProductDetail_ProductDetails_div");
-        if (srcDesc) description.appendChild(srcDesc.cloneNode(true));
-        else description.innerHTML = "<p>See product specifications and care details below.</p>";
+        var srcDesc =
+          global.document.getElementById("ProductDetail_ProductDetails_div2") ||
+          global.document.getElementById("ProductDetail_ProductDetails_div") ||
+          resolveGenericProductDescriptionNode();
+        if (srcDesc && srcDesc !== description && hostHasMeaningfulText(srcDesc)) {
+          while (description.firstChild) description.removeChild(description.firstChild);
+          description.appendChild(srcDesc.cloneNode(true));
+        } else if (/^MHH-/i.test(resolveSoftGoodsProductCode())) {
+          description.innerHTML = getCordaroysMattressFallbackContent().detailsHtml;
+        } else {
+          description.innerHTML = "<p>See product specifications and care details below.</p>";
+        }
       } catch (eDescSeed) {}
     }
     rows.push({ id: "details", label: "PRODUCT DETAILS", host: description });
@@ -5128,6 +5236,27 @@
     var purchase = resolveBeanBagPurchaseElement(infoColumn);
     if (purchase && purchase.parentNode === infoColumn) infoColumn.insertBefore(acc, purchase);
     else if (acc.parentNode !== infoColumn) infoColumn.appendChild(acc);
+    /* If a later saranoni wipe left empty panels, refill hosts now. */
+    try {
+      var featPanelFill = acc.querySelector("#mc-acc-row-features .mc-acc-panel");
+      var detPanelFill = acc.querySelector("#mc-acc-row-details .mc-acc-panel");
+      if (featPanelFill && !hostHasMeaningfulText(featPanelFill) && features) {
+        if (!hostHasMeaningfulText(features)) {
+          if (/^MHH-/i.test(resolveSoftGoodsProductCode())) {
+            features.innerHTML = getCordaroysMattressFallbackContent().featuresHtml;
+          }
+        }
+        if (features.parentNode !== featPanelFill) featPanelFill.appendChild(features);
+      }
+      if (detPanelFill && !hostHasMeaningfulText(detPanelFill) && description) {
+        if (!hostHasMeaningfulText(description)) {
+          if (/^MHH-/i.test(resolveSoftGoodsProductCode())) {
+            description.innerHTML = getCordaroysMattressFallbackContent().detailsHtml;
+          }
+        }
+        if (description.parentNode !== detPanelFill) detPanelFill.appendChild(description);
+      }
+    } catch (eFillEmpty) {}
     /* Rescue ATC if an earlier pass nested it inside the collapsed Features panel. */
     if (purchase && purchase.closest && purchase.closest("#mc-pdp-accordion .mc-acc-panel")) {
       try {
@@ -7044,8 +7173,15 @@
       bodyHtml = getMahjongOfficialFeaturesHtml(getMahjongProductCode());
     }
     if (!bodyHtml) bodyHtml = extractDescriptionFeaturesHtml();
+    if (!bodyHtml && /^MHH-/i.test(resolveSoftGoodsProductCode())) {
+      bodyHtml = getCordaroysMattressFallbackContent().featuresHtml;
+    }
     var block = global.document.getElementById("mc-pdp-features");
     if (!bodyHtml) {
+      if (isCordaroysBrandPdpPage()) {
+        try { ensureBeanBagPdpAccordion(); } catch (eBbFeatEmpty) {}
+        return;
+      }
       if (block) {
         try {
           block.style.setProperty("display", "none", "important");
@@ -7085,7 +7221,7 @@
     }
     /* Bean Bag features are owned by their existing accordion once it exists.
        Do not reinsert that node as a loose sibling on a later PDP pass. */
-    if (isBeanBagPdpPage() && global.document.getElementById("mc-pdp-accordion")) {
+    if (isCordaroysBrandPdpPage() && global.document.getElementById("mc-pdp-accordion")) {
       ensureBeanBagPdpAccordion();
       return;
     }
