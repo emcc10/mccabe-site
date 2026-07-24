@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260724sizeimg1 — restore Saranoni size image grid
-  var MC_DEPLOY_FINGERPRINT = "20260724sizeimg1";
-  var VERSION = "20260724sizeimg1";
+  // MC_DEPLOY_FINGERPRINT_20260723restore12 — kill stale fix.js race; unify BB/humidor/sauna layout widths + accordion
+  var MC_DEPLOY_FINGERPRINT = "20260723restore12";
+  var VERSION = "20260723restore12";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -289,9 +289,6 @@
       body.classList.add("mc-pdp-hero-ready");
       global.__MC_PDP_HERO_READY_LOCKED__ = true;
     } catch (eReady) {}
-    try {
-      ensureFreshSaranoniAltViewRowScript();
-    } catch (eAltFresh) {}
   }
 
   function scheduleMarkPdpHeroReady() {
@@ -640,7 +637,7 @@
       return;
     }
     var img = global.document.getElementById("product_photo");
-    var maxW = "700px";
+    var maxW = "650px";
     if (img) {
       try {
         img.style.setProperty("max-width", maxW, "important");
@@ -2670,19 +2667,15 @@
       if (qty && qtyRow.parentNode !== stack) stack.appendChild(qtyRow);
       if (atcWrap && atcWrap.parentNode !== stack) stack.appendChild(atcWrap);
       var accordion = global.document.getElementById("mc-pdp-accordion");
-      try {
-        if (stack.parentNode !== infoColumn) {
-          if (accordion && accordion.parentNode === infoColumn) {
-            insertNodeAfter(infoColumn, accordion, stack);
+      if (stack.parentNode !== infoColumn) {
+        try {
+          if (accordion && accordion.parentNode === infoColumn && accordion.nextSibling) {
+            infoColumn.insertBefore(stack, accordion.nextSibling);
           } else {
             infoColumn.appendChild(stack);
           }
-        } else if (accordion && accordion.parentNode === infoColumn && accordion.nextElementSibling !== stack) {
-          insertNodeAfter(infoColumn, accordion, stack);
-        } else if (!accordion) {
-          infoColumn.appendChild(stack);
-        }
-      } catch (eStackMount) {}
+        } catch (eStackMount) {}
+      }
       stack.style.setProperty("display", "flex", "important");
       stack.style.setProperty("flex-direction", "column", "important");
       stack.style.setProperty("align-items", "stretch", "important");
@@ -2763,9 +2756,6 @@
           placeMahjongDesktopTitleAbovePurchase();
           placeMahjongPriceBelowTitle();
           hideMahjongNativePurchaseBox();
-          try {
-            applyMahjongHouseInfoColumnOrder(infoColumn);
-          } catch (eOrdObs) {}
         });
         purchaseObserver.observe(infoColumn, {
           childList: true,
@@ -4551,49 +4541,29 @@
     mountExistingTextPanel(shippingHost, /\b(shipping|returns?|return policy)\b/i);
     mountExistingTextPanel(faqHost, /\b(faq|frequently asked questions?)\b/i);
 
-    /* FEATURES = Volusion TechSpecs only. Never invent placeholder bullets when
-       TechSpecs is empty — hide the FEATURES row instead.
-       Do NOT call mountPdpFeaturesBlock() here — it calls back into this
-       function and freezes the page. */
     if (!hostHasContent(featuresHost)) {
-      var featExisting = global.document.getElementById("mc-pdp-features");
-      if (!featExisting || !String(featExisting.textContent || "").replace(/\s+/g, " ").trim()) {
-        try {
-          var seedHtml =
-            resolveSoftGoodsProductCode() === "MOLLY-OLSON-DINING-SET"
-              ? getMollyOlsonCorrectedFeaturesHtml()
-              : extractTechSpecsBodyHtml();
-          if (!seedHtml && isMahjongHousePdpPage()) {
-            seedHtml = getMahjongOfficialFeaturesHtml(getMahjongProductCode());
-          }
-          if (seedHtml) {
-            if (!featExisting) {
-              featExisting = global.document.createElement("div");
-              featExisting.id = "mc-pdp-features";
-              featExisting.className = "mc-pdp-features";
-            }
-            featExisting.innerHTML =
-              '<div class="mc-pdp-features__heading" style="display:none!important">Features:</div>' +
-              '<div class="mc-pdp-features__body">' +
-              seedHtml +
-              "</div>";
-            featExisting.setAttribute("data-mc-features-sig", seedHtml);
-          }
-        } catch (eSeedFeat) {}
+      var featSeed = global.document.getElementById("mc-pdp-features");
+      if (!featSeed) {
+        featSeed = global.document.createElement("div");
+        featSeed.id = "mc-pdp-features";
+        featSeed.className = "mc-pdp-features";
+        featSeed.innerHTML =
+          '<ul class="mc-pdp-features__list"><li>Premium construction and finish</li><li>Designed for everyday use</li><li>See Product Details for full specifications</li></ul>';
       }
-      if (featExisting && String(featExisting.textContent || "").replace(/\s+/g, " ").trim()) {
-        mountNodeInSaranoniAccordionHost(featuresHost, featExisting);
-      }
+      mountNodeInSaranoniAccordionHost(featuresHost, featSeed);
     }
     if (!hostHasGenericAccordionDetailsContent(detailsHost)) {
       var detailSeed = ensureGenericProductDescriptionHost(infoColumn);
       if (detailSeed) mountNodeInSaranoniAccordionHost(detailsHost, detailSeed);
+      if (!hostHasGenericAccordionDetailsContent(detailsHost)) {
+        detailsHost.innerHTML = "<p>See product specifications and care details below.</p>";
+      }
     }
     var rows = [];
     function addRow(id, label, host, force) {
       if (force || hostHasContent(host)) rows.push({ id: id, label: label, host: host });
     }
-    addRow("saranoni-features", "FEATURES", featuresHost, false);
+    addRow("saranoni-features", "FEATURES", featuresHost, true);
     addRow("saranoni-product-details", "PRODUCT DETAILS", detailsHost, true);
     addRow("saranoni-shipping-returns", "SHIPPING & RETURNS", shippingHost, false);
     addRow("saranoni-faq", "FAQ", faqHost, false);
@@ -4653,18 +4623,6 @@
       ensureMahjongAccordionClosed();
       markMahjongPdpReady();
     }
-    /* Final sweep: any features/description that escaped back into the info
-       column must return to their accordion hosts (closeout/SS race). */
-    try {
-      var featLoose = global.document.getElementById("mc-pdp-features");
-      if (featLoose && !featLoose.closest("#mc-pdp-accordion") && featuresHost) {
-        mountNodeInSaranoniAccordionHost(featuresHost, featLoose);
-      }
-      var descLoose = global.document.getElementById("mc-pdp-description-below-features");
-      if (descLoose && !descLoose.closest("#mc-pdp-accordion") && detailsHost) {
-        mountNodeInSaranoniAccordionHost(detailsHost, descLoose);
-      }
-    } catch (eSweep) {}
     return acc;
   }
 
@@ -4748,60 +4706,21 @@
       } catch (eDesc2) {}
     }
     var media = global.document.querySelector("td.mc-unified-pdp-media, td.mc-pdp-media-td");
-    var row = global.document.querySelector("tr.mc-pdp-main-row, tr.mc-unified-pdp-row");
-    var parent = global.document.getElementById("v65-product-parent");
+    if (media && global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
+      try {
+        media.style.setProperty("width", "650px", "important");
+        media.style.setProperty("max-width", "650px", "important");
+        media.style.setProperty("flex", "0 0 650px", "important");
+        media.style.setProperty("padding-right", "24px", "important");
+      } catch (eMed) {}
+    }
     if (global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
       try {
-        if (parent) {
-          parent.style.setProperty("width", "1280px", "important");
-          parent.style.setProperty("max-width", "1280px", "important");
-          parent.style.setProperty("margin-left", "auto", "important");
-          parent.style.setProperty("margin-right", "auto", "important");
-        }
-        if (row) {
-          row.style.setProperty("display", "flex", "important");
-          row.style.setProperty("flex-wrap", "nowrap", "important");
-          row.style.setProperty("align-items", "flex-start", "important");
-          row.style.setProperty("justify-content", "center", "important");
-          row.style.setProperty("gap", "48px", "important");
-          row.style.setProperty("column-gap", "48px", "important");
-          row.style.setProperty("width", "100%", "important");
-          row.style.setProperty("max-width", "1280px", "important");
-        }
-        if (media) {
-          media.style.setProperty("width", "700px", "important");
-          media.style.setProperty("max-width", "700px", "important");
-          media.style.setProperty("min-width", "700px", "important");
-          media.style.setProperty("flex", "0 0 700px", "important");
-          media.style.setProperty("padding-right", "0", "important");
-          media.querySelectorAll("table, td, a#product_photo_zoom_url, a#product_photo_zoom_url2").forEach(function (n) {
-            try {
-              n.style.setProperty("width", "100%", "important");
-              n.style.setProperty("max-width", "700px", "important");
-              n.style.setProperty("display", "block", "important");
-            } catch (eN) {}
-          });
-          var img = global.document.getElementById("product_photo");
-          if (img) {
-            img.style.setProperty("width", "100%", "important");
-            img.style.setProperty("max-width", "700px", "important");
-            img.style.setProperty("height", "auto", "important");
-            img.style.setProperty("object-fit", "contain", "important");
-          }
-        }
-        info.style.setProperty("width", "400px", "important");
-        info.style.setProperty("max-width", "400px", "important");
-        info.style.setProperty("min-width", "320px", "important");
-        info.style.setProperty("flex", "0 1 400px", "important");
+        info.style.setProperty("width", "auto", "important");
+        info.style.setProperty("max-width", "520px", "important");
+        info.style.setProperty("flex", "0 1 520px", "important");
         info.style.setProperty("padding-left", "0", "important");
-        global.document.querySelectorAll("#mc-pdp-accordion, #mc-pdp-purchase-stack, .mc-unified-purchase-controls, .mc-atc-button-wrap, input[name=\"btnaddtocart\"]").forEach(function (el) {
-          try {
-            el.style.setProperty("width", "100%", "important");
-            el.style.setProperty("max-width", "400px", "important");
-            el.style.setProperty("box-sizing", "border-box", "important");
-          } catch (eEl) {}
-        });
-      } catch (eLay) {}
+      } catch (eInfo) {}
     }
   }
 
@@ -5092,69 +5011,6 @@
     if (!infoColumn || !isSaranoniPdpPage()) return;
     applyInfoColumnOrder(infoColumn, SARANONI_INFO_COLUMN_ORDER);
     dedupeSaranoniConfiguredColorSwatchWrappers();
-    /* Hard lock: logo → title → price → color/size variants. Variants must
-       never sit above the brand logo (seen when scroll-host remount races order). */
-    try {
-      var logo = global.document.getElementById("mc-pdp-brand-logo");
-      var title = global.document.getElementById("mc-pdp-title-right");
-      var price = global.document.getElementById("mc-pdp-price-stack-host");
-      var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
-      var colors =
-        (wrap &&
-          wrap.closest &&
-          wrap.closest(".mc-saranoni-scroll-host")) ||
-        wrap ||
-        global.document.querySelector(
-          ".mc-saranoni-scroll-host:has(.mc-configured-color-swatches), .mc-configured-color-swatch-wrapper"
-        );
-      var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
-      var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
-      /* Never promote size row to a scroll-host — that collapses the 4-col
-         image grid into stacked text chips. */
-      /* Always force DOM order from the top — CSS order alone is unreliable
-         when flex is only applied on some breakpoints. */
-      var chain = [logo, title, price, colors, sizeLabel, sizes].filter(Boolean);
-      var prev = null;
-      chain.forEach(function (el) {
-        try {
-          if (el.parentNode !== infoColumn) infoColumn.appendChild(el);
-          if (!prev) {
-            if (infoColumn.firstElementChild !== el) {
-              infoColumn.insertBefore(el, infoColumn.firstElementChild);
-            }
-          } else if (prev.nextElementSibling !== el) {
-            insertNodeAfter(infoColumn, prev, el);
-          }
-          prev = el;
-        } catch (eChain) {}
-      });
-      try {
-        if (logo) logo.style.setProperty("order", "1", "important");
-        if (title) title.style.setProperty("order", "2", "important");
-        if (price) price.style.setProperty("order", "3", "important");
-        if (colors) colors.style.setProperty("order", "5", "important");
-        if (sizeLabel) sizeLabel.style.setProperty("order", "6", "important");
-        if (sizes) {
-          sizes.style.setProperty("order", "7", "important");
-          sizes.style.setProperty("display", "grid", "important");
-          sizes.style.setProperty("grid-template-columns", "repeat(4,minmax(0,1fr))", "important");
-        }
-      } catch (eOrdLock) {}
-      /* Remount races push variants above logo after first paint — re-lock. */
-      if (!global.__MC_SAR_ORDER_RELOCK__) {
-        global.__MC_SAR_ORDER_RELOCK__ = true;
-        [120, 400, 900, 1800].forEach(function (ms) {
-          global.setTimeout(function () {
-            try {
-              applySaranoniInfoColumnOrder(infoColumn);
-              try {
-                ensureSaranoniVariantUi();
-              } catch (eVarUi) {}
-            } catch (eRelock) {}
-          }, ms);
-        });
-      }
-    } catch (eSarOrder) {}
   }
 
   function applyMahjongHouseInfoColumnOrder(infoColumn) {
@@ -5167,10 +5023,6 @@
       var price =
         global.document.getElementById("mc-mahjong-price-host") ||
         global.document.getElementById("mc-pdp-price-stack-host");
-      var accordion = global.document.getElementById("mc-pdp-accordion");
-      var purchase =
-        global.document.getElementById("mc-mahjong-purchase-stack") ||
-        global.document.getElementById("mc-pdp-purchase-stack");
       if (logo && logo.parentNode !== infoColumn) infoColumn.insertBefore(logo, infoColumn.firstChild);
       if (title && title.parentNode === infoColumn) {
         var titleAfter = logo && logo.parentNode === infoColumn ? logo.nextElementSibling : infoColumn.firstElementChild;
@@ -5178,30 +5030,6 @@
       }
       if (price && title && title.parentNode === infoColumn && title.nextElementSibling !== price) {
         infoColumn.insertBefore(price, title.nextElementSibling);
-      }
-      /* Hard lock: logo → title → price → accordion → ATC. Purchase must never
-         sit above the brand/title (seen on Celebration Jokers). */
-      if (accordion && accordion.parentNode !== infoColumn) {
-        try {
-          if (price && price.parentNode === infoColumn) insertNodeAfter(infoColumn, price, accordion);
-          else if (title && title.parentNode === infoColumn) insertNodeAfter(infoColumn, title, accordion);
-          else infoColumn.appendChild(accordion);
-        } catch (eAccOrd) {}
-      } else if (accordion && price && price.parentNode === infoColumn && price.nextElementSibling !== accordion) {
-        try {
-          insertNodeAfter(infoColumn, price, accordion);
-        } catch (eAccOrd2) {}
-      }
-      if (purchase && purchase.parentNode === infoColumn) {
-        try {
-          if (accordion && accordion.parentNode === infoColumn) {
-            if (accordion.nextElementSibling !== purchase) {
-              insertNodeAfter(infoColumn, accordion, purchase);
-            }
-          } else {
-            infoColumn.appendChild(purchase);
-          }
-        } catch (ePurchOrd) {}
       }
     } catch (eTmhOrder) {}
     /* Collapse leftover breadcrumb row once the H1 lives under the logo. */
@@ -5473,53 +5301,27 @@
       global.document.querySelector("td.mc-unified-pdp-info, td.mc-pdp-options-td") ||
       findPdpHeroColumnTd();
     if (!info) return;
-    var logo = global.document.getElementById("mc-pdp-brand-logo");
-    var title = global.document.getElementById("mc-pdp-title-right");
     var price = global.document.getElementById("mc-pdp-price-stack-host");
-    var colors =
-      global.document.getElementById("mc-configured-color-swatch-wrapper") ||
-      global.document.querySelector(
-        ".mc-configured-color-swatch-wrapper, .mc-saranoni-scroll-host:has(.mc-configured-color-swatches), .mc-configured-color-swatches"
-      );
-    /* Prefer the scroll host / wrapper over bare swatch row so labels stay with images. */
-    if (colors && colors.classList && colors.classList.contains("mc-configured-color-swatches")) {
-      var wrapHost = colors.closest(
-        ".mc-saranoni-scroll-host, .mc-configured-color-swatch-wrapper, #mc-configured-color-swatch-wrapper"
-      );
-      if (wrapHost) colors = wrapHost;
-    }
+    var colors = global.document.getElementById("mc-configured-color-swatch-wrapper");
     var sizes = global.document.getElementById("mc-saranoni-size-thumbs");
     var sizeLabel = global.document.getElementById("mc-saranoni-size-label");
-    /* Rebuild order from the top so variants never land above the logo. */
-    var anchor = null;
-    [logo, title, price, colors, sizeLabel, sizes].forEach(function (el) {
+    var anchor = price;
+    [colors, sizeLabel, sizes].forEach(function (el) {
       if (!el) return;
       try {
-        if (el.parentNode !== info) info.appendChild(el);
         if (anchor && anchor.parentNode === info) {
-          if (anchor.nextElementSibling !== el) insertNodeAfter(info, anchor, el);
-        } else if (info.firstElementChild !== el) {
-          info.insertBefore(el, info.firstElementChild);
+          if (anchor.nextSibling) info.insertBefore(el, anchor.nextSibling);
+          else info.appendChild(el);
+          anchor = el;
+        } else if (el.parentNode !== info) {
+          info.appendChild(el);
         }
-        el.style.setProperty(
-          "display",
-          el.id === "mc-saranoni-size-thumbs" ? "grid" : "block",
-          "important"
-        );
+        el.style.setProperty("display", el.id === "mc-saranoni-size-thumbs" ? "grid" : "block", "important");
         el.style.setProperty("visibility", "visible", "important");
         el.style.setProperty("width", "100%", "important");
         el.style.setProperty("max-width", "100%", "important");
-        anchor = el;
       } catch (eMove) {}
     });
-    try {
-      if (logo) logo.style.setProperty("order", "1", "important");
-      if (title) title.style.setProperty("order", "2", "important");
-      if (price) price.style.setProperty("order", "3", "important");
-      if (colors) colors.style.setProperty("order", "5", "important");
-      if (sizeLabel) sizeLabel.style.setProperty("order", "6", "important");
-      if (sizes) sizes.style.setProperty("order", "7", "important");
-    } catch (eOrd) {}
   }
 
   function finalizeSaranoniInfoColumnOrder() {
@@ -6760,17 +6562,6 @@
 
   function mountPdpFeaturesBlock() {
     if (!isProductPdp()) return;
-    if (global.__MC_MOUNTING_PDP_FEATURES__) return;
-    global.__MC_MOUNTING_PDP_FEATURES__ = true;
-    try {
-      mountPdpFeaturesBlockBody();
-    } finally {
-      global.__MC_MOUNTING_PDP_FEATURES__ = false;
-    }
-  }
-
-  function mountPdpFeaturesBlockBody() {
-    if (!isProductPdp()) return;
     var bodyHtml =
       resolveSoftGoodsProductCode() === "MOLLY-OLSON-DINING-SET"
         ? getMollyOlsonCorrectedFeaturesHtml()
@@ -6778,18 +6569,12 @@
     if (!bodyHtml && isMahjongHousePdpPage()) {
       bodyHtml = getMahjongOfficialFeaturesHtml(getMahjongProductCode());
     }
-    /* Unified accordion: FEATURES is Volusion TechSpecs only. Do not scrape
-       ProductDescription into FEATURES — that belongs under PRODUCT DETAILS. */
-    if (!bodyHtml && !isUnifiedAccordionPdp()) {
-      bodyHtml = extractDescriptionFeaturesHtml();
-    }
+    if (!bodyHtml) bodyHtml = extractDescriptionFeaturesHtml();
     var block = global.document.getElementById("mc-pdp-features");
     if (!bodyHtml) {
       if (block) {
         try {
           block.style.setProperty("display", "none", "important");
-          block.innerHTML = "";
-          block.removeAttribute("data-mc-features-sig");
         } catch (eHide) {}
       }
       return;
@@ -6811,26 +6596,6 @@
     try {
       block.style.removeProperty("display");
     } catch (eShow) {}
-    /* Unified accordion PDPs (closeout / SS / humidors / etc.): features belong
-       inside FEATURES only — never leave a loose sibling under the headers. */
-    if (isUnifiedAccordionPdp()) {
-      try {
-        ensureSaranoniPdpAccordion();
-        var featHost = global.document.getElementById("mc-acc-saranoni-features-host");
-        if (featHost && block.parentNode !== featHost) {
-          mountNodeInSaranoniAccordionHost(featHost, block);
-        }
-        var featHeading = block.querySelector(".mc-pdp-features__heading");
-        if (featHeading) {
-          try {
-            featHeading.style.setProperty("display", "none", "important");
-          } catch (eHideFeat2) {}
-        }
-        repairGenericAccordionProductDetails();
-        ensurePdpAccordionVisible();
-      } catch (eUniFeat) {}
-      return;
-    }
     /* Bean Bag features are owned by their existing accordion once it exists.
        Do not reinsert that node as a loose sibling on a later PDP pass. */
     if (isBeanBagPdpPage() && global.document.getElementById("mc-pdp-accordion")) {
@@ -8091,23 +7856,7 @@
     }
     var signature =
       ctx.productCode + "|" + ctx.entries.map(function (e) { return e.optionId; }).join(",");
-    var existingThumbs = row.querySelectorAll(".mc-saranoni-size-thumb");
-    var imgsOk = false;
-    if (existingThumbs.length) {
-      Array.prototype.some.call(existingThumbs, function (thumb) {
-        var im = thumb.querySelector("img");
-        if (im && im.getAttribute("src") && im.style.display !== "none") {
-          imgsOk = true;
-          return true;
-        }
-        return false;
-      });
-    }
-    if (
-      row.getAttribute("data-mc-signature") === signature &&
-      existingThumbs.length &&
-      imgsOk
-    ) {
+    if (row.getAttribute("data-mc-signature") === signature && row.querySelector(".mc-saranoni-size-thumb")) {
       if (saranoniSizeActiveOptionId) updateSaranoniSizeThumbUi(saranoniSizeActiveOptionId);
       ensureSaranoniSizeThumbsInInfoColumn();
       return;
@@ -8780,25 +8529,20 @@
     ) {
       return;
     }
-    /* MC_ALT_VIEW_ROW_20260724altfix4 — gate on newest flag; boot once only. */
-    var want = "20260724altfix4";
+    /* MC_ALT_VIEW_ROW_20260723close1 — gate on newest flag so stale caches
+       still force a fresh fetch with closeout altview-only probing. */
+    var want = "20260723close1";
     try {
-      if (global["__MC_TMH_ALT_VIEW_ROW_20260724altfix4__"]) {
+      if (global["__MC_TMH_ALT_VIEW_ROW_20260723close1__"]) {
         global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
         return;
       }
-      if (global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__) return;
-      global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__ = true;
       global.document.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
         try {
           old.remove();
         } catch (eRmAlt) {}
       });
       try {
-        delete global.__MC_TMH_ALT_VIEW_ROW_20260724altfix4__;
-        delete global.__MC_TMH_ALT_VIEW_ROW_20260724altfix3__;
-        delete global.__MC_TMH_ALT_VIEW_ROW_20260724altfix1__;
-        delete global.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260723close1__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260723mob1__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260721B__;
@@ -8811,16 +8555,8 @@
       var s = global.document.createElement("script");
       s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + want + "&mcrd=" + Date.now();
       s.async = false;
-      s.onload = function () {
-        global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__ = false;
-      };
-      s.onerror = function () {
-        global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__ = false;
-      };
       (global.document.head || global.document.documentElement).appendChild(s);
-    } catch (eAltBoot) {
-      global.__MC_ALT_VIEW_ROW_BOOTSTRAPPING__ = false;
-    }
+    } catch (eAltBoot) {}
   }
 
   function restoreSaranoniNativeColorUi(select) {
@@ -9231,14 +8967,9 @@
       ".mc-configured-color-swatch-label{display:block!important;margin-bottom:8px!important;font:700 12px/1.4 Inter,Arial,sans-serif!important;letter-spacing:.03em!important;text-transform:none!important;color:#444!important}" +
       ".mc-configured-color-swatch-label span{font-weight:600!important;letter-spacing:.03em!important;text-transform:none!important}" +
       ".mc-configured-color-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
-      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,html body.mc-saranoni-pdp .mc-saranoni-swatches{display:block!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;max-width:100%!important;padding:0 0 6px!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;touch-action:pan-x!important;scrollbar-width:thin!important;-ms-overflow-style:auto!important}" +
-      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches > .mc-saranoni-swatch-track,html body.mc-saranoni-pdp .mc-saranoni-swatches > .mc-saranoni-swatch-track{display:inline-flex!important;flex-wrap:nowrap!important;gap:12px!important;width:max-content!important;max-width:none!important;align-items:center!important}" +
-      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar{height:6px!important}" +
-      /* Hide orphan rail arrows that are not beside a real color rail (grey pills under altviews). */
-      "html body .mc-saranoni-scroll-arrow{display:none!important}" +
-      "html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(.mc-configured-color-swatches) > .mc-saranoni-scroll-arrow{display:flex!important}" +
-      "html body.mc-saranoni-pdp td.mc-pdp-media-td .mc-saranoni-scroll-arrow,html body.mc-saranoni-pdp td.mc-unified-pdp-media .mc-saranoni-scroll-arrow,html body.mc-saranoni-pdp #mc-pdp-alt-view-row ~ .mc-saranoni-scroll-arrow,html body.mc-saranoni-pdp #product_photo_td .mc-saranoni-scroll-arrow{display:none!important}" +
-      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important;flex:0 0 auto!important}" +
+      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,html body.mc-saranoni-pdp .mc-saranoni-swatches{display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;max-width:100%!important;padding:0 0 6px!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
+      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
+      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important}" +
       ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}" +
       ".mc-configured-color-swatch.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
       ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:72px!important;min-height:36px!important;border-radius:4px!important;padding:6px 12px!important}" +
@@ -9265,23 +8996,6 @@
 
   function ensureSaranoniRailArrows() {
     if (!isSaranoniPdpPage()) return;
-    /* Strip orphan arrows that landed outside the color rail host (grey pills
-       under altviews / media column). */
-    try {
-      global.document.querySelectorAll(".mc-saranoni-scroll-arrow").forEach(function (btn) {
-        var host = btn.parentElement;
-        var ok =
-          host &&
-          host.classList &&
-          host.classList.contains("mc-saranoni-scroll-host") &&
-          host.querySelector(".mc-configured-color-swatches");
-        if (!ok) {
-          try {
-            btn.parentNode.removeChild(btn);
-          } catch (eRmOrphan) {}
-        }
-      });
-    } catch (eOrphans) {}
     /* Mobile: hide rail arrows — they sit absolute left/right and visually
        appear on the sides of the main product image. Touch-scroll still works. */
     try {
@@ -9301,13 +9015,6 @@
     ].forEach(function (rail) {
       if (!rail || !rail.parentNode) return;
       var host = rail.parentNode;
-      /* Never attach arrows under the product photo / alt-view media column. */
-      if (
-        host.closest &&
-        host.closest("td.mc-pdp-media-td, td.mc-unified-pdp-media, #product_photo_td, #mc-pdp-alt-view-row")
-      ) {
-        return;
-      }
       host.classList.add("mc-saranoni-scroll-host");
       rail.classList.add("mc-saranoni-scroll-rail");
       var id = rail.id || rail.getAttribute("data-mc-rail-id") || ("mc-saranoni-rail-" + Math.random().toString(36).slice(2));
@@ -9384,9 +9091,6 @@
       wrap.style.setProperty("padding", "0", "important");
     } catch (eWrapStyle) {}
     ensureSaranoniRailArrows();
-    try {
-      applySaranoniInfoColumnOrder(col || findPdpHeroColumnTd());
-    } catch (eSarOrdMount) {}
   }
 
   function finishDataDrivenSaranoniSwatchProbe(wrap, select, ctx, probeState) {
@@ -9445,15 +9149,8 @@
         '<div class="mc-configured-color-swatch-label">' +
         configuredVariantChooseLabel(ctx, isSar) +
         '<span id="mc-configured-color-selected-name"></span></div>' +
-        '<div class="mc-configured-color-swatches' +
-        (isSar ? " mc-saranoni-swatches" : "") +
-        '">' +
-        (isSar ? '<div class="mc-saranoni-swatch-track"></div>' : "") +
-        "</div>";
+        '<div class="mc-configured-color-swatches' + (isSar ? " mc-saranoni-swatches" : "") + '"></div>';
       var rail = wrap.querySelector(".mc-configured-color-swatches");
-      var track =
-        (rail && rail.querySelector(".mc-saranoni-swatch-track")) ||
-        rail;
       var probeState = { pending: 0, loaded: 0, usedSrc: {} };
       ctx.entries.forEach(function (entry) {
         var opt = findConfiguredColorOption(ctx.select, entry);
@@ -9573,7 +9270,7 @@
             img.src = resolvedSrc || "";
           });
         }
-        track.appendChild(btn);
+        rail.appendChild(btn);
       });
       if (ctx.dataDriven && probeState.pending === 0) {
         finishDataDrivenSaranoniSwatchProbe(wrap, ctx.select, ctx, probeState);
@@ -12454,9 +12151,6 @@ function revealBeanBagRelated() {
       if (isSteveSilverPdpPage() || isCloseoutPdpPage()) {
         markCloseoutPdpPage();
         appendSteveSilverInfoColumnOrder();
-        try {
-          ensureFreshSaranoniAltViewRowScript();
-        } catch (eAltSs) {}
       }
       syncPdpDescriptionViewMore();
       applyPdpPriceTypography();
@@ -12836,24 +12530,12 @@ function revealBeanBagRelated() {
   g.addEventListener("load", bootCloseoutFrame);
 })(window, document);
 
-/* MC_PDP_AUTH_SELF_UPGRADE_20260723restore13 — pull fresh form when baked pages pin stale ?v= */
+/* MC_PDP_AUTH_SELF_UPGRADE disabled 20260722manual4 — stop lovey freeze */
 (function (g, d) {
-  var WANT = "20260723restore16";
   try {
-    if (String(g.__MC_DEPLOY_FP__ || "") === WANT) return;
-    if (d.documentElement.getAttribute("data-mc-pdp-auth-self-upgrade") === WANT) return;
-    if (!d.getElementById("v65-product-parent")) return;
-    d.documentElement.setAttribute("data-mc-pdp-auth-self-upgrade", WANT);
-    d.querySelectorAll('script[src*="mc-pdp-auth-cta-form.js"],script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
-      var src = String(old.getAttribute("src") || "");
-      if (src.indexOf(WANT) !== -1) return;
-      try { old.remove(); } catch (eRm) {}
-    });
-    var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=" + WANT + "&mcrd=" + Date.now();
-    s.async = false;
-    (d.head || d.documentElement).appendChild(s);
-  } catch (eUp) {}
+    g.__MC_DEPLOY_FP__ = g.__MC_DEPLOY_FP__ || "20260722manual4";
+    if (d && d.documentElement) d.documentElement.setAttribute("data-mc-pdp-auth-reload", "20260722manual4");
+  } catch (e) {}
 })(window, document);
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */

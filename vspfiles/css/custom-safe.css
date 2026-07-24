@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260724sizeimg1 - restore saranoni size image grid */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260723menu1 - opaque push-menu over PDP overlap */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -17839,12 +17839,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description li {
   text-transform: none !important;
 }
 
-/* Hide loose description copies under media / as direct info-column children —
-   NOT the copy mounted inside PRODUCT DETAILS accordion. */
-html body.mc-pdp-unified-ready td.mc-unified-pdp-media #mc-pdp-description-below-features:not(:empty),
-html body.mc-pdp-unified-ready td.mc-pdp-media-td #mc-pdp-description-below-features:not(:empty),
-html body.mc-pdp-unified-ready td.mc-unified-pdp-info > #mc-pdp-description-below-features:not(:empty),
-html body.mc-pdp-unified-ready td.mc-pdp-options-td > #mc-pdp-description-below-features:not(:empty),
+html body.mc-pdp-unified-ready #mc-pdp-description-below-features:not(:empty),
 html body.mc-pdp-unified-ready #mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-pdp-description-under-media,
 html body.mc-pdp-unified-ready .mc-gatlin-description-below,
@@ -17855,60 +17850,6 @@ html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidde
 html body.mc-pdp-unified-ready td.mc-unified-pdp-info:has(.mc-unified-purchase-controls input[name="btnaddtocart"]) #v65-productdetail-action-wrapper {
   display: none !important;
 }
-
-/* Hide loose FEATURES / description copies outside the accordion on closeout/SS/unified PDPs. */
-html body.mc-pdp-accordion-pdp:has(#mc-pdp-accordion)
-  td.mc-pdp-options-td
-  > #mc-pdp-features,
-html body.mc-pdp-accordion-pdp:has(#mc-pdp-accordion)
-  td.mc-unified-pdp-info
-  > #mc-pdp-features,
-html body.mc-closeout-pdp:has(#mc-pdp-accordion)
-  td.mc-pdp-options-td
-  > #mc-pdp-features,
-html body.mc-closeout-pdp:has(#mc-pdp-accordion)
-  td.mc-unified-pdp-info
-  > #mc-pdp-features,
-html body.mc-steve-silver-altview-pdp:has(#mc-pdp-accordion)
-  td.mc-pdp-options-td
-  > #mc-pdp-features,
-html body.mc-steve-silver-altview-pdp:has(#mc-pdp-accordion)
-  td.mc-unified-pdp-info
-  > #mc-pdp-features {
-  display: none !important;
-}
-html body.mc-pdp-accordion-pdp #mc-pdp-accordion #mc-pdp-features,
-html body.mc-closeout-pdp #mc-pdp-accordion #mc-pdp-features,
-html body.mc-steve-silver-altview-pdp #mc-pdp-accordion #mc-pdp-features {
-  display: block !important;
-  visibility: visible !important;
-}
-/* Always show description once it lives in the PRODUCT DETAILS accordion panel. */
-html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-pdp-description-below-features,
-html body.mc-pdp-unified-ready #mc-pdp-accordion #mc-acc-saranoni-product-details-host,
-html body.mc-pdp-unified-ready #mc-pdp-accordion #ProductDetail_ProductDetails_div,
-html body.mc-pdp-unified-ready #mc-pdp-accordion #ProductDetail_ProductDetails_div2,
-html body.mc-pdp-unified-ready #mc-pdp-accordion #product_description,
-html body.mc-product-page #mc-pdp-accordion #mc-pdp-description-below-features,
-html body.mc-closeout-pdp #mc-pdp-accordion #mc-pdp-description-below-features {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-/* Keep native Volusion #altviews suppressed when the custom alt row is present. */
-html body.mc-closeout-pdp:has(#mc-pdp-alt-view-row) #altviews,
-html body.mc-steve-silver-altview-pdp:has(#mc-pdp-alt-view-row) #altviews,
-html body.mc-closeout-pdp:has(#mc-pdp-alt-view-row) span#altviews,
-html body.mc-steve-silver-altview-pdp:has(#mc-pdp-alt-view-row) span#altviews {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  overflow: hidden !important;
-}
-
 
 /* Gatlin / fixed -SECT sectionals: unified purchase stack below logo + features */
 html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host {
@@ -23930,18 +23871,13 @@ html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__pric
 /* END REMOVABLE: Saranoni color horizontal scroll rail (20260718; size grid 20260720sarfix4) */
 /* BEGIN REMOVABLE: PDP alt-view row stable placement/no visible scrollbar (20260718) */
 html body #mc-pdp-alt-view-row {
-  /* block scrollport — flex locks horizontal scroll in Volusion table cells */
-  display: block !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
+  display: flex !important;
   position: relative !important;
   clear: both !important;
   float: none !important;
   z-index: 1 !important;
-  scrollbar-width: thin !important;
-  -ms-overflow-style: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  touch-action: pan-x !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 html body #mc-pdp-alt-view-row::-webkit-scrollbar {
@@ -24747,9 +24683,7 @@ html body.mc-product-page .mc-related-plp-grid {
   html body.mc-saranoni-pdp #mc-pdp-alt-view-row,
   html body.productdetails #mc-pdp-alt-view-row,
   html body.mc-product-page #mc-pdp-alt-view-row {
-    display: block !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
+    display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
     width: 100% !important;
@@ -24762,9 +24696,7 @@ html body.mc-product-page .mc-related-plp-grid {
 
 html body.productdetails #mc-pdp-alt-view-row,
 html body.mc-product-page #mc-pdp-alt-view-row {
-  display: block !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
+  display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
   position: relative !important;
@@ -24870,7 +24802,7 @@ html body.mc-saranoni-pdp #content_area span#altviews {
 }
 
 html body.mc-saranoni-pdp #mc-pdp-alt-view-row {
-  display: block !important;
+  display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
   order: 2 !important;
@@ -24885,8 +24817,8 @@ html body.mc-saranoni-pdp #mc-pdp-alt-view-row {
   height: auto !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  touch-action: pan-x !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
 }
 
 html body.mc-saranoni-pdp #v65-product-related,
@@ -24941,9 +24873,7 @@ html body.mc-saranoni-pdp.mc-saranoni-style-rail-active .mc-configured-color-swa
   overflow: visible !important;
 }
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #mc-pdp-alt-view-row {
-  display: block !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
+  display: flex !important;
 }
 /* Hide stray Select Style label above brand logo */
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-unified-pdp-info > font:first-child,
@@ -25979,7 +25909,7 @@ body.productdetails td.mc-pdp-media-td #mc-pdp-description-below-features {
 }
 
 
-/* MC_RESTORE13_LAYOUT_SHIP_20260723 */
+/* MC_RESTORE12_LAYOUT_SHIP_20260723 */
 /* Wider centered PDP composition + gap between media and info */
 @media (min-width: 992px) {
   html body.mc-pdp-unified-ready #v65-product-parent,
@@ -26053,44 +25983,6 @@ body.productdetails td.mc-pdp-media-td #mc-pdp-description-below-features {
   }
 }
 
-/* Saranoni info column order: logo → title → price → variants (all viewports) */
-html body.mc-saranoni-pdp td.mc-pdp-options-td,
-html body.mc-saranoni-pdp td.mc-unified-pdp-info {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-}
-html body.mc-saranoni-pdp #mc-pdp-brand-logo { order: 1 !important; }
-html body.mc-saranoni-pdp #mc-pdp-title-right { order: 2 !important; }
-html body.mc-saranoni-pdp #mc-pdp-price-stack-host { order: 3 !important; }
-html body.mc-saranoni-pdp #messaging-element { order: 4 !important; }
-html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper,
-html body.mc-saranoni-pdp .mc-configured-color-swatch-wrapper,
-html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(#mc-configured-color-swatch-wrapper),
-html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(.mc-configured-color-swatches) {
-  order: 5 !important;
-}
-html body.mc-saranoni-pdp #mc-saranoni-size-label { order: 6 !important; }
-html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
-html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(#mc-saranoni-size-thumbs) {
-  order: 7 !important;
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-}
-html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb img {
-  display: block !important;
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1 / 1 !important;
-  object-fit: cover !important;
-}
-html body.mc-saranoni-pdp #mc-pdp-option-block { order: 8 !important; }
-html body.mc-saranoni-pdp #mc-pdp-accordion { order: 9 !important; }
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack,
-html body.mc-saranoni-pdp .mc-unified-purchase-controls {
-  order: 10 !important;
-}
-
 /* Saranoni mobile: variant image rows directly below price */
 @media (max-width: 991px) {
   html body.mc-saranoni-pdp td.mc-pdp-options-td,
@@ -26106,35 +25998,21 @@ html body.mc-saranoni-pdp .mc-unified-purchase-controls {
   html body.mc-saranoni-pdp #mc-pdp-price-stack-host { order: 3 !important; }
   html body.mc-saranoni-pdp #messaging-element { order: 4 !important; display: none !important; }
   html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper,
-  html body.mc-saranoni-pdp .mc-configured-color-swatch-wrapper,
-  html body.mc-saranoni-pdp .mc-configured-color-swatches,
-  html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(#mc-configured-color-swatch-wrapper),
-  html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(.mc-configured-color-swatches) {
+  html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(#mc-configured-color-swatch-wrapper) {
     order: 5 !important;
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 10px 0 8px !important;
   }
-  html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches {
-    display: flex !important;
-  }
   html body.mc-saranoni-pdp #mc-saranoni-size-label { order: 6 !important; }
   html body.mc-saranoni-pdp #mc-saranoni-size-thumbs,
   html body.mc-saranoni-pdp .mc-saranoni-scroll-host:has(#mc-saranoni-size-thumbs) {
     order: 7 !important;
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 0 12px !important;
-  }
-  html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb img {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 1 / 1 !important;
-    object-fit: cover !important;
   }
   html body.mc-saranoni-pdp #mc-pdp-option-block { order: 8 !important; }
   html body.mc-saranoni-pdp #mc-pdp-accordion { order: 9 !important; }
@@ -26149,69 +26027,5 @@ html body.mc-saranoni-pdp .mc-unified-purchase-controls {
   html body.mc-saranoni-pdp td.mc-pdp-media-td #mc-configured-color-swatch-wrapper,
   html body.mc-saranoni-pdp td.mc-unified-pdp-media #mc-configured-color-swatch-wrapper {
     display: none !important;
-  }
-}
-
-/* MC_RESTORE13_LAYOUT_SIZES_20260723 — larger media, narrower ATC */
-@media (min-width: 992px) {
-  html body.mc-pdp-unified-ready #v65-product-parent,
-  html body.mc-pdp-accordion-pdp #v65-product-parent,
-  html body.mc-product-page #v65-product-parent {
-    width: 1280px !important;
-    max-width: 1280px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  html body.mc-pdp-unified-ready tr.mc-pdp-main-row,
-  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row,
-  html body.mc-product-page tr.mc-pdp-main-row {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
-    gap: 48px !important;
-    column-gap: 48px !important;
-    width: 100% !important;
-    max-width: 1280px !important;
-  }
-  html body.mc-pdp-unified-ready td.mc-pdp-media-td,
-  html body.mc-pdp-unified-ready td.mc-unified-pdp-media,
-  html body.mc-product-page td.mc-pdp-media-td {
-    flex: 0 0 700px !important;
-    width: 700px !important;
-    max-width: 700px !important;
-    min-width: 700px !important;
-  }
-  html body.mc-pdp-unified-ready td.mc-pdp-media-td img#product_photo,
-  html body.mc-pdp-unified-ready td.mc-unified-pdp-media img#product_photo,
-  html body.mc-product-page #product_photo,
-  html body.mc-pdp-unified-ready td.mc-pdp-media-td a#product_photo_zoom_url,
-  html body.mc-pdp-unified-ready td.mc-pdp-media-td a#product_photo_zoom_url2,
-  html body.mc-pdp-unified-ready td.mc-pdp-media-td > table,
-  html body.mc-pdp-unified-ready td.mc-pdp-media-td > table td {
-    width: 100% !important;
-    max-width: 700px !important;
-    display: block !important;
-    box-sizing: border-box !important;
-  }
-  html body.mc-pdp-unified-ready td.mc-pdp-options-td,
-  html body.mc-pdp-unified-ready td.mc-unified-pdp-info,
-  html body.mc-product-page td.mc-pdp-options-td {
-    flex: 0 1 400px !important;
-    width: 400px !important;
-    max-width: 400px !important;
-    min-width: 320px !important;
-  }
-  html body.mc-pdp-unified-ready #mc-pdp-accordion,
-  html body.mc-product-page #mc-pdp-accordion,
-  html body.mc-pdp-unified-ready #mc-pdp-purchase-stack,
-  html body.mc-pdp-unified-ready .mc-unified-purchase-controls,
-  html body.mc-product-page .mc-unified-purchase-controls,
-  html body.mc-pdp-unified-ready .mc-atc-button-wrap,
-  html body.mc-pdp-unified-ready input[name="btnaddtocart"],
-  html body.mc-product-page input[name="btnaddtocart"] {
-    width: 100% !important;
-    max-width: 400px !important;
-    box-sizing: border-box !important;
   }
 }

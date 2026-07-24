@@ -1483,7 +1483,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
   <script>
 (function (g, d) {
-  var FP = "20260723restore16";
+  var FP = "20260723restore12";
   function bootFreshCta() {
     if (!d.getElementById("v65-product-parent")) return;
     if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
@@ -1493,7 +1493,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260724sizeimg1&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723restore12&mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -1696,7 +1696,7 @@ html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion{
 })(window, document);
   </script>
   <script id="mc-plp-enforcer-bridge">
-(function(g,d){var W="20260723restore16",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
+(function(g,d){var W="20260723restore12",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
 function cat(){try{var p=String(g.location.pathname||"").toLowerCase();
 var isHome =
@@ -2720,18 +2720,18 @@ document.addEventListener("DOMContentLoaded", function () {
 </style>
 <script id="mc-pdp-auth-loader-minimal">
 (function () {
-  var FP = "20260723restore16";
+  var FP = "20260723restore12";
   if (String(window.__MC_DEPLOY_FP__ || "") === FP) {
   } else if (
     document.documentElement.getAttribute("data-mc-pdp-auth-reload") !== FP &&
     document.documentElement.getAttribute("data-mc-pdp-auth-head-boot") !== FP &&
-    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"][src*="20260723restore16"]')
+    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"][src*="20260723restore12"]')
   ) {
     /* Fallback only when head boot did not inject the current fingerprint.
        Always use the versioned URL â€” unversioned CDN still serves stale copies. */
     document.documentElement.setAttribute("data-mc-pdp-auth-reload", FP);
     var s = document.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260724sizeimg1&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260723restore12&mcrd=" + Date.now();
     s.async = false;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -3784,16 +3784,12 @@ body.mc-product-page #content_area .wm-swatch img {
     min-height: 0 !important;
   }
   /* Alt images: centered under main. Custom #mc-pdp-alt-view-row stays visible;
-     native #altviews is hidden once the custom row owns the thumbs.
-     MUST be display:block (not flex) — flex scrollports lock scrollLeft=0
-     inside Volusion nested table cells. Track uses inline-flex instead. */
+     native #altviews is hidden once the custom row owns the thumbs. */
   body.mc-product-page #content_area #mc-pdp-alt-view-row,
   .productdetails #content_area #mc-pdp-alt-view-row,
   #content_area #mc-pdp-alt-view-row {
-    display: block !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    text-align: left !important;
+    display: flex !important;
+    text-align: center !important;
     margin: 8px auto 36px auto !important;
     padding: 0 !important;
     width: 100% !important;
@@ -3802,8 +3798,6 @@ body.mc-product-page #content_area .wm-swatch img {
     clear: both !important;
     order: 2 !important;
     box-sizing: border-box !important;
-    -webkit-overflow-scrolling: touch !important;
-    touch-action: pan-x !important;
   }
   body.mc-product-page:not(.mc-pdp-custom-alt-row) #content_area #altviews,
   body.mc-product-page:not(.mc-pdp-custom-alt-row) #content_area .altviews,
@@ -14810,7 +14804,7 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260723restore16"></script>
+  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260723restore12"></script>
  
   <script id="mc-my-boards-template-boot">
 (function () {
@@ -15655,6 +15649,6 @@ body.mc-product-page #v65-product-related img {
   window.addEventListener('load', removeOnlyStaleCustomSafeCss, { once: true });
 })();
 </script>
-<script src="/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260724altfix4"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"219322d1a28c40a88da65ab074cf5d58","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script src="/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260723rel1"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"219322d1a28c40a88da65ab074cf5d58","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1c9facf1ed8f075',t:'MTc4NDI5ODk5NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

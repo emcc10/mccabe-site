@@ -1,21 +1,10 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260724altfix4 — main-first gallery; Molly SKU-only alts */
-  if (!window || !document) return;
-  if (window.__MC_TMH_ALT_VIEW_ROW_20260724altfix4__) return;
-  window.__MC_TMH_ALT_VIEW_ROW_20260724altfix4__ = true;
-  /* Bump generation so any prior boot (stale ?v= then force-refresh) stops scheduling. */
-  try {
-    if (window.__MC_ALT_VIEW_ROW_MO__) {
-      window.__MC_ALT_VIEW_ROW_MO__.disconnect();
-      window.__MC_ALT_VIEW_ROW_MO__ = null;
-    }
-  } catch (eDisc) {}
-  window.__MC_ALT_VIEW_ROW_GEN__ = (window.__MC_ALT_VIEW_ROW_GEN__ || 0) + 1;
-  var BOOT_GEN = window.__MC_ALT_VIEW_ROW_GEN__;
-  window.__MC_TMH_ALT_VIEW_ROW_20260724altfix3__ = true;
-  window.__MC_TMH_ALT_VIEW_ROW_20260724altfix1__ = true;
+  /* MC_ALT_VIEW_ROW_20260723altscrl — block scroll-host + inline-flex track so
+     closeout/SS alt thumbs can scroll inside Volusion table cells (flex
+     scrollports fail there: scrollLeft stays 0). */
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__) return;
   window.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723close1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723mob1__ = true;
@@ -32,10 +21,6 @@
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
-
-  function isLiveBoot() {
-    return BOOT_GEN === window.__MC_ALT_VIEW_ROW_GEN__;
-  }
 
   function productCode() {
     var field = document.querySelector('input[name="ProductCode"],input[name="productcode"]');
@@ -181,29 +166,9 @@
     return upper.indexOf(needle) !== -1 || upper.indexOf(needle2) !== -1;
   }
 
-  function prependMainHero(items, code) {
-    var hero = heroImage();
-    var heroSrc = absoluteUrl(
-      (hero && (hero.currentSrc || hero.getAttribute("src"))) ||
-        (code ? "/v/vspfiles/photos/" + code + "-1.jpg" : "")
-    );
-    if (!heroSrc || !urlBelongsToProduct(heroSrc, code)) return items;
-    var heroKey = canonicalUrl(heroSrc);
-    items = items.filter(function (item) {
-      return canonicalUrl(item.full) !== heroKey;
-    });
-    items.unshift({
-      slot: 0,
-      full: heroSrc,
-      alt: "Main product image"
-    });
-    return items;
-  }
-
   function collectItems(code) {
     var items = [];
     var seen = {};
-    /* Only native #altviews + SKU-probed photos — never scrape the full page. */
     var nativeAlt = nativeAltContainer();
     if (nativeAlt) {
       Array.prototype.forEach.call(nativeAlt.querySelectorAll("img"), function (image) {
@@ -230,15 +195,14 @@
     });
     items.sort(function (a, b) { return a.slot - b.slot; });
     if (code === "MOLLY-OLSON-DINING-SET") {
-      /* Keep dining alts 2–8 only. altview1 duplicates hero; 9+ are unrelated
-         bedroom/other-SKU supplier dumps under this product code. */
+      // The first supplier alt is the hero image repeated under a different
+      // filename. Keep the three distinct chair/detail views instead.
+      // altview9 is a mismatched supplier photo -- a dark wood ladder-back
+      // chair on a jute rug, nothing like the Molly Olson's khaki upholstered
+      // mid-century chairs or its round pedestal table shown in the other
+      // alt views. Confirmed visually 2026-07-21.
       items = items.filter(function (item) {
-        var m = String(item.full || "").match(/-altview(\d+)\./i);
-        if (m) {
-          var n = parseInt(m[1], 10);
-          return n >= 2 && n <= 8;
-        }
-        return false;
+        return !/(?:-altview1|-altview9|-1|-2t)\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full);
       });
     }
     /* Drop legacy -N.jpg / -NT.jpg thumbs when -altviewN exists — those numbered
@@ -251,7 +215,7 @@
         return !/-\d+T?\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full) || /-altview\d+\./i.test(item.full);
       });
     }
-    return prependMainHero(items, code);
+    return items;
   }
 
   function publishActiveHero(full) {
@@ -374,8 +338,7 @@
     discoveredByCode[code] = [];
     /* Closeout / furniture: prefer -altviewN only. Legacy -2/-3/-4.jpg slots on
        products like TYLER-BAR-SET often contain unrelated supplier photos. */
-    var maxSlot = code === "MOLLY-OLSON-DINING-SET" ? 8 : MAX_ALT_VIEWS;
-    var remaining = maxSlot;
+    var remaining = MAX_ALT_VIEWS;
 
     function completeOne() {
       remaining -= 1;
@@ -398,7 +361,7 @@
       schedule();
     }
 
-    for (var altSlot = 1; altSlot <= maxSlot; altSlot += 1) {
+    for (var altSlot = 1; altSlot <= MAX_ALT_VIEWS; altSlot += 1) {
       (function (photoSlot) {
         var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
         probeImage(src, function () {
@@ -514,14 +477,14 @@
     var row = document.getElementById(ROW_ID);
 
     if (isSaranoni) {
+      var heroCanon = canonicalUrl(hero.currentSrc || hero.getAttribute("src") || "");
       var sarItems = (discoveredByCode[code] || [])
         .slice()
         .filter(function (item) {
-          return urlBelongsToProduct(item.full, code);
+          return canonicalUrl(item.full) !== heroCanon;
         })
         .sort(function (a, b) { return a.slot - b.slot; });
-      sarItems = prependMainHero(sarItems, code);
-      if (sarItems.length <= 1 && !(discoveredByCode[code] || []).length) {
+      if (!sarItems.length) {
         /* Keep an already-built row visible while re-probing. */
         if (!(row && row.children && row.children.length)) {
           if (row) row.style.setProperty("display", "none", "important");
@@ -529,7 +492,7 @@
         probeSaranoniAltViews(code);
         return;
       }
-      if (sarItems.length) renderRow(hero, mediaCell, row, sarItems);
+      renderRow(hero, mediaCell, row, sarItems);
       return;
     }
 
@@ -578,12 +541,6 @@
       else mediaCell.appendChild(row);
     }
 
-    var signature = items.map(function (item) { return canonicalUrl(item.full); }).join("|");
-    /* Stable: skip style + DOM rebuild when thumbs already match (stops flicker). */
-    if (row.getAttribute("data-mc-items") === signature && row.querySelector("." + TRACK_CLASS)) {
-      return;
-    }
-
     var heroWidth = Math.round(hero.getBoundingClientRect().width || hero.offsetWidth || 0);
     /* IMPORTANT: do NOT use display:flex on the scrollport itself. Inside
        Volusion nested table cells, a flex scrollport reports scrollWidth >
@@ -615,6 +572,8 @@
     row.style.setProperty("scrollbar-width", "thin", "important");
     row.style.setProperty("-ms-overflow-style", "auto", "important");
 
+    var signature = items.map(function (item) { return canonicalUrl(item.full); }).join("|");
+    if (row.getAttribute("data-mc-items") === signature && row.querySelector("." + TRACK_CLASS)) return;
     row.setAttribute("data-mc-items", signature);
     while (row.firstChild) row.removeChild(row.firstChild);
 
@@ -673,9 +632,7 @@
       (document.head || document.documentElement).appendChild(st);
     }
     st.textContent =
-      "html body #mc-pdp-alt-view-row,html body.mc-product-page #mc-pdp-alt-view-row,html body.productdetails #mc-pdp-alt-view-row," +
-      "html body.mc-saranoni-pdp #mc-pdp-alt-view-row,html body.mc-closeout-pdp #mc-pdp-alt-view-row{" +
-      "display:block!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;" +
+      "#mc-pdp-alt-view-row{display:block!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;" +
       "overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;" +
       "scrollbar-width:thin!important}" +
       "#mc-pdp-alt-view-row .mc-pdp-alt-view-row__track{display:inline-flex!important;flex-wrap:nowrap!important;align-items:center!important;" +
@@ -685,18 +642,13 @@
   }
 
   function schedule() {
-    if (!isLiveBoot()) return;
     window.clearTimeout(schedule.timer);
-    schedule.timer = window.setTimeout(function () {
-      if (!isLiveBoot()) return;
-      render();
-    }, 160);
+    schedule.timer = window.setTimeout(render, 80);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", schedule);
   else schedule();
   document.addEventListener("click", function (event) {
-    if (!isLiveBoot()) return;
     if (!isSaranoniProductPage(productCode())) return;
     var full = variantHeroFromClickTarget(event.target);
     if (!full) return;
@@ -704,32 +656,11 @@
   }, true);
   window.addEventListener("load", schedule);
   window.addEventListener("resize", schedule);
-  [400, 1200, 2800].forEach(function (delay) {
+  [300, 900, 1800, 3500, 7000, 11000].forEach(function (delay) {
     window.setTimeout(schedule, delay);
   });
   if (window.MutationObserver) {
-    var observer = new window.MutationObserver(function (mutations) {
-      if (!isLiveBoot()) return;
-      var meaningful = false;
-      for (var i = 0; i < mutations.length; i++) {
-        var m = mutations[i];
-        var t = m.target;
-        if (t && t.id === ROW_ID) continue;
-        if (t && t.closest && t.closest("#" + ROW_ID)) continue;
-        if (t && t.classList && t.classList.contains(TRACK_CLASS)) continue;
-        /* Ignore attribute-only churn on hero img (src swaps) — holdHero already
-           owns the hero; rebuilding thumbs from that causes desktop flicker. */
-        if (m.type === "attributes" && t && t.tagName === "IMG") continue;
-        meaningful = true;
-        break;
-      }
-      if (meaningful) schedule();
-    });
-    observer.observe(document.getElementById("v65-product-parent") || document.body, {
-      childList: true,
-      subtree: true,
-      attributes: false,
-    });
-    window.__MC_ALT_VIEW_ROW_MO__ = observer;
+    var observer = new window.MutationObserver(schedule);
+    observer.observe(document.getElementById("v65-product-parent") || document.body, { childList: true, subtree: true });
   }
 })(window, document);
