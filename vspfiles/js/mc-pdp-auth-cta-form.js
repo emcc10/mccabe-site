@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260723restore4 — one unified accordion layout for all PDPs
-  var MC_DEPLOY_FINGERPRINT = "20260723restore4";
-  var VERSION = "20260723restore4";
+  // MC_DEPLOY_FINGERPRINT_20260723restore5 — fix runPatch brace syntax; unified accordion for all PDPs
+  var MC_DEPLOY_FINGERPRINT = "20260723restore5";
+  var VERSION = "20260723restore5";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -12070,39 +12070,40 @@ function revealBeanBagRelated() {
         } else if (isUnifiedPdpReady()) {
           stripPriceZeroCents();
         } else if (isPdpLayoutMounted()) {
-        forceRebuildCleanPriceStack();
-        if (!isSoftGoodsPdpPage()) {
-          ensureUnifiedPdpLayout();
-        }
-        if (
-          global.document.body &&
-          !global.document.body.classList.contains("mc-pdp-unified-ready")
-        ) {
-          if (isSoftGoodsPdpPage()) {
-            reassertSoftGoodsHeroOrder();
-          } else {
-            fixAddToCartChrome();
-          }
-        }
-        stripPriceZeroCents();
-      } else if (!sectional) {
-        if (!mountPdpLayoutOnce()) {
           forceRebuildCleanPriceStack();
-        }
-        if (!isSoftGoodsPdpPage()) {
-          ensureUnifiedPdpLayout();
-        }
-        if (
-          global.document.body &&
-          !global.document.body.classList.contains("mc-pdp-unified-ready")
-        ) {
-          if (isSoftGoodsPdpPage()) {
-            reassertSoftGoodsHeroOrder();
-          } else {
-            fixAddToCartChrome();
+          if (!isSoftGoodsPdpPage()) {
+            ensureUnifiedPdpLayout();
           }
+          if (
+            global.document.body &&
+            !global.document.body.classList.contains("mc-pdp-unified-ready")
+          ) {
+            if (isSoftGoodsPdpPage()) {
+              reassertSoftGoodsHeroOrder();
+            } else {
+              fixAddToCartChrome();
+            }
+          }
+          stripPriceZeroCents();
+        } else {
+          if (!mountPdpLayoutOnce()) {
+            forceRebuildCleanPriceStack();
+          }
+          if (!isSoftGoodsPdpPage()) {
+            ensureUnifiedPdpLayout();
+          }
+          if (
+            global.document.body &&
+            !global.document.body.classList.contains("mc-pdp-unified-ready")
+          ) {
+            if (isSoftGoodsPdpPage()) {
+              reassertSoftGoodsHeroOrder();
+            } else {
+              fixAddToCartChrome();
+            }
+          }
+          stripPriceZeroCents();
         }
-        stripPriceZeroCents();
       }
       applyPdpDescriptionStyle();
       fixAddToCartChrome();
