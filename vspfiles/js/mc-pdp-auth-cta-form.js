@@ -6,9 +6,9 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260724altfix4 — Molly gallery + FEATURES + saranoni order relock
-  var MC_DEPLOY_FINGERPRINT = "20260724altfix4";
-  var VERSION = "20260724altfix4";
+  // MC_DEPLOY_FINGERPRINT_20260724hang1 — break FEATURES/accordion infinite recursion
+  var MC_DEPLOY_FINGERPRINT = "20260724hang1";
+  var VERSION = "20260724hang1";
   /* Stale template/CDN copies often inject older ?v= after a fresh boot.
      Bail so lovey3/sarmob1/close1 cannot overwrite this generation. */
   try {
@@ -4552,12 +4552,35 @@
     mountExistingTextPanel(faqHost, /\b(faq|frequently asked questions?)\b/i);
 
     /* FEATURES = Volusion TechSpecs only. Never invent placeholder bullets when
-       TechSpecs is empty — hide the FEATURES row instead. */
-    try {
-      mountPdpFeaturesBlock();
-    } catch (eFeatMount) {}
+       TechSpecs is empty — hide the FEATURES row instead.
+       Do NOT call mountPdpFeaturesBlock() here — it calls back into this
+       function and freezes the page. */
     if (!hostHasContent(featuresHost)) {
       var featExisting = global.document.getElementById("mc-pdp-features");
+      if (!featExisting || !String(featExisting.textContent || "").replace(/\s+/g, " ").trim()) {
+        try {
+          var seedHtml =
+            resolveSoftGoodsProductCode() === "MOLLY-OLSON-DINING-SET"
+              ? getMollyOlsonCorrectedFeaturesHtml()
+              : extractTechSpecsBodyHtml();
+          if (!seedHtml && isMahjongHousePdpPage()) {
+            seedHtml = getMahjongOfficialFeaturesHtml(getMahjongProductCode());
+          }
+          if (seedHtml) {
+            if (!featExisting) {
+              featExisting = global.document.createElement("div");
+              featExisting.id = "mc-pdp-features";
+              featExisting.className = "mc-pdp-features";
+            }
+            featExisting.innerHTML =
+              '<div class="mc-pdp-features__heading" style="display:none!important">Features:</div>' +
+              '<div class="mc-pdp-features__body">' +
+              seedHtml +
+              "</div>";
+            featExisting.setAttribute("data-mc-features-sig", seedHtml);
+          }
+        } catch (eSeedFeat) {}
+      }
       if (featExisting && String(featExisting.textContent || "").replace(/\s+/g, " ").trim()) {
         mountNodeInSaranoniAccordionHost(featuresHost, featExisting);
       }
@@ -6730,6 +6753,17 @@
   }
 
   function mountPdpFeaturesBlock() {
+    if (!isProductPdp()) return;
+    if (global.__MC_MOUNTING_PDP_FEATURES__) return;
+    global.__MC_MOUNTING_PDP_FEATURES__ = true;
+    try {
+      mountPdpFeaturesBlockBody();
+    } finally {
+      global.__MC_MOUNTING_PDP_FEATURES__ = false;
+    }
+  }
+
+  function mountPdpFeaturesBlockBody() {
     if (!isProductPdp()) return;
     var bodyHtml =
       resolveSoftGoodsProductCode() === "MOLLY-OLSON-DINING-SET"
