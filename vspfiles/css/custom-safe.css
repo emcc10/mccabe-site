@@ -1,8 +1,8 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260723menu1 - opaque push-menu over PDP overlap */
-/* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
-/* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260725nav1 - mobile category > toggles */
+/* MC_PDP_LAYOUT_20260616pdp32 â€” stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
+/* MC_DEPLOY_VERIFY â€” PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
-/* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
+/* Loads after template.css; cache-bust via mcCssBust() in template â€” not the static ?v= on mccabe-overrides */
 /* Global typography aligned with category member-price amount (Inter; body text 400 / 0.02em). */
 body {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
@@ -58,7 +58,7 @@ body {
   overflow-x: hidden !important;
 }
 
-/* Fluid media + main columns — keeps PDP/category content inside the viewport */
+/* Fluid media + main columns â€” keeps PDP/category content inside the viewport */
 #if_homepage,
 #content_area,
 #content_area_home {
@@ -77,7 +77,7 @@ iframe {
 }
 
 /* ======================================
-   HEADER + HERO SEARCH — underline, hover, pop-out (strip may live in header or #mcHeroSearchOverlay)
+   HEADER + HERO SEARCH â€” underline, hover, pop-out (strip may live in header or #mcHeroSearchOverlay)
 ====================================== */
 header.header .header__section--middle,
 #mcHeroSearchOverlay .header__section--middle {
@@ -92,7 +92,7 @@ header.header .header__section--middle,
   overflow: visible !important;
 }
 
-/* Interior: search lives in .mc-header-desktop-bar (beside nav → cart); full width on mobile */
+/* Interior: search lives in .mc-header-desktop-bar (beside nav â†’ cart); full width on mobile */
 body:not(.is-home) header.header > .header__section--middle,
 body:not(.is-home) header.header .mc-header-search-below-nav {
   position: relative !important;
@@ -127,7 +127,7 @@ header.header #collapsingSearch {
   border: none !important;
   border-radius: 0 !important;
   padding: 8px 20px 12px !important;
-  /* Underline is only on .collapsing-search__form .row — a wrapper border stacked into a double line */
+  /* Underline is only on .collapsing-search__form .row â€” a wrapper border stacked into a double line */
   border-bottom: none !important;
   transition:
     background 0.22s ease,
@@ -234,7 +234,7 @@ header.header .collapsing-search__form .row,
   margin: 0 !important;
 }
 
-/* Non-home header search underline: mobile/tablet only — desktop rules live in last-win blocks (avoid double line with .container/.row) */
+/* Non-home header search underline: mobile/tablet only â€” desktop rules live in last-win blocks (avoid double line with .container/.row) */
 @media (max-width: 991px) {
   body:not(.is-home) header.header .collapsing-search__form .row {
     border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
@@ -412,7 +412,7 @@ body.mc-search-open #mcHeroSearchOverlay #toggle1 .toggle__icon--open {
   opacity: 0.85 !important;
 }
 
-/* Hero: underline on the input row (outer .collapsing-search has no border — see template critical) */
+/* Hero: underline on the input row (outer .collapsing-search has no border â€” see template critical) */
 html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within) .collapsing-search__form .row {
   border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
 }
@@ -481,7 +481,7 @@ body:not(.is-home) #if_homepage {
   pointer-events: none !important;
 }
 
-/* Full-bleed: homepage hero only (never on category — avoids black bar when body.is-home is wrong) */
+/* Full-bleed: homepage hero only (never on category â€” avoids black bar when body.is-home is wrong) */
 hthtml.mc-allow-home-hero body.is-home #if_homepage,
 html.mc-allow-home-hero body.is-home #slideshow-container {
   width: 100vw !important;
@@ -508,7 +508,7 @@ html.mc-allow-home-hero body.is-home #slideshow-container {
   box-sizing: border-box !important;
 }
 
-/* Homepage hero video only — do not style .mc-hero-video on category/PLP pages */
+/* Homepage hero video only â€” do not style .mc-hero-video on category/PLP pages */
 html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
   position: relative;
   z-index: 1 !important;
@@ -614,7 +614,7 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   line-height: 0 !important;
 }
 
-/* Hero menu: homepage only — above search + video layers */
+/* Hero menu: homepage only â€” above search + video layers */
 html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu {
   position: absolute;
   top: 18px !important;
@@ -654,7 +654,7 @@ html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav {
    loads near the end of <body>, AFTER this stylesheet, with the exact same
    selector forcing width:60%/gap:0/justify-content:space-between on
    .hero-nav. Same selector = tied specificity, so source order wins and
-   beats us no matter what we put here — UNLESS we raise specificity above
+   beats us no matter what we put here â€” UNLESS we raise specificity above
    it. Repeating .hero-nav does that without changing what it matches. */
 html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav.hero-nav {
   width: auto !important;
@@ -692,7 +692,7 @@ meta[itemprop="name"] {
   display: none !important;
 }
 
-/* Volusion injects "McCabe's Theater & Living" text into #display_homepage_title on every page — never show in header */
+/* Volusion injects "McCabe's Theater & Living" text into #display_homepage_title on every page â€” never show in header */
 header.header #display_homepage_title,
 header.header #display_homepage_title *,
 #display_homepage_title,
@@ -821,7 +821,7 @@ body.category:not(.is-home) #slideshow-container .hero-nav {
   }
 }
 
-/* Homepage hero: “Search” label above the underline (RH-style), right-aligned with module */
+/* Homepage hero: â€œSearchâ€ label above the underline (RH-style), right-aligned with module */
 @media (min-width: 992px) {
   #slideshow-container .mc-hero-search-inner::before {
     content: "Search" !important;
@@ -891,7 +891,7 @@ body.is-home #slideshow-container {
     display: none !important;
   }
 
-  /* hero container: shorter than desktop; video still fills the box (cover) — home only */
+  /* hero container: shorter than desktop; video still fills the box (cover) â€” home only */
   html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
     min-height: max(280px, 52vh) !important;
     min-height: max(280px, 52svh) !important;
@@ -906,7 +906,7 @@ body.is-home #slideshow-container {
     object-position: center center !important;
   }
 
-  /* overlay: centered stack — logo + tagline sit together over video */
+  /* overlay: centered stack â€” logo + tagline sit together over video */
   #slideshow-container .mc-hero-overlay {
     position: absolute !important;
     inset: 0 !important;
@@ -919,7 +919,7 @@ body.is-home #slideshow-container {
     pointer-events: none !important;
   }
 
-  /* Do not use bare `p` here — !important beats inline styles and blocked the 36px tagline */
+  /* Do not use bare `p` here â€” !important beats inline styles and blocked the 36px tagline */
   #mc-hero-copy-tagline,
   #slideshow-container #mc-hero-copy-tagline {
     font-size: 14px !important;
@@ -949,7 +949,7 @@ body.is-home #slideshow-container {
   }
 }
 
-/* Homepage: hero supplies nav + search; hide duplicate desktop strip — only when URL allows home hero */
+/* Homepage: hero supplies nav + search; hide duplicate desktop strip â€” only when URL allows home hero */
 html.mc-allow-home-hero body.is-home header.header > .mc-header-desktop-bar,
 html.mc-allow-home-hero body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar],
 html.mc-allow-home-hero body.is-home .mc-header-desktop-bar {
@@ -966,7 +966,7 @@ html.mc-allow-home-hero body.is-home .mc-header-desktop-bar {
 }
 
 /* PDP: keep desktop nav + search visible even if body.is-home is set incorrectly
-   (DESKTOP ONLY — 2026-07-07)
+   (DESKTOP ONLY â€” 2026-07-07)
    This was unscoped and is the primary cause of the giant-chevron mobile bug:
    every product-detail page carries body.productdetails, so this forced the
    full desktop nav bar + dropdown menu visible at every viewport width,
@@ -1030,7 +1030,7 @@ body.mc-product-page #if_homepage {
   border-top: 0 !important;
 }
 
-/* PDP from URL only: template sets html.mc-url-looks-like-pdp before <body> (Volusion default.asp?ProductCode=…).
+/* PDP from URL only: template sets html.mc-url-looks-like-pdp before <body> (Volusion default.asp?ProductCode=â€¦).
    Replicate here so hero stays hidden even if template critical CSS is stale in cache. */
 html.mc-url-looks-like-pdp #if_homepage,
 html.mc-url-looks-like-pdp body #if_homepage,
@@ -1070,8 +1070,8 @@ html.mc-url-looks-like-pdp body.is-home header.header .main-menu {
    (body:not(.is-home) #display_menu_1 = 1 id + 1 class-from-:not + 1 tag)
    was HIGHER than the mobile hide rule further down (header #display_menu_1
    = 1 id + 1 tag), so it won on every viewport width regardless of source
-   order. That forced the full desktop nav — including dropdown submenu
-   carets meant only for hover/desktop — to render on every mobile PDP page,
+   order. That forced the full desktop nav â€” including dropdown submenu
+   carets meant only for hover/desktop â€” to render on every mobile PDP page,
    overlapping content with oversized chevron icons ("DINING BEDROOM...LUXE
    COMFORTS" bleeding through with giant carets). Scoped to min-width:992px
    so mobile's own display:none rule (search "hide desktop main menu" below)
@@ -1121,7 +1121,7 @@ html.mc-url-looks-like-pdp body.is-home header.header .main-menu {
 
 /* ===== NON-HOME MENU: MATCH HOMEPAGE HERO MENU EXACTLY (DESKTOP/TABLET) ===== */
 
-/* LI: same as hero – no fixed widths, no extra margin (centering via flex on ul) */
+/* LI: same as hero â€“ no fixed widths, no extra margin (centering via flex on ul) */
 body:not(.is-home) #display_menu_1 .vnav--level1 > li,
 body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li {
   width: auto !important;
@@ -1158,7 +1158,7 @@ body:not(.is-home) #display_menu_1 .vnav__label {
 
 /* ======================================
    PRODUCT GRID: FIX IMAGE BOX HEIGHT
-   (scoped off category pages — category PLP uses fixed tiles + object-fit: contain)
+   (scoped off category pages â€” category PLP uses fixed tiles + object-fit: contain)
 ====================================== */
 html:not(.category) body:not(.category) .v-product-grid .v-product__img {
   display: block;
@@ -1221,7 +1221,7 @@ html:not(.category) body:not(.category) .v-product-grid .v-product__img img {
 
 /* =========================================================
    PRODUCT LISTINGS: ALIGN IMAGES TO THE TOP OF THE IMAGE BOX
-   (not on category — category uses uniform center-crop tiles)
+   (not on category â€” category uses uniform center-crop tiles)
 ========================================================= */
 html:not(.category) body:not(.is-home) #content_area .v-product__img,
 html:not(.category) body:not(.is-home) #content_area_home .v-product__img {
@@ -1253,15 +1253,15 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
   align-items: stretch !important;
   visibility: visible !important;
   /* 2026-07-07: was -45px (clipped the menu, per the 2026-07-02 note
-     below), then -30px per a subsequent request — but -30px turned out
+     below), then -30px per a subsequent request â€” but -30px turned out
      to ALSO clip the menu, just less severely: user reported the
      desktop nav completely missing on category/PDP pages ("gone on
      the other pages"). Confirmed live: header.header computed
-     margin-top:-30px (this rule, not an inline style — verified via
+     margin-top:-30px (this rule, not an inline style â€” verified via
      getAttribute('style'), which had no margin-top at all) pulled the
      header 22-30px above the viewport, taking #display_menu_1 with it
      (nav had real content, display:flex, but getBoundingClientRect().y
-     was negative — off-screen, not just visually hidden). Set to 0 to
+     was negative â€” off-screen, not just visually hidden). Set to 0 to
      stop clipping; whatever visual gap -30px was closing needs to be
      solved a different way if it resurfaces, since a fully missing
      nav is a worse failure mode than a small gap.
@@ -1269,7 +1269,7 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
   margin-top: 0px !important;
 }
 
-/* Interior: logo row first, main menu (#display_menu_1) second, search strip last — beats theme float/order */
+/* Interior: logo row first, main menu (#display_menu_1) second, search strip last â€” beats theme float/order */
 :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp:not(.is-home), html.category body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
   header.header
   > .header__section:not(.header__section--middle) {
@@ -1629,7 +1629,7 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li:focus-within > a {
 }
 
 /* =====================================================
-   FIX MENU SHIFT AT 992px–1199px (product/category pages)
+   FIX MENU SHIFT AT 992pxâ€“1199px (product/category pages)
    Bootstrap col-lg-* only applies at 1200px+, so at 1199px the
    menu column loses width and can shift right. Lock layout here.
 ===================================================== */
@@ -1892,16 +1892,16 @@ a.mc-account-float {
 }
 
 /* 2026-07-07 user-confirmed: .mc-cart-float__icon is the duplicate/oversized
-   SVG documented at "CART GLYPH ALIGNMENT" further down this file —
+   SVG documented at "CART GLYPH ALIGNMENT" further down this file â€”
    template.min.js's [class*=mc-cart-float] selector also matches this inner
    svg and force-sizes it to 52px via inline !important every ~100ms,
    independent of the anchor. This CSS rule alone can't hold against that
-   interval (confirmed live: reverts within ~100ms) — the real fix is a
+   interval (confirmed live: reverts within ~100ms) â€” the real fix is a
    MutationObserver in mc-plp-enforcer.js that re-applies display:none
    instantly and ALSO paints the cart glyph as an inline background-image on
    the anchor (the background-image rule further down THIS file turned out
    to be losing a cascade fight against other unrelated rules setting
-   background-image:initial on the same anchor — confirmed live the icon
+   background-image:initial on the same anchor â€” confirmed live the icon
    went completely blank without the JS-driven inline background-image).
    This rule stays only as a first-paint assist before the JS runs. */
 .mc-cart-float__icon,
@@ -2031,7 +2031,7 @@ a.hero-cart-link {
 }
 
 @media (max-width: 991px) {
-  /* 1) STOP the hero from being full-page on mobile — home only */
+  /* 1) STOP the hero from being full-page on mobile â€” home only */
   html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
     min-height: max(280px, 52vh) !important;
     min-height: max(280px, 52svh) !important;
@@ -2200,7 +2200,7 @@ a.hero-cart-link {
 }
 
 @media (max-width: 991px) {
-  /* Hero: video behind, overlay + copy ABOVE (was z-index:1 on both → text hidden under video) */
+  /* Hero: video behind, overlay + copy ABOVE (was z-index:1 on both â†’ text hidden under video) */
   #slideshow-container,
   #slideshow-container .mc-hero-video {
     position: relative !important;
@@ -2423,7 +2423,7 @@ nav.push-menu .push-menu__close-btn::before {
   }
 }
 
-/* MOBILE: category — title centered; member + list price left */
+/* MOBILE: category â€” title centered; member + list price left */
 @media (max-width: 991px) {
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
@@ -2552,7 +2552,7 @@ body.mc-product-page #content_area .main-image img {
   }
 }
 
-/* Match homepage hero menu: flex (not inline-flex) so ul doesn’t shrink and overlap items */
+/* Match homepage hero menu: flex (not inline-flex) so ul doesnâ€™t shrink and overlap items */
 body:not(.is-home) #display_menu_1 > ul.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul {
@@ -2728,7 +2728,7 @@ body.mc-product-page select.mc-native-leather {
     max-width: 650px !important;
   }
 
-  /* Stop cut-off on the left — never use bare `td *` here: it sets overflow:visible on
+  /* Stop cut-off on the left â€” never use bare `td *` here: it sets overflow:visible on
      #mcLeatherSwatchStrip and lets swatches paint over #mcPlannerRow. */
   body.mc-product-page #content_area td.mc-pdp-options-td #mcLeatherSwatchStrip,
   body.productdetails #content_area td.mc-pdp-options-td #mcLeatherSwatchStrip {
@@ -2976,7 +2976,7 @@ body.mc-product-page select.mc-native-leather {
       padding: 0 0.85em !important;
     }
 
-    /* Unlocked: mirror main price block — label above, price below (same sizes as .option_pricing / #priceWithOptions) */
+    /* Unlocked: mirror main price block â€” label above, price below (same sizes as .option_pricing / #priceWithOptions) */
     .mc-member-price-caption[data-mc-member-state="unlocked"],
     .mc-member-price-caption[data-mc-member-state="unlocked-no-price"] {
       text-align: left !important;
@@ -3025,10 +3025,10 @@ body.mc-product-page select.mc-native-leather {
     }
 
     /* FIX THE BREADCRUMB TABLE SPACING ON CATEGORY + PRODUCT PAGES.
-       Scoped away from body.shoppingcart — this attribute selector also
+       Scoped away from body.shoppingcart â€” this attribute selector also
        matches #v65-cart-table-container (the cart's own item-list wrapper,
        which happens to share width="100%" cellpadding="5"), so on the cart
-       page it was hiding the entire order — not just an empty-looking page,
+       page it was hiding the entire order â€” not just an empty-looking page,
        the actual cart contents table never rendered. */
     body:not(.is-home):not(.shoppingcart) table[width="100%"][cellpadding="5"] {
       margin: 0 !important;
@@ -3045,7 +3045,7 @@ body.mc-product-page select.mc-native-leather {
       line-height: 1 !important;
     }
 
-    /* Logo / top strip only — not .header__section--middle (duplicate search row) */
+    /* Logo / top strip only â€” not .header__section--middle (duplicate search row) */
     :is(html:not(.mc-allow-home-hero) body, body:not(.is-home), body.category, body.productdetails, body.mc-product-page, body.mc-theater-seating-pdp:not(.is-home), html.category body, html.mc-paragon-pdp body, html.mc-url-looks-like-pdp body.is-home)
       .header__section:not(.header__section--middle) {
       display: flex !important;
@@ -3687,7 +3687,7 @@ margin-left: 0 !important;
     box-shadow: none !important;
   }
 
-  /* Use unified icon sizing (same as base block above) – do not override size/position */
+  /* Use unified icon sizing (same as base block above) â€“ do not override size/position */
 }
 }
 
@@ -4125,7 +4125,7 @@ body.mc-product-page #v65-product-parent #options_table select {
   max-width: 100% !important;
   box-sizing: border-box !important;
 }
-/* Leather select hidden – selection shown in "Selected leather" box instead */
+/* Leather select hidden â€“ selection shown in "Selected leather" box instead */
 body.mc-product-page #content_area select.mc-native-leather,
 body.mc-product-page #v65-product-parent select.mc-native-leather,
 select.mc-native-leather {
@@ -4170,7 +4170,7 @@ select.mc-native-leather {
     flex-shrink: 0 !important;
   }
 
-  /* Make sure LIs don’t introduce layout weirdness */
+  /* Make sure LIs donâ€™t introduce layout weirdness */
   body:not(.is-home) #display_menu_1 > ul > li {
     float: none !important;
     clear: none !important;
@@ -4252,7 +4252,7 @@ select.mc-native-leather {
 
 
 /* ============================================================
-   FIX 2: Home icon size — match cart icon behavior.
+   FIX 2: Home icon size â€” match cart icon behavior.
    Replaces fixed 20px size with responsive clamp().
    Targets ONLY .mc-home-float__icon
    ============================================================ */
@@ -5569,7 +5569,7 @@ body.mc-bean-bag-pdp [class*="memberpricing"] {
   display: none !important;
 }
 
-/* Beat template inline accordion rules that clip #options_table selects (body.mc-product-page … .mc-option-accordion select). */
+/* Beat template inline accordion rules that clip #options_table selects (body.mc-product-page â€¦ .mc-option-accordion select). */
 body.mc-bean-bag-pdp.mc-product-page #content_area .mc-option-accordion select,
 body.mc-bean-bag-pdp.mc-product-page #content_area .mc-option-accordion .mc-option-accordion-native,
 body.mc-bean-bag-pdp.productdetails #content_area .mc-option-accordion select,
@@ -5764,7 +5764,7 @@ body.mc-product-page:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_
 body.productdetails:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_productprice {
   display: none !important;
 }
-/* Price under "Price with selected options" – larger font (not when McCabe retail/member stack is active) */
+/* Price under "Price with selected options" â€“ larger font (not when McCabe retail/member stack is active) */
 body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_sale_price,
 body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_sale_price b,
 body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_sale_price span {
@@ -5938,8 +5938,8 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
 
 /* Add to Cart: unified layout styles `.mc-unified-purchase-controls` (see MC_UNIFIED_PDP_LAYOUT at EOF). */
 
-/* Don’t clip the Add to Cart button in the options column */
-/* Single Add to Cart: no second container/color – wrapper matches button */
+/* Donâ€™t clip the Add to Cart button in the options column */
+/* Single Add to Cart: no second container/color â€“ wrapper matches button */
 body.mc-product-page #content_area .v65-product-addtocart,
 body.mc-product-page #v65-product-parent .v65-product-addtocart,
 body.mc-product-page #content_area .v65-product-addtocart div,
@@ -6085,7 +6085,7 @@ body.mc-product-page #content_area .mc-option-accordion__panel {
   body.mc-product-page #content_area #mcLeatherRow,
   body.mc-product-page #content_area #mc-inline-config,
   body.mc-product-page #content_area #mcPlannerRow {
-    max-width: 520px !important; /* matches your “wide table” look, but still responsive */
+    max-width: 520px !important; /* matches your â€œwide tableâ€ look, but still responsive */
   }
 
   /* Sectional PDP: selected configuration (#mc-inline-config) same measure as options / accordion (440px). */
@@ -6416,7 +6416,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   margin-top: 4px;
 }
 
-/* Mobile: full login modal visible — scroll inside panel, safe areas, shorter iframe floor */
+/* Mobile: full login modal visible â€” scroll inside panel, safe areas, shorter iframe floor */
 @media (max-width: 991px) {
   .mc-login-modal.mc-login-modal--open {
     align-items: flex-start !important;
@@ -6571,7 +6571,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   color: #111;
 }
 
-/* Category listing: same visual order on every card (image → title → price) + full-width images */
+/* Category listing: same visual order on every card (image â†’ title â†’ price) + full-width images */
 :is(html.category, body.category) .v-product-grid .v-product,
 :is(html.category, body.category) ul.v-product-grid > li.v-product {
   display: flex;
@@ -6582,7 +6582,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   height: 100%;
 }
 
-/* Flex default order is 0 — lower than our image (1), so sale/member nodes sat above the image. */
+/* Flex default order is 0 â€” lower than our image (1), so sale/member nodes sat above the image. */
 :is(html.category, body.category) .v-product-grid .v-product > *,
 :is(html.category, body.category) ul.v-product-grid > li.v-product > * {
   order: 5;
@@ -6848,7 +6848,7 @@ body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area .v-pro
   display: none !important;
 }
 
-/* PDP: guests never see “Sale price” row — caption prompts login */
+/* PDP: guests never see â€œSale priceâ€ row â€” caption prompts login */
 body:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox font.product_sale_price,
 body:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox .product_sale_price,
 body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
@@ -6989,7 +6989,7 @@ html body.mc-bean-bag-pdp #mc-pdp-accordion .mc-acc-header:hover {
   }
 }
 
-/* Category: subcategory nav (sidebar + in-content vnav) — left, RH-style caps */
+/* Category: subcategory nav (sidebar + in-content vnav) â€” left, RH-style caps */
 :is(html.category, body.category) .sidebar-wrapper .sidebar,
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] {
   text-align: left !important;
@@ -7069,7 +7069,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   line-height: 1.35 !important;
 }
 
-/* Category “Sort by” / “Products per page” (Volusion listing controls): member-price stack, streamlined */
+/* Category â€œSort byâ€ / â€œProducts per pageâ€ (Volusion listing controls): member-price stack, streamlined */
 :is(html.category, body.category):not(.productdetails) #content_area select:not(#options_table select):not(.mc-native-leather):not(.mc-option-accordion-native),
 html.vol-list.category:not(.productdetails) #content_area select:not(#options_table select):not(.mc-native-leather):not(.mc-option-accordion-native) {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif !important;
@@ -7127,7 +7127,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   color: #1a1a1a !important;
 }
 
-/* Category cards: “Retail” before list / regular price — same label style as member line */
+/* Category cards: â€œRetailâ€ before list / regular price â€” same label style as member line */
 :is(html.category, body.category) #content_area .v-product .product_list_price::before,
 :is(html.category, body.category) #content_area ul.v-product-grid > li .product_list_price::before,
 :is(html.category, body.category) #content_area .v-product font.product_list_price::before,
@@ -7202,7 +7202,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   color: #fff !important;
 }
 
-/* Next beside “Page N …” above the grid (injected #mc-category-pager-top; re-parented before product grid in JS) */
+/* Next beside â€œPage N â€¦â€ above the grid (injected #mc-category-pager-top; re-parented before product grid in JS) */
 .mc-category-pager-page-row {
   display: flex !important;
   flex-direction: row !important;
@@ -7306,7 +7306,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
-   PDP: main row — image left, options right (desktop); stacked on mobile
+   PDP: main row â€” image left, options right (desktop); stacked on mobile
    (tagged row: tr.mc-pdp-main-row from template_266.html)
    ========================================================= */
 @media (min-width: 992px) {
@@ -7342,7 +7342,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
-   PDP: related products — 4 across (PLP-like), horizontal scroll fallback + arrows
+   PDP: related products â€” 4 across (PLP-like), horizontal scroll fallback + arrows
    ========================================================= */
 .mc-related-carousel {
   position: relative;
@@ -7539,7 +7539,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
  Related / "More from this collection":
  Volusion uses table.v65-productDisplay with separate rows for images | names | prices.
  Native (non-carousel) blocks need real table layout at every viewport.
- IMPORTANT: Never target tables inside `.mc-related-carousel__viewport` — that wrapper's CSS
+ IMPORTANT: Never target tables inside `.mc-related-carousel__viewport` â€” that wrapper's CSS
  deliberately uses display:block/flex on the table/tbody (.mc-related-carousel__viewport table {})
  and a high-specificity `display:table !important` on #v65-product-related was overriding it,
  collapsing image/title rows (titles row vs images stacked in column + huge gaps).
@@ -7717,7 +7717,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
-   PDP: main product row — side-by-side on desktop (overlap fix: min-width: 0)
+   PDP: main product row â€” side-by-side on desktop (overlap fix: min-width: 0)
    Applies to standard Volusion row 2 and tagged mc-pdp-main-row.
    ========================================================= */
 @media (min-width: 992px) {
@@ -7804,7 +7804,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   }
 
   /*
-   PDP hero image — unified for all PDPs.
+   PDP hero image â€” unified for all PDPs.
    Older rule used min-width:600px + margin-left:70px inside a ~55%/58% flex column:
    overflow / shrink left the hero looking like a tiny thumb (esp. sectionals + split-rows).
    */
@@ -7828,7 +7828,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
    PDP desktop: thumbnails below main image
    The live Volusion DOM puts span#altviews inside the same outer TD as the
    main image, after the inner image <table>. Making that outer TD a flex
-   column naturally stacks image above thumbnails — no JS DOM-moving needed.
+   column naturally stacks image above thumbnails â€” no JS DOM-moving needed.
    Selector confirmed from live HTML inspection.
    ========================================================= */
 @media (min-width: 992px) {
@@ -8000,7 +8000,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   }
 }
 
-/* Keep homepage content below the hero — not sliding up over a shrunken slideshow */
+/* Keep homepage content below the hero â€” not sliding up over a shrunken slideshow */
 html.mc-allow-home-hero body.is-home #if_homepage {
   position: relative !important;
   z-index: 2 !important;
@@ -8462,7 +8462,7 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
   flex-direction: column !important;
 }
 
-/* Category: 3 / 2 / 1 — grid containers only; card flex/width lives in one block below (no duplicate @media nesting) */
+/* Category: 3 / 2 / 1 â€” grid containers only; card flex/width lives in one block below (no duplicate @media nesting) */
 @media (min-width: 992px) {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
   :is(html.category, body.category) #content_area ul.v-product-grid,
@@ -8523,7 +8523,7 @@ html body.mc-product-page #v65-product-related .mc-related-plp-grid {
   }
 }
 
-/* --- Category cards — single block (grid cells: flex + 100% width; vol-list + grid-item kept for markup variants) --- */
+/* --- Category cards â€” single block (grid cells: flex + 100% width; vol-list + grid-item kept for markup variants) --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product,
 :is(html.category, body.category) #content_area .v-product-grid > div.v-product,
@@ -8551,7 +8551,7 @@ html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
   background: #ffffff !important;
 }
 
-/* Sale / list price nodes default to flex order 0 — push behind image (order 1) on category cards */
+/* Sale / list price nodes default to flex order 0 â€” push behind image (order 1) on category cards */
 :is(html.category, body.category) #content_area .v-product-grid > div.v-product > *,
 :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product > *,
 :is(html.category, body.category) #content_area ul.v-product-grid > li > *,
@@ -8686,7 +8686,7 @@ html.vol-list.category #content_area .v-product-grid > .v-product {
   height: 100%;
 }
 
-/* Image tile — same fixed height home + category (category: letterbox; home: crop) */
+/* Image tile â€” same fixed height home + category (category: letterbox; home: crop) */
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__img,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__image,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__image-wrap,
@@ -8742,7 +8742,7 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-produc
   margin: 0 !important;
 }
 
-/* Title band — left-aligned with member pricing below */
+/* Title band â€” left-aligned with member pricing below */
 body.is-home:not(.productdetails) #content_area_home .v-product__name,
 body.is-home:not(.productdetails) #content_area_home .productnamecolor,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid h2,
@@ -8994,12 +8994,12 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     min-width: 0 !important;
     max-width: 800px !important;
     box-sizing: border-box !important;
-    /* Default: align with cell edge (single-image PDPs have no #altviews — 250px was empty gutter). */
+    /* Default: align with cell edge (single-image PDPs have no #altviews â€” 250px was empty gutter). */
     margin-left: 10px !important;
   }
 
   /* Thumbnail strip present: legacy offset aligns full-width rows with hero column.
-     Exclude bean bags — .mc-bean-bag-media-stack + 250px shoves hero over the info column. */
+     Exclude bean bags â€” .mc-bean-bag-media-stack + 250px shoves hero over the info column. */
   body.productdetails:not(.mc-bean-bag-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-pdp-unified-ready) :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
   body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-pdp-unified-ready) :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
   body.productdetails:not(.mc-bean-bag-pdp):not(.mc-steve-silver-altview-pdp):not(.mc-pdp-unified-ready) :is(#content_area, #v65-product-parent) #product_photo_td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
@@ -9037,7 +9037,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin: 0 !important;
   }
 
-  /* Hero table beside thumbs — second+ tables */
+  /* Hero table beside thumbs â€” second+ tables */
   body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo):not(:first-of-type),
   body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo):not(:first-of-type),
   body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > table:has(img#product_photo):not(:first-of-type),
@@ -9204,7 +9204,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 }
 
-/* Last-win: PDP row cells without .mc-pdp-* — match 58/42 split; clip media so hero cannot paint over options */
+/* Last-win: PDP row cells without .mc-pdp-* â€” match 58/42 split; clip media so hero cannot paint over options */
 @media (min-width: 992px) {
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
@@ -9256,7 +9256,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* #altviews is a *direct* child of #product_photo_td / media td: pull up (legacy Volusion).
-   When #altviews is nested *inside* the same td/table as the hero, do NOT use margin hacks — use nested flex block below. */
+   When #altviews is nested *inside* the same td/table as the hero, do NOT use margin hacks â€” use nested flex block below. */
 @media (min-width: 992px) {
   body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
   body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
@@ -9270,7 +9270,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 }
 
-/* Nested #altviews (same td/table as hero): flex row — thumbs left, hero flexes; no independent margin-top. */
+/* Nested #altviews (same td/table as hero): flex row â€” thumbs left, hero flexes; no independent margin-top. */
 @media (min-width: 992px) {
   body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews),
   body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews),
@@ -9380,7 +9380,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   FINAL FIX — HIDE DESKTOP SEARCH LABEL + LIFT PDP ALTVIEWS
+   FINAL FIX â€” HIDE DESKTOP SEARCH LABEL + LIFT PDP ALTVIEWS
    ========================================================= */
 
 @media (min-width: 992px) {
@@ -9549,7 +9549,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   FINAL FORCE FIX — DESKTOP NON-HOME SEARCH + PDP ALT THUMBS
+   FINAL FORCE FIX â€” DESKTOP NON-HOME SEARCH + PDP ALT THUMBS
    ========================================================= */
 
 /* A. NON-HOME DESKTOP: hide duplicate search UI and keep only one search rail */
@@ -9632,7 +9632,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   FINAL FORCE FIX — REMOVE EXTRA SEARCH LABEL + MOVE PDP IMAGE LEFT
+   FINAL FORCE FIX â€” REMOVE EXTRA SEARCH LABEL + MOVE PDP IMAGE LEFT
    ========================================================= */
 @media (min-width: 992px) {
   /* 1) Remove the extra uppercase SEARCH label everywhere on desktop */
@@ -9720,7 +9720,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     object-fit: contain !important;
   }
 
-  /* Main image clears alt column (margin-left); do not negative-shift — it overlapped thumbs */
+  /* Main image clears alt column (margin-left); do not negative-shift â€” it overlapped thumbs */
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
   body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
@@ -9749,7 +9749,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   LAST-WIN — uppercase SEARCH was from ::before, not .search__toggle
+   LAST-WIN â€” uppercase SEARCH was from ::before, not .search__toggle
    (see .mc-header-search-cart-wrap::before + .mc-hero-search-inner::before earlier in file)
    ========================================================= */
 @media (min-width: 992px) {
@@ -9782,7 +9782,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   FINAL SEARCH FIX — HERO ALIGNMENT + REMOVE EXTRA LABEL/LINE
+   FINAL SEARCH FIX â€” HERO ALIGNMENT + REMOVE EXTRA LABEL/LINE
    ========================================================= */
 @media (min-width: 992px) {
   /* ---------------------------------------------------------
@@ -9964,7 +9964,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   MAIN SHELL — keep Volusion outer wrappers centered when max-width caps width
+   MAIN SHELL â€” keep Volusion outer wrappers centered when max-width caps width
    ========================================================= */
 @media (min-width: 992px) {
   article.vol-container,
@@ -9984,7 +9984,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   PDP WIDER LAYOUT — only on real product detail (has #v65-product-parent)
+   PDP WIDER LAYOUT â€” only on real product detail (has #v65-product-parent)
    ========================================================= */
 @media (min-width: 992px) {
   body.productdetails:has(#v65-product-parent) .vol-container,
@@ -10192,7 +10192,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   HERO SEARCH — single underline (form/container must not add a second line)
+   HERO SEARCH â€” single underline (form/container must not add a second line)
    ========================================================= */
 @media (min-width: 992px) {
   #mcHeroSearchOverlay .collapsing-search__form {
@@ -10212,7 +10212,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     content: none !important;
   }
 
-  /* Placeholder-only cue on hero — hide label (same as header bar; clip still leaked duplicate text in some builds). */
+  /* Placeholder-only cue on hero â€” hide label (same as header bar; clip still leaked duplicate text in some builds). */
   #mcHeroSearchOverlay .collapsing-search__label,
   #mcHeroSearchOverlay .collapsing-search__label__text {
     display: none !important;
@@ -10230,7 +10230,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   PDP — layout sync (992px+); matches live Volusion custom CSS (flat @media, no nesting)
+   PDP â€” layout sync (992px+); matches live Volusion custom CSS (flat @media, no nesting)
    ========================================================= */
 @media (min-width: 992px) {
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
@@ -10302,7 +10302,7 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   display: none !important;
 }
 
-/* Revert / last-win: duplicate "Search" (label + placeholder) — high specificity + strip row pseudo text */
+/* Revert / last-win: duplicate "Search" (label + placeholder) â€” high specificity + strip row pseudo text */
 @media (min-width: 992px) {
   html body:not(.is-home) header.header .mc-header-desktop-bar .collapsing-search__form .row::before,
   html body:not(.is-home) header.header .mc-header-desktop-bar .collapsing-search__form .row::after {
@@ -10365,7 +10365,7 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
 }
 
 
-/* Category PLP: nested table.v65-productDisplay (live DOM — separate rows for images vs title/price; per <td>, not .v-product) */
+/* Category PLP: nested table.v65-productDisplay (live DOM â€” separate rows for images vs title/price; per <td>, not .v-product) */
 html.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td {
   text-align: center !important;
   vertical-align: top !important;
@@ -10391,7 +10391,7 @@ html.category body:not(.productdetails):not(.is-home) #content_area table.v65-pr
   text-align: center !important;
 }
 
-/* Category PLP: ul/div .v-product-grid cards (e.g. bean bags) — center stack per card only */
+/* Category PLP: ul/div .v-product-grid cards (e.g. bean bags) â€” center stack per card only */
 html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product,
 html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item,
 html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product,
@@ -10452,7 +10452,7 @@ html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product
   text-align: center !important;
 }
 
-/* Bean bag category (103) PLP — last-win: real sale/list price nodes stay visible on product cards (overrides any stray hides) */
+/* Bean bag category (103) PLP â€” last-win: real sale/list price nodes stay visible on product cards (overrides any stray hides) */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .product_saleprice,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid .product_saleprice,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid font.product_sale_price,
@@ -10467,7 +10467,7 @@ html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #cont
   opacity: 1 !important;
 }
 
-/* Loveseat cat 157 PLP — guests only: hide Volusion sale rows (nested table + grid); member/login row is the public price UX */
+/* Loveseat cat 157 PLP â€” guests only: hide Volusion sale rows (nested table + grid); member/login row is the public price UX */
 html.mc-cat157-plp-guest.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_saleprice,
 html.mc-cat157-plp-guest.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_sale_price,
 html.mc-cat157-plp-guest.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_sale_price,
@@ -10483,7 +10483,7 @@ html.mc-cat157-plp-guest.category body:not(.productdetails):not(.is-home) #conte
 }
 
 
-/* Bean bag (103) PLP — per-list-item card column only; does not target ul.v-product-grid wrapper */
+/* Bean bag (103) PLP â€” per-list-item card column only; does not target ul.v-product-grid wrapper */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item {
   box-sizing: border-box !important;
@@ -10495,7 +10495,7 @@ html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #cont
   max-width: 100% !important;
 }
 
-/* Bean bag (103) PLP — nested Volusion product table inside grid cell */
+/* Bean bag (103) PLP â€” nested Volusion product table inside grid cell */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td {
   vertical-align: top !important;
   text-align: center !important;
@@ -10529,7 +10529,7 @@ html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #cont
   text-align: center !important;
 }
 
-/* Bean bag 103 PLP: image tiles must stay display:flex (custom-safe centers img via flex). Do not set image box to display:block here — it overrides flex and images look off-center. */
+/* Bean bag 103 PLP: image tiles must stay display:flex (custom-safe centers img via flex). Do not set image box to display:block here â€” it overrides flex and images look off-center. */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__img,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__image,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__image-wrap,
@@ -10547,7 +10547,7 @@ html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #cont
 }
 
 
-/* Member PLP — hide only the resolved price mount until mcMarkCardPriceWrapperReady (per card, under #content_area) */
+/* Member PLP â€” hide only the resolved price mount until mcMarkCardPriceWrapperReady (per card, under #content_area) */
 body.category:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li .mc-pricing-pending,
 body.category:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .mc-pricing-pending,
 body.category:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .mc-pricing-pending {
@@ -10803,7 +10803,7 @@ body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td
   color: #444 !important;
 }
 
-/* Theater / WM panel: configuration summary — RH typography (Inter, caps label, clean body). */
+/* Theater / WM panel: configuration summary â€” RH typography (Inter, caps label, clean body). */
 body.productdetails .mc-configuration-rh,
 body.mc-product-page .mc-configuration-rh,
 body.mc-theater-seating-pdp .mc-configuration-rh {
@@ -10920,7 +10920,7 @@ body.mc-saranoni-pdp table[id*="options_table"][data-mc-hide-native-options="1"]
   z-index: auto !important;
 }
 
-/* Final 992–1199 desktop header clamp: center menu; search is off-flow (.mc-search-float). */
+/* Final 992â€“1199 desktop header clamp: center menu; search is off-flow (.mc-search-float). */
 @media (min-width: 992px) and (max-width: 1199px) {
   body:not(.is-home) header.header .mc-header-desktop-bar .microblock.main-menu {
     min-width: 0 !important;
@@ -11862,7 +11862,7 @@ body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartbutton 
   max-width: 100% !important;
 }
 /* =========================================================
-   MCCABE FIXES — DO NOT ADD NEW UI
+   MCCABE FIXES â€” DO NOT ADD NEW UI
    ========================================================= */
 
 /* --- Keep the existing desktop menu aligned sitewide --- */
@@ -12011,7 +12011,7 @@ html.is-sectional-product #mc-inline-config {
   opacity: 1 !important;
 }
 
-/* Sectional: leather UI lives only inside the accordion — hide duplicate row near Add To Cart. */
+/* Sectional: leather UI lives only inside the accordion â€” hide duplicate row near Add To Cart. */
 html.is-sectional-product #mc-inline-config #mcLeatherRow {
   display: none !important;
   visibility: hidden !important;
@@ -12084,7 +12084,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   }
 }
 
-/* MTL sectional PDP — Popular Configurations + Product Summary (20260519sectional) */
+/* MTL sectional PDP â€” Popular Configurations + Product Summary (20260519sectional) */
 #mtl-sectional-configurations {
   clear: both;
   display: block !important;
@@ -12119,7 +12119,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   gap: 18px;
 }
 
-/* Popular Configurations inside PDP accordion — tighter grid gap */
+/* Popular Configurations inside PDP accordion â€” tighter grid gap */
 #mc-acc-row-popularconfig #mtl-sectional-configurations .mtl-sectional-grid {
   grid-template-columns: 1fr !important;
   justify-items: stretch !important;
@@ -12132,7 +12132,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   }
 }
 
-/* Popular Configurations accordion — use full grid cell width for diagram + copy */
+/* Popular Configurations accordion â€” use full grid cell width for diagram + copy */
 #mc-acc-row-popularconfig #mtl-sectional-configurations.mtl-sectional-configurations .mtl-sectional-card {
   box-sizing: border-box !important;
   width: 100% !important;
@@ -12215,7 +12215,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   outline-offset: 2px !important;
 }
 
-/* Full width/height from intrinsic PNG — do not cap height (avoids squashing the PDF layout). */
+/* Full width/height from intrinsic PNG â€” do not cap height (avoids squashing the PDF layout). */
 #mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-figure img.mtl-sectional-image {
   display: block !important;
   width: 100% !important;
@@ -12437,7 +12437,7 @@ html.is-sectional-product #mcLeatherSwatchStrip img {
   overflow: visible !important;
 }
 
-/* Sectional mini leather chips (native select–driven); wins over legacy .mc-mini-swatch strip rules. */
+/* Sectional mini leather chips (native selectâ€“driven); wins over legacy .mc-mini-swatch strip rules. */
 html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches {
   display: flex !important;
   flex-wrap: wrap !important;
@@ -12491,7 +12491,7 @@ html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches .mc-lea
   border-color: #111 !important;
 }
 
-/* Force the modal body and active tab panel to be visible —
+/* Force the modal body and active tab panel to be visible â€”
    Volusion site-wide CSS may set display:none on these. */
 html.is-sectional-product .wm-overlay .wm-modal-body {
   display: block !important;
@@ -12694,7 +12694,7 @@ body.mc-product-page #v65-product-parent [itemprop="offers"] {
   }
 }
 
-/* PDP: Add to Cart column alignment (matches flush-left 435px stack — was sectional-centered only). */
+/* PDP: Add to Cart column alignment (matches flush-left 435px stack â€” was sectional-centered only). */
 body.productdetails #v65-product-parent .v65-product-addtocart,
 body.mc-product-page #v65-product-parent .v65-product-addtocart {
   display: flex !important;
@@ -12735,7 +12735,7 @@ html.is-sectional-product #wmOpen {
   pointer-events: auto !important;
 }
 
-/* In-box Product Summary link — match template_266 #mcPlannerRow #mcProductSummaryBtn (~3436–3446, ~7465–7499): flex sibling sizing + pill metrics. */
+/* In-box Product Summary link â€” match template_266 #mcPlannerRow #mcProductSummaryBtn (~3436â€“3446, ~7465â€“7499): flex sibling sizing + pill metrics. */
 html.is-sectional-product #mtl-product-summary #mtl-sum-palliser-summary,
 html.is-sectional-product body.productdetails #mtl-product-summary #mtl-sum-palliser-summary,
 html.is-sectional-product body.productdetails #content_area #mtl-product-summary #mtl-sum-palliser-summary,
@@ -12769,7 +12769,7 @@ html.is-sectional-product body.productdetails #v65-product-parent #mtl-product-s
   appearance: none !important;
 }
 
-/* Narrow PDP column — same tightening as body.productdetails #mcProductSummaryBtn (custom-safe ~10585–10598). */
+/* Narrow PDP column â€” same tightening as body.productdetails #mcProductSummaryBtn (custom-safe ~10585â€“10598). */
 html.is-sectional-product body.productdetails #mtl-product-summary #mtl-sum-palliser-summary,
 html.is-sectional-product body.productdetails #content_area #mtl-product-summary #mtl-sum-palliser-summary,
 html.is-sectional-product body.productdetails #v65-product-parent #mtl-product-summary #mtl-sum-palliser-summary {
@@ -13246,7 +13246,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     display: inline-block !important;
   }
 
-  /* PDP Add to Cart button — black, uppercase, no border-radius. */
+  /* PDP Add to Cart button â€” black, uppercase, no border-radius. */
   body.mc-product-page #content_area input[name="btnaddtocart"],
   body.productdetails #content_area input[name="btnaddtocart"],
   body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
@@ -13509,7 +13509,7 @@ div.product_productprice:nth-child(2) {
   font-weight: 300 !important;
 }
 
-/* Deeply-nested Volusion price span — nudge top margin to align with surrounding price chrome.
+/* Deeply-nested Volusion price span â€” nudge top margin to align with surrounding price chrome.
    Selector kept verbatim from the live override; brittle but matches the live tree exactly. */
 table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > b:nth-child(2) > font:nth-child(1) > div:nth-child(1) > span:nth-child(1) {
   margin-top: 5px !important;
@@ -13517,7 +13517,7 @@ width: 400px !important;
 }
 
 /* =========================================================
-   PDP Firefox DevTools session — round 2 (20260513-acc-v4 typography refresh)
+   PDP Firefox DevTools session â€” round 2 (20260513-acc-v4 typography refresh)
    - Global Inter, base color #444, 0.14em letter-spacing on PDPs.
    - Pull config block up 35px on desktop.
    - Larger leather swatch strip.
@@ -13525,12 +13525,12 @@ width: 400px !important;
    - Retail-row price font size 13px / line-height 1.5.
    - Larger heading hierarchy for retail/member labels.
    - Reset altviews so the thumbnails sit directly under the main product image
-     (the position:absolute / 846px-margin experiments are NOT applied — those broke
+     (the position:absolute / 846px-margin experiments are NOT applied â€” those broke
      the layout. Use the DOM move from template_266.html accordion script + this CSS.).
    ========================================================= */
 
 /* Inline <style> baseline copied from the Firefox session into the persisted CSS.
-   NEVER put font-size on `body *` — it beats every PDP option rule (see DevTools cascade). */
+   NEVER put font-size on `body *` â€” it beats every PDP option rule (see DevTools cascade). */
 body {
   font-weight: 400;
   color: #444 !important;
@@ -13611,7 +13611,7 @@ body.productdetails #content_area .mc-atc-button-wrap {
 }
 
 .mc-atc-button-wrap {
-  /* Black rectangular Add to Cart — superseded by MC_UNIFIED_PDP_LAYOUT when .mc-pdp-unified-ready */
+  /* Black rectangular Add to Cart â€” superseded by MC_UNIFIED_PDP_LAYOUT when .mc-pdp-unified-ready */
   background: #000 !important;
   background-color: #000 !important;
   border: 1px solid #000 !important;
@@ -13652,7 +13652,7 @@ html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice
   line-height: 1.2 !important;
 }
 
-/* Retail / member labels + locked-member link — 13px, match product title. */
+/* Retail / member labels + locked-member link â€” 13px, match product title. */
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
@@ -13712,7 +13712,7 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
   color: #444 !important;
 }
 
-/* Sale price size override — equivalent of the 26620230411140605.css DevTools edit. */
+/* Sale price size override â€” equivalent of the 26620230411140605.css DevTools edit. */
 .home table.v65-productDisplay .product_saleprice,
 .home table.v65-productDisplay .product_saleprice b,
 .home #fpslider .item .sale,
@@ -13732,7 +13732,7 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
   font-size: 14px;
 }
 
-/* Configuration block — pull up 35px on desktop so it stacks tight against the accordion. */
+/* Configuration block â€” pull up 35px on desktop so it stacks tight against the accordion. */
 @media (min-width: 992px) {
   body.mc-product-page #mcConfigurationBlock,
   body.productdetails #mcConfigurationBlock {
@@ -13783,7 +13783,7 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
     clear: both !important;
   }
 
-  /* Individual thumbnail links inside altviews: ~64px square, 3–4 per row. */
+  /* Individual thumbnail links inside altviews: ~64px square, 3â€“4 per row. */
   body.mc-product-page :is(#content_area, #v65-product-parent) #altviews a,
   body.mc-product-page :is(#content_area, #v65-product-parent) #altviews > div,
   body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews a,
@@ -13844,17 +13844,17 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
 
 /* Element-rule remnant: prevent #altviews from being styled as ruby text. */
 #altviews {
-  /* display: block ruby !important; — invalid layout for thumbnails. */
+  /* display: block ruby !important; â€” invalid layout for thumbnails. */
   display: flex !important;
 }
 
 /* =========================================================
-   Late overrides — keep these AT THE END so they win over the
+   Late overrides â€” keep these AT THE END so they win over the
    higher-specificity black-ATC rule (~line 5779) and the #333
    color stamps that ship earlier in this file.
    ========================================================= */
 
-/* Add to Cart — lighter shell (#f9f9f9 / #d4d4d4). Full selector list wins over Black ATC (~5779). */
+/* Add to Cart â€” lighter shell (#f9f9f9 / #d4d4d4). Full selector list wins over Black ATC (~5779). */
 html body.mc-product-page #content_area input[name="btnaddtocart"],
 html body.mc-product-page #content_area input[id*="btnaddtocart"],
 html body.mc-product-page #content_area button[name="btnaddtocart"],
@@ -13933,10 +13933,10 @@ html body.productdetails #content_area .mc-pdp-accordion .mc-acc-content {
   color: #444 !important;
 }
 
-/* ATC button text stays #444 with the rest of the body text — no override needed. */
+/* ATC button text stays #444 with the rest of the body text â€” no override needed. */
 
 /* =========================================================
-   PDP Firefox DevTools session — round 3 (20260513-acc-v6)
+   PDP Firefox DevTools session â€” round 3 (20260513-acc-v6)
    - Retail / member labels uppercase + semibold weight.
    - Retail / member prices semibold weight.
    - Broad PDP text weight 300 (final pasted selector).
@@ -13955,7 +13955,7 @@ body * {
   letter-spacing: 1.14px;
 }
 
-/* PDP description text — match #mc-pdp-features body/list (14px / 400). */
+/* PDP description text â€” match #mc-pdp-features body/list (14px / 400). */
 html body.productdetails span[itemprop="description"],
 html body.mc-product-page span[itemprop="description"],
 html body.productdetails #content_area span[itemprop="description"],
@@ -14054,7 +14054,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-row {
 }
 
 /* Configuration heading line-height (line-height: 1.5; was written as "1.5 inherit"
-   in the DevTools session, which is invalid CSS — applying just 1.5). */
+   in the DevTools session, which is invalid CSS â€” applying just 1.5). */
 body.productdetails .mc-configuration-rh__heading,
 body.mc-product-page .mc-configuration-rh__heading,
 body.mc-theater-seating-pdp .mc-configuration-rh__heading {
@@ -14062,7 +14062,7 @@ body.mc-theater-seating-pdp .mc-configuration-rh__heading {
   line-height: 1.5 !important;
 }
 
-/* Product Info / TechSpecs / ExtInfo TAB CELLS only — MUST NOT hide the parent <table>:
+/* Product Info / TechSpecs / ExtInfo TAB CELLS only â€” MUST NOT hide the parent <table>:
    Volusion nests the Product Details description (#ProductDetail_ProductDetails_div2) in that same table.
    Older `table:has(td.vCSS_tab) { display:none }` removed the entire description block (May 2026). */
 body.productdetails tr:has(> td[class*="vCSS_tab"]),
@@ -14210,7 +14210,7 @@ a.productnamecolor {
    PDP button borders + divider lines = #e2dfd8 (sitewide brand line color).
    Late, broad sweep so every visible button border / horizontal rule on a PDP
    uses the same warm-grey line color regardless of which earlier rule painted it.
-   Add to Cart excluded — MC_PDP_ATC_BLACK_LOCK at EOF.
+   Add to Cart excluded â€” MC_PDP_ATC_BLACK_LOCK at EOF.
    ========================================================= */
 
 /* Accordion shell + rows + panels */
@@ -14293,9 +14293,9 @@ html body.productdetails #v65-product-parent hr {
 }
 
 /* =========================================================
-   Display serif — Cormorant Garamond (headings / editorial titles ONLY).
+   Display serif â€” Cormorant Garamond (headings / editorial titles ONLY).
    No font-size, color, spacing, line-height, or transform changes.
-   Overrides sitewide `body * … font-family: inherit` + Inter resets.
+   Overrides sitewide `body * â€¦ font-family: inherit` + Inter resets.
    `html.mc-commerce-surface`: cart/checkout/account/login route (see template_266.html).
    ========================================================= */
 :root {
@@ -14350,7 +14350,7 @@ html body #content_area .wm-info-card h4 {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 
-/* PDP accordion + RH config headings: sans only — do not inherit display serif. */
+/* PDP accordion + RH config headings: sans only â€” do not inherit display serif. */
 html body .mc-pdp-accordion .mc-acc-header,
 html body .mc-pdp-accordion .mc-acc-label,
 html body .mc-pdp-accordion .mc-acc-header * {
@@ -14365,7 +14365,7 @@ html body #v65-product-parent #mc-inline-config * {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 
-/* Related PDP rails: Volusion may place #v65-product-related OUTSIDE #content_area — duplicate selectors cover both roots. Table / list only (carousel uses .mc-related-carousel__viewport rules above). */
+/* Related PDP rails: Volusion may place #v65-product-related OUTSIDE #content_area â€” duplicate selectors cover both roots. Table / list only (carousel uses .mc-related-carousel__viewport rules above). */
 :is(body.productdetails, body.mc-product-page) #content_area #v65-product-related table.v65-productDisplay img,
 :is(body.productdetails, body.mc-product-page) #v65-product-related table.v65-productDisplay img,
 :is(body.productdetails, body.mc-product-page) #content_area #related_products_content table.v65-productDisplay img,
@@ -14402,7 +14402,7 @@ html body #v65-product-parent #mc-inline-config * {
   height: auto !important;
 }
 
-/* MTL PDP: custom retail/member block — final font-size override after earlier .mc-pdp-* rules (e.g. 14px ~9967–10027). */
+/* MTL PDP: custom retail/member block â€” final font-size override after earlier .mc-pdp-* rules (e.g. 14px ~9967â€“10027). */
 html body #v65-product-parent .mtl-product-price-block,
 html body #v65-product-parent .mtl-product-price-block *,
 html body #v65-product-parent .mtl-retail-label,
@@ -14412,7 +14412,7 @@ html body #v65-product-parent .mtl-member-price {
   font-size: 16px !important;
 }
 
-/* Category PLP: final lock — white thumb bg, fixed stage */
+/* Category PLP: final lock â€” white thumb bg, fixed stage */
 html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
 html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
 :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product > a.v-product__img,
@@ -14503,7 +14503,7 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img
   }
 }
 
-/* Site-wide: hide hero shell by default (category pages often keep body.is-home — beats body:not(.is-home) rules) */
+/* Site-wide: hide hero shell by default (category pages often keep body.is-home â€” beats body:not(.is-home) rules) */
 body:not(.is-home) #if_homepage,
 body:not(.is-home) #slideshow-container,
 body:not(.is-home) #slideshow-container .mc-hero-video,
@@ -14580,7 +14580,7 @@ html.is-category-or-listing-page .v-product-grid a.v-product__img > img {
   background: transparent !important;
 }
 
-/* C_BAKED_TEMPLATE_OVERRIDE_20260518live — live pages use Volusion-compiled template (not SFTP file); mcCssBust loads this file */
+/* C_BAKED_TEMPLATE_OVERRIDE_20260518live â€” live pages use Volusion-compiled template (not SFTP file); mcCssBust loads this file */
 header.header #display_homepage_title,
 header.header #display_homepage_title *,
 #display_homepage_title,
@@ -14695,7 +14695,7 @@ body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img {
   }
 }
 
-/* MC PLP THUMBNAIL CLEANUP 20260518 — 280px mat / 220px stage (canonical) */
+/* MC PLP THUMBNAIL CLEANUP 20260518 â€” 280px mat / 220px stage (canonical) */
 html[data-mc-category-plp="1"] #content_area > table > tbody > tr > td.colors_lines_light,
 html[data-mc-category-plp="1"] #content_area > table > tr > td.colors_lines_light,
 html.category #content_area > table > tbody > tr > td.colors_lines_light {
@@ -14726,7 +14726,7 @@ html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box > 
   clip-path: none !important;
 }
 
-/* MC PLP THUMB — all white, no gray mat */
+/* MC PLP THUMB â€” all white, no gray mat */
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos/"],
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/product/"],
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos"],
@@ -14762,7 +14762,7 @@ html.category #content_area .v-product-grid .v65-productPhoto a {
   border: 0 !important;
 }
 
-/* MC_PDP_TYPE_13PX_STACK — last; title, options, retail/member unified at 13px */
+/* MC_PDP_TYPE_13PX_STACK â€” last; title, options, retail/member unified at 13px */
 html body.productdetails #content_area span[itemprop="name"],
 html body.mc-product-page #content_area span[itemprop="name"],
 html body.productdetails #v65-product-parent span[itemprop="name"],
@@ -14832,7 +14832,7 @@ html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces {
   text-transform: uppercase !important;
   color: #777 !important;
 }
-/* Retail / member amounts + option dropdown values — 13px, no caps */
+/* Retail / member amounts + option dropdown values â€” 13px, no caps */
 html body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
 html body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
@@ -14905,7 +14905,7 @@ html body.mc-product-page #content_area .mc-configuration-rh__total {
   color: #444 !important;
   white-space: pre-line !important;
 }
-/* Retail/member dollar amounts — normal tracking (0.16em on prices looked jumbled) */
+/* Retail/member dollar amounts â€” normal tracking (0.16em on prices looked jumbled) */
 html body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
 html body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
@@ -14946,7 +14946,7 @@ html body.productdetails #content_area .mc-option-accordion__toggle {
   letter-spacing: 0 !important;
   text-transform: none !important;
 }
-/* Accordion + config buttons — brand line #e2dfd8 (ATC uses black lock at EOF) */
+/* Accordion + config buttons â€” brand line #e2dfd8 (ATC uses black lock at EOF) */
 html body.mc-product-page #mcPlannerBtn,
 html body.productdetails #mcPlannerBtn,
 html body.mc-product-page #mcProductSummaryBtn,
@@ -14955,7 +14955,7 @@ html body.mc-product-page .mc-config-btn,
 html body.productdetails .mc-config-btn {
   border-color: #e2dfd8 !important;
 }
-/* MC_PDP_PRICE_STACK — kill native Volusion sale row overlapping McCabe member lines */
+/* MC_PDP_PRICE_STACK â€” kill native Volusion sale row overlapping McCabe member lines */
 html body.productdetails:has(.mc-pdp-member-pricing) #content_area .product_sale_price,
 html body.mc-product-page:has(.mc-pdp-member-pricing) #content_area .product_sale_price,
 html body.productdetails:has(.mc-pdp-member-pricing) #content_area .product_saleprice,
@@ -15011,7 +15011,7 @@ html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line {
   position: static !important;
   margin: 0 0 2px 0 !important;
 }
-/* No :has() — template sets body.mc-pdp-price-stack when retail/member block mounts */
+/* No :has() â€” template sets body.mc-pdp-price-stack when retail/member block mounts */
 html body.mc-pdp-price-stack #v65-product-parent .product_sale_price,
 html body.mc-pdp-price-stack #v65-product-parent .product_saleprice,
 html body.mc-pdp-price-stack #v65-product-parent font.product_sale_price,
@@ -15070,7 +15070,7 @@ html body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-prod
   gap: 6px !important;
   width: 100% !important;
 }
-/* MC_PDP_STACK_VISIBLE_20260528b — regression fix: McCabe stack must stay visible on PDP */
+/* MC_PDP_STACK_VISIBLE_20260528b â€” regression fix: McCabe stack must stay visible on PDP */
 html body.productdetails .mc-pdp-retail-row,
 html body.mc-product-page .mc-pdp-retail-row,
 html body.productdetails #v65-product-parent .mc-pdp-retail-row,
@@ -15164,7 +15164,7 @@ html body.mc-theater-seating-pdp #mc-pdp-price-stack-host .mc-pdp-member-pricing
   overflow: hidden !important;
   opacity: 0 !important;
 }
-/* Sectional PDP: McCabe stack owns retail/member/sale — hide duplicate MTL summary + caption prices */
+/* Sectional PDP: McCabe stack owns retail/member/sale â€” hide duplicate MTL summary + caption prices */
 html body.productdetails:has(.mc-pdp-retail-row) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),
 html body.mc-product-page:has(.mc-pdp-retail-row) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),
 html body.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price) {
@@ -15213,7 +15213,7 @@ html body.productdetails:has(.mc-pdp-member-pricing) #v65-product-parent .colors
 html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-pdp-member-line {
   display: none !important;
 }
-/* Sectional PDP: MTL top price panel — html.is-sectional-product (class is on documentElement) */
+/* Sectional PDP: MTL top price panel â€” html.is-sectional-product (class is on documentElement) */
 html.is-sectional-product #mc-pdp-top-price-panel,
 html.is-sectional-product body #mc-pdp-top-price-panel,
 html body.is-sectional-product #mc-pdp-top-price-panel,
@@ -15624,7 +15624,7 @@ html body.productdetails:has(#mc-pdp-top-price-panel) #mtl-pdp-top-price {
   margin: 0 !important;
   padding: 0 !important;
 }
-/* MC HOME HERO SAFETY OVERRIDE — show homepage video hero even if category class leaks */
+/* MC HOME HERO SAFETY OVERRIDE â€” show homepage video hero even if category class leaks */
 html.mc-allow-home-hero body.is-home #if_homepage,
 html.category body.is-home #if_homepage,
 body.category.is-home #if_homepage {
@@ -15822,7 +15822,7 @@ body.category.is-home #slideshow-container .hero-nav {
   pointer-events: auto !important;
   z-index: 50 !important;
 }
-/* MC FINAL FIX — keep PDP top price panel visible and separated */
+/* MC FINAL FIX â€” keep PDP top price panel visible and separated */
 body.productdetails #v65-product-parent #mc-pdp-top-price-panel,
 body.mc-product-page #v65-product-parent #mc-pdp-top-price-panel,
 html.is-sectional-product #v65-product-parent #mc-pdp-top-price-panel {
@@ -15847,7 +15847,7 @@ html.is-sectional-product #v65-product-parent #mc-pdp-top-price-panel * {
   position: static !important;
   transform: none !important;
 }
-/* MC FIX — hide duplicate selected-configuration summary card on sectional PDPs */
+/* MC FIX â€” hide duplicate selected-configuration summary card on sectional PDPs */
 body.productdetails #v65-product-parent .mtl-selected-configuration-card,
 body.mc-product-page #v65-product-parent .mtl-selected-configuration-card,
 body.productdetails #v65-product-parent .mtl-selected-config-card,
@@ -15950,7 +15950,7 @@ body.mc-palliser-pdp .mc-pdp-member-line__amount {
 }
 /* =====================================================
    FINAL LOCK: CATEGORY PRODUCT IMAGE UNIFORMITY
-   0609 — Steve Silver / PLP image fix
+   0609 â€” Steve Silver / PLP image fix
    Purpose: same visual box, no crop, no weird image heights
 ===================================================== */
 
@@ -16005,8 +16005,8 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product
 }
 
 /* =====================================================
-   MC PDP HERO COLUMN — logo, title, price, Klarna/Affirm, Features
-   Order: logo → title → price → BNPL → Features (TechSpecs)
+   MC PDP HERO COLUMN â€” logo, title, price, Klarna/Affirm, Features
+   Order: logo â†’ title â†’ price â†’ BNPL â†’ Features (TechSpecs)
 ===================================================== */
 html body.productdetails #mc-pdp-brand-logo,
 html body.mc-product-page #mc-pdp-brand-logo,
@@ -16284,7 +16284,7 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li::before {
 }
 
 /* =====================================================
-   MC PDP FINAL LAYOUT — logo, hero indent, qty, description, image cap
+   MC PDP FINAL LAYOUT â€” logo, hero indent, qty, description, image cap
    SFTP-deployed; wins over template inline styles where possible.
 ===================================================== */
 html body.productdetails #mc-pdp-title-right,
@@ -16422,7 +16422,7 @@ html body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="b
   max-width: none !important;
 }
 
-/* Hide duplicate Volusion qty labels — single label lives in #mc-pdp-qty-row */
+/* Hide duplicate Volusion qty labels â€” single label lives in #mc-pdp-qty-row */
 html body.productdetails .vol-cartqty__wrap:not(#mc-pdp-qty-row .vol-cartqty__wrap) label,
 html body.mc-product-page .vol-cartqty__wrap:not(#mc-pdp-qty-row .vol-cartqty__wrap) label,
 html body.productdetails [itemprop="offers"] .vol-cartqty__wrap label,
@@ -16494,7 +16494,7 @@ html body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc
 }
 
 /* =====================================================
-   MC PDP LOCK 20260614pdp8 — title, price, qty/atc stack, anti-flicker
+   MC PDP LOCK 20260614pdp8 â€” title, price, qty/atc stack, anti-flicker
 ===================================================== */
 /* MC_MAHJONG_TITLE_FIX_20260721: this anti-flicker gate must also release
    once mc-pdp-unified-ready is set, not only mc-pdp-hero-ready. Mahjong
@@ -16590,7 +16590,7 @@ html body.mc-product-page .colors_pricebox td[aria-hidden="true"] {
   overflow: hidden !important;
 }
 
-/* MC PDP LOCK pdp9 — main image cap + description border off */
+/* MC PDP LOCK pdp9 â€” main image cap + description border off */
 html body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
 html body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo,
 html body.productdetails #content_area img#product_photo,
@@ -16615,7 +16615,7 @@ html body.mc-product-page #v65-product-parent img#product_photo {
   }
 }
 
-/* MC PDP LOCK pdp10 — centered purchase stack, description typography, anti-flicker */
+/* MC PDP LOCK pdp10 â€” centered purchase stack, description typography, anti-flicker */
 html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-features,
 html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-features,
 html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack,
@@ -16744,7 +16744,7 @@ html body.mc-product-page .mc-pdp-purchase-controls #mc-pdp-qty-row {
   margin: 0 auto 10px auto !important;
 }
 
-/* MC PDP LOCK pdp11 — loose description li + ATC wrap in purchase stack */
+/* MC PDP LOCK pdp11 â€” loose description li + ATC wrap in purchase stack */
 html body.productdetails #content_area span[itemprop="description"] > li,
 html body.mc-product-page #content_area span[itemprop="description"] > li,
 html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"] > li,
@@ -16767,7 +16767,7 @@ html body.mc-product-page .mc-pdp-purchase-controls > .mc-atc-button-wrap {
   margin: 0 !important;
 }
 
-/* MC PDP LOCK pdp12 — bean bag cover swatches above Features in hero column */
+/* MC PDP LOCK pdp12 â€” bean bag cover swatches above Features in hero column */
 html body.productdetails #beanbag-swatch-wrapper,
 html body.mc-product-page #beanbag-swatch-wrapper,
 html body.mc-bean-bag-pdp #beanbag-swatch-wrapper {
@@ -16813,7 +16813,7 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 #beanbag-swatch-wra
   display: none !important;
 }
 
-/* MC PDP LOCK pdp13 — description under media + responsive image cap */
+/* MC PDP LOCK pdp13 â€” description under media + responsive image cap */
 html body.mc-bean-bag-pdp #mc-pdp-description-under-media,
 html body.mc-bean-bag-pdp .mc-pdp-description-under-media {
   display: block !important;
@@ -17003,7 +17003,7 @@ html body.mc-saranoni-pdp #mc-pdp-features {
   margin-top: 8px !important;
 }
 
-/* Legacy duplicate picker — removed in saranoni9; keep hidden if stale markup exists */
+/* Legacy duplicate picker â€” removed in saranoni9; keep hidden if stale markup exists */
 html body.mc-saranoni-pdp #mc-saranoni-color-picker,
 html body.mc-saranoni-pdp .mc-saranoni-color-picker {
   display: none !important;
@@ -17558,7 +17558,7 @@ html body.mc-bean-bag-pdp [class*="affirm" i] {
   }
 }
 
-/* Soft-goods thumbnails under main image (not column layout) — unified + ruched fallback */
+/* Soft-goods thumbnails under main image (not column layout) â€” unified + ruched fallback */
 @media (min-width: 992px) {
   html body.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
   html body.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
@@ -17603,7 +17603,7 @@ html body.mc-ruched-blanket-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-hos
   opacity: 0 !important;
 }
 /* =========================================================
-   MC_UNIFIED_PDP_LAYOUT_20260616 — one global PDP layout system.
+   MC_UNIFIED_PDP_LAYOUT_20260616 â€” one global PDP layout system.
    Replaces product-specific layout patches (bean bag, Saranoni,
    Gatlin, MC_PDP_ATC_BLACK_LOCK wrapper styling, mc-pdp-purchase-controls).
    ========================================================= */
@@ -17841,7 +17841,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description li {
 
 /* Hide loose description shells outside the accordion only.
    #mc-pdp-description-below-features inside #mc-pdp-accordion IS the
-   PRODUCT DETAILS body (Volusion productdescription) — never hide it. */
+   PRODUCT DETAILS body (Volusion productdescription) â€” never hide it. */
 html body.mc-pdp-unified-ready td.mc-unified-pdp-info > #mc-pdp-description-below-features:not(:empty),
 html body.mc-pdp-unified-ready td.mc-pdp-options-td > #mc-pdp-description-below-features:not(:empty),
 html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-info > #mc-pdp-description-below-features:not(:empty),
@@ -18010,11 +18010,12 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="
   box-shadow: none !important;
 }
 
-/* MC PDP unified e-product lock 20260616pdp57: consistent layout, black ATC, description follows existing features typography. */
-html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
-html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
-html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
-html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row {
+/* MC PDP unified e-product lock 20260616pdp57: consistent layout, black ATC, description follows existing features typography.
+   Bean-bag / Cordaroys Nest PDPs use flex columns (logo+ATC beside hero) — do not force table-row on those. */
+html body.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp) #content_area tr.mc-unified-pdp-row,
+html body.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp) #v65-product-parent tr.mc-unified-pdp-row,
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp) #content_area tr.mc-unified-pdp-row,
+html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp) #v65-product-parent tr.mc-unified-pdp-row {
   display: table-row !important;
   width: 100% !important;
   table-layout: fixed !important;
@@ -18613,7 +18614,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   html body.mc-steve-silver-altview-pdp:not(.mc-gatlin-sectional-pdp).mc-pdp-unified-ready #v65-product-parent td.mc-unified-pdp-media {
     /* flex-direction:column/align-items govern THIS element's own children
        (image, altviews). flex:0 0 678px (added alongside, not conflicting)
-       governs how this element behaves as a flex ITEM of the now-flex row —
+       governs how this element behaves as a flex ITEM of the now-flex row â€”
        without it the media cell defaulted to flex-shrink:1 and could
        compress under the constant reflow load from other repair scripts,
        dragging the info column's width along with it. */
@@ -18632,7 +18633,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
 
   /* display:table-cell here (the old value) never reliably respects width:
      table cells treat an explicit width as a minimum/hint for the layout
-     algorithm, not a mandate — confirmed live: even inline JS-set
+     algorithm, not a mandate â€” confirmed live: even inline JS-set
      width/min-width/max-width with !important rendered at 657-674px instead
      of 420px. Converting the ROW to flex and this cell to a real block-level
      flex item makes the browser treat 420px as an actual box size instead of
@@ -18857,7 +18858,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   }
 }
 
-/* MC_SS_MEDIA_LEFT_ALIGN_20260619 — Steve Silver: hero, alt thumbs, description stack left in media column (desktop). */
+/* MC_SS_MEDIA_LEFT_ALIGN_20260619 â€” Steve Silver: hero, alt thumbs, description stack left in media column (desktop). */
 @media (min-width: 992px) {
   html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) #altviews,
   html body.mc-steve-silver-altview-pdp :is(#content_area, #v65-product-parent) span#altviews,
@@ -18894,7 +18895,7 @@ html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) .mc-unified-altview
   }
 }
 
-/* MC_SS_UNIFIED_NATIVE_PANEL_HIDE_20260620 — hide duplicate Care/tech specs and orphaned description tables. */
+/* MC_SS_UNIFIED_NATIVE_PANEL_HIDE_20260620 â€” hide duplicate Care/tech specs and orphaned description tables. */
 html body.productdetails:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
 html body.mc-product-page:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
 html body.mc-pdp-unified-ready:has(#mc-pdp-features .mc-pdp-features__body:not(:empty)) #ProductDetail_TechSpecs_div,
@@ -18917,7 +18918,7 @@ html body.mc-product-page table.colors_descriptionbox[data-mc-native-panel-hidde
   overflow: hidden !important;
 }
 
-/* MC_NATIVE_EMPTY_DESC_SHELL_HIDE_20260621 — orphan Volusion Care/description boxes after McCabe mount. */
+/* MC_NATIVE_EMPTY_DESC_SHELL_HIDE_20260621 â€” orphan Volusion Care/description boxes after McCabe mount. */
 html body.productdetails table.colors_descriptionbox[data-mc-empty-desc="1"],
 html body.mc-product-page table.colors_descriptionbox[data-mc-empty-desc="1"],
 html body.productdetails [data-mc-empty-desc="1"],
@@ -18942,7 +18943,7 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2[data-mc-native-pane
   border: 0 !important;
 }
 
-/* MC_SS_UNIFIED_HERO_OFFSET_20260620 — was meant to match Saranoni vertical
+/* MC_SS_UNIFIED_HERO_OFFSET_20260620 â€” was meant to match Saranoni vertical
    breathing room on Steve Silver unified PDPs; zeroed alongside
    MC_SS_LOGO_IMAGE_TOP_ALIGN_20260713 so the image top matches the brand
    logo top instead of sitting 30px below it. */
@@ -18955,7 +18956,7 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2[data-mc-native-pane
   }
 }
 
-/* MC_SS_INFO_COLUMN_DESC_20260620 — Steve Silver description in info column above qty (Saranoni-style). */
+/* MC_SS_INFO_COLUMN_DESC_20260620 â€” Steve Silver description in info column above qty (Saranoni-style). */
 html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info #mc-pdp-description-below-features,
 html body.mc-steve-silver-altview-pdp td.mc-pdp-options-td #mc-pdp-description-below-features {
   display: block !important;
@@ -19019,7 +19020,7 @@ html body.mc-product-page .mc-pdp-description-view-more {
   cursor: pointer !important;
 }
 
-/* MC_PLP_CONTAIN_NO_CROP_20260619layout4 — tall PLP photos (beds, etc.) must not clip at the top */
+/* MC_PLP_CONTAIN_NO_CROP_20260619layout4 â€” tall PLP photos (beds, etc.) must not clip at the top */
 html.category #content_area .v-product-grid a.v-product__img,
 html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
 html.is-category-or-listing-page #content_area .v-product-grid a.v-product__img,
@@ -19067,7 +19068,7 @@ html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-
 }
 
 /* =========================================================
-   MOBILE: "SELECT A CATEGORY" — always viewport-centered
+   MOBILE: "SELECT A CATEGORY" â€” always viewport-centered
    (same top band as home/cart floats; beats header flex space-between)
    ========================================================= */
 @media (max-width: 991px) {
@@ -19141,7 +19142,7 @@ html body.mc-product-page #mc-pdp-description-below-features.mc-pdp-description-
     box-sizing: border-box !important;
   }
 
-  /* Only style the closed label here — never force both SELECT + CLOSE visible */
+  /* Only style the closed label here â€” never force both SELECT + CLOSE visible */
   header.header .menu-toggle__text.push-menu--closed {
     display: inline-block !important;
     width: 100% !important;
@@ -19339,7 +19340,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
   }
 }
 
-/* === MC_MOBILE_FULL_VIEW_20260620 — keep storefront content fully visible on phones === */
+/* === MC_MOBILE_FULL_VIEW_20260620 â€” keep storefront content fully visible on phones === */
 @media (max-width: 991px) {
   html,
   body {
@@ -19461,7 +19462,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
   }
 }
 
-/* MC_SARANONI_PDP_LAYOUT_20260621sarlayout8 — full-width hero row; table-cell nested columns. */
+/* MC_SARANONI_PDP_LAYOUT_20260621sarlayout8 â€” full-width hero row; table-cell nested columns. */
 @media (min-width: 992px) {
   html body.mc-saranoni-pdp #v65-product-parent,
   html body.mc-saranoni-pdp #content_area #v65-product-parent {
@@ -19498,7 +19499,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
     box-sizing: border-box !important;
   }
 
-  /* Volusion wraps each hero cell in a direct <td> inside mc-pdp-main-row — flex those wrappers. */
+  /* Volusion wraps each hero cell in a direct <td> inside mc-pdp-main-row â€” flex those wrappers. */
   html body.mc-saranoni-pdp tr.mc-pdp-main-row > td {
     display: block !important;
     flex: 1 1 0% !important;
@@ -19685,7 +19686,7 @@ html.mc-commerce-surface .mc-cart-actions-bar__btn--secondary:hover {
    runtime. On initial load setOpen(false) hasn't run yet and the theme's
    off-canvas CSS no longer matches, so it rendered visibly at the page bottom
    (a "duplicate" category menu with giant chevron "v" icons). Keep it parked
-   off-canvas until body/html.push-menu-open is set — this mirrors exactly what
+   off-canvas until body/html.push-menu-open is set â€” this mirrors exactly what
    setOpen() applies inline, so the mobile hamburger still opens it. We avoid
    touching `display` so the JS toggle's inline display:block is unaffected. */
 nav.push-menu {
@@ -20025,7 +20026,7 @@ html body footer.footer .elist__wrapper .input-group {
   margin-right: auto !important;
 }
 
-/* Cart float: fix oval shape — max-height:48px at line ~4524 makes it 52×48.
+/* Cart float: fix oval shape â€” max-height:48px at line ~4524 makes it 52Ã—48.
    Same selector spec (0,1,3), later in file wins. */
 html body a.mc-cart-float,
 html body .mc-cart-float,
@@ -20449,7 +20450,7 @@ html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu a {
 /* 2026-07-04: hide leftover unconfigured Volusion sidebar menu slots.
    These render literal placeholder text ("Nav Menu 2" .. "Nav Menu 8")
    because the slots were never populated in Volusion admin. Confirmed
-   present on every page type (home, category, PDP) — not new, just
+   present on every page type (home, category, PDP) â€” not new, just
    newly noticed; safe to hide everywhere. */
 .sidebar.left-nav {
   display: none !important;
@@ -20466,11 +20467,11 @@ html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu a {
 
    2026-07-07: this entire section was unscoped (no @media guard) despite
    being a desktop-only nav redesign (absolute positioning against
-   header.header, row-flex top-level list, hover underlines — none of
+   header.header, row-flex top-level list, hover underlines â€” none of
    which apply to the mobile push-menu). The doubled-ID selectors give it
    (2,0,0)+ specificity, higher than every other display rule targeting
    #display_menu_1 including the correct mobile hide rule, so it forced
-   the full desktop nav — with all its dropdown submenu carets — visible
+   the full desktop nav â€” with all its dropdown submenu carets â€” visible
    and absolutely positioned on every mobile page regardless of viewport
    width. That's what was rendering as giant chevron icons overlapping
    category text on mobile PDPs. Wrapping the whole section in
@@ -20482,7 +20483,7 @@ html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu a {
    WHY (2026-07-05): the header itself starts at the same y on every page
    type (measured: -22 on category, SS PDP, bean bag PDP, Saranoni PDP),
    but the in-flow content ABOVE the nav inside the header differs per
-   template (nav sat at y=-12 on some pages, y=+28 on others — a 40px
+   template (nav sat at y=-12 on some pages, y=+28 on others â€” a 40px
    spread the user kept seeing as \"the menu sits lower on product pages\").
    Positioning the nav absolutely against the header removes every
    template's flow differences from the equation: same top offset
@@ -20514,7 +20515,7 @@ html body header.header {
    itself, NOT an in-flow intermediate wrapper. Both wrappers between the
    nav and the header carry position:relative, and their own y varies by
    page template AND by load timing (late scripts hide content above them,
-   shifting them mid-load — measured the same page rendering the menu at
+   shifting them mid-load â€” measured the same page rendering the menu at
    y=86 on one load and y=126 on another). Making them static forces the
    absolute nav to resolve against the header, whose y is constant. */
 html body header.header .col-xs-12.no-pad-lg,
@@ -20522,7 +20523,7 @@ html body header.header .microblock.main-menu {
   position: static !important;
 }
 
-/* Top-level list: no vertical offset of its own anymore — the absolutely
+/* Top-level list: no vertical offset of its own anymore â€” the absolutely
    positioned nav container above is the single source of vertical truth. */
 #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1,
 #display_menu_1#display_menu_1 > ul.vnav--level1,
@@ -20548,7 +20549,7 @@ html body header.header .microblock.main-menu {
   list-style: none !important;
 }
 
-/* Top-level link: RH — uppercase, wide tracking, display serif, dark. */
+/* Top-level link: RH â€” uppercase, wide tracking, display serif, dark. */
 #display_menu_1#display_menu_1 > ul > li > a,
 #display_menu_1#display_menu_1 .vnav--level1 > li > a,
 #display_menu_1#display_menu_1 .vnav__link {
@@ -20569,7 +20570,7 @@ html body header.header .microblock.main-menu {
 
 /* Hover: thin underline slides in (not a grey highlight). ::after is immune
    to any inline styles a stray script might set on the <a> itself.
-   display:block is required here — a pre-existing desktop rule
+   display:block is required here â€” a pre-existing desktop rule
    (body:not(.is-home) #display_menu_1 .vnav__link::after) sets
    display:none !important on this exact pseudo-element and nothing was
    overriding it, so the underline box never rendered even though
@@ -20630,7 +20631,7 @@ html body header.header .microblock.main-menu {
   color: #1a1a1a !important;
 }
 
-/* Home hero overlay menu — same RH treatment (light text over the hero). */
+/* Home hero overlay menu â€” same RH treatment (light text over the hero). */
 #slideshow-container#slideshow-container .hero-menu a {
   font-family: var(--mc-font-display) !important;
   font-size: 16px !important;
@@ -20663,7 +20664,7 @@ html body header.header .microblock.main-menu {
 }
 
 /* ============================================================
-   HEADER ICONS — remove the white circle chrome, keep bare icons.
+   HEADER ICONS â€” remove the white circle chrome, keep bare icons.
    ============================================================ */
 html body .mc-home-float, html body a.mc-home-float,
 html body .mc-cart-float, html body a.mc-cart-float,
@@ -20677,7 +20678,7 @@ html body .mc-search-float, html body button.mc-search-float {
 }
 
 
-/* 2026-07-04: kill remaining grey hover box — .vnav__item:hover { background:#ccc }
+/* 2026-07-04: kill remaining grey hover box â€” .vnav__item:hover { background:#ccc }
    is a separate rule from the one already overridden on the <a> itself. */
 #display_menu_1#display_menu_1 li.vnav__item:hover,
 #display_menu_1#display_menu_1 .vnav--level1 > li:hover {
@@ -20687,12 +20688,12 @@ html body .mc-search-float, html body button.mc-search-float {
 
 /* 2026-07-05 user-requested: align magnifying glass (search) and person
    (account) icons with the cart icon on one line, tighter gap between
-   them. Cart itself is intentionally NOT touched here — its actual
+   them. Cart itself is intentionally NOT touched here â€” its actual
    rendered size/position (42px, top:10px, right:18px) comes from a
    native template script (template.min.js) that runs on its own ~100ms
    interval via inline styles, which always beats any external stylesheet
    regardless of specificity. Fighting it earlier caused a severe visible
-   glitch (see cart-float-finalizer-recurring-conflict memory note) — the
+   glitch (see cart-float-finalizer-recurring-conflict memory note) â€” the
    safe fix is matching search/account TO cart, not the reverse. Gap math:
    cart spans right:18px to right:60px (18+42). account sits at
    right:70px (10px gap) spanning to right:112px. search sits at
@@ -20722,7 +20723,7 @@ html body a.mc-search-float, html body button.mc-search-float {
    via inline-style priority, but has an intermittent timing gap where the
    52px CSS value shows through, causing a visible 42<->52 flicker.
    Setting 42px here (agreeing with, not fighting, template.min.js) rather
-   than leaving 52px as the CSS fallback closes that gap — both sides now
+   than leaving 52px as the CSS fallback closes that gap â€” both sides now
    want the same number, so there is nothing left to oscillate between. */
 html body a.mc-cart-float, html body .mc-cart-float {
   width: 42px !important;
@@ -20733,16 +20734,16 @@ html body a.mc-cart-float, html body .mc-cart-float {
   max-height: 42px !important;
 }
 
-/* 2026-07-05 CART GLYPH ALIGNMENT — the root cause, finally:
+/* 2026-07-05 CART GLYPH ALIGNMENT â€” the root cause, finally:
    template.min.js positions the cart with querySelectorAll matching
    [class*=mc-cart-float], which ALSO matches the inner svg
    (class mc-cart-float__icon). The svg therefore gets position:fixed;
    width:42px; top:10px; right:18px as inline !important styles every
-   ~100ms — ripping the glyph out of its box (rendered 42x20 at the box
-   top edge, overflowing 20px right — measured live). Inline !important
+   ~100ms â€” ripping the glyph out of its box (rendered 42x20 at the box
+   top edge, overflowing 20px right â€” measured live). Inline !important
    cannot be beaten by any stylesheet for those properties, and adding a
    competing script re-creates the oscillation glitch. The native script
-   never touches display or background though — so: hide the hijacked
+   never touches display or background though â€” so: hide the hijacked
    svg, paint the identical glyph (same path data) as a centered
    background on the anchor. Zero fight, pixel-identical rendering. */
 html body .mc-cart-float svg.mc-cart-float__icon,
@@ -20759,12 +20760,12 @@ html body a.mc-cart-float, html body .mc-cart-float {
 
 /* 2026-07-05 SUBMENU CLEANUP (user-reported):
    1. Submenu links carry the same .vnav__link class as top-level links,
-      so the RH slide-in ::after underline leaked onto them — combined
+      so the RH slide-in ::after underline leaked onto them â€” combined
       with the text-decoration:underline hover rule that made a DOUBLE
       underline. Kill ::after inside subnavs; hover keeps only
       text-decoration.
    2. Same font size for categories and subcategories (16px).
-   3. Level-3 flyout had a gray (#ddd) background and no chrome — match
+   3. Level-3 flyout had a gray (#ddd) background and no chrome â€” match
       the white level-2 panel styling.
    4. Explicit :link/:visited so browser visited-color never bleeds in. */
 #display_menu_1#display_menu_1 .vnav__subnav .vnav__link::after,
@@ -20807,7 +20808,7 @@ html body a.mc-cart-float, html body .mc-cart-float {
 
 /* 2026-07-05: the header wrapper (.col-xs-12.no-pad-lg) starts each page
    load with padding-top:64px which a late script/class change reduces to
-   24px — measured live: the menu wrapper jumps from y=42 to y=2 mid-load
+   24px â€” measured live: the menu wrapper jumps from y=42 to y=2 mid-load
    with nothing above it changing. That 40px collapse is the "menu sits
    lower / jumps" symptom on product pages. Pin the settled value from
    first paint so the menu never moves. */
@@ -20819,7 +20820,7 @@ html body header.header > .col-xs-12 {
 /* 2026-07-05 (supersedes the 24px attempt just above): the wrapper starts
    at padding-top:64px (rule keyed on its classes) and drops to 0 only
    when a script later adds [data-mc-header-bar], switching which rule
-   matches — that mid-load switch is the 40px menu jump. This selector
+   matches â€” that mid-load switch is the 40px menu jump. This selector
    out-ranks both (5 classes + 4 types vs 4+3 and 4+2) and needs no
    attribute, so the settled value applies from first paint. */
 html body header.header > div.col-xs-12.no-pad-lg.mc-header-desktop-bar,
@@ -20827,7 +20828,7 @@ html body header.header div.col-xs-12.no-pad-lg.mc-header-desktop-bar {
   padding-top: 0 !important;
 }
 
-/* 2026-07-05: top-level menu links rendered navy/purple on PDPs — a
+/* 2026-07-05: top-level menu links rendered navy/purple on PDPs â€” a
    PDP-scoped :link/:visited color rule outranked the plain selector
    (same failure mode as the submenu links, fixed the same way). */
 #display_menu_1#display_menu_1 > ul > li > a,
@@ -20840,13 +20841,13 @@ html body header.header div.col-xs-12.no-pad-lg.mc-header-desktop-bar {
   color: #1a1a1a !important;
 }
 
-} /* end @media (min-width: 992px) — RH-STYLE HEADER NAV, 2026-07-07 */
+} /* end @media (min-width: 992px) â€” RH-STYLE HEADER NAV, 2026-07-07 */
 
 /* 2026-07-04 user-requested: hide grey pagination Next button and native
    Add To Cart button/text on category listing pages.
    2026-07-07: this had been accidentally swallowed into the desktop-only
    RH-STYLE HEADER NAV wrap above (an unrelated section it happened to sit
-   inside of), which meant it silently stopped applying on mobile — the
+   inside of), which meant it silently stopped applying on mobile â€” the
    raw unstyled "Add To Cart" text link reappeared on phones. Restored
    here, outside any @media guard, so it applies at every width like the
    original 2026-07-04 rule did. */
@@ -20914,7 +20915,7 @@ html body.mc-product-page.mc-saranoni-pdp #mc-pdp-brand-logo img {
 /* ============================================================
    ADD-TO-CART MINI-CART POPUP (2026-07-06)
    Volusion's stock .soft_add_wrapper popup was completely unstyled
-   (default table borders, blue links, no spacing) — matching it to
+   (default table borders, blue links, no spacing) â€” matching it to
    the RH aesthetic used sitewide (Cormorant headings, dark ink,
    black CTA button, clean rules instead of table borders).
    ============================================================ */
@@ -20954,7 +20955,7 @@ html body .soft_add_header_shadow {
   overflow: visible !important;
 }
 html body .soft_add_header {
-  /* Stock height:13px (no !important) — same class of bug as the buttons
+  /* Stock height:13px (no !important) â€” same class of bug as the buttons
      and action area below. */
   position: relative !important;
   height: auto !important;
@@ -20973,7 +20974,7 @@ html body .soft_add_span,
 html body .soft_add_header .soft_add_span {
   display: block !important;
   font-family: var(--mc-font-display) !important;
-  /* Stock sets font-size:0 and paints "Items in Cart" via :before — that
+  /* Stock sets font-size:0 and paints "Items in Cart" via :before â€” that
      pseudo also used padding-top inside a 13px-tall header, so only a
      sliver of the letters showed. Show the real span text instead. */
   font-size: 18px !important;
@@ -21022,11 +21023,11 @@ html body .soft_add_content_shadow {
   overflow: visible !important;
 }
 html body .soft_add_content_wrapper {
-  /* Volusion's stock CSS gives this a light grey (#eee) background — meant
+  /* Volusion's stock CSS gives this a light grey (#eee) background â€” meant
      to read as a "well" under the old cramped table, but under our roomier
      white-card redesign it just looked like a dirty/washed-out popup.
      Also stock z-index:100 sat above the absolute header and covered the
-     "Added to cart" title — keep content below the header in stacking. */
+     "Added to cart" title â€” keep content below the header in stacking. */
   background: #fff !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -21045,7 +21046,7 @@ html body .soft_add_content_wrapper {
 html body .soft_add_content_area {
   /* Volusion's stock popup CSS pins this (and its ancestor wrappers) to a
      fixed ~300px width sized for the old compact layout, narrower than our
-     wrapper — the flex row below overflowed straight past it and got
+     wrapper â€” the flex row below overflowed straight past it and got
      clipped at the popup's edge. Force every level of the chain to 100%. */
   width: 100% !important;
   max-width: 100% !important;
@@ -21068,7 +21069,7 @@ html body table.cart_table tr.product-row {
 }
 html body table.cart_table tr.product-row {
   /* Grid keeps icon | name | qty | price | remove in one row with Remove
-     pinned on the far right — flex-wrap + equal flex bases were stacking
+     pinned on the far right â€” flex-wrap + equal flex bases were stacking
      qty/price/remove and letting price paint over Remove. */
   display: grid !important;
   grid-template-columns: 64px minmax(0, 1fr) max-content max-content max-content !important;
@@ -21177,7 +21178,7 @@ html body table.cart_table td.remove {
   text-align: right !important;
 }
 html body .soft_add_sub_total {
-  /* Stock height:17px (no !important) — same class of bug as the buttons. */
+  /* Stock height:17px (no !important) â€” same class of bug as the buttons. */
   height: auto !important;
   display: flex !important;
   align-items: baseline !important;
@@ -21199,7 +21200,7 @@ html body .sub_total_amount {
   font-size: 15px !important;
 }
 html body .soft_add_action_area {
-  /* Same stock height:17px trick as .check_out/.continue_shopping — this
+  /* Same stock height:17px trick as .check_out/.continue_shopping â€” this
      container needs ~75px for both stacked buttons, but its own hardcoded
      17px was quietly shrinking how much room its ANCESTORS (content_wrapper,
      wrapper) allocated when they sized themselves to "auto", so the buttons
@@ -21214,14 +21215,14 @@ html body .soft_add_action_area {
   margin-top: 10px !important;
 }
 html body a.check_out {
-  /* Volusion's stock CSS applies text-indent:-9999px to .check_out — the
+  /* Volusion's stock CSS applies text-indent:-9999px to .check_out â€” the
      classic "hide text, show icon instead" trick, meant for a background-
      image icon this template never actually sets. That pushed "View Cart"
      9999px offscreen, leaving what looked like an empty black box even
      though color/background/height were all otherwise correct. It ALSO
      sets a fixed height:17px (no !important) which, combined with our
      box-sizing:border-box + padding, left no room for a line of text even
-     once un-indented — height:auto fixes that half. */
+     once un-indented â€” height:auto fixes that half. */
   text-indent: 0 !important;
   height: auto !important;
   min-height: 44px !important;
@@ -21265,7 +21266,7 @@ html body a.continue_shopping:hover {
 }
 
 /* ============================================================
-   ATC MINI-CART — header + row layout (all viewports)
+   ATC MINI-CART â€” header + row layout (all viewports)
    Stock template keeps .soft_add_header_shadow absolute + title
    font-size:0/:before, so the header is clipped on desktop and
    mobile. Row uses grid so Remove stays on the far right.
@@ -21366,7 +21367,7 @@ html body .soft_add_content_wrapper {
 /* ============================================================
    SHOPPING CART PAGE BUTTONS (2026-07-06)
    Recalculate / Get Shipping Options / Proceed To Checkout / Apply (coupon)
-   were rendering as stock browser/Bootstrap grey buttons — bring them to
+   were rendering as stock browser/Bootstrap grey buttons â€” bring them to
    the same black RH button aesthetic used everywhere else (ATC, mini-cart
    "View Cart", etc).
    ============================================================ */
@@ -21400,7 +21401,7 @@ body.shoppingcart .btn_apply:hover {
   border-color: #1a1a1a !important;
 }
 
-/* "Recalculate" is a plain text link in Volusion's own markup (btn-link) —
+/* "Recalculate" is a plain text link in Volusion's own markup (btn-link) â€”
    keep it link-like rather than boxed, just bring it into the RH palette
    instead of default blue/grey. */
 body.shoppingcart input.btn_recalculate {
@@ -21428,7 +21429,7 @@ body.shoppingcart input.btn_recalculate:hover {
    MOBILE-ONLY REPAIRS (2026-07-08)
    Everything in this block is scoped to @media (max-width: 991px) so it CANNOT
    affect the desktop layout (desktop viewport never matches this query).
-   Fixes: (1) width cascade — nested wrappers each add horizontal padding that
+   Fixes: (1) width cascade â€” nested wrappers each add horizontal padding that
    compounds on a phone-width viewport, crushing #content_area to ~half the
    screen and stacking product titles one word per line; (2) home hero desktop
    nav overlapping the mobile "Select a category" toggle; (3) broken 404 hero
@@ -21436,7 +21437,7 @@ body.shoppingcart input.btn_recalculate:hover {
    rendering as large black chevrons at the top of category pages.
    ============================================================================ */
 @media (max-width: 991px) {
-  /* (0) Kill the browser-default body margin (8px) — combined with a 100vw-wide
+  /* (0) Kill the browser-default body margin (8px) â€” combined with a 100vw-wide
      body it caused a persistent ~8px horizontal scroll on every phone page. */
   html body {
     margin-left: 0 !important;
@@ -21444,7 +21445,7 @@ body.shoppingcart input.btn_recalculate:hover {
     overflow-x: hidden !important;
   }
 
-  /* (1) Width cascade — every nested wrapper adds its own L/R padding (and the
+  /* (1) Width cascade â€” every nested wrapper adds its own L/R padding (and the
      template's inline enforceMobileLayout adds 16px to #content_area AND
      .content_area-wrapper), which compounds to crush #content_area to ~half
      the phone width and push its content right, so the Volusion product-listing
@@ -21487,7 +21488,7 @@ body.shoppingcart input.btn_recalculate:hover {
     box-sizing: border-box !important;
   }
   /* Legacy Volusion listing tables use table-layout:auto and size to their
-     content, ignoring #content_area's width — that's what kept the product
+     content, ignoring #content_area's width â€” that's what kept the product
      grid at ~400px and pushed/clipped it off the right edge even after the
      gutters were collapsed. Forcing table-layout:fixed + width:100% makes
      them respect the container so the grid collapses to fit the phone. */
@@ -21541,13 +21542,13 @@ body.shoppingcart input.btn_recalculate:hover {
     display: none !important;
   }
 
-  /* (2) Home hero: hide the desktop-style overlay category nav on phones — the
+  /* (2) Home hero: hide the desktop-style overlay category nav on phones â€” the
      mobile "Select a category" toggle (.menu-toggle) is the real mobile menu.
      .hero-menu only exists on the homepage. The DB-served template forces
      `.hero-menu{display:flex!important}` (specificity 1,3,2) in TWO <style>
      blocks that come AFTER custom-safe.css in source order, so a normal
      hide rule loses the tie. Doubled-ID (#slideshow-container#slideshow-
-     container) raises specificity to (2,4,2) to win — desktop untouched
+     container) raises specificity to (2,4,2) to win â€” desktop untouched
      because the whole thing is inside this max-width:991px query. */
   html.mc-allow-home-hero body.is-home #slideshow-container#slideshow-container .hero-menu,
   html.mc-allow-home-hero body.is-home #slideshow-container#slideshow-container .hero-nav,
@@ -21584,14 +21585,14 @@ body.shoppingcart input.btn_recalculate:hover {
   }
 
   /* (5) "Select a Category" mobile toggle on the HOMEPAGE was #444 (from a
-     broad `body *{color:#444!important}` rule) — too dark/heavy. The toggle
+     broad `body *{color:#444!important}` rule) â€” too dark/heavy. The toggle
      sits in a FIXED header over consistently LIGHT backgrounds (the cream
      hero-video top frame, and the cream promo section the fixed header
-     overlaps once scrolled), so lighten it to a soft warm greige — clearly
-     lighter/softer than #444 yet still legible on cream — rather than white
+     overlaps once scrolled), so lighten it to a soft warm greige â€” clearly
+     lighter/softer than #444 yet still legible on cream â€” rather than white
      (which would vanish there). Homepage-only so category/PDP toggles (over
      white pages) keep their darker, readable color. */
-  /* SELECT A CATEGORY — dark bar @ 25% opacity, white text (all pages) */
+  /* SELECT A CATEGORY â€” dark bar @ 25% opacity, white text (all pages) */
   body header.header .header__section--bottom,
   body header.header .header__section--bottom.visible-xs {
     background: rgba(0, 0, 0, 0.25) !important;
@@ -21616,10 +21617,10 @@ body.shoppingcart input.btn_recalculate:hover {
   }
 }
 
-/* 2026-07-06 SHOPPING CART BLANK PAGE — #v65-cart-table-container (the table
+/* 2026-07-06 SHOPPING CART BLANK PAGE â€” #v65-cart-table-container (the table
    holding the actual cart items/subtotal/checkout button) was computing
    display:none with no matching rule in ANY stylesheet (checked all 54,
-   including cross-origin ones) and no inline style in the server HTML —
+   including cross-origin ones) and no inline style in the server HTML â€”
    almost certainly a one-time jQuery .hide() whose matching .show() never
    ran because soft_add_mult.js throws "Identifier 'isInit' has already
    been declared" and aborts. Forcing it visible here is a durable fix:
@@ -21628,12 +21629,12 @@ body.shoppingcart input.btn_recalculate:hover {
   display: table !important;
 }
 
-/* 2026-07-06 CART "WEIRD ICON" (tofu box) — the button-icons webfont
+/* 2026-07-06 CART "WEIRD ICON" (tofu box) â€” the button-icons webfont
    (template.css @font-face) 404s: vspfiles/templates/266/fonts/buttons/
    button-icons.{woff,ttf} don't exist on the server (lost along with the
    other missing static assets, see swatches/June 25 restore). Its private-
    use-area glyphs (\e600 etc.) fall back to the browser's "missing glyph"
-   tofu box wherever they're used (remove-item ×, Apply/Recalculate icons).
+   tofu box wherever they're used (remove-item Ã—, Apply/Recalculate icons).
    Fix: override each icon's content with a plain Unicode character that
    renders in any font, so nothing depends on the missing webfont. */
 .btn-icon-close::before { content: "\00d7" !important; display: inline-block !important; font-size: 16px !important; line-height: 1 !important; width: 18px !important; height: 18px !important; text-align: center !important; }
@@ -21644,7 +21645,7 @@ body.shoppingcart input.btn_recalculate:hover {
 .btn-icon-plus::before { content: "\002b" !important; display: inline-block !important; font-size: 16px !important; line-height: 1 !important; width: 18px !important; height: 18px !important; text-align: center !important; }
 .btn-icon-email::before { content: "\2709" !important; display: inline-block !important; font-size: 16px !important; line-height: 1 !important; width: 18px !important; height: 18px !important; text-align: center !important; }
 
-/* 2026-07-06 CART BUTTONS RENDERING AS UNSTYLED NATIVE BUTTONS — no
+/* 2026-07-06 CART BUTTONS RENDERING AS UNSTYLED NATIVE BUTTONS â€” no
    stylesheet on shoppingcart.asp defines a base `.btn` rule (confirmed
    across all 54 loaded stylesheets, incl. template.css/mccabe-overrides/
    shoppingcart.css), so appearance stayed "auto" and buttons show the raw
@@ -21669,7 +21670,7 @@ html.shoppingcart .btn_checkout_guest {
 }
 
 /* 2026-07-06 UNIFIED PDP MOBILE ROW COLLAPSE (Molly Olson / all mc-pdp-unified-ready
-   products) — this is a NEW mobile fix, not a restore of prior code: the "unified
+   products) â€” this is a NEW mobile fix, not a restore of prior code: the "unified
    e-product lock 20260616pdp57" rule (~line 17612) forces
    `#v65-product-parent tr.mc-unified-pdp-row { display:table-row!important;
    table-layout:fixed!important }` with NO media-query guard, so it applies at every
@@ -21678,12 +21679,12 @@ html.shoppingcart .btn_checkout_guest {
    rule (~line 17329, no ID) on specificity alone, regardless of source order. Result
    on phones: the row stays a real table-row, table-layout:fixed evenly splits the
    media/info <td>s to ~half width each (confirmed live: both computed to the exact
-   same half-width, stacked in Y but each with a huge blank margin) — tiny image,
+   same half-width, stacked in Y but each with a huge blank margin) â€” tiny image,
    dead space, and Add to Cart pushed out of view. The parent <table> itself also
    stays `display:table` on mobile with nothing forcing it to stack, which fights
    any attempt to make just the <tr>/<td> go display:block. Fix: re-declare with the
    SAME #v65-product-parent/#content_area specificity (so the cascade tie goes to
-   whichever rule is later in source order — this one, since it's appended after
+   whichever rule is later in source order â€” this one, since it's appended after
    line 17612) and additionally force the <table> and <tbody> themselves to
    display:block so nothing is left expecting a table layout context. Verified live
    on Molly Olson (SS dining set) at a 666px/453px viewport: image goes full-width,
@@ -21745,7 +21746,7 @@ html.shoppingcart .btn_checkout_guest {
 }
 
 /* 2026-07-07 SARANONI MOBILE LAYOUT FIX (vol-product__top__inner row/cells)
-   — Saranoni products use a different markup pattern (Volusion legacy tables)
+   â€” Saranoni products use a different markup pattern (Volusion legacy tables)
    than the unified PDP. On mobile, inline styles force the row to display:flex
    with gap:0 and cells to width:460px, causing text to wrap narrowly and
    content to overflow. Unlike the unified-PDP (which uses CSS-only IDs for
@@ -21801,11 +21802,11 @@ html.shoppingcart .btn_checkout_guest {
    MOBILE DESKTOP-NAV HARD KILL (2026-07-07)
    Root cause of the "giant chevron" bug reported on every mobile PDP:
    a full audit found 33 separate rules throughout this file that target
-   #display_menu_1 / .mc-header-desktop-bar with NO @media guard — many
+   #display_menu_1 / .mc-header-desktop-bar with NO @media guard â€” many
    labeled "(DESKTOP/TABLET)" in their own comments but never actually
    scoped. The highest-specificity offender uses a doubled ID
    (#display_menu_1#display_menu_1, specificity 2 IDs) to deliberately
-   "outrank the site's own single-ID rules" — including the mobile
+   "outrank the site's own single-ID rules" â€” including the mobile
    display:none rule that's supposed to hide this nav on phones. Net
    effect: the full desktop nav (absolutely positioned, with hover-only
    dropdown submenu carets meant for mouse users) rendered on every
@@ -21834,15 +21835,15 @@ html.shoppingcart .btn_checkout_guest {
   }
 }
 
-/* 2026-07-07 user-requested: remove the "← RETURN TO [category]" link that
+/* 2026-07-07 user-requested: remove the "â† RETURN TO [category]" link that
    sits above the product image on every PDP entirely (all product families,
-   all viewports) — user flagged it as a possible source of layout issues.
+   all viewports) â€” user flagged it as a possible source of layout issues.
    Hiding the whole row (not just the link) so it doesn't leave blank space:
    markup is <tr class="mc-pdp-return-row"><td class="mc-pdp-return-cell">
    <a class="mc-pdp-return-link">. Placed at the very end of the file so it
    wins any specificity tie against the many earlier .mc-pdp-return-link
    color/hover rules scattered throughout (none of which set display, so
-   there's no real conflict — this is just for safety). */
+   there's no real conflict â€” this is just for safety). */
 html body tr.mc-pdp-return-row,
 html body td.mc-pdp-return-cell,
 html body a.mc-pdp-return-link.mc-pdp-return-link.mc-pdp-return-link.mc-pdp-return-link,
@@ -21854,16 +21855,16 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   overflow: hidden !important;
 }
 
-/* 2026-07-07 shopping cart page (shoppingcart.asp) mobile fix — CONSOLIDATED
+/* 2026-07-07 shopping cart page (shoppingcart.asp) mobile fix â€” CONSOLIDATED
    final version. Superseded five iterative attempts (table-squeeze,
    flex-column stack, ::before labels, text-align overrides) that are no
    longer in the file; each is summarized here only where it explains a
    non-obvious choice below.
 
    Root problem: legacy Volusion cart row markup is a single <tr> with 12
-   <td> cells — image, description, "each" price, qty input, "total"
+   <td> cells â€” image, description, "each" price, qty input, "total"
    price, and a remove button, interleaved with empty divider/spacer cells
-   (most of the 12) — all originally laid out via table-layout:auto, which
+   (most of the 12) â€” all originally laid out via table-layout:auto, which
    starved the description column to 74px while an unused spacer/total
    column hogged width, and caused mid-word text wrapping and horizontal
    overflow past the viewport on every mobile width tested (confirmed
@@ -21872,7 +21873,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
 
    User explicitly wants: product name + each price + qty on ONE line,
    total on the line beneath. Reaching that requires CSS Grid (not flexbox
-   — flex-wrap's automatic line-breaking based on available space produced
+   â€” flex-wrap's automatic line-breaking based on available space produced
    unpredictable wrapping when tested live) with named grid-areas, which
    let the 12 DOM-order cells be placed into an arbitrary 2D layout
    regardless of source order:
@@ -21881,11 +21882,11 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
      row 3: total                                  <- beneath, as requested
      row 4: remove button
    All the empty spacer/divider cells are hidden outright (nth-child
-   1,2,5,7,9,12 — verified live via full cell dump, they carry no content).
+   1,2,5,7,9,12 â€” verified live via full cell dump, they carry no content).
 
    Two structural blockers found and fixed along the way:
    1) Percentage widths don't resolve reliably for a flex/grid/block
-      element whose containing block is still a table context — the
+      element whose containing block is still a table context â€” the
       enclosing <table> and <tbody> must ALSO be forced to display:block
       (confirmed live: without this, width:100% on the row computed to
       93px instead of ~550px). Same fix pattern as the Saranoni PDP layout
@@ -21898,7 +21899,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
       those three cells removes ALL the wrapper elements from the layout
       tree at once (their children render as if directly inside the
       cell), leaving only the actual text nodes and the qty <input> as
-      real boxes — which is what finally let "Each: $799" etc. render as
+      real boxes â€” which is what finally let "Each: $799" etc. render as
       single, cleanly-aligned lines instead of stacked or disconnected
       fragments. Confirmed live at 666px: product name/each/qty share one
       row, total sits on its own row beneath, no overflow
@@ -21927,7 +21928,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   /* 2026-07-07 follow-up 6: user reported white gaps between the grey
      card sections and asked for Total right-aligned. The gaps came from
      CSS Grid's row-gap/column-gap rendering as literal empty space that
-     shows the grid CONTAINER's background, not each item's — the row
+     shows the grid CONTAINER's background, not each item's â€” the row
      (tr) was transparent while every cell had its own rgb(238,238,238)
      grey, so the 4-8px gaps between grid areas showed white page
      background through. Confirmed live via computed background-color:
@@ -21936,13 +21937,13 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
      block regardless of gap size.
 
      2026-07-07 follow-up 7: user sent an actual phone screenshot (not
-     achievable through this session's testing — resize_window has been
+     achievable through this session's testing â€” resize_window has been
      stuck reporting 666px innerWidth all session regardless of requested
      width, a tooling limitation, so every prior "verified live" check in
      this file was only ever tested at 666px) showing genuine overflow:
      Total, Qty, RECALCULATE, and shipping fields all cut off on a real
      narrow phone. Root cause: grid-template-columns was "auto auto 1fr"
-     for the desc/each/qty row — "auto" tracks size to their content's
+     for the desc/each/qty row â€” "auto" tracks size to their content's
      max-content width and do NOT shrink below it, so "Molly Olson
      5-Piece Dining Set" forced its column to its full unwrapped text
      width regardless of how little viewport space was actually
@@ -21976,7 +21977,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
     overflow-wrap: normal !important;
   }
   /* Empty spacer/divider cells Volusion renders alongside each real
-     column — verified live via full cell dump (12 total, only 6 carry
+     column â€” verified live via full cell dump (12 total, only 6 carry
      content). */
   html.shoppingcart tr.v65-cart-details-row > td:nth-child(1),
   html.shoppingcart tr.v65-cart-details-row > td:nth-child(2),
@@ -22056,16 +22057,16 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   }
 }
 /* 2026-07-07 follow-up 7 continued: the CSS above (minmax grid columns,
-   smaller fonts, right-aligned total) is necessary but NOT sufficient —
+   smaller fonts, right-aligned total) is necessary but NOT sufficient â€”
    #v65-cart-table is nested inside #v65-cart-table-container inside a
    <form>, and every level in that chain correctly resolves width:100% of
    its own parent (confirmed live via getBoundingClientRect at each
    level), yet none of them ever measured below ~389px even after adding
    max-width:100% and table-layout:fixed to every table in the chain, and
-   even a `form *{max-width:100%}` nuclear-option override — none of it
+   even a `form *{max-width:100%}` nuclear-option override â€” none of it
    changed the measured width by a single pixel. A hardcoded pixel width
    DID work when tested (manually forcing the row to 297px correctly
-   shrank it), proving the grid can respond to an explicit size — CSS
+   shrank it), proving the grid can respond to an explicit size â€” CSS
    alone just wasn't managing to hand it one through this particular
    nested-table structure. The actual fix is JS-based: see
    "SHOPPING CART TABLE WIDTH" in mc-plp-enforcer.js, which computes
@@ -22075,12 +22076,12 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
    constraint; without the JS, the table has nothing shrinking it. */
 
 /* 2026-07-07 follow-up 8: user's phone screenshot showed Country/State
-   dropdowns in Calculate Shipping cut off past the right edge — a
+   dropdowns in Calculate Shipping cut off past the right edge â€” a
    SEPARATE nested table (#v65-cart-shipping-details, fixed by JS
    alongside the cart-items table, see mc-plp-enforcer.js) from the cart
    row fixed above. Even after that table-width JS fix, the selects
    themselves stayed pinned at 150px: found a native (non-!important-
-   proof — actually it does carry !important) template rule
+   proof â€” actually it does carry !important) template rule
    `#v65-cart-shipping-details select, #v65-cart-shipping-details input
    { width: 150px !important }` using an ID selector, which beats the
    existing sitewide `html.shoppingcart select { width:100% !important }`
@@ -22089,7 +22090,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
    rule is later in the file). Confirmed live: select right edge moved
    from 428px to 388px (within the 393px test budget) after this. Note:
    the selects end up quite narrow (~90px) as a result, which truncates
-   their own displayed text ("United Sta...") — that's the native
+   their own displayed text ("United Sta...") â€” that's the native
    <select> control showing its selected option in a tight box, not a
    viewport overflow; the full option list is still reachable by tapping
    it open. A real fix for the truncation itself would mean redesigning
@@ -22105,7 +22106,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
 }
 
 /* 2026-07-09 CART SHIPPING "TYPE OF ADDRESS" RADIO OVERFLOW + COLLAPSED
-   FIELDS — user's phone screenshot showed Residential/Business text cut
+   FIELDS â€” user's phone screenshot showed Residential/Business text cut
    off past the right edge below the Country/State/Zip fields fixed
    above. First root cause found: the `input` selector in the rule above
    also matches the two <input type="radio"> in the Type Of Address row,
@@ -22116,10 +22117,10 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
    A radio-only override (`input[type=radio]{width:auto}`) fixed that in
    isolation, but after actually deploying it, the user's next screenshot
    showed the Country/State/Zip/radio fields had gone from "cut off" to
-   effectively invisible — squeezed to ~21-31px wide. Investigating live
+   effectively invisible â€” squeezed to ~21-31px wide. Investigating live
    (same-origin iframe at a real 390px viewport) found a second, deeper
    bug: this table's label column and value column split ~276px/~31px
-   regardless of ANY width rule tried on the cells — not just CSS
+   regardless of ANY width rule tried on the cells â€” not just CSS
    (stylesheet, `!important`), but even inline `style.setProperty(...,
    'important')` set directly via JS on the row's own cells made zero
    difference to the rendered box (confirmed via getBoundingClientRect
@@ -22127,7 +22128,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
    issue). Even an explicit <colgroup><col width=45%><col width=55%>
    only partially worked (one column moved, the other didn't). This
    table's column-width resolution is resistant to essentially every
-   normal CSS technique for controlling it — same family of issue as the
+   normal CSS technique for controlling it â€” same family of issue as the
    nested-table width problem solved via JS pixel-width elsewhere in this
    file, just immune to that fix too since this isn't a container-width
    problem, it's a column-split problem.
@@ -22135,7 +22136,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
    The reliable fix: stop asking the table to split into two columns at
    all. Force the table/rows/cells to `display:block`, so each label and
    its field stack vertically (full width) instead of sitting side by
-   side — sidesteps the column-width bug entirely instead of fighting it.
+   side â€” sidesteps the column-width bug entirely instead of fighting it.
    This is the same approach the original 2026-07-07 comment above
    already flagged as "the real fix" for the truncated-select problem,
    just not applied until this table proved unfixable any other way.
@@ -22163,16 +22164,16 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   }
 }
 
-/* 2026-07-09 CART SHIPPING — OUTER ROW ALSO OVERFLOWS. After deploying
+/* 2026-07-09 CART SHIPPING â€” OUTER ROW ALSO OVERFLOWS. After deploying
    the stacking fix above, the user's next screenshot showed the fields
    themselves fixed (full-width, readable) but the "Type Of Address*:"
    label text now cut off ("Type Of Add..."). Traced live: the whole
    "Calculate Shipping" block sits in one row, tr.v65-cart-shipping-
    details-row, INSIDE #v65-cart-table (the same table the cart items
-   are in — this isn't a separate table). #v65-cart-table is already
+   are in â€” this isn't a separate table). #v65-cart-table is already
    correctly width-constrained by the existing JS fix (fixCartTableWidth
    in mc-plp-enforcer.js) and stacked to display:block on mobile by an
-   existing rule elsewhere in this file for the item rows — but this
+   existing rule elsewhere in this file for the item rows â€” but this
    particular row was measured rendering at 394px wide (x:47-441) while
    its own parent table was only 286px (x:45-331): a table row wider
    than its table, because this row/cell stayed in table-row/table-cell
@@ -22184,7 +22185,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
    participating in table column sizing. Verified live: after this,
    the outer container/row/table chain all render at the same width as
    #v65-cart-table (down from 384-394px to 270-286px), and the "Type Of
-   Address*:" text — previously cut off at x:right past the viewport —
+   Address*:" text â€” previously cut off at x:right past the viewport â€”
    now ends at x:178, well inside the 389px viewport. */
 @media (max-width: 991px) {
   html.shoppingcart #v65-cart-table tr.v65-cart-shipping-details-row,
@@ -22196,7 +22197,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   }
 }
 
-/* 2026-07-07 DUPLICATE DESKTOP MENU ON HOMEPAGE — user reported the
+/* 2026-07-07 DUPLICATE DESKTOP MENU ON HOMEPAGE â€” user reported the
    regular header nav showing BELOW the hero image on desktop, stacked
    on top of the hero's own overlay menu (two identical nav bars).
    Root cause: the genuine homepage's <body> carries BOTH "is-home" AND
@@ -22206,20 +22207,20 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
    admin-only, NOT in this file) has 13 separate rules of the form
    "body.mc-theater-seating-pdp header.header X" meant to force the
    desktop nav visible on genuine theater-seating PDP pages that get
-   incorrectly tagged is-home — but since the real homepage ALSO
+   incorrectly tagged is-home â€” but since the real homepage ALSO
    carries mc-theater-seating-pdp, the same "fix" wrongly re-shows the
    desktop nav there too, on top of the hero's own nav.
 
    This CSS block alone does NOT fix it (kept only as a first-paint
-   fallback / documentation) — raising specificity here made no
+   fallback / documentation) â€” raising specificity here made no
    difference, because the actual winning value isn't coming from that
    CSS rule at all: a native script bakes a huge inline style directly
    onto .mc-header-desktop-bar on every page load, including
    `display: flex !important` among ~20 other properties (confirmed
-   live via getAttribute('style') on a fresh load — it's already
+   live via getAttribute('style') on a fresh load â€” it's already
    there before any of our code runs). Inline styles beat every
-   external stylesheet rule regardless of specificity, so no CSS fix —
-   however high-specificity — can win here. The actual fix is JS-based:
+   external stylesheet rule regardless of specificity, so no CSS fix â€”
+   however high-specificity â€” can win here. The actual fix is JS-based:
    see "DUPLICATE HOME NAV" in mc-plp-enforcer.js, which detects the
    is-home + mc-theater-seating-pdp combination and force-hides the bar
    and #display_menu_1 via inline style + MutationObserver, the same
@@ -22246,7 +22247,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   }
 }
 
-/* 2026-07-08 SARANONI MOBILE — CSS-only; replaces removed enforcer polling */
+/* 2026-07-08 SARANONI MOBILE â€” CSS-only; replaces removed enforcer polling */
 @media (max-width: 991px) {
   /* Kill leftover translateX / left:50% centering that shoves the info column off-screen. */
   html body.mc-saranoni-pdp td.mc-pdp-options-td,
@@ -22342,7 +22343,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
     box-sizing: border-box !important;
   }
 
-  /* Hide Klarna/Affirm BNPL on Saranoni — overflow/glitch source in Firefox mobile. */
+  /* Hide Klarna/Affirm BNPL on Saranoni â€” overflow/glitch source in Firefox mobile. */
   html body.mc-saranoni-pdp #messaging-element,
   html body.mc-saranoni-pdp #messaging-element *,
   html body.mc-saranoni-pdp klarna-placement,
@@ -22453,7 +22454,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   }
 }
 
-/* 2026-07-08 PDP RELATED RAIL — restore full-width related + center desktop row */
+/* 2026-07-08 PDP RELATED RAIL â€” restore full-width related + center desktop row */
 :is(body.productdetails, body.mc-product-page) table.vol-product__bottom {
   display: table !important;
   width: 100% !important;
@@ -22547,8 +22548,8 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   }
 }
 
-/* 2026-07-09 SARANONI PDP MOBILE — options-column nested-table overflow.
-   User reported (mobile only, Saranoni products only — e.g. Bamboni
+/* 2026-07-09 SARANONI PDP MOBILE â€” options-column nested-table overflow.
+   User reported (mobile only, Saranoni products only â€” e.g. Bamboni
    Socks): color swatches rendering below the ADD TO CART button instead
    of above "Product Details", the ATC button not fully visible/not
    centered, and the brand logo not centered.
@@ -22556,7 +22557,7 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
    Root cause, confirmed live (same-origin iframe, real 386-390px
    viewport): td.mc-pdp-options-td (already display:block via an earlier
    rule) sits inside a legacy Volusion <table><tbody><tr> chain where the
-   immediate parent <tr> was still display:table-row — a display-mode
+   immediate parent <tr> was still display:table-row â€” a display-mode
    mismatch between a block child and its table-row parent that produces
    nonsensical anonymous-box sizing (measured live: the child TD rendered
    WIDER than several of its own ancestors, e.g. a 340px child inside a
@@ -22564,12 +22565,12 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
    display:block, using :has() so the whole chain (however many levels
    deep) is caught in one rule, fixed it: logo/purchase-stack/ATC button
    all moved from overflowing the viewport by ~13px to fitting with
-   margin to spare, AND — without any separate ordering/flex rule needed
-   — the color-swatch-wrapper and #mc-pdp-accordion already came out in
+   margin to spare, AND â€” without any separate ordering/flex rule needed
+   â€” the color-swatch-wrapper and #mc-pdp-accordion already came out in
    the correct visual order (swatch above accordion) once the broken
    anonymous-box rendering was removed. (A flex + explicit `order`
    approach was tried first to force the order directly, but it
-   regressed the width fix in testing — this simpler :has() rule alone
+   regressed the width fix in testing â€” this simpler :has() rule alone
    was sufficient and didn't have that side effect.) */
 @media (max-width: 991px) {
   html body.mc-saranoni-pdp table:has(td.mc-pdp-options-td),
@@ -22582,13 +22583,13 @@ html body .mc-pdp-return-link-static.mc-pdp-return-link-static.mc-pdp-return-lin
   }
 }
 
-/* 2026-07-09 SARANONI PDP MOBILE — media-column nested-table overflow,
+/* 2026-07-09 SARANONI PDP MOBILE â€” media-column nested-table overflow,
    same bug as above, other side of the layout (the photo column,
    td.mc-pdp-media-td, is in its own separate nested table chain). This
    CSS version is kept only as an early-paint fallback: live testing
    found this specific chain has a competing, dynamically-inserted
    <style> tag from other page scripts that can win the cascade race
-   depending on timing, so the authoritative fix is JS-based —
+   depending on timing, so the authoritative fix is JS-based â€”
    see ensureSaranoniMediaColumnLayout() in mc-pdp-auth-cta-fix.js, which
    sets the same properties via inline style (always wins over any
    stylesheet regardless of insertion order) and re-runs every time
@@ -22708,9 +22709,9 @@ body.mc-saranoni-plp #content_area .mc-member-grid-price__amount {
   line-height: 1.3 !important;
 }
 
-/* ===== 2026-07-10: PLP name→price tighten (-25px) — all listing products =====
+/* ===== 2026-07-10: PLP nameâ†’price tighten (-25px) â€” all listing products =====
    Generalizes DevTools path:
-   #mc-products-start … tr:nth-child(2) > td > div > div:nth-child(2)
+   #mc-products-start â€¦ tr:nth-child(2) > td > div > div:nth-child(2)
    That node is the product-name block (2nd div in each product cell/card). */
 #mc-products-start table tbody tr td > div > div:nth-child(2),
 #mc-products-start .mc-cat-prodcard > div:nth-child(2),
@@ -22889,7 +22890,7 @@ html body.mc-pdp-hero-ready.mc-pdp-hero-pending td.mc-pdp-options-td {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
   }
 }
-/* MC_PDP_STATIC_CENTER_20260712 — centered media+info; kill mobile bounce transforms */
+/* MC_PDP_STATIC_CENTER_20260712 â€” centered media+info; kill mobile bounce transforms */
 @media (min-width: 992px) {
   html body.mc-product-page #content_area,
   html body.productdetails #content_area,
@@ -23068,7 +23069,7 @@ html body.mc-pdp-hero-ready.mc-pdp-hero-pending td.mc-pdp-options-td {
   display: none !important;
 }
 
-/* MC_MOBILE_SUBCATS_SOFTADD_20260712nav02 — undo "hide all nested ULs" + black ATC box */
+/* MC_MOBILE_SUBCATS_SOFTADD_20260712nav02 â€” undo "hide all nested ULs" + black ATC box */
 @media (max-width: 991px) {
   nav.push-menu button.mc-sub-toggle,
   #push-nav__menu button.mc-sub-toggle,
@@ -23128,6 +23129,28 @@ html body.mc-pdp-hero-ready.mc-pdp-hero-pending td.mc-pdp-options-td {
     justify-content: space-between !important;
     width: 100% !important;
   }
+
+  /* Small ">" only â€” do not restyle category link text/font. */
+  nav.push-menu button.mc-sub-toggle,
+  #push-nav__menu button.mc-sub-toggle,
+  .push-menu__menu-wrapper button.mc-sub-toggle {
+    flex: 0 0 auto !important;
+    align-self: center !important;
+    margin: 0 0 0 4px !important;
+    padding: 6px 8px !important;
+    min-width: 28px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    color: #fff !important;
+  }
+
+  #push-nav__menu .mc-mobile-vnav__link,
+  .push-menu__menu-wrapper .mc-mobile-vnav__link {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+  }
 }
 
 html body a.check_out,
@@ -23153,7 +23176,7 @@ html body .soft_add_wrapper a.continue_shopping {
 
 /* ===== 2026-07-13: RELATED FULL WIDTH + BEAN BAG OVERLAP (CSS only, no JS loops) ===== */
 @media (min-width: 992px) {
-  /* Nested Volusion related tables shrink to ~939px and sit left — force full shell */
+  /* Nested Volusion related tables shrink to ~939px and sit left â€” force full shell */
   html body.productdetails #v65-product-related,
   html body.mc-product-page #v65-product-related {
     display: block !important;
@@ -23229,6 +23252,8 @@ html body .soft_add_wrapper a.continue_shopping {
     margin-left: 0 !important;
   }
 
+  html body.mc-bean-bag-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-bean-bag-pdp #v65-product-parent tr.mc-unified-pdp-row,
   html body.mc-bean-bag-pdp tr.mc-pdp-main-row,
   html body.mc-bean-bag-pdp tr.mc-unified-pdp-row {
     display: flex !important;
@@ -23268,7 +23293,7 @@ html body .soft_add_wrapper a.continue_shopping {
   }
 }
 
-/* 2026-07-14 � Grayson PDP hero and related-product sizing.
+/* 2026-07-14 ï¿½ Grayson PDP hero and related-product sizing.
    The 650px hero floor is desktop-only so mobile remains fluid. */
 @media (min-width: 992px) {
   html body.mc-product-page img#product_photo,
@@ -23637,7 +23662,7 @@ body:has(#v65-product-parent) #site-header {
 /* END REMOVABLE: PDP container/header stabilization (20260717) */
 /* BEGIN REMOVABLE: restore approved PDP header typography/logo margin (20260717) */
 @media (min-width: 992px) {
-  /* Keep Cormorant — a later Inter override here was beating the approved menu font. */
+  /* Keep Cormorant â€” a later Inter override here was beating the approved menu font. */
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > a,
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--horizontal.vnav--level1 > li > a,
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > ul a,
@@ -23666,7 +23691,7 @@ html body.mc-bean-bag-pdp .colors_pricebox > tbody > tr > td > table > tbody > t
   visibility: hidden !important;
 }
 /* END REMOVABLE: Bean Bag accordion/price label correction (20260718) */
-/* BEGIN REMOVABLE: main menu font only (20260718) — removed Inter override; Cormorant block below wins */
+/* BEGIN REMOVABLE: main menu font only (20260718) â€” removed Inter override; Cormorant block below wins */
 /* END REMOVABLE: main menu font only (20260718) */
 /* BEGIN REMOVABLE: approved Cormorant main-menu font only (20260718) */
 @media (min-width: 992px) {
@@ -23817,7 +23842,7 @@ html body.mc-closeout-pdp #mc-pdp-accordion #product_description {
 
 @media (max-width: 991px) {
   /* Keep home content above the hero stacking context. Do NOT pull the header
-     up with a negative margin — the header is position:fixed at the viewport
+     up with a negative margin â€” the header is position:fixed at the viewport
      top, and margin:-65px was hiding SELECT A CATEGORY above the screen. */
   html.mc-allow-home-hero body.is-home article.vol-container.vol-container,
   html.mc-allow-home-hero body.is-home section.vol-inner.vol-inner {
@@ -24032,7 +24057,7 @@ html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow[disabled] {
 
 /* BEGIN REMOVABLE: mobile cart glyph visible (20260719cart1)
    Inner svg is hijacked by template.min.js; keep it hidden and paint the
-   glyph on the anchor. Correct fill encoding is %23111111 (not %2523…). */
+   glyph on the anchor. Correct fill encoding is %23111111 (not %2523â€¦). */
 html body a.mc-cart-float,
 html body .mc-cart-float {
   display: flex !important;
@@ -24902,7 +24927,7 @@ html body.mc-saranoni-pdp #related_products_content {
 /* END REMOVABLE: Saranoni desktop altviews + media cell (20260720sarfix4) */
 
 /* BEGIN REMOVABLE: lovey Style stack + menu Cormorant lock (20260722manual2) */
-/* Hide ONLY native option photos (optionimg_*) — never generic swatch/alt thumbs. */
+/* Hide ONLY native option photos (optionimg_*) â€” never generic swatch/alt thumbs. */
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active img[id^="optionimg_"],
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active a:has(img[id^="optionimg_"]),
 html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) img[id^="optionimg_"],
@@ -24940,7 +24965,7 @@ html body.mc-saranoni-pdp.mc-saranoni-style-rail-active #mc-pdp-alt-view-row {
 /* Hide stray Select Style label above brand logo */
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-unified-pdp-info > font:first-child,
 html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-pdp-options-td > font:first-child {
-  /* no-op placeholder — JS does the text match hide */
+  /* no-op placeholder â€” JS does the text match hide */
 }
 @media (min-width: 992px) {
   html body header.header #display_menu_1#display_menu_1 > ul.vnav--level1 > li > a,
@@ -24955,7 +24980,7 @@ html body.mc-saranoni-pdp.mc-saranoni-style-rail-active td.mc-pdp-options-td > f
 }
 /* END REMOVABLE: lovey Style stack + menu Cormorant lock (20260722manual2) */
 
-/* BEGIN REMOVABLE: site promo bar (20260722manual2) — two-row offers + codes */
+/* BEGIN REMOVABLE: site promo bar (20260722manual2) â€” two-row offers + codes */
 html body .mc-site-promo-bar {
   display: flex !important;
   flex-direction: column !important;
@@ -25146,7 +25171,7 @@ html body.mc-saranoni-pdp:has(#mc-configured-color-swatch-wrapper) .productoptio
   }
 }
 
-/* Promo banner — single-line offers; numbers +2px vs body copy */
+/* Promo banner â€” single-line offers; numbers +2px vs body copy */
 html body .mc-promo-banner,
 html body #mcPromoBanner.mc-promo-banner {
   display: flex !important;
@@ -25285,7 +25310,7 @@ html body.mc-bean-bag-pdp #altviews img {
   object-fit: cover !important;
 }
 
-/* Game Room bars (cat 194) — same 1128 frame as other brand PDPs */
+/* Game Room bars (cat 194) â€” same 1128 frame as other brand PDPs */
 @media (min-width: 992px) {
   html body.mc-game-room-bar-pdp #content_area,
   html body.mc-game-room-bar-pdp #v65-product-parent,
@@ -25348,7 +25373,7 @@ html body.mc-bean-bag-pdp #altviews img {
    Delete this entire block to revert promo/footer/Saranoni PDP chrome experiments.
    Safety vs raw DevTools paste:
    - promo min-width:1200px and footer margin-left:300px are desktop-only
-     (@media min-width:1200px) — unscoped they overflowed mobile.
+     (@media min-width:1200px) â€” unscoped they overflowed mobile.
    - modal-content / modal-title / .close / .col-sm-offset-2 display:none
      are NOT enabled (broke member login / footer newsletter). Left commented. */
 html body .mc-promo-banner__line {
@@ -25493,7 +25518,7 @@ html body.productdetails.mc-saranoni-pdp .mc-pdp-main-row > td:nth-child(2) {
     overflow: hidden !important;
   }
 
-  /* Closeout / Steve Silver info column: logo → title → price → accordion → ATC */
+  /* Closeout / Steve Silver info column: logo â†’ title â†’ price â†’ accordion â†’ ATC */
   html body.mc-closeout-pdp td.mc-unified-pdp-info,
   html body.mc-closeout-pdp td.mc-pdp-options-td,
   html body.mc-steve-silver-altview-pdp td.mc-unified-pdp-info,
@@ -25871,7 +25896,7 @@ html body.mc-pdp-accordion-pdp #mc-pdp-accordion {
 }
 /* END REMOVABLE: unified accordion layout 20260723restore4 */
 
-/* MC_RESTORE6_UNIFIED_WIDTH — one media/info gap for every PDP */
+/* MC_RESTORE6_UNIFIED_WIDTH â€” one media/info gap for every PDP */
 @media (min-width: 992px) {
   html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
   html body.mc-pdp-unified-ready #v65-product-parent tr.mc-pdp-main-row,
@@ -25938,7 +25963,7 @@ html body.mc-pdp-accordion-pdp #mc-pdp-accordion {
   }
 }
 
-/* MC_RESTORE6_FREE_SHIP — kill icon-font glyphs; show GIF only */
+/* MC_RESTORE6_FREE_SHIP â€” kill icon-font glyphs; show GIF only */
 :is(html.category, body.category) #content_area .icon-free-shipping:not(img),
 :is(html.category, body.category) #content_area i.icon-free-shipping,
 :is(html.category, body.category) #content_area span.icon-free-shipping {
@@ -25955,7 +25980,7 @@ html body.mc-pdp-accordion-pdp #mc-pdp-accordion {
 }
 
 
-/* MC_RESTORE10_CENTER — keep hero+info as one tight composition */
+/* MC_RESTORE10_CENTER â€” keep hero+info as one tight composition */
 @media (min-width: 992px) {
   html body.mc-pdp-unified-ready #v65-product-parent,
   html body.mc-pdp-accordion-pdp #v65-product-parent {

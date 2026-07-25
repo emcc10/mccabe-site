@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725bbsw1 — BB swatch freeze fix (no MO reassert loop)
-  var MC_DEPLOY_FINGERPRINT = "20260725bbsw1";
-  var VERSION = "20260725bbsw1";
+  // MC_DEPLOY_FINGERPRINT_20260725chin1 — BB Nest desktop row: stop legacy unwrap stacking
+  var MC_DEPLOY_FINGERPRINT = "20260725chin1";
+  var VERSION = "20260725chin1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725028;
+  var DEPLOY_RANK = 20260725031;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -552,13 +552,16 @@
     var img = global.document.getElementById("product_photo");
     if (!img) return false;
     if (img.__mcSsUserSelectedAlt) return true;
-    var full = "/v/vspfiles/photos/" + pc + "-1.jpg";
+    /* Prefer -2.jpg (full hero). Many SS -1.jpg slots are tiny 300px thumbs that
+       look blurry when the PDP scales them to ~650px. */
+    var full = "/v/vspfiles/photos/" + pc + "-2.jpg";
     var cur = String(img.getAttribute("src") || img.src || "");
     var normalizedCur = cur.replace(/\?.*$/, "").split("#")[0];
     var normalizedFull = full.replace(/\?.*$/, "").split("#")[0];
     var needsSwap =
-      /-2T\.|-2\.jpg/i.test(cur) ||
-      (normalizedCur.indexOf(pc) !== -1 && normalizedCur.indexOf("-1.") === -1);
+      /-1T?\.jpg/i.test(cur) ||
+      /-2T\.jpg/i.test(cur) ||
+      (normalizedCur.indexOf(pc) !== -1 && normalizedCur.indexOf("-2.") === -1);
     if (needsSwap || normalizedCur !== normalizedFull) {
       try {
         img.setAttribute("src", full);
@@ -570,7 +573,7 @@
       .querySelectorAll("a#product_photo_zoom_url, a#product_photo_zoom_url2")
       .forEach(function (link) {
         var href = String(link.getAttribute("href") || "");
-        if (!href || /-2T\.|-2\.jpg/i.test(href)) {
+        if (!href || /-1T?\.jpg|-2T\.jpg/i.test(href) || href.indexOf("-2.") === -1) {
           try {
             link.setAttribute("href", full);
           } catch (eHref) {}
@@ -4005,8 +4008,10 @@
       "max-width:min(720px,100%)!important;width:100%!important;height:auto!important}" +
       "body.productdetails a#product_photo_zoom_url,body.mc-product-page a#product_photo_zoom_url{" +
       "max-width:min(650px,100%)!important;width:100%!important;display:block!important}" +
-      "html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row{" +
-      "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:32px!important}" +
+      "html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,html body.mc-bean-bag-pdp #v65-product-parent tr.mc-pdp-main-row," +
+      "html body.mc-bean-bag-pdp #content_area tr.mc-unified-pdp-row,html body.mc-bean-bag-pdp #v65-product-parent tr.mc-unified-pdp-row," +
+      "html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row,html body.mc-ruched-blanket-pdp #v65-product-parent tr.mc-pdp-main-row{" +
+      "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;justify-content:center!important;gap:40px!important}" +
       "html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{" +
       "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:28px!important;column-gap:28px!important;justify-content:center!important;max-width:1180px!important;margin:0 auto!important}" +
       "html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-media-td{" +
@@ -8856,7 +8861,11 @@
       );
       if (!info) return;
       var outer = info.closest && info.closest("td.vol-product__top--right");
-      if (!outer || info.parentElement === outer) return;
+      /* When info IS the right column (BB Nest / simple color SKUs), closest()
+         returns itself. Walking parents from the main <tr> then never reaches
+         that TD and wrongly forces display:block on the hero row — stacking
+         logo/title/ATC under the image. Only unwrap real nested wrappers. */
+      if (!outer || info === outer || info.parentElement === outer) return;
 
       var priceHost = global.document.getElementById("mc-pdp-price-stack-host");
       if (priceHost) {
@@ -9838,11 +9847,11 @@
     ) {
       return;
     }
-    /* MC_ALT_VIEW_ROW_20260723close1 — gate on newest flag so stale caches
-       still force a fresh fetch with closeout altview-only probing. */
-    var want = "20260723close1";
+    /* MC_ALT_VIEW_ROW_20260725hum1 — gate on newest flag so stale caches
+       still force a fresh fetch without host/reparent thrash. */
+    var want = "20260725hum1";
     try {
-      if (global["__MC_TMH_ALT_VIEW_ROW_20260723close1__"]) {
+      if (global["__MC_TMH_ALT_VIEW_ROW_20260725hum1__"]) {
         global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
         return;
       }
@@ -9852,6 +9861,9 @@
         } catch (eRmAlt) {}
       });
       try {
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260725hum1__;
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260725gat1__;
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260725fix3__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260723close1__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260723mob1__;
         delete global.__MC_TMH_ALT_VIEW_ROW_20260721B__;
@@ -13756,6 +13768,9 @@ function revealBeanBagRelated() {
       scheduleSteveSilverLayoutRepair();
       scheduleMahjongHouseLayoutRepair();
       normalizeLegacyPdpInfoWrapper();
+      try {
+        repairBeanBagDesktopMainRow();
+      } catch (eBbRowAfterLegacy) {}
       installDescriptionViewMoreResize();
       syncPdpDescriptionViewMore();
       if (isSaranoniPdpPage()) {

@@ -1,9 +1,11 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260725fix3 — Canova gallery + suppress stale numbered alts.
+  /* MC_ALT_VIEW_ROW_20260725hum1 — stop host/reparent thrash (page jump + alt flash).
      Prefer -altviewN over Volusion -N restore leftovers. */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725fix3__) return;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725hum1__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260725hum1__ = true;
+  window.__MC_TMH_ALT_VIEW_ROW_20260725gat1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725fix3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723altscrl__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260723close1__ = true;
@@ -18,10 +20,11 @@
   var ROW_ID = "mc-pdp-alt-view-row";
   var TRACK_CLASS = "mc-pdp-alt-view-row__track";
   var MAX_ALT_VIEWS = 64;
-  var ALT_PROBE_VER = "20260725fix3";
+  var ALT_PROBE_VER = "20260725hum1";
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
+  var altRowMutating = false;
 
   function productCode() {
     var field = document.querySelector('input[name="ProductCode"],input[name="productcode"]');
@@ -567,10 +570,19 @@
       var heroBlock = directChild(mediaCell, hero);
       if (heroBlock) mediaCell.insertBefore(row, heroBlock.nextSibling || null);
       else mediaCell.appendChild(row);
-    } else if (row.parentNode !== mediaCell) {
-      var currentHeroBlock = directChild(mediaCell, hero);
-      if (currentHeroBlock) mediaCell.insertBefore(row, currentHeroBlock.nextSibling || null);
-      else mediaCell.appendChild(row);
+    } else {
+      /* Host wrap is intentional — never yank the row back into mediaCell
+         (that fought ensureAltRowScrollArrows and looped forever). */
+      var parent = row.parentNode;
+      var hosted =
+        parent &&
+        parent.id === "mc-pdp-alt-view-row-host" &&
+        mediaCell.contains(parent);
+      if (!hosted && parent !== mediaCell) {
+        var currentHeroBlock = directChild(mediaCell, hero);
+        if (currentHeroBlock) mediaCell.insertBefore(row, currentHeroBlock.nextSibling || null);
+        else mediaCell.appendChild(row);
+      }
     }
 
     var heroWidth = Math.round(hero.getBoundingClientRect().width || hero.offsetWidth || 0);
@@ -605,54 +617,151 @@
     row.style.setProperty("-ms-overflow-style", "auto", "important");
 
     var signature = items.map(function (item) { return canonicalUrl(item.full); }).join("|");
-    if (row.getAttribute("data-mc-items") === signature && row.querySelector("." + TRACK_CLASS)) return;
-    row.setAttribute("data-mc-items", signature);
-    while (row.firstChild) row.removeChild(row.firstChild);
+    if (row.getAttribute("data-mc-items") === signature && row.querySelector("." + TRACK_CLASS)) {
+      /* Already built — only ensure arrows once, never rebuild thumbs. */
+      if (row.dataset.mcAltArrowReady !== "1") ensureAltRowScrollArrows(row, mediaCell);
+      return;
+    }
+    altRowMutating = true;
+    try {
+      row.setAttribute("data-mc-items", signature);
+      while (row.firstChild) row.removeChild(row.firstChild);
 
-    var track = document.createElement("div");
-    track.className = TRACK_CLASS;
-    track.style.setProperty("display", "inline-flex", "important");
-    track.style.setProperty("flex-wrap", "nowrap", "important");
-    track.style.setProperty("align-items", "center", "important");
-    track.style.setProperty("justify-content", "flex-start", "important");
-    track.style.setProperty("gap", "8px", "important");
-    track.style.setProperty("width", "max-content", "important");
-    track.style.setProperty("max-width", "none", "important");
-    track.style.setProperty("box-sizing", "border-box", "important");
+      var track = document.createElement("div");
+      track.className = TRACK_CLASS;
+      track.style.setProperty("display", "inline-flex", "important");
+      track.style.setProperty("flex-wrap", "nowrap", "important");
+      track.style.setProperty("align-items", "center", "important");
+      track.style.setProperty("justify-content", "flex-start", "important");
+      track.style.setProperty("gap", "8px", "important");
+      track.style.setProperty("width", "max-content", "important");
+      track.style.setProperty("max-width", "none", "important");
+      track.style.setProperty("box-sizing", "border-box", "important");
 
-    items.forEach(function (item) {
-      var link = document.createElement("a");
-      var image = document.createElement("img");
-      link.href = item.full;
-      link.setAttribute("data-mc-tmh-alt-slot", String(item.slot));
-      link.setAttribute("aria-label", "View alternate product image " + item.slot);
-      link.style.setProperty("display", "block", "important");
-      link.style.setProperty("flex", "0 0 " + thumbSize + "px", "important");
-      link.style.setProperty("width", thumbSize + "px", "important");
-      link.style.setProperty("height", thumbSize + "px", "important");
-      link.style.setProperty("margin", "0", "important");
-      link.style.setProperty("padding", "0", "important");
-      link.style.setProperty("overflow", "hidden", "important");
-      link.style.setProperty("box-sizing", "border-box", "important");
-      link.addEventListener("click", function (event) {
-        event.preventDefault();
-        holdHero(item.full);
+      items.forEach(function (item) {
+        var link = document.createElement("a");
+        var image = document.createElement("img");
+        link.href = item.full;
+        link.setAttribute("data-mc-tmh-alt-slot", String(item.slot));
+        link.setAttribute("aria-label", "View alternate product image " + item.slot);
+        link.style.setProperty("display", "block", "important");
+        link.style.setProperty("flex", "0 0 " + thumbSize + "px", "important");
+        link.style.setProperty("width", thumbSize + "px", "important");
+        link.style.setProperty("height", thumbSize + "px", "important");
+        link.style.setProperty("margin", "0", "important");
+        link.style.setProperty("padding", "0", "important");
+        link.style.setProperty("overflow", "hidden", "important");
+        link.style.setProperty("box-sizing", "border-box", "important");
+        link.addEventListener("click", function (event) {
+          event.preventDefault();
+          holdHero(item.full);
+        });
+        image.src = item.full;
+        image.alt = item.alt;
+        image.loading = "lazy";
+        image.style.setProperty("display", "block", "important");
+        image.style.setProperty("width", thumbSize + "px", "important");
+        image.style.setProperty("height", thumbSize + "px", "important");
+        image.style.setProperty("max-width", "none", "important");
+        image.style.setProperty("object-fit", "cover", "important");
+        image.style.setProperty("margin", "0", "important");
+        image.style.setProperty("padding", "0", "important");
+        image.style.setProperty("float", "none", "important");
+        link.appendChild(image);
+        track.appendChild(link);
       });
-      image.src = item.full;
-      image.alt = item.alt;
-      image.loading = "lazy";
-      image.style.setProperty("display", "block", "important");
-      image.style.setProperty("width", thumbSize + "px", "important");
-      image.style.setProperty("height", thumbSize + "px", "important");
-      image.style.setProperty("max-width", "none", "important");
-      image.style.setProperty("object-fit", "cover", "important");
-      image.style.setProperty("margin", "0", "important");
-      image.style.setProperty("padding", "0", "important");
-      image.style.setProperty("float", "none", "important");
-      link.appendChild(image);
-      track.appendChild(link);
-    });
-    row.appendChild(track);
+      row.appendChild(track);
+      ensureAltRowScrollArrows(row, mediaCell);
+    } finally {
+      window.setTimeout(function () {
+        altRowMutating = false;
+      }, 0);
+    }
+  }
+
+  function ensureAltRowScrollArrows(row, mediaCell) {
+    if (!row || !row.parentNode) return;
+    if (row.dataset.mcAltArrowReady === "1" && document.getElementById("mc-pdp-alt-view-row-host")) {
+      return;
+    }
+    altRowMutating = true;
+    try {
+      var host = row.parentNode;
+      if (host.id !== "mc-pdp-alt-view-row-host") {
+        var wrap = document.createElement("div");
+        wrap.id = "mc-pdp-alt-view-row-host";
+        wrap.className = "mc-pdp-alt-view-row-host";
+        try {
+          host.insertBefore(wrap, row);
+          wrap.appendChild(row);
+        } catch (eWrap) {
+          return;
+        }
+        host = wrap;
+      }
+      host.style.setProperty("display", "block", "important");
+      host.style.setProperty("position", "relative", "important");
+      host.style.setProperty("width", row.style.maxWidth || "100%", "important");
+      host.style.setProperty("max-width", row.style.maxWidth || "100%", "important");
+      host.style.setProperty("margin", "10px auto 0", "important");
+      host.style.setProperty("box-sizing", "border-box", "important");
+      row.style.setProperty("margin-top", "0", "important");
+      row.style.setProperty("display", "block", "important");
+      row.style.setProperty("overflow-x", "auto", "important");
+
+      function makeButton(dir) {
+        var cls = "mc-pdp-alt-view-row__arrow--" + (dir < 0 ? "prev" : "next");
+        var btn = host.querySelector(":scope > ." + cls);
+        if (!btn) {
+          btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "mc-pdp-alt-view-row__arrow " + cls;
+          btn.setAttribute("aria-label", dir < 0 ? "Scroll alternate views left" : "Scroll alternate views right");
+          btn.textContent = dir < 0 ? "‹" : "›";
+          if (dir < 0) host.insertBefore(btn, row);
+          else host.appendChild(btn);
+        }
+        btn.onclick = function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          var amount = Math.max(Math.round((row.clientWidth || 220) * 0.72), 140);
+          var before = row.scrollLeft || 0;
+          try {
+            row.scrollBy({ left: dir * amount, behavior: "smooth" });
+          } catch (eScrollBy) {}
+          window.setTimeout(function () {
+            if (Math.abs((row.scrollLeft || 0) - before) < 2) {
+              row.scrollLeft = before + dir * amount;
+            }
+            refresh();
+          }, 40);
+        };
+        return btn;
+      }
+
+      var prev = makeButton(-1);
+      var next = makeButton(1);
+      function refresh() {
+        var max = Math.max(0, row.scrollWidth - row.clientWidth - 2);
+        var hasOverflow = max > 4;
+        prev.style.setProperty("display", hasOverflow ? "flex" : "none", "important");
+        next.style.setProperty("display", hasOverflow ? "flex" : "none", "important");
+        prev.disabled = !hasOverflow || row.scrollLeft <= 2;
+        next.disabled = !hasOverflow || row.scrollLeft >= max;
+      }
+      if (row.dataset.mcAltArrowBound !== "1") {
+        row.dataset.mcAltArrowBound = "1";
+        row.addEventListener("scroll", refresh, { passive: true });
+        window.addEventListener("resize", refresh);
+      }
+      row.dataset.mcAltArrowReady = "1";
+      refresh();
+      window.setTimeout(refresh, 200);
+    } finally {
+      window.setTimeout(function () {
+        altRowMutating = false;
+      }, 0);
+    }
   }
 
   function ensureAltRowCss() {
@@ -664,13 +773,22 @@
       (document.head || document.documentElement).appendChild(st);
     }
     st.textContent =
+      "#mc-pdp-alt-view-row-host{display:block!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;box-sizing:border-box!important}" +
       "#mc-pdp-alt-view-row{display:block!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;" +
       "overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;" +
       "scrollbar-width:thin!important}" +
       "#mc-pdp-alt-view-row .mc-pdp-alt-view-row__track{display:inline-flex!important;flex-wrap:nowrap!important;align-items:center!important;" +
       "gap:8px!important;width:max-content!important;max-width:none!important}" +
       "#mc-pdp-alt-view-row a,#mc-pdp-alt-view-row img{float:none!important;position:relative!important;z-index:1!important}" +
-      "@media (max-width:991px){#mc-pdp-alt-view-row{order:2!important;margin-top:10px!important}}" ;
+      "#mc-pdp-alt-view-row-host .mc-pdp-alt-view-row__arrow{appearance:none!important;-webkit-appearance:none!important;position:absolute!important;" +
+      "top:50%!important;transform:translateY(-50%)!important;z-index:5!important;width:28px!important;height:40px!important;" +
+      "border:1px solid #ddd!important;border-radius:999px!important;background:rgba(255,255,255,.96)!important;color:#444!important;" +
+      "display:none!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;" +
+      "font:700 20px/1 Arial,sans-serif!important;cursor:pointer!important;box-shadow:0 1px 3px rgba(0,0,0,.08)!important}" +
+      "#mc-pdp-alt-view-row-host .mc-pdp-alt-view-row__arrow--prev{left:4px!important}" +
+      "#mc-pdp-alt-view-row-host .mc-pdp-alt-view-row__arrow--next{right:4px!important}" +
+      "#mc-pdp-alt-view-row-host .mc-pdp-alt-view-row__arrow[disabled]{opacity:.25!important;pointer-events:none!important}" +
+      "@media (max-width:991px){#mc-pdp-alt-view-row,#mc-pdp-alt-view-row-host{order:2!important;margin-top:10px!important}}" ;
   }
 
   function schedule() {
@@ -692,7 +810,10 @@
     window.setTimeout(schedule, delay);
   });
   if (window.MutationObserver) {
-    var observer = new window.MutationObserver(schedule);
+    var observer = new window.MutationObserver(function () {
+      if (altRowMutating) return;
+      schedule();
+    });
     observer.observe(document.getElementById("v65-product-parent") || document.body, { childList: true, subtree: true });
   }
 })(window, document);
