@@ -8,10 +8,10 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260725tap1";
+  var VERSION = "20260725tap2";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725036;
+  var DEPLOY_RANK = 20260725037;
   var ALT_VIEW_ROW_VER = "20260725baby1";
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
@@ -9064,9 +9064,9 @@
       ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;width:100%!important;min-width:0!important;min-height:44px!important;padding:10px 6px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important;box-sizing:border-box!important;-webkit-tap-highlight-color:rgba(0,0,0,.08)!important;touch-action:manipulation!important}" +
       ".mc-saranoni-size-thumb img{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;aspect-ratio:1/1!important;object-fit:cover!important;margin:0!important;padding:0!important;border:0!important;border-radius:2px!important;pointer-events:none!important}" +
       ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{margin:0!important;font:600 11px/1.15 Inter,Arial,sans-serif!important;max-width:100%!important;color:#444!important;text-align:center!important;white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;letter-spacing:0!important;pointer-events:none!important}" +
-      "@media (max-width:991px){.mc-saranoni-size-thumbs{gap:6px!important}.mc-saranoni-size-thumb{min-height:48px!important;padding:12px 2px!important}.mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{font:600 10.5px/1.1 Inter,Arial,sans-serif!important}}" +
-      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__price{margin:2px 0 0!important;font:500 12px/1.25 Inter,Arial,sans-serif!important;color:#555!important;text-align:center!important;white-space:nowrap!important;display:block!important;visibility:visible!important;opacity:1!important}" +
-      ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}" +
+      "@media (max-width:991px){.mc-saranoni-size-thumbs{gap:6px!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}.mc-saranoni-size-thumb{min-height:52px!important;padding:14px 4px!important}.mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{font:600 11px/1.15 Inter,Arial,sans-serif!important}}" +
+      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__price{margin:2px 0 0!important;font:500 12px/1.25 Inter,Arial,sans-serif!important;color:#555!important;text-align:center!important;white-space:nowrap!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important}" +
+      ".mc-saranoni-size-thumb.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
       /* Size row must never sit in a scroll-host / get rail arrows. */
       ".mc-saranoni-scroll-host:has(> #mc-saranoni-size-thumbs) > .mc-saranoni-scroll-arrow{display:none!important}" +
       "#mc-saranoni-size-thumbs.mc-saranoni-scroll-rail{padding-left:0!important;padding-right:0!important;overflow:visible!important}";
@@ -9622,12 +9622,11 @@
     syncConfiguredColorSwatchUi(ctx, true, forcePhoto);
     if (isSaranoniPdpPage()) {
       removeSaranoniDuplicateColorPicker();
-      /* Do NOT finalizeSaranoniInfoColumnOrder() here — that rebuilds the
-         accordion on every color tap and makes Features/size taps feel dead
-         on phones. Keep title + variant order only. */
+      /* Do NOT finalize/reorder the info column here — moving purchase-stack
+         / size thumbs under the finger drops the rest of a multi-tap gesture
+         on phones. Title stay-put only. */
       try {
         ensurePdpTitleInOptionsColumn();
-        ensureSaranoniVariantsBelowPrice();
       } catch (eTitleKeep) {}
     }
     return true;
@@ -10500,12 +10499,15 @@
       ".mc-configured-color-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
       "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,html body.mc-saranoni-pdp .mc-saranoni-swatches{display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;max-width:100%!important;padding:0 0 6px!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
       "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
-      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important;-webkit-tap-highlight-color:rgba(0,0,0,.08)!important;touch-action:manipulation!important}" +
+      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important;-webkit-tap-highlight-color:rgba(0,0,0,.08)!important;touch-action:manipulation!important;user-select:none!important;-webkit-user-select:none!important}" +
       ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;pointer-events:none!important}" +
       ".mc-configured-color-swatch.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
       ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:72px!important;min-height:44px!important;border-radius:4px!important;padding:6px 12px!important}" +
       ".mc-configured-color-swatch__text{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;white-space:normal!important;text-align:center!important;pointer-events:none!important}" +
       ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}" +
+      /* Prefer vertical page scroll over horizontal rail pan so soft finger
+         moves do not cancel the tap before click fires. */
+      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches{touch-action:pan-y!important;-webkit-user-select:none!important;user-select:none!important}" +
       "html body.mc-saranoni-pdp .mc-acc-header{touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(0,0,0,.06)!important;min-height:44px!important}" +
       "html body.mc-saranoni-pdp .mc-acc-header .mc-acc-label,html body.mc-saranoni-pdp .mc-acc-header .mc-acc-chevron{pointer-events:none!important}";
   }
@@ -14065,6 +14067,139 @@ function revealBeanBagRelated() {
       applySaranoniSizeVariantSelection(ctx, entry, true);
       return true;
     }
+    /* Mobile browsers suppress click when the finger moves ~15–20px (common on
+       phones). Drive color/size/accordion from pointer/touch up instead, with a
+       loose move threshold, and debounce so a later click does not double-fire. */
+    var saranoniPointerTap = null;
+    var saranoniPointerSelectKey = "";
+    var saranoniPointerSelectAt = 0;
+    var SARANONI_TAP_MOVE_PX = 48;
+    var SARANONI_TAP_DEBOUNCE_MS = 650;
+
+    function saranoniEventPoint(e) {
+      if (e.changedTouches && e.changedTouches[0]) {
+        return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+      }
+      if (e.touches && e.touches[0]) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+      if (typeof e.clientX === "number") return { x: e.clientX, y: e.clientY };
+      return null;
+    }
+
+    function saranoniTapControlFromEvent(e) {
+      if (!e || !e.target || !e.target.closest || !isSaranoniPdpPage()) return null;
+      /* Color + size only here. Accordion keeps its own delegated click handler
+         so pointer+click do not open-then-immediately-close a row. */
+      return e.target.closest(".mc-configured-color-swatch, .mc-saranoni-size-thumb");
+    }
+
+    function saranoniTapKey(el) {
+      if (!el) return "";
+      if (el.classList.contains("mc-configured-color-swatch")) {
+        return "color:" + String(el.getAttribute("data-option-id") || "");
+      }
+      if (el.classList.contains("mc-saranoni-size-thumb")) {
+        return "size:" + String(el.getAttribute("data-option-id") || "");
+      }
+      return "";
+    }
+
+    function saranoniApplyTapControl(el) {
+      if (!el || !el.isConnected) return false;
+      var key = saranoniTapKey(el);
+      var now = Date.now();
+      if (key && key === saranoniPointerSelectKey && now - saranoniPointerSelectAt < SARANONI_TAP_DEBOUNCE_MS) {
+        return true;
+      }
+      var applied = false;
+      if (el.classList.contains("mc-configured-color-swatch")) {
+        handleConfiguredColorSwatchClick(el);
+        applied = true;
+      } else if (el.classList.contains("mc-saranoni-size-thumb")) {
+        applied = handleSaranoniSizeThumbClick(el);
+      }
+      if (applied && key) {
+        saranoniPointerSelectKey = key;
+        saranoniPointerSelectAt = now;
+      }
+      return applied;
+    }
+
+    function saranoniNoteTapMovement(e) {
+      var tap = saranoniPointerTap;
+      if (!tap) return;
+      var pt = saranoniEventPoint(e);
+      if (!pt) return;
+      var dx = Math.abs(pt.x - tap.x);
+      var dy = Math.abs(pt.y - tap.y);
+      if (dx > tap.maxDx) tap.maxDx = dx;
+      if (dy > tap.maxDy) tap.maxDy = dy;
+    }
+
+    function saranoniPointerDown(e) {
+      if (e && e.pointerType === "mouse" && typeof e.button === "number" && e.button !== 0) {
+        return;
+      }
+      var el = saranoniTapControlFromEvent(e);
+      var pt = saranoniEventPoint(e);
+      if (!el || !pt) {
+        saranoniPointerTap = null;
+        return;
+      }
+      saranoniPointerTap = {
+        el: el,
+        x: pt.x,
+        y: pt.y,
+        maxDx: 0,
+        maxDy: 0,
+        pointerId: typeof e.pointerId === "number" ? e.pointerId : null,
+        done: false,
+      };
+    }
+
+    function saranoniPointerUp(e) {
+      var tap = saranoniPointerTap;
+      if (!tap || !tap.el || tap.done) return;
+      if (
+        tap.pointerId != null &&
+        typeof e.pointerId === "number" &&
+        e.pointerId !== tap.pointerId &&
+        e.type &&
+        e.type.indexOf("pointer") === 0
+      ) {
+        return;
+      }
+      saranoniNoteTapMovement(e);
+      if (tap.maxDx > SARANONI_TAP_MOVE_PX || tap.maxDy > SARANONI_TAP_MOVE_PX) {
+        saranoniPointerTap = null;
+        return;
+      }
+      tap.done = true;
+      saranoniPointerTap = null;
+      if (saranoniApplyTapControl(tap.el)) {
+        try {
+          e.preventDefault();
+          e.stopPropagation();
+        } catch (eStopTap) {}
+      }
+    }
+
+    function saranoniPointerCancel() {
+      /* Do NOT clear the candidate. Chrome/iOS often pointercancel when they
+         think the gesture might scroll; touchend still follows and should count
+         as a tap when movement stays under our threshold. */
+    }
+
+    global.document.addEventListener("pointerdown", saranoniPointerDown, true);
+    global.document.addEventListener("pointermove", saranoniNoteTapMovement, true);
+    global.document.addEventListener("pointerup", saranoniPointerUp, true);
+    global.document.addEventListener("pointercancel", saranoniPointerCancel, true);
+    global.document.addEventListener("touchstart", saranoniPointerDown, { capture: true, passive: true });
+    global.document.addEventListener("touchmove", saranoniNoteTapMovement, { capture: true, passive: true });
+    global.document.addEventListener("touchend", saranoniPointerUp, { capture: true, passive: false });
+    global.document.addEventListener("touchcancel", saranoniPointerCancel, true);
+
     global.document.addEventListener(
       "click",
       function (e) {
@@ -14075,7 +14210,7 @@ function revealBeanBagRelated() {
           e.preventDefault();
           e.stopPropagation();
           e.stopImmediatePropagation();
-          handleConfiguredColorSwatchClick(configuredColorSwatch);
+          saranoniApplyTapControl(configuredColorSwatch);
           return;
         }
         var sizeThumb =
@@ -14084,7 +14219,7 @@ function revealBeanBagRelated() {
           e.preventDefault();
           e.stopPropagation();
           e.stopImmediatePropagation();
-          handleSaranoniSizeThumbClick(sizeThumb);
+          saranoniApplyTapControl(sizeThumb);
           return;
         }
         if (typeof global.mcHandleLoginCtaClick === "function") {
