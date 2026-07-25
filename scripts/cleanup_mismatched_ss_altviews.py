@@ -117,6 +117,11 @@ def code_family(code: str) -> str | None:
 
 
 def is_foreign(code: str, source_url: str) -> bool:
+    """True when the source URL is clearly not this product family.
+
+    Prefer positive family/SKU match. Local -2.jpg copies and empty URLs are
+    treated as unknown (not foreign) so we don't delete unscored keepers.
+    """
     fam = code_family(code)
     if not fam:
         return False
@@ -124,9 +129,21 @@ def is_foreign(code: str, source_url: str) -> bool:
     if not fname or fname.startswith("http") or "vspfiles/photos" in fname:
         return False
     aliases = FAMILY_ALIASES.get(fam, [fam.lower()])
-    matches_self = any(a in fname for a in aliases)
+    if any(a in fname for a in aliases):
+        return False
+    code_frags = [p for p in code.replace("SS-", "").lower().split("-") if len(p) >= 4]
+    if any(p in fname for p in code_frags):
+        return False
     foreign = {name for token, name in FOREIGN_TOKENS if token in fname and name != fam}
-    return bool(foreign) and not matches_self
+    # Named foreign family, or any other stevesilver product filename that
+    # doesn't mention us (Brock/Ottawa/etc. not in the token list).
+    if foreign:
+        return True
+    # Heuristic: Manufacturer filenames usually start with a collection name.
+    # If it looks like Product_SKU_... and isn't ours, drop it.
+    if re.match(r"^[a-z]+[_-]", fname) and not any(a in fname for a in aliases):
+        return True
+    return False
 
 
 def load_existing_deletes() -> list[str]:

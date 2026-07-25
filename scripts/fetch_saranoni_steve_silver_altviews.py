@@ -330,7 +330,12 @@ def ss_code_family(code: str) -> str | None:
 
 
 def ss_gallery_matches_product(code: str, name: str, url: str) -> bool:
-    """Drop related-product images (Keily on Conroe, Noah on Denver, etc.)."""
+    """Keep only images that belong to this product family.
+
+    Steve Silver PDPs embed related-product shots (Keily/Brock/Ottawa on Conroe).
+    For known families, require a positive alias/SKU match — do not keep
+    "unknown" filenames just because they aren't in the foreign-token list.
+    """
     fam = ss_code_family(code)
     if not fam:
         return True
@@ -338,14 +343,11 @@ def ss_gallery_matches_product(code: str, name: str, url: str) -> bool:
     aliases = _SS_FAMILY_ALIASES.get(fam, (fam.lower(),))
     if any(a in blob for a in aliases):
         return True
-    foreign = {
-        fam_name
-        for token, fam_name in _SS_FOREIGN_TOKENS
-        if token in blob and fam_name != fam
-    }
-    # Unknown filename with no foreign family token — keep (could be generic SKU shot).
-    # Clear foreign family token without our own aliases — reject.
-    return not foreign
+    # Also accept raw SKU fragments from the code (e.g. CON80621).
+    code_frags = [p for p in code.replace("SS-", "").lower().split("-") if len(p) >= 4]
+    if any(p in blob for p in code_frags):
+        return True
+    return False
 
 
 def collect_ss_page_map() -> dict[str, str]:
