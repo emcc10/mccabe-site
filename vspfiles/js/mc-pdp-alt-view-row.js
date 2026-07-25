@@ -1,9 +1,9 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260725baby1 — ignore Saranoni size-thumb clicks (404 data-main-image).
-     Prefer -altviewN over Volusion -N restore leftovers. */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725baby1__) return;
+  /* MC_ALT_VIEW_ROW_20260725altmatch1 — main hero is first thumb; family-matched alts only. */
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725altmatch1__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260725altmatch1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725baby1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725alt3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725alt2__ = true;
@@ -23,7 +23,51 @@
   var ROW_ID = "mc-pdp-alt-view-row";
   var TRACK_CLASS = "mc-pdp-alt-view-row__track";
   var MAX_ALT_VIEWS = 64;
-  var ALT_PROBE_VER = "20260725baby1";
+  var ALT_PROBE_VER = "20260725altmatch1";
+  /* After family cleanup, only probe/show these max slots for products that
+     previously had cross-family scrapes. Missing entries = no cap. */
+  var ALT_VIEW_MAX_SLOT = {
+    "SS-BC900CTT": 4,
+    "SS-BC900DR": 5,
+    "SS-BC900KFB": 2,
+    "SS-BC900MR": 2,
+    "SS-BC900NS": 3,
+    "SS-BC900QFB": 2,
+    "SS-BC950CTBT": 3,
+    "SS-BC950DRB": 5,
+    "SS-BC950MRB": 2,
+    "SS-BC950NSB": 2,
+    "SS-BC950QFB": 4,
+    "SS-CAS900C": 4,
+    "SS-CAS900DR": 5,
+    "SS-CAS900KFB": 4,
+    "SS-CAS900M": 5,
+    "SS-CAS900NS": 8,
+    "SS-CAS900QFB": 4,
+    "SS-CONROE-GRAY-PWR-SECT": 3,
+    "SS-CONROE-PWR-CHAISE-SECT": 2,
+    "SS-DENVER-BROWN-PWR-SECT": 9,
+    "SS-GATLIN-PWR-SECT": 14,
+    "SS-HP900CTWT": 2,
+    "SS-HP900KFBD": 2,
+    "SS-HP900KFBW": 2,
+    "SS-HP900MRD": 2,
+    "SS-HP900MRW": 2,
+    "SS-HP900NSW": 3,
+    "SS-HP900QFBW": 2,
+    "SS-KEILY-BROWN-86SOFA": 15,
+    "SS-OLSEN-DOVE-PWR-SOFA": 14,
+    "SS-RV900C": 4,
+    "SS-RV900DR": 6,
+    "SS-RV900KFB": 8,
+    "SS-RV900M": 8,
+    "SS-RV900NS": 8,
+    "SS-RV900QFB": 8,
+    "SS-SIG900C": 9,
+    "SS-SIG900KFB": 5,
+    "SS-SIG900QFB": 5,
+    "SS-ZENITH-PWR-CONSOLE-SOFA": 8
+  };
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
@@ -173,6 +217,41 @@
     return upper.indexOf(needle) !== -1 || upper.indexOf(needle2) !== -1;
   }
 
+  function maxAllowedAltSlot(code) {
+    var max = ALT_VIEW_MAX_SLOT[String(code || "").toUpperCase()];
+    return typeof max === "number" && max > 0 ? max : 0;
+  }
+
+  function filterAllowedAltSlots(code, items) {
+    var max = maxAllowedAltSlot(code);
+    if (!max) return items;
+    return items.filter(function (item) {
+      var slot = item.slot || altViewSlot(item.full);
+      /* slot 0 = main hero thumb; altviewN uses 1..N; legacy -N uses 100+N */
+      if (!slot || slot === 0) return true;
+      if (slot >= 100) return slot - 100 <= max;
+      return slot <= max;
+    });
+  }
+
+  function withHeroFirst(items, hero) {
+    var list = (items || []).slice();
+    if (!hero || !list.length) return list;
+    var heroSrc = absoluteUrl(hero.currentSrc || hero.getAttribute("src") || "");
+    if (!heroSrc || /nophoto|placeholder|spacer/i.test(heroSrc)) return list;
+    var heroCanon = canonicalUrl(heroSrc);
+    list = list.filter(function (item) {
+      return canonicalUrl(item.full) !== heroCanon;
+    });
+    if (!list.length) return list;
+    list.unshift({
+      slot: 0,
+      full: heroSrc,
+      alt: "Main product image"
+    });
+    return list;
+  }
+
   function collectItems(code) {
     var items = [];
     var seen = {};
@@ -222,7 +301,7 @@
         return !/-\d+T?\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(item.full) || /-altview\d+\./i.test(item.full);
       });
     }
-    return items;
+    return filterAllowedAltSlots(code, items);
   }
 
   function publishActiveHero(full) {
@@ -332,7 +411,9 @@
       render();
     }
 
-    for (var slot = 1; slot <= MAX_ALT_VIEWS; slot += 1) {
+    var probeMax = maxAllowedAltSlot(code) || MAX_ALT_VIEWS;
+    remaining = probeMax;
+    for (var slot = 1; slot <= probeMax; slot += 1) {
       (function (photoSlot) {
         var src =
           "/v/vspfiles/photos/" +
@@ -360,7 +441,8 @@
     discoveredByCode[code] = [];
     /* Closeout / furniture: prefer -altviewN only. Legacy -2/-3/-4.jpg slots on
        products like TYLER-BAR-SET often contain unrelated supplier photos. */
-    var remaining = MAX_ALT_VIEWS;
+    var probeMax = maxAllowedAltSlot(code) || MAX_ALT_VIEWS;
+    var remaining = probeMax;
 
     function completeOne() {
       remaining -= 1;
@@ -383,7 +465,7 @@
       schedule();
     }
 
-    for (var altSlot = 1; altSlot <= MAX_ALT_VIEWS; altSlot += 1) {
+    for (var altSlot = 1; altSlot <= probeMax; altSlot += 1) {
       (function (photoSlot) {
         var src =
           "/v/vspfiles/photos/" +
@@ -505,14 +587,12 @@
     var row = document.getElementById(ROW_ID);
 
     if (isSaranoni) {
-      var heroCanon = canonicalUrl(hero.currentSrc || hero.getAttribute("src") || "");
-      var sarItems = (discoveredByCode[code] || [])
-        .slice()
-        .filter(function (item) {
-          return canonicalUrl(item.full) !== heroCanon;
-        })
-        .sort(function (a, b) { return a.slot - b.slot; });
-      if (!sarItems.length) {
+      var sarItems = filterAllowedAltSlots(
+        code,
+        (discoveredByCode[code] || []).slice().sort(function (a, b) { return a.slot - b.slot; })
+      );
+      sarItems = withHeroFirst(sarItems, hero);
+      if (sarItems.length <= 1 && !(discoveredByCode[code] || []).length) {
         /* Keep an already-built row visible while re-probing. */
         if (!(row && row.children && row.children.length)) {
           if (row) row.style.setProperty("display", "none", "important");
@@ -524,7 +604,7 @@
       return;
     }
 
-    var items = collectItems(code);
+    var items = withHeroFirst(collectItems(code), hero);
     /* Always probe -altviewN for furniture/closeout PDPs. Native #altviews often
        only exposes the hero (-1/-2T), which previously short-circuited probing and
        left mismatched or missing alt galleries (Canova/Camolson, 2026-07-25). */

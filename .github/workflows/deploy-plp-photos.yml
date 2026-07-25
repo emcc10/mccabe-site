@@ -10,6 +10,9 @@ on:
       - "scripts/upload_missing_stock_photos.py"
       - "scripts/upload_altview_photos.py"
       - "scripts/upload_humidor_sauna_altviews.py"
+      - "scripts/upload_ss_altview_cleanup.py"
+      - "scripts/cleanup_mismatched_ss_altviews.py"
+      - "vspfiles/photos/.ss-altview-cleanup"
       - "scripts/upload_beanbag_swatches.py"
       - "scripts/upload_recliner_plp_photos.py"
       - "scripts/fetch_recliner_plp_photos.py"
@@ -121,6 +124,16 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_PORT: "2222"
         run: python3 scripts/upload_humidor_sauna_altviews.py
+
+      - name: Upload SS altview family cleanup + remote deletes
+        # Overwrite renumbered keepers and remove cross-family leftovers (Conroe/Keily/etc).
+        if: ${{ always() && !cancelled() && (github.event_name == 'workflow_dispatch' || (contains(env.DEPLOY_CHANGED_FILES, 'SS-') && contains(env.DEPLOY_CHANGED_FILES, 'altview')) || contains(env.DEPLOY_CHANGED_FILES, '.ss-altview-cleanup') || contains(env.DEPLOY_CHANGED_FILES, '.altview-remote-deletes')) }}
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_ss_altview_cleanup.py
 
       - name: Upload all altview photos (*-altviewN.jpg)
         # Full altview set — only on explicit reupload marker or manual dispatch (not every altview tweak).

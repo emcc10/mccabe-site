@@ -50,7 +50,7 @@
   function upgradeAltViewRow() {
     try {
       if (!global.document.getElementById("v65-product-parent")) return;
-      if (global.__MC_TMH_ALT_VIEW_ROW_20260725alt3__ || global.__MC_TMH_ALT_VIEW_ROW_20260725alt2__) {
+      if (global.__MC_TMH_ALT_VIEW_ROW_20260725altmatch1__ || global.__MC_TMH_ALT_VIEW_ROW_20260725alt3__ || global.__MC_TMH_ALT_VIEW_ROW_20260725alt2__) {
         global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "alt3");
         return;
       }
@@ -63,7 +63,7 @@
       global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "alt3");
       var s = global.document.createElement("script");
       s.id = "mc-pdp-alt-view-row-js";
-      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260725alt3&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260725altmatch1&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eAlt) {}
