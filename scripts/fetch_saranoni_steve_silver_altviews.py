@@ -250,6 +250,106 @@ def ss_is_room(name: str, url: str) -> bool:
     return any(m in text for m in ROOM_SS)
 
 
+# Cross-family tokens scraped from related-product blocks on stevesilver.com PDPs.
+_SS_FAMILY_ALIASES: dict[str, tuple[str, ...]] = {
+    "CONROE": ("conroe",),
+    "DENVER": ("denver",),
+    "GATLIN": ("gatlin",),
+    "KEILY": ("keily", "kiely"),
+    "LUNA": ("luna",),
+    "OLSEN": ("olsen",),
+    "NOAH": ("noah",),
+    "PROVO": ("provo",),
+    "LEHI": ("lehi",),
+    "BRISBANE": ("brisbane",),
+    "LEXINGTON": ("lexington",),
+    "ZENITH": ("zenith",),
+    "CASSIE": ("cassie", "cas900"),
+    "BEARCREEK": ("bearcreek", "bear_creek", "bc900", "bc950"),
+    "HIGHLANDPARK": ("highlandpark", "highland_park", "hp900"),
+    "RIVERDALE": ("riverdale", "rv900"),
+    "MONTANA": ("montana", "mon900"),
+    "WILSHIRE": ("wilshire", "ws890", "ws89q0"),
+    "SWANSON": ("swanson", "ss100"),
+    "SIGNATURE": ("signature", "sig900"),
+}
+
+_SS_PREFIX_FAMILY = {
+    "BC": "BEARCREEK",
+    "HP": "HIGHLANDPARK",
+    "CAS": "CASSIE",
+    "RV": "RIVERDALE",
+    "MON": "MONTANA",
+    "WS": "WILSHIRE",
+    "SIG": "SIGNATURE",
+}
+
+_SS_FOREIGN_TOKENS = (
+    ("keily", "KEILY"),
+    ("kiely", "KEILY"),
+    ("lexington", "LEXINGTON"),
+    ("provo", "PROVO"),
+    ("noah", "NOAH"),
+    ("olsen", "OLSEN"),
+    ("lehi", "LEHI"),
+    ("brisbane", "BRISBANE"),
+    ("highlandpark", "HIGHLANDPARK"),
+    ("highland_park", "HIGHLANDPARK"),
+    ("hp900", "HIGHLANDPARK"),
+    ("bearcreek", "BEARCREEK"),
+    ("bear_creek", "BEARCREEK"),
+    ("bc900", "BEARCREEK"),
+    ("bc950", "BEARCREEK"),
+    ("wilshire", "WILSHIRE"),
+    ("ws890", "WILSHIRE"),
+    ("ws89q0", "WILSHIRE"),
+    ("swanson", "SWANSON"),
+    ("ss100", "SWANSON"),
+    ("riverdale", "RIVERDALE"),
+    ("montana", "MONTANA"),
+    ("cassie", "CASSIE"),
+    ("denver", "DENVER"),
+    ("gatlin", "GATLIN"),
+    ("conroe", "CONROE"),
+    ("luna", "LUNA"),
+    ("zenith", "ZENITH"),
+    ("signature", "SIGNATURE"),
+    ("sig900", "SIGNATURE"),
+)
+
+
+def ss_code_family(code: str) -> str | None:
+    parts = code.split("-")
+    if len(parts) < 2:
+        return None
+    p1 = parts[1]
+    m = re.match(r"^([A-Z]+)(\d+)", p1)
+    if m:
+        return _SS_PREFIX_FAMILY.get(m.group(1), p1)
+    return p1
+
+
+def ss_gallery_matches_product(code: str, name: str, url: str) -> bool:
+    """Keep only images that belong to this product family.
+
+    Steve Silver PDPs embed related-product shots (Keily/Brock/Ottawa on Conroe).
+    For known families, require a positive alias/SKU match — do not keep
+    "unknown" filenames just because they aren't in the foreign-token list.
+    """
+    fam = ss_code_family(code)
+    if not fam:
+        return True
+    blob = f"{name} {url}".lower()
+    aliases = _SS_FAMILY_ALIASES.get(fam, (fam.lower(),))
+    if any(a in blob for a in aliases):
+        return True
+    # Also accept raw SKU fragments from the code (e.g. CON80621).
+    code_frags = [p for p in code.replace("SS-", "").lower().split("-") if len(p) >= 4]
+    if any(p in blob for p in code_frags):
+        return True
+    return False
+
+
 def collect_ss_page_map() -> dict[str, str]:
     """Parse fetch_* scripts + bed catalog for SS code -> product page."""
     pages: dict[str, str] = {}
@@ -594,6 +694,7 @@ def fetch_steve_silver(rows: list[dict]) -> None:
             continue
 
         gallery = extract_ss_gallery(html)
+        gallery = [(n, u) for n, u in gallery if ss_gallery_matches_product(code, n, u)]
         # Prefer room/lifestyle first, then other non-studio extras
         rooms = [(n, u) for n, u in gallery if ss_is_room(n, u)]
         others = [(n, u) for n, u in gallery if not ss_is_room(n, u)]

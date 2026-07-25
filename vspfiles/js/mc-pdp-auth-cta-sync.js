@@ -12,7 +12,7 @@
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
   var DEPLOY_RANK = 20260725039;
-  var ALT_VIEW_ROW_VER = "20260725baby1";
+  var ALT_VIEW_ROW_VER = "20260725altmatch1";
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;

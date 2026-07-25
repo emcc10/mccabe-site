@@ -9,7 +9,8 @@
 
   /* forceLoveyStyleCta REMOVED 20260722manual4 â€” was unloading CTA and freezing lovey PDPs */
 
-  var VERSION = "202607259999"; /* digits >= baked restore12 bridge W */
+  /* Digit string must beat prior live latch 202607259999 or this file no-ops. */
+  var VERSION = "20260726001home1"; /* home featured parallel-table convert + nav */
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -26,8 +27,6 @@
     return;
   }
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
-  /* Satisfy baked bridge W="20260723restore12" digit compare (restore12 => 2026072312). */
-  global.__MC_PLP_ENFORCER_VER__ = "202607259999";
   global.__MC_PLP_ENFORCER__ = true;
 
   function upgradePdpAuthCtaForm() {
@@ -50,7 +49,7 @@
   function upgradeAltViewRow() {
     try {
       if (!global.document.getElementById("v65-product-parent")) return;
-      if (global.__MC_TMH_ALT_VIEW_ROW_20260725alt3__ || global.__MC_TMH_ALT_VIEW_ROW_20260725alt2__) {
+      if (global.__MC_TMH_ALT_VIEW_ROW_20260725altmatch1__ || global.__MC_TMH_ALT_VIEW_ROW_20260725alt3__ || global.__MC_TMH_ALT_VIEW_ROW_20260725alt2__) {
         global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "alt3");
         return;
       }
@@ -63,7 +62,7 @@
       global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "alt3");
       var s = global.document.createElement("script");
       s.id = "mc-pdp-alt-view-row-js";
-      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260725alt3&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260725altmatch1&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eAlt) {}
@@ -1004,11 +1003,13 @@
     return grid;
   }
 
-  /* Some Volusion category tables use parallel image and detail rows instead
-     of divider blocks. Match each card by its product URL, never by position. */
-  function convertParallelLegacyProductTable(root) {
+  /* Some Volusion category/home tables use parallel image and detail rows instead
+     of divider blocks. Match each card by its product URL, never by position.
+     Homepage featured tables often duplicate each photo link (hover/2T) — count
+     unique image hrefs, not raw <img> nodes. */
+  function convertParallelLegacyProductTable(root, gridClassName) {
     root = root || document.getElementById("content_area");
-    if (!root || root.querySelector(".v-product-grid")) return false;
+    if (!root || root.querySelector(".v-product-grid, .mc-home-featured-grid")) return false;
     var tables = root.querySelectorAll("table.v65-productDisplay");
     var table = null;
     var bestCount = 0;
@@ -1016,11 +1017,18 @@
     for (ti = 0; ti < tables.length; ti++) {
       if (tables[ti].querySelector("table.v65-productDisplay")) continue;
       var titles = tables[ti].querySelectorAll("a.productnamecolor, a.colors_productname");
+      var uniqueImgHrefs = {};
       var images = tables[ti].querySelectorAll('a[href*="product-p/"] img, a[href*="-p/"] img');
-      var productImages = 0;
       var ii;
-      for (ii = 0; ii < images.length; ii++) if (isProductPhoto(images[ii])) productImages += 1;
-      if (titles.length > bestCount && titles.length === productImages) {
+      for (ii = 0; ii < images.length; ii++) {
+        if (!isProductPhoto(images[ii])) continue;
+        var parentA = images[ii].parentElement;
+        if (!parentA || parentA.tagName !== "A") continue;
+        var imgHref = parentA.href || parentA.getAttribute("href") || "";
+        if (imgHref) uniqueImgHrefs[imgHref] = true;
+      }
+      var uniqueImgCount = Object.keys(uniqueImgHrefs).length;
+      if (titles.length > bestCount && titles.length === uniqueImgCount) {
         table = tables[ti];
         bestCount = titles.length;
       }
@@ -1036,7 +1044,7 @@
     });
     var titleLinks = Array.prototype.slice.call(table.querySelectorAll("a.productnamecolor, a.colors_productname"));
     var grid = document.createElement("div");
-    grid.className = "v-product-grid";
+    grid.className = gridClassName || "v-product-grid";
     var sourceLinks = [];
     titleLinks.forEach(function (title) {
       var href = title.href || title.getAttribute("href") || "";
@@ -1097,6 +1105,7 @@
     table.parentNode.replaceChild(grid, table);
     injectVolusionProductGridStyle();
     injectLegacyPlpLayoutFixCss();
+    if (/mc-home-featured-grid/.test(grid.className)) injectHomeFeaturedGridCss();
     collapsePlpGridGap(root);
     return true;
   }
@@ -1218,6 +1227,13 @@
     if (!isHome()) return false;
     var root = document.getElementById("content_area");
     if (!root || root.querySelector(".mc-home-featured-grid")) return false;
+
+    /* Homepage featured products are usually a parallel 2-column Volusion table
+       (name/price/photo rows), not Grid_Single divider blocks. Prefer that path. */
+    if (convertParallelLegacyProductTable(root, "v-product-grid mc-home-featured-grid")) {
+      return true;
+    }
+
     var tables = root.querySelectorAll("table.v65-productDisplay");
     var table = null;
     var expected = 0;
@@ -1929,6 +1945,7 @@
     if (isHome()) {
       restoreHomeHeaderState();
       convertHomeFeaturedProducts();
+      repairCartFloatIcon();
       return;
     }
     if (!isCategoryPlp()) return;
@@ -1980,6 +1997,15 @@
   if (isCategoryPlp()) {
     markCategory();
     run();
+  } else if (isHome()) {
+    /* Eager home path — featured table must convert before paint settles. */
+    restoreHomeHeaderState();
+    run();
+    [200, 800, 2000, 4000].forEach(function (ms) {
+      global.setTimeout(function () {
+        if (isHome()) run();
+      }, ms);
+    });
   }
 
   if (typeof MutationObserver !== "undefined") {
