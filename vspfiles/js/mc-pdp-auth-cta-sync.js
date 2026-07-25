@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; baby size/color hero restore
+  // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260725baby1";
+  var VERSION = "20260725tap1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725035;
+  var DEPLOY_RANK = 20260725036;
   var ALT_VIEW_ROW_VER = "20260725baby1";
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
@@ -4791,8 +4791,15 @@
   var saranoniLayoutTimer = null;
   var saranoniLayoutLastRun = 0;
   var saranoniLayoutFinalizing = false;
+  var saranoniLayoutQuietUntil = 0;
+  function markSaranoniUserInteraction() {
+    /* After a swatch/size/accordion tap, suppress layout finalize churn that
+       rebuilds DOM under the finger and drops the click on mobile. */
+    saranoniLayoutQuietUntil = Date.now() + 900;
+  }
   function scheduleSaranoniLayoutPass(force) {
     if (!isSaranoniPdpPage() || isStalePdpAuthRun()) return;
+    if (!force && Date.now() < saranoniLayoutQuietUntil) return;
     if (force) {
       if (saranoniLayoutTimer) {
         global.clearTimeout(saranoniLayoutTimer);
@@ -4805,9 +4812,46 @@
     if (Date.now() - saranoniLayoutLastRun < 120) return;
     saranoniLayoutTimer = global.setTimeout(function () {
       saranoniLayoutTimer = null;
+      if (Date.now() < saranoniLayoutQuietUntil) return;
       saranoniLayoutLastRun = Date.now();
       finalizeSaranoniInfoColumnOrder();
     }, 60);
+  }
+
+  function setSaranoniAccordionRowOpen(row, open) {
+    if (!row) return;
+    var header = row.querySelector(".mc-acc-header");
+    var panel = row.querySelector(".mc-acc-panel");
+    row.dataset.open = open ? "1" : "0";
+    if (header) header.setAttribute("aria-expanded", open ? "true" : "false");
+    if (panel) panel.setAttribute("aria-hidden", open ? "false" : "true");
+  }
+
+  function toggleSaranoniAccordionRow(row) {
+    if (!row) return;
+    var wasOpen = row.dataset.open === "1";
+    if (row.parentNode) {
+      Array.prototype.forEach.call(row.parentNode.querySelectorAll(".mc-acc-row"), function (sibling) {
+        setSaranoniAccordionRowOpen(sibling, false);
+      });
+    }
+    if (!wasOpen) setSaranoniAccordionRowOpen(row, true);
+  }
+
+  function ensureSaranoniAccordionDelegation(acc) {
+    if (!acc || acc.dataset.mcAccDelegated === "1") return;
+    acc.dataset.mcAccDelegated = "1";
+    /* One delegated listener survives row rebuilds — per-header listeners were
+       wiped whenever finalize() rewrote accordion innerHTML on mobile. */
+    acc.addEventListener("click", function (e) {
+      var header =
+        e.target && e.target.closest ? e.target.closest(".mc-acc-header") : null;
+      if (!header || !acc.contains(header)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      markSaranoniUserInteraction();
+      toggleSaranoniAccordionRow(header.closest(".mc-acc-row"));
+    });
   }
 
   function buildSaranoniAccordionRow(id, label, contentHost) {
@@ -4828,24 +4872,6 @@
     var panel = global.document.createElement("div");
     panel.className = "mc-acc-panel";
     panel.setAttribute("aria-hidden", "true");
-    header.addEventListener("click", function (e) {
-      e.preventDefault();
-      var open = row.dataset.open === "1";
-      if (row.parentNode) {
-        Array.prototype.forEach.call(row.parentNode.querySelectorAll(".mc-acc-row"), function (sibling) {
-          var siblingHeader = sibling.querySelector(".mc-acc-header");
-          var siblingPanel = sibling.querySelector(".mc-acc-panel");
-          sibling.dataset.open = "0";
-          if (siblingHeader) siblingHeader.setAttribute("aria-expanded", "false");
-          if (siblingPanel) siblingPanel.setAttribute("aria-hidden", "true");
-        });
-      }
-      if (!open) {
-        row.dataset.open = "1";
-        header.setAttribute("aria-expanded", "true");
-        panel.setAttribute("aria-hidden", "false");
-      }
-    });
     if (contentHost && contentHost.parentNode !== panel) {
       panel.appendChild(contentHost);
     }
@@ -5167,12 +5193,22 @@
     }
 
     var signature = rows.map(function (row) { return row.id; }).join("|");
+    ensureSaranoniAccordionDelegation(acc);
     if (acc.dataset.mcSaranoniRows !== signature) {
+      /* Preserve which panel the shopper had open across rebuilds — color/size
+         taps used to call finalize() and wipe FEATURES mid-gesture on mobile. */
+      var openId = "";
+      var openRow = acc.querySelector('.mc-acc-row[data-open="1"]');
+      if (openRow) openId = openRow.id || "";
       acc.innerHTML = "";
       rows.forEach(function (row) {
         acc.appendChild(buildSaranoniAccordionRow(row.id, row.label, row.host));
       });
       acc.dataset.mcSaranoniRows = signature;
+      if (openId) {
+        var restore = global.document.getElementById(openId);
+        if (restore) setSaranoniAccordionRowOpen(restore, true);
+      }
     } else {
       rows.forEach(function (row) {
         var panel = global.document.querySelector("#mc-acc-row-" + row.id + " .mc-acc-panel");
@@ -9025,10 +9061,10 @@
       ".mc-saranoni-size-thumbs{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;width:100%!important;max-width:100%!important;margin:12px 0 0!important;padding:0!important;overflow:visible!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
       ".mc-saranoni-size-thumbs::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
       ".mc-saranoni-size-label{display:block!important;margin:12px 0 6px!important;font:500 13px/1.3 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;color:#444!important;text-transform:none!important}" +
-      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:6px!important;width:100%!important;min-width:0!important;min-height:0!important;padding:8px 6px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important;box-sizing:border-box!important}" +
-      ".mc-saranoni-size-thumb img{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;aspect-ratio:1/1!important;object-fit:cover!important;margin:0!important;padding:0!important;border:0!important;border-radius:2px!important}" +
-      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{margin:0!important;font:600 11px/1.15 Inter,Arial,sans-serif!important;max-width:100%!important;color:#444!important;text-align:center!important;white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;letter-spacing:0!important}" +
-      "@media (max-width:991px){.mc-saranoni-size-thumbs{gap:6px!important}.mc-saranoni-size-thumb{padding:8px 2px!important}.mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{font:600 10.5px/1.1 Inter,Arial,sans-serif!important}}" +
+      ".mc-saranoni-size-thumb{appearance:none!important;-webkit-appearance:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;width:100%!important;min-width:0!important;min-height:44px!important;padding:10px 6px!important;border:1px solid #e8e8e8!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:visible!important;box-sizing:border-box!important;-webkit-tap-highlight-color:rgba(0,0,0,.08)!important;touch-action:manipulation!important}" +
+      ".mc-saranoni-size-thumb img{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;aspect-ratio:1/1!important;object-fit:cover!important;margin:0!important;padding:0!important;border:0!important;border-radius:2px!important;pointer-events:none!important}" +
+      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{margin:0!important;font:600 11px/1.15 Inter,Arial,sans-serif!important;max-width:100%!important;color:#444!important;text-align:center!important;white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;letter-spacing:0!important;pointer-events:none!important}" +
+      "@media (max-width:991px){.mc-saranoni-size-thumbs{gap:6px!important}.mc-saranoni-size-thumb{min-height:48px!important;padding:12px 2px!important}.mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{font:600 10.5px/1.1 Inter,Arial,sans-serif!important}}" +
       ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__price{margin:2px 0 0!important;font:500 12px/1.25 Inter,Arial,sans-serif!important;color:#555!important;text-align:center!important;white-space:nowrap!important;display:block!important;visibility:visible!important;opacity:1!important}" +
       ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}" +
       /* Size row must never sit in a scroll-host / get rail arrows. */
@@ -9155,6 +9191,7 @@
 
   function applySaranoniSizeVariantSelection(ctx, entry, updateHero) {
     if (!ctx || !entry || !ctx.select) return false;
+    markSaranoniUserInteraction();
     saranoniSizeActiveOptionId = String(entry.optionId || "");
     try {
       global.__MC_SAR_SIZE_USER_PICKED__ = true;
@@ -9571,6 +9608,7 @@
 
   function applyConfiguredColorSelection(ctx, entry, forcePhoto) {
     if (!ctx || !entry) return false;
+    markSaranoniUserInteraction();
     try {
       global.__MC_CONFIGURED_COLOR_USER_PICKED__ = true;
     } catch (eUserPick) {}
@@ -9584,14 +9622,13 @@
     syncConfiguredColorSwatchUi(ctx, true, forcePhoto);
     if (isSaranoniPdpPage()) {
       removeSaranoniDuplicateColorPicker();
-      try {
-        ensurePdpTitleInOptionsColumn();
-      } catch (eTitleKeep) {}
-      finalizeSaranoniInfoColumnOrder();
+      /* Do NOT finalizeSaranoniInfoColumnOrder() here — that rebuilds the
+         accordion on every color tap and makes Features/size taps feel dead
+         on phones. Keep title + variant order only. */
       try {
         ensurePdpTitleInOptionsColumn();
         ensureSaranoniVariantsBelowPrice();
-      } catch (eTitleKeep2) {}
+      } catch (eTitleKeep) {}
     }
     return true;
   }
@@ -10463,12 +10500,14 @@
       ".mc-configured-color-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
       "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,html body.mc-saranoni-pdp .mc-saranoni-swatches{display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;max-width:100%!important;padding:0 0 6px!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
       "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
-      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important}" +
-      ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}" +
+      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important;-webkit-tap-highlight-color:rgba(0,0,0,.08)!important;touch-action:manipulation!important}" +
+      ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;pointer-events:none!important}" +
       ".mc-configured-color-swatch.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
-      ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:72px!important;min-height:36px!important;border-radius:4px!important;padding:6px 12px!important}" +
-      ".mc-configured-color-swatch__text{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;white-space:normal!important;text-align:center!important}" +
-      ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}";
+      ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:72px!important;min-height:44px!important;border-radius:4px!important;padding:6px 12px!important}" +
+      ".mc-configured-color-swatch__text{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;white-space:normal!important;text-align:center!important;pointer-events:none!important}" +
+      ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}" +
+      "html body.mc-saranoni-pdp .mc-acc-header{touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(0,0,0,.06)!important;min-height:44px!important}" +
+      "html body.mc-saranoni-pdp .mc-acc-header .mc-acc-label,html body.mc-saranoni-pdp .mc-acc-header .mc-acc-chevron{pointer-events:none!important}";
   }
 
   function ensureSaranoniScrollArrowCss() {
@@ -14015,6 +14054,17 @@ function revealBeanBagRelated() {
 
   if (!global.__MC_PDP_AUTH_CTA_CAPTURE__) {
     global.__MC_PDP_AUTH_CTA_CAPTURE__ = true;
+    function handleSaranoniSizeThumbClick(btn) {
+      if (!btn || !isSaranoniPdpPage()) return false;
+      var optionId = btn.getAttribute("data-option-id");
+      if (!optionId) return false;
+      var ctx = findSaranoniSizeVariantContext();
+      if (!ctx) return false;
+      var entry = resolveConfiguredColorEntry(ctx, optionId);
+      if (!entry) return false;
+      applySaranoniSizeVariantSelection(ctx, entry, true);
+      return true;
+    }
     global.document.addEventListener(
       "click",
       function (e) {
@@ -14026,6 +14076,15 @@ function revealBeanBagRelated() {
           e.stopPropagation();
           e.stopImmediatePropagation();
           handleConfiguredColorSwatchClick(configuredColorSwatch);
+          return;
+        }
+        var sizeThumb =
+          e.target && e.target.closest ? e.target.closest(".mc-saranoni-size-thumb") : null;
+        if (sizeThumb) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          handleSaranoniSizeThumbClick(sizeThumb);
           return;
         }
         if (typeof global.mcHandleLoginCtaClick === "function") {
