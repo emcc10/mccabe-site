@@ -594,12 +594,23 @@ verify_live_template_http "$TEMPLATE_ENFORCER_TAG"
 echo ""
 echo "Category/product HTML is Volusion-BAKED: after SFTP template updates, open Volusion"
 echo "Design → File Editor → template_266.html → Save once so /category-s/*.htm picks up changes."
-echo "If still broken, Cloudflare Purge by URL:"
+echo "If homepage/PLP still jumbled, Cloudflare Purge by URL (1-year cache on ?v=):"
+echo "  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260725fix3"
+echo "  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260727001fix1"
 echo "  /v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"
 echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
 echo ""
+echo "=== Cloudflare purge (optional CLOUDFLARE_API_TOKEN + CLOUDFLARE_ZONE_ID) ==="
+python3 scripts/purge_cloudflare_storefront.py || true
+echo ""
+echo "=== Patch baked .htm enforcer refs via SFTP (no Cloudflare needed) ==="
+python3 scripts/patch_baked_html_enforcer.py || true
+echo ""
 echo "=== Live storefront verify (soft — does not fail CI) ==="
 python3 scripts/verify_live_plp_deploy.py --soft || true
+echo ""
+echo "NO CLOUDFLARE? Volusion Design → File Editor → template_266.html → Save once."
+echo "That rebakes / and category pages to the new enforcer ?v= (already cached correctly)."
 
 echo "=== Core deploy gate (template + custom-safe + mccabe-overrides — SFTP MD5 + HTTP markers) ==="
 set +e

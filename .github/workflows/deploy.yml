@@ -135,6 +135,14 @@ jobs:
         continue-on-error: true
         run: python3 scripts/verify_live_plp_deploy.py --soft
 
+      - name: Purge Cloudflare sticky asset URLs (optional secrets)
+        if: steps.deploy.outcome == 'success'
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        run: python3 scripts/purge_cloudflare_storefront.py
+
       - name: Deploy summary
         if: always()
         run: |
@@ -148,4 +156,6 @@ jobs:
           echo "Quick browser checks:"
           echo "  fetch('/v/vspfiles/js/mc-pdp-auth-cta-fix.js?'+Date.now()).then(r=>r.text()).then(t=>console.log(t.includes('mcEnsurePdpPriceStack')))"
           echo "  fetch('/v/vspfiles/js/mc-pdp-price-stack.js?'+Date.now()).then(r=>console.log(r.status))"
+          echo "CRITICAL if homepage still jumbled: Cloudflare Purge URL"
+          echo "  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260725fix3"
           echo "Rebake: Volusion Design → File Editor → template_266.html → Save (for template/baked .htm changes)"
