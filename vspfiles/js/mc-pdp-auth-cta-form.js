@@ -11,7 +11,7 @@
   var VERSION = "20260725tap4";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725039;
+  var DEPLOY_RANK = 20260725040;
   var ALT_VIEW_ROW_VER = "20260725altmatch1";
   var ENFORCER_WANT = "20260727001fix1";
   try {
