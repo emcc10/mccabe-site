@@ -13,12 +13,40 @@
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
   var DEPLOY_RANK = 20260725039;
   var ALT_VIEW_ROW_VER = "20260725altmatch1";
+  var ENFORCER_WANT = "20260727001fix1";
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
     global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ = DEPLOY_RANK;
     global.__MC_PDP_AUTH_CTA_MAX_VER__ = VERSION;
   } catch (eMax) {}
+  /* Baked pages load auth-cta with &mcrd= (CDN miss). Use that to also pull a
+     fresh enforcer when the static ?v=form3 URL is still a year-long HIT. */
+  try {
+    var enfDigits = parseInt(String(global.__MC_PLP_ENFORCER_VER__ || "").replace(/\D/g, ""), 10) || 0;
+    var wantDigits = parseInt(String(ENFORCER_WANT).replace(/\D/g, ""), 10) || 0;
+    if (enfDigits < wantDigits && !global.__MC_PLP_ENFORCER_HOTLOAD__) {
+      global.__MC_PLP_ENFORCER_HOTLOAD__ = true;
+      global.document.querySelectorAll('script[src*="mc-plp-enforcer"]').forEach(function (oldEnf) {
+        try { oldEnf.remove(); } catch (eRmEnf) {}
+      });
+      try {
+        delete global.__MC_PLP_ENFORCER__;
+        delete global.__MC_PLP_ENFORCER_VER__;
+        delete global.mcPlpEnforcerRun;
+      } catch (eDelEnf) {}
+      var enfScript = global.document.createElement("script");
+      enfScript.id = "mc-plp-enforcer-js";
+      enfScript.src =
+        "/v/vspfiles/js/mc-plp-enforcer.js?v=" + ENFORCER_WANT + "&mcrd=" + Date.now();
+      enfScript.onload = function () {
+        try {
+          global.mcPlpEnforcerRun && global.mcPlpEnforcerRun();
+        } catch (eEnfRun) {}
+      };
+      (global.document.head || global.document.documentElement).appendChild(enfScript);
+    }
+  } catch (eEnfHot) {}
   /* Do NOT strip form.js script tags. Baked boots require tag presence and
      __MC_DEPLOY_FP__==="20260725fix3"; stripping caused endless reinject/loading loops. */
 

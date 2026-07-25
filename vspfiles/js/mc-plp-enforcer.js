@@ -1,6 +1,6 @@
 ﻿/**
  * PLP fixes â€” DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260723restore13 â€” bean bag free-ship img fallback (no icon font)
+ * MC_PLP_ENFORCER_20260727001fix1 â€” CDN unfreeze: beat 202607259999 latch + home grid
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
@@ -9,8 +9,9 @@
 
   /* forceLoveyStyleCta REMOVED 20260722manual4 â€” was unloading CTA and freezing lovey PDPs */
 
-  /* Digit string must beat prior live latch 202607259999 or this file no-ops. */
-  var VERSION = "20260726001home1"; /* home featured parallel-table convert + nav */
+  /* Digit string must beat prior live latch 202607259999 or this file no-ops.
+     20260726001 alone LOSES to 9999; trailing fix1 makes 202607270011 > 202607259999. */
+  var VERSION = "20260727001fix1"; /* CDN unfreeze + home featured parallel-table convert */
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
