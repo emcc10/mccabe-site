@@ -1,9 +1,10 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260725alt3 — never yank row out of host (orphan hosts grew the page).
+  /* MC_ALT_VIEW_ROW_20260725baby1 — ignore Saranoni size-thumb clicks (404 data-main-image).
      Prefer -altviewN over Volusion -N restore leftovers. */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725alt3__) return;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725baby1__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260725baby1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725alt3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725alt2__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725hum1__ = true;
@@ -22,7 +23,7 @@
   var ROW_ID = "mc-pdp-alt-view-row";
   var TRACK_CLASS = "mc-pdp-alt-view-row__track";
   var MAX_ALT_VIEWS = 64;
-  var ALT_PROBE_VER = "20260725alt3";
+  var ALT_PROBE_VER = "20260725baby1";
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
@@ -276,8 +277,17 @@
 
   function variantHeroFromClickTarget(target) {
     if (!target || !target.closest) return "";
-    var btn = target.closest(".mc-configured-color-swatch,.mc-saranoni-color-picker__thumbs a,[data-main-image]");
+    /* Size chips are owned by mc-pdp-auth-cta-form.js. Their data-main-image is
+       often a missing size-only file (Baby Bamboni Lite Sets 1479/1483/1484),
+       and holdHero would pin the main photo to a blue "?" for 10s. */
+    if (target.closest(".mc-saranoni-size-thumb, #mc-saranoni-size-thumbs, #mc-saranoni-size-label")) {
+      return "";
+    }
+    var btn = target.closest(
+      ".mc-configured-color-swatch,.mc-saranoni-color-picker__thumbs a,[data-main-image]"
+    );
     if (!btn) return "";
+    if (btn.classList && btn.classList.contains("mc-saranoni-size-thumb")) return "";
     var main = btn.getAttribute("data-main-image") || "";
     var optionId = btn.getAttribute("data-option-id") || "";
     var code = productCode();
