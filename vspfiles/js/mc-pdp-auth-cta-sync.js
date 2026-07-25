@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725alt2 — stop alt-row chin1/hum1 reload loop; keep Nest layout
-  var MC_DEPLOY_FINGERPRINT = "20260725alt2";
+  // MC_DEPLOY_FINGERPRINT_20260725loop1 — stop baked-boot reinject loop (FP must stay fix3)
+  var MC_DEPLOY_FINGERPRINT = "20260725fix3";
   var VERSION = "20260725alt2";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725032;
+  var DEPLOY_RANK = 20260725033;
   var ALT_VIEW_ROW_VER = "20260725alt2";
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
@@ -19,15 +19,8 @@
     global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ = DEPLOY_RANK;
     global.__MC_PDP_AUTH_CTA_MAX_VER__ = VERSION;
   } catch (eMax) {}
-  /* Baked Volusion pages still inject ancient mc-pdp-auth-cta-fix.js (?v=sarmob1).
-     Remove those tags so only this generation owns PDP layout. */
-  try {
-    global.document.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
-      var src = String(old.getAttribute("src") || "");
-      if (src.indexOf(VERSION) !== -1) return;
-      try { old.remove(); } catch (eRmFix) {}
-    });
-  } catch (eStripFix) {}
+  /* Do NOT strip form.js script tags. Baked boots require tag presence and
+     __MC_DEPLOY_FP__==="20260725fix3"; stripping caused endless reinject/loading loops. */
 
   /* Storefront HTML can lag template rebake — force alt-view-row to this fingerprint.
      Must use ALT_VIEW_ROW_VER (not VERSION) so we never fight ensureFreshSaranoniAltViewRowScript. */

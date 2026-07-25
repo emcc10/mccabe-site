@@ -9,7 +9,7 @@
 
   /* forceLoveyStyleCta REMOVED 20260722manual4 â€” was unloading CTA and freezing lovey PDPs */
 
-  var VERSION = "20260725bbsw1";
+  var VERSION = "202607259999"; /* digits >= baked restore12 bridge W */
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -17,28 +17,31 @@
   }
 
   var PLP_MAT = "#ffffff";
-  if (plpVerNum(global.__MC_PLP_ENFORCER_VER__) >= plpVerNum(VERSION)) return;
+  if (plpVerNum(global.__MC_PLP_ENFORCER_VER__) >= plpVerNum(VERSION)) {
+    /* Baked PLP bridge deletes VER and reloads unless mcPlpEnforcerRun exists.
+       Keep a no-op so restore12/20260518e boots stop thrashing. */
+    if (typeof global.mcPlpEnforcerRun !== "function") {
+      global.mcPlpEnforcerRun = function () {};
+    }
+    return;
+  }
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
+  /* Satisfy baked bridge W="20260723restore12" digit compare (restore12 => 2026072312). */
+  global.__MC_PLP_ENFORCER_VER__ = "202607259999";
   global.__MC_PLP_ENFORCER__ = true;
 
   function upgradePdpAuthCtaForm() {
     try {
       if (!global.document.getElementById("v65-product-parent")) return;
-      var WANT = "20260725bbsw1";
-      var WANT_RANK = 20260725028;
+      var WANT_RANK = 20260725033;
       var curRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
       if (curRank >= WANT_RANK) return;
-      if (String(global.__MC_DEPLOY_FP__ || "") === WANT) return;
-      if (global.document.documentElement.getAttribute("data-mc-plp-form-upgrade") === WANT) return;
-      global.document.documentElement.setAttribute("data-mc-plp-form-upgrade", WANT);
-      global.document.querySelectorAll('script[src*="mc-pdp-auth-cta-form.js"],script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
-        var src = String(old.getAttribute("src") || "");
-        if (src.indexOf(WANT) !== -1) return;
-        try { old.remove(); } catch (eRm) {}
-      });
+      if (global.document.querySelector('script[src*="mc-pdp-auth-cta-form.js"]')) return;
+      if (global.document.documentElement.getAttribute("data-mc-plp-form-upgrade") === "loop1") return;
+      global.document.documentElement.setAttribute("data-mc-plp-form-upgrade", "loop1");
       var s = global.document.createElement("script");
       s.id = "mc-pdp-auth-cta-form-js";
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" + WANT + "&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725alt2&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eUp) {}
@@ -47,24 +50,20 @@
   function upgradeAltViewRow() {
     try {
       if (!global.document.getElementById("v65-product-parent")) return;
-      var WANT = "20260725fix3";
-      if (global.document.documentElement.getAttribute("data-mc-plp-altrow-upgrade") === WANT) return;
-      var existing = global.document.querySelector('script[src*="mc-pdp-alt-view-row.js"]');
-      if (existing && String(existing.getAttribute("src") || "").indexOf(WANT) !== -1) {
-        global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", WANT);
+      if (global.__MC_TMH_ALT_VIEW_ROW_20260725alt2__) {
+        global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "alt2");
         return;
       }
-      global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", WANT);
-      global.document.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
-        try { old.remove(); } catch (eRm) {}
-      });
-      try {
-        delete global.__MC_TMH_ALT_VIEW_ROW_20260725fix2__;
-        delete global.__MC_TMH_ALT_VIEW_ROW_20260725fix3__;
-      } catch (eDel) {}
+      if (global.document.documentElement.getAttribute("data-mc-plp-altrow-upgrade") === "alt2") return;
+      var existing = global.document.querySelector('script[src*="mc-pdp-alt-view-row.js"]');
+      if (existing) {
+        global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "alt2");
+        return;
+      }
+      global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "alt2");
       var s = global.document.createElement("script");
       s.id = "mc-pdp-alt-view-row-js";
-      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + WANT + "&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260725alt2&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eAlt) {}
@@ -2133,7 +2132,7 @@
      re-inject the script on every call. Confirmed against the live deployed script on
      20260713 â€” update this if mc-pdp-auth-cta-fix.js's VERSION is bumped again.
      MC_PDP_AUTH_VERSION_GUARD_FIX_20260713 */
-  var PDP_AUTH_WANT = "20260725bbsw1";
+  var PDP_AUTH_WANT_RANK = 20260725033;
 
   function isSaranoniPdpPage() {
     try {
@@ -2158,25 +2157,12 @@
         (b && b.classList.contains("productdetails")) ||
         !!global.document.getElementById("v65-product-parent");
       if (!onPdp) return;
-      /* template_266.html already loads mc-pdp-auth-cta-fix.js on every PDP via its own
-         head-boot + fallback loaders. If a copy is already present, do not remove it and
-         inject another â€” that produced multiple live copies of the same ~11k-line script
-         running concurrently on the same PDP. MC_PDP_AUTH_DUPLICATE_LOAD_FIX_20260713 */
-      if (global.document.querySelector('script[src*="mc-pdp-auth-cta-fix.js"]')) return;
-      if (String(global.__MC_PDP_AUTH_CTA_FIX_VER__ || "") === PDP_AUTH_WANT) return;
-      global.document
-        .querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]')
-        .forEach(function (old) {
-          try {
-            old.remove();
-          } catch (eRm) {}
-        });
-      delete global.__MC_PDP_AUTH_CTA_FIX_VER__;
+      if (Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) >= PDP_AUTH_WANT_RANK) return;
+      if (global.document.querySelector('script[src*="mc-pdp-auth-cta-form.js"]')) return;
+      if (global.__MC_PDP_AUTH_CTA_FIX_VER__) return;
       var s = global.document.createElement("script");
       s.src =
-        "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" +
-        PDP_AUTH_WANT +
-        "&mcrd=" +
+        "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725alt2&mcrd=" +
         Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
