@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725fix3 — Additional $ contrast + Canova alt cleanup
-  var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260725fix3";
+  // MC_DEPLOY_FINGERPRINT_20260725bbsw1 — BB swatch freeze fix (no MO reassert loop)
+  var MC_DEPLOY_FINGERPRINT = "20260725bbsw1";
+  var VERSION = "20260725bbsw1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725025;
+  var DEPLOY_RANK = 20260725028;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -4363,6 +4363,8 @@
      the purchase column has been assembled. This avoids depending on a broad
      stylesheet selector racing the legacy table layout. */
   function applyBeanBagMobilePurchaseOffset(infoColumn) {
+    /* Mobile Cordaroys/BB must stack media then info — never pull the purchase
+       column up over the hero (old -280px offset caused logo/price overlap). */
     if (!infoColumn || !global.matchMedia || !global.matchMedia("(max-width: 991px)").matches) return;
     var root = global.document.getElementById("content_area");
     if (!root) return;
@@ -4373,8 +4375,8 @@
     });
     targets.forEach(function (cell) {
       try {
-        cell.style.setProperty("padding-top", "78px", "important");
-        cell.style.setProperty("margin-top", "-280px", "important");
+        cell.style.setProperty("padding-top", "0", "important");
+        cell.style.setProperty("margin-top", "0", "important");
       } catch (eMobileOffset) {}
     });
   }
@@ -10295,7 +10297,7 @@
       "html body.mc-saranoni-pdp .mc-saranoni-scroll-host{position:relative!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}" +
       "html body.mc-saranoni-pdp .mc-saranoni-scroll-host .mc-saranoni-scroll-rail{padding-left:28px!important;padding-right:28px!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
       "html body.mc-saranoni-pdp .mc-saranoni-scroll-host .mc-saranoni-scroll-rail::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
-      "html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow{appearance:none!important;-webkit-appearance:none!important;position:absolute!important;top:50%!important;transform:translateY(-50%)!important;z-index:5!important;width:22px!important;height:38px!important;border:1px solid #ddd!important;border-radius:999px!important;background:rgba(255,255,255,.96)!important;color:#444!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font:700 18px/1 Arial,sans-serif!important;cursor:pointer!important;box-shadow:0 1px 3px rgba(0,0,0,.08)!important}" +
+      "html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow{appearance:none!important;-webkit-appearance:none!important;position:absolute!important;top:0!important;transform:translateY(0)!important;z-index:5!important;width:22px!important;height:38px!important;border:1px solid #ddd!important;border-radius:999px!important;background:rgba(255,255,255,.96)!important;color:#444!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font:700 18px/1 Arial,sans-serif!important;cursor:pointer!important;box-shadow:0 1px 3px rgba(0,0,0,.08)!important}" +
       "html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow--prev{left:0!important}" +
       "html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow--next{right:0!important}" +
       "html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow[disabled]{opacity:.25!important;pointer-events:none!important}";
@@ -10383,6 +10385,16 @@
         next.style.setProperty("display", hasOverflow ? "flex" : "none", "important");
         prev.disabled = !hasOverflow || rail.scrollLeft <= 2;
         next.disabled = !hasOverflow || rail.scrollLeft >= max;
+        /* Pin arrows to the variant rail midline so accordion open/close
+           does not shift them when the scroll-host height changes. */
+        var railTop = rail.offsetTop || 0;
+        var railMid = railTop + Math.round((rail.offsetHeight || 38) / 2);
+        var arrowH = prev.offsetHeight || 38;
+        var topPx = Math.max(0, railMid - Math.round(arrowH / 2)) + "px";
+        prev.style.setProperty("top", topPx, "important");
+        next.style.setProperty("top", topPx, "important");
+        prev.style.setProperty("transform", "none", "important");
+        next.style.setProperty("transform", "none", "important");
       }
       if (rail.dataset.mcSaranoniArrowBound !== "1") {
         rail.dataset.mcSaranoniArrowBound = "1";
@@ -11912,7 +11924,11 @@
     "805": "https://cordaroys.com/cdn/shop/files/FC-FUR-TN.jpg?v=1762183620",
     "807": "https://cordaroys.com/cdn/shop/files/FC-FUR-WH.jpg?v=1762183620",
     "809": "https://cordaroys.com/cdn/shop/files/FC-FUR-GR.jpg?v=1762183620",
-    "811": "https://cordaroys.com/cdn/shop/files/FC-FUR-BK.jpg?v=1762183620"
+    "811": "https://cordaroys.com/cdn/shop/files/FC-FUR-BK.jpg?v=1762183620",
+    "819": "https://cordaroys.com/cdn/shop/files/FC-CW-BK.jpg",
+    "815": "https://cordaroys.com/cdn/shop/files/FC-CW-CF.jpg",
+    "813": "https://cordaroys.com/cdn/shop/files/FC-CW-CG.jpg",
+    "817": "https://cordaroys.com/cdn/shop/files/FC-CW-IV.jpg"
   };
   var BB_COVER_ASSET_BY_LABEL = {
     "faux fur|pink": ["https://cordaroys.com/cdn/shop/files/FC-FUR-PK.jpg?v=1763914701", "https://cordaroys.com/cdn/shop/files/faux-fur-pink.jpg?v=1759932371&width=80"],
@@ -11929,15 +11945,30 @@
     "chenille|very peri": ["https://cordaroys.com/cdn/shop/files/FC-CH-VP.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-very-peri-purple.jpg?v=1759932371&width=80"],
     "chenille|tan": ["https://cordaroys.com/cdn/shop/files/FC-CH-TN.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-tan.jpg?v=1759932370&width=80"],
     "chenille|rainforest": ["https://cordaroys.com/cdn/shop/files/FC-CH-RF.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-rainforest.jpg?v=1759932371&width=80"],
-    "chenille|moss": ["https://cordaroys.com/cdn/shop/files/FC-CH-MO.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-moss.jpg?v=1759932370&width=80"]
+    "chenille|moss": ["https://cordaroys.com/cdn/shop/files/FC-CH-MO.jpg?v=1769458046", "https://cordaroys.com/cdn/shop/files/chenille-moss.jpg?v=1759932370&width=80"],
+    "faux leather|black": ["https://cordaroys.com/cdn/shop/files/FC-CW-BK.jpg", "/v/vspfiles/swatches/corduroy/fauxLeather-black.jpg"],
+    "faux leather|coffee": ["https://cordaroys.com/cdn/shop/files/FC-CW-CF.jpg", "/v/vspfiles/swatches/corduroy/fauxLeather-coffee.jpg"],
+    "faux leather|cognac": ["https://cordaroys.com/cdn/shop/files/FC-CW-CG.jpg", "/v/vspfiles/swatches/corduroy/fauxLeather-cognac.jpg"],
+    "faux leather|ivory": ["https://cordaroys.com/cdn/shop/files/FC-CW-IV.jpg", "/v/vspfiles/swatches/corduroy/fauxLeather-ivory.jpg"]
   };
 
   function bbCoverAsset(label) {
     var normalized = String(label || "").toLowerCase().replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
-    var color = normalized.split("/").pop().replace(/^faux fur\s+/i, "").replace(/^chenille\s+/i, "").trim();
+    var color = normalized.split("/").pop()
+      .replace(/^faux\s+leather\s+/i, "")
+      .replace(/^faux\s+fur\s+/i, "")
+      .replace(/^chenille\s+/i, "")
+      .trim();
     var codeEl = global.document.querySelector('input[name="ProductCode"],input[name="productcode"]');
     var code = String(global.global_Current_ProductCode || (codeEl && codeEl.value) || "");
-    var family = /chenille/i.test(normalized) || /CHENILLE/i.test(code) ? "chenille" : "faux fur";
+    var family = "faux fur";
+    if (/faux\s*leather/i.test(normalized) || /FAUX-?LEATHER/i.test(code) || /BB-FAUX(?!-FUR)/i.test(code)) {
+      family = "faux leather";
+    } else if (/chenille/i.test(normalized) || /CHENILLE/i.test(code)) {
+      family = "chenille";
+    } else if (/faux\s*fur/i.test(normalized) || /FAUX-?FUR/i.test(code)) {
+      family = "faux fur";
+    }
     var pair = BB_COVER_ASSET_BY_LABEL[family + "|" + color];
     return pair ? { hero: pair[0], thumb: pair[1] } : null;
   }
@@ -11981,13 +12012,30 @@
       return asset ? asset.hero : null;
     }
 
+    function bbTargetSrc(imgFile) {
+      if (!imgFile) return "";
+      if (/^(?:https?:)?\/\//i.test(imgFile) || String(imgFile).charAt(0) === "/") return String(imgFile);
+      return "/v/vspfiles/images/" + imgFile;
+    }
+
+    function bbSrcLooksLikeWanted(src, want) {
+      var s = String(src || "").split("?")[0];
+      var w = String(want || "").split("?")[0];
+      if (!s || !w) return false;
+      if (s === w) return true;
+      if (s.replace(/^https:/, "") === w.replace(/^https:/, "")) return true;
+      var wPath = w.replace(/^https?:/, "");
+      return s.indexOf(wPath) >= 0 || (wPath && s.slice(-Math.min(wPath.length, 48)) === wPath.slice(-Math.min(wPath.length, 48)));
+    }
+
     function applyBbImage(imgFile) {
       var mainImg = global.document.getElementById("product_photo");
-      if (!mainImg) return;
+      if (!mainImg || !imgFile) return;
       activeBbImageFile = imgFile;
-      var targetSrc = /^(?:https?:)?\/\//i.test(imgFile) ? imgFile : "/v/vspfiles/images/" + imgFile;
+      var targetSrc = bbTargetSrc(imgFile);
       try {
-        if (mainImg.getAttribute("src") !== targetSrc) mainImg.src = targetSrc;
+        var cur = mainImg.getAttribute("src") || "";
+        if (!bbSrcLooksLikeWanted(cur, targetSrc)) mainImg.src = targetSrc;
         // A stale srcset lets the browser re-pick the previous cover; remove it.
         if (mainImg.hasAttribute("srcset")) mainImg.removeAttribute("srcset");
         mainImg.style.setProperty("opacity", "1", "important");
@@ -12016,28 +12064,17 @@
       } catch (eAlt) {}
     }
 
-    function reassertBbImageOnce(imgFile) {
-      var mainImg = global.document.getElementById("product_photo");
-      if (!mainImg) return;
-      if (mainImg && typeof global.MutationObserver === "function") {
-        var bbObs = new global.MutationObserver(function (mutations, obs) {
-          var src = mainImg.getAttribute("src") || "";
-          if (src !== imgFile && src !== imgFile.replace(/^https:/, "")) {
-            applyBbImage(imgFile);
-          }
-          obs.disconnect();
-        });
-        bbObs.observe(mainImg, { attributes: true, attributeFilter: ["src"] });
-        global.setTimeout(function () { try { bbObs.disconnect(); } catch (e) {} }, 2000);
-      } else {
-        global.setTimeout(function () { applyBbImage(imgFile); }, 600);
-      }
-    }
-
+    /* Timed re-apply only — never a MutationObserver (legacy Volusion/option
+       scripts can fight src forever and freeze the page on swatch click). */
     function scheduleBbImageLock(imgFile) {
-      [60, 180, 450, 900, 1600, 2800, 5000].forEach(function (ms) {
+      var want = bbTargetSrc(imgFile);
+      [50, 200, 600, 1200].forEach(function (ms) {
         global.setTimeout(function () {
-          if (activeBbImageFile === imgFile) applyBbImage(imgFile);
+          if (activeBbImageFile !== imgFile) return;
+          var mainImg = global.document.getElementById("product_photo");
+          if (!mainImg) return;
+          if (bbSrcLooksLikeWanted(mainImg.getAttribute("src") || "", want)) return;
+          applyBbImage(imgFile);
         }, ms);
       });
     }
@@ -12082,6 +12119,12 @@
       var optVal = selected.optVal;
 
       if (!imgFile) return;
+      /* Block bubble-phase legacy handlers that rewrite the hero to missing
+         /v/vspfiles/images/bb-fauxLeather-*.jpg paths. Avoid stopImmediatePropagation. */
+      try {
+        eBb.preventDefault();
+        eBb.stopPropagation();
+      } catch (eStop) {}
 
       if (coverSel && optVal) {
         if (typeof global.change_option === "function") {
@@ -12119,7 +12162,6 @@
       } catch (eAct) {}
 
       applyBbImage(imgFile);
-      reassertBbImageOnce(imgFile);
       scheduleBbImageLock(imgFile);
     }, true);
 
@@ -12131,7 +12173,6 @@
       var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[String(sel.value || "")] || bbImageForSwatchLabel(opt ? opt.text : "");
       if (!imgFile) return;
       applyBbImage(imgFile);
-      reassertBbImageOnce(imgFile);
       scheduleBbImageLock(imgFile);
     }, true);
   }

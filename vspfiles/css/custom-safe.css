@@ -23997,8 +23997,8 @@ html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow {
   appearance: none !important;
   -webkit-appearance: none !important;
   position: absolute !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
+  top: 0 !important;
+  transform: none !important;
   z-index: 5 !important;
   width: 22px !important;
   height: 38px !important;
@@ -25785,6 +25785,56 @@ html body.mc-bean-bag-pdp #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__l
   color: #444 !important;
 }
 /* END REMOVABLE: bean bag accordion features color 20260723restore1 */
+
+/* BEGIN REMOVABLE: BB/mattress mobile stack + accordion wrap 20260725bbmob1 */
+@media (max-width: 991px) {
+  html body.mc-bean-bag-pdp td.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-info,
+  html body.mc-cordaroys-pdp td.mc-pdp-options-td,
+  html body.mc-cordaroys-pdp td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp #mc-bb-mobile-info-host,
+  html body.mc-cordaroys-pdp #mc-bb-mobile-info-host {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html body.mc-bean-bag-pdp #mc-pdp-accordion,
+  html body.mc-cordaroys-pdp #mc-pdp-accordion,
+  html body.mc-bean-bag-pdp #mc-pdp-accordion .mc-acc-row,
+  html body.mc-cordaroys-pdp #mc-pdp-accordion .mc-acc-row,
+  html body.mc-bean-bag-pdp #mc-pdp-accordion .mc-acc-panel,
+  html body.mc-cordaroys-pdp #mc-pdp-accordion .mc-acc-panel,
+  html body.mc-bean-bag-pdp #mc-pdp-accordion .mc-acc-content,
+  html body.mc-cordaroys-pdp #mc-pdp-accordion .mc-acc-content,
+  html body.mc-bean-bag-pdp #mc-pdp-accordion #mc-pdp-features,
+  html body.mc-cordaroys-pdp #mc-pdp-accordion #mc-pdp-features,
+  html body.mc-bean-bag-pdp #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__body,
+  html body.mc-cordaroys-pdp #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__body,
+  html body.mc-bean-bag-pdp #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list,
+  html body.mc-cordaroys-pdp #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list,
+  html body.mc-bean-bag-pdp #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list li,
+  html body.mc-cordaroys-pdp #mc-pdp-accordion #mc-pdp-features .mc-pdp-features__list li,
+  html body.mc-bean-bag-pdp #mc-pdp-accordion #mc-pdp-description-below-features,
+  html body.mc-cordaroys-pdp #mc-pdp-accordion #mc-pdp-description-below-features {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* Keep Saranoni variant rail arrows aligned to the rail, not host center. */
+html body.mc-saranoni-pdp .mc-saranoni-scroll-host > .mc-saranoni-scroll-arrow {
+  top: 0 !important;
+  transform: none !important;
+}
+/* END REMOVABLE: BB/mattress mobile stack + accordion wrap 20260725bbmob1 */
 
 /* BEGIN REMOVABLE: generic furniture accordion desc 20260723restore2 */
 html body.mc-pdp-accordion-pdp:not(.mc-steve-silver-altview-pdp):not(.mc-saranoni-pdp):not(.mc-mahjong-house-pdp)
