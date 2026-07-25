@@ -1,9 +1,10 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260725hum1 — stop host/reparent thrash (page jump + alt flash).
+  /* MC_ALT_VIEW_ROW_20260725alt2 — stop host/reparent thrash + script reload loop.
      Prefer -altviewN over Volusion -N restore leftovers. */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725hum1__) return;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725alt2__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260725alt2__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725hum1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725gat1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725fix3__ = true;
@@ -20,7 +21,7 @@
   var ROW_ID = "mc-pdp-alt-view-row";
   var TRACK_CLASS = "mc-pdp-alt-view-row__track";
   var MAX_ALT_VIEWS = 64;
-  var ALT_PROBE_VER = "20260725hum1";
+  var ALT_PROBE_VER = "20260725alt2";
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
