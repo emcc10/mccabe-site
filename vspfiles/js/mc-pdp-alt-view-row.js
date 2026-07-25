@@ -1,9 +1,10 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260725alt2 — stop host/reparent thrash + script reload loop.
+  /* MC_ALT_VIEW_ROW_20260725alt3 — never yank row out of host (orphan hosts grew the page).
      Prefer -altviewN over Volusion -N restore leftovers. */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725alt2__) return;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725alt3__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260725alt3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725alt2__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725hum1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725gat1__ = true;
@@ -21,7 +22,7 @@
   var ROW_ID = "mc-pdp-alt-view-row";
   var TRACK_CLASS = "mc-pdp-alt-view-row__track";
   var MAX_ALT_VIEWS = 64;
-  var ALT_PROBE_VER = "20260725alt2";
+  var ALT_PROBE_VER = "20260725alt3";
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
@@ -572,16 +573,31 @@
       if (heroBlock) mediaCell.insertBefore(row, heroBlock.nextSibling || null);
       else mediaCell.appendChild(row);
     } else {
-      /* Host wrap is intentional — never yank the row back into mediaCell
-         (that fought ensureAltRowScrollArrows and looped forever). */
+      /* Host wrap is intentional — never yank the row out of the host.
+         Moving only the row left empty #mc-pdp-alt-view-row-host nodes stacked
+         under the hero (Barron flicker + page growing downward). */
       var parent = row.parentNode;
-      var hosted =
-        parent &&
-        parent.id === "mc-pdp-alt-view-row-host" &&
-        mediaCell.contains(parent);
-      if (!hosted && parent !== mediaCell) {
-        var currentHeroBlock = directChild(mediaCell, hero);
-        if (currentHeroBlock) mediaCell.insertBefore(row, currentHeroBlock.nextSibling || null);
+      var hostEl =
+        (parent && parent.id === "mc-pdp-alt-view-row-host" && parent) ||
+        document.getElementById("mc-pdp-alt-view-row-host");
+      if (hostEl && row.parentNode !== hostEl) {
+        try { hostEl.appendChild(row); } catch (eRehost) {}
+      }
+      if (hostEl) {
+        if (!mediaCell.contains(hostEl)) {
+          var currentHeroBlock = directChild(mediaCell, hero);
+          if (currentHeroBlock) mediaCell.insertBefore(hostEl, currentHeroBlock.nextSibling || null);
+          else mediaCell.appendChild(hostEl);
+        }
+        /* Remove duplicate/orphan hosts left by older builds. */
+        Array.prototype.forEach.call(document.querySelectorAll("#mc-pdp-alt-view-row-host"), function (node) {
+          if (node !== hostEl && (!node.contains(row))) {
+            try { if (node.parentNode) node.parentNode.removeChild(node); } catch (eOrphan) {}
+          }
+        });
+      } else if (parent !== mediaCell) {
+        var heroBlock2 = directChild(mediaCell, hero);
+        if (heroBlock2) mediaCell.insertBefore(row, heroBlock2.nextSibling || null);
         else mediaCell.appendChild(row);
       }
     }
@@ -811,9 +827,39 @@
     window.setTimeout(schedule, delay);
   });
   if (window.MutationObserver) {
-    var observer = new window.MutationObserver(function () {
+    var observer = new window.MutationObserver(function (mutations) {
       if (altRowMutating) return;
-      schedule();
+      var i, j, nodes, node, ignore;
+      for (i = 0; i < mutations.length; i++) {
+        ignore = true;
+        nodes = [];
+        if (mutations[i].addedNodes && mutations[i].addedNodes.length) {
+          for (j = 0; j < mutations[i].addedNodes.length; j++) nodes.push(mutations[i].addedNodes[j]);
+        }
+        if (mutations[i].removedNodes && mutations[i].removedNodes.length) {
+          for (j = 0; j < mutations[i].removedNodes.length; j++) nodes.push(mutations[i].removedNodes[j]);
+        }
+        if (!nodes.length) {
+          node = mutations[i].target;
+          if (node && node.id !== "mc-pdp-alt-view-row-host" && node.id !== "mc-pdp-alt-view-row" &&
+              !(node.closest && (node.closest("#mc-pdp-alt-view-row-host") || node.closest("#mc-steve-silver-altviews-wrap")))) {
+            ignore = false;
+          }
+        } else {
+          for (j = 0; j < nodes.length; j++) {
+            node = nodes[j];
+            if (!node || node.nodeType !== 1) continue;
+            if (node.id === "mc-pdp-alt-view-row-host" || node.id === "mc-pdp-alt-view-row") continue;
+            if (node.closest && (node.closest("#mc-pdp-alt-view-row-host") || node.closest("#mc-steve-silver-altviews-wrap"))) continue;
+            ignore = false;
+            break;
+          }
+        }
+        if (!ignore) {
+          schedule();
+          return;
+        }
+      }
     });
     observer.observe(document.getElementById("v65-product-parent") || document.body, { childList: true, subtree: true });
   }

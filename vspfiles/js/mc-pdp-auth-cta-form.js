@@ -8,11 +8,11 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725loop1 — stop baked-boot reinject loop (FP must stay fix3)
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260725alt2";
+  var VERSION = "20260725alt3";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725033;
-  var ALT_VIEW_ROW_VER = "20260725alt2";
+  var DEPLOY_RANK = 20260725034;
+  var ALT_VIEW_ROW_VER = "20260725alt3";
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -13993,7 +13993,7 @@ function revealBeanBagRelated() {
 
 /* MC_STEVE_SILVER_ALT_VIEWS_20260620 — force -1 piece hero for all SS- PDPs (bedroom + upholstery). */
 (function (g, d) {
-  var SS_ALT_VER = "20260701sshero2";
+  var SS_ALT_VER = "20260725alt3";
 
   function normalizePhotoUrl(url) {
     if (typeof g.mcNormalizePhotoUrl === "function") return g.mcNormalizePhotoUrl(url);
@@ -14067,6 +14067,27 @@ function revealBeanBagRelated() {
   }
 
   function ensureAltViews(code, mediaCell, zoom) {
+    /* Custom mc-pdp-alt-view-row owns SS galleries. Rebuilding #altviews here
+       fought that row (hide/show + reparent), orphaned hosts, and pushed the
+       page downward (Barron flicker). */
+    var customRow = d.getElementById("mc-pdp-alt-view-row");
+    if (customRow && customRow.querySelector("a,img")) {
+      var ssWrap = d.getElementById("mc-steve-silver-altviews-wrap");
+      if (ssWrap) {
+        try {
+          ssWrap.style.setProperty("display", "none", "important");
+          ssWrap.setAttribute("data-mc-ss-alt-deferred", "1");
+        } catch (eHideWrap) {}
+      }
+      var nativeAlt = d.getElementById("altviews") || d.querySelector("span#altviews");
+      if (nativeAlt) {
+        try {
+          nativeAlt.style.setProperty("display", "none", "important");
+          nativeAlt.setAttribute("data-mc-altviews-suppressed", "1");
+        } catch (eHideAlt) {}
+      }
+      return;
+    }
     var altSlot = 2;
     var alt = d.getElementById("altviews") || d.querySelector("span#altviews");
     var altBuilt =
