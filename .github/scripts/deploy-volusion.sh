@@ -603,8 +603,14 @@ echo ""
 echo "=== Cloudflare purge (optional CLOUDFLARE_API_TOKEN + CLOUDFLARE_ZONE_ID) ==="
 python3 scripts/purge_cloudflare_storefront.py || true
 echo ""
+echo "=== Patch baked .htm enforcer refs via SFTP (no Cloudflare needed) ==="
+python3 scripts/patch_baked_html_enforcer.py || true
+echo ""
 echo "=== Live storefront verify (soft — does not fail CI) ==="
 python3 scripts/verify_live_plp_deploy.py --soft || true
+echo ""
+echo "NO CLOUDFLARE? Volusion Design → File Editor → template_266.html → Save once."
+echo "That rebakes / and category pages to the new enforcer ?v= (already cached correctly)."
 
 echo "=== Core deploy gate (template + custom-safe + mccabe-overrides — SFTP MD5 + HTTP markers) ==="
 set +e
