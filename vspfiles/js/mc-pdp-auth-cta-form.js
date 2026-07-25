@@ -8,10 +8,10 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260725tap3";
+  var VERSION = "20260725tap4";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725038;
+  var DEPLOY_RANK = 20260725039;
   var ALT_VIEW_ROW_VER = "20260725baby1";
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
@@ -10499,15 +10499,16 @@
       ".mc-configured-color-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
       "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches,html body.mc-saranoni-pdp .mc-saranoni-swatches{display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;max-width:100%!important;padding:0 0 6px!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}" +
       "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches::-webkit-scrollbar,html body.mc-saranoni-pdp .mc-saranoni-swatches::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}" +
-      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important;-webkit-tap-highlight-color:rgba(0,0,0,.08)!important;touch-action:manipulation!important;user-select:none!important;-webkit-user-select:none!important}" +
+      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 82px!important;width:82px!important;height:82px!important;padding:0!important;border:0!important;border-radius:4px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important;-webkit-tap-highlight-color:rgba(0,0,0,.08)!important;touch-action:manipulation!important;user-select:none!important;-webkit-user-select:none!important}" +
       ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;pointer-events:none!important}" +
       ".mc-configured-color-swatch.active{border:2px solid #111!important;box-shadow:0 0 0 1px #111 inset!important}" +
-      ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;min-width:72px!important;min-height:44px!important;border-radius:4px!important;padding:6px 12px!important}" +
+      ".mc-configured-color-swatch.mc-saranoni-text-swatch{width:auto!important;height:auto!important;flex:0 0 auto!important;min-width:72px!important;min-height:44px!important;border-radius:4px!important;padding:6px 12px!important}" +
       ".mc-configured-color-swatch__text{font:600 11px/1.2 Inter,Arial,sans-serif!important;color:#444!important;white-space:normal!important;text-align:center!important;pointer-events:none!important}" +
       ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}" +
-      /* Prefer vertical page scroll over horizontal rail pan so soft finger
-         moves do not cancel the tap before click fires. */
-      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches{touch-action:pan-y!important;-webkit-user-select:none!important;user-select:none!important}" +
+      /* Allow horizontal rail swipe again. pan-y-only blocked overflow scroll and
+         clipped trailing variants. Variant selection uses pointer-up + move
+         threshold, so pan-x no longer kills taps. */
+      "html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches{touch-action:pan-x pan-y!important;-webkit-user-select:none!important;user-select:none!important;overscroll-behavior-x:contain!important}" +
       "html body.mc-saranoni-pdp .mc-acc-header{touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(0,0,0,.06)!important;min-height:44px!important}" +
       "html body.mc-saranoni-pdp .mc-acc-header .mc-acc-label,html body.mc-saranoni-pdp .mc-acc-header .mc-acc-chevron{pointer-events:none!important}";
   }
@@ -10531,45 +10532,33 @@
 
   function ensureSaranoniRailArrows() {
     if (!isSaranoniPdpPage()) return;
-    /* Mobile: hide rail arrows — they sit absolute left/right and visually
-       appear on the sides of the main product image. Touch-scroll still works. */
-    try {
-      if (global.matchMedia && global.matchMedia("(max-width: 991px)").matches) {
-        global.document.querySelectorAll(".mc-saranoni-scroll-arrow").forEach(function (btn) {
-          try {
-            btn.style.setProperty("display", "none", "important");
-          } catch (eHideArr) {}
-        });
-        return;
-      }
-    } catch (eMq) {}
     ensureSaranoniScrollArrowCss();
+    var isMobile = false;
+    try {
+      isMobile = !!(global.matchMedia && global.matchMedia("(max-width: 991px)").matches);
+    } catch (eMq) {}
     [
       global.document.querySelector(".mc-configured-color-swatches.mc-saranoni-swatches")
       /* Size options use a 4-column wrap grid — never a scroll rail. */
     ].forEach(function (rail) {
       if (!rail || !rail.parentNode) return;
       var host = rail.parentNode;
-      /* Never promote the whole info column into a scroll host — that orphans
-         the rail above the logo and parks arrow buttons as column siblings. */
-      if (
+      /* Always host arrows on the swatch wrapper — never on the info/media
+         column (that parked arrows on the sides of the main product image). */
+      var wrapHost = global.document.getElementById("mc-configured-color-swatch-wrapper");
+      if (wrapHost) {
+        try {
+          if (rail.parentNode !== wrapHost) wrapHost.appendChild(rail);
+          host = wrapHost;
+        } catch (eRehost) {}
+      } else if (
         host &&
         host.matches &&
         host.matches(
           "td.mc-unified-pdp-info, td.mc-pdp-options-td, td.mc-pdp-media-td, td.mc-unified-pdp-media"
         )
       ) {
-        var wrapHost = global.document.getElementById("mc-configured-color-swatch-wrapper");
-        if (wrapHost) {
-          try {
-            wrapHost.appendChild(rail);
-            host = wrapHost;
-          } catch (eRehost) {
-            return;
-          }
-        } else {
-          return;
-        }
+        return;
       }
       host.classList.add("mc-saranoni-scroll-host");
       rail.classList.add("mc-saranoni-scroll-rail");
@@ -10615,12 +10604,18 @@
            does not shift them when the scroll-host height changes. */
         var railTop = rail.offsetTop || 0;
         var railMid = railTop + Math.round((rail.offsetHeight || 38) / 2);
-        var arrowH = prev.offsetHeight || 38;
+        var arrowH = prev.offsetHeight || (isMobile ? 34 : 38);
         var topPx = Math.max(0, railMid - Math.round(arrowH / 2)) + "px";
         prev.style.setProperty("top", topPx, "important");
         next.style.setProperty("top", topPx, "important");
         prev.style.setProperty("transform", "none", "important");
         next.style.setProperty("transform", "none", "important");
+        if (isMobile) {
+          prev.style.setProperty("width", "20px", "important");
+          next.style.setProperty("width", "20px", "important");
+          prev.style.setProperty("height", "34px", "important");
+          next.style.setProperty("height", "34px", "important");
+        }
       }
       if (rail.dataset.mcSaranoniArrowBound !== "1") {
         rail.dataset.mcSaranoniArrowBound = "1";
