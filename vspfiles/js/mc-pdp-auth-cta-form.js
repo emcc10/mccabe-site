@@ -8,10 +8,10 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260725tap2";
+  var VERSION = "20260725tap3";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725037;
+  var DEPLOY_RANK = 20260725038;
   var ALT_VIEW_ROW_VER = "20260725baby1";
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
@@ -12705,8 +12705,140 @@
     } catch (eHoistRel) {}
   }
 
+  function ensureRelatedPlpCardNavigation() {
+    if (global.__MC_RELATED_PLP_CARD_NAV_VER__ === VERSION) return;
+    global.__MC_RELATED_PLP_CARD_NAV_VER__ = VERSION;
+    function relatedCardHref(card) {
+      if (!card || !card.querySelector) return "";
+      var a =
+        card.querySelector(".mc-related-plp-card__media a[href]") ||
+        card.querySelector(".mc-related-plp-card__title a[href]") ||
+        card.querySelector("a[href]");
+      if (!a) return "";
+      return String(a.href || a.getAttribute("href") || "");
+    }
+    function relatedEventPoint(e) {
+      if (e.changedTouches && e.changedTouches[0]) {
+        return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+      }
+      if (e.touches && e.touches[0]) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+      if (typeof e.clientX === "number") return { x: e.clientX, y: e.clientY };
+      return null;
+    }
+    var relatedPointerTap = null;
+    var relatedNavKey = "";
+    var relatedNavAt = 0;
+    function goRelatedHref(href) {
+      if (!href) return false;
+      var now = Date.now();
+      if (href === relatedNavKey && now - relatedNavAt < 800) return true;
+      relatedNavKey = href;
+      relatedNavAt = now;
+      try {
+        global.location.href = href;
+      } catch (eGo) {
+        return false;
+      }
+      return true;
+    }
+    function relatedPointerDown(e) {
+      var card =
+        e.target && e.target.closest ? e.target.closest(".mc-related-plp-card") : null;
+      var pt = relatedEventPoint(e);
+      if (!card || !pt) {
+        relatedPointerTap = null;
+        return;
+      }
+      relatedPointerTap = {
+        card: card,
+        x: pt.x,
+        y: pt.y,
+        maxDx: 0,
+        maxDy: 0,
+        done: false,
+      };
+    }
+    function relatedNoteMove(e) {
+      var tap = relatedPointerTap;
+      if (!tap) return;
+      var pt = relatedEventPoint(e);
+      if (!pt) return;
+      var dx = Math.abs(pt.x - tap.x);
+      var dy = Math.abs(pt.y - tap.y);
+      if (dx > tap.maxDx) tap.maxDx = dx;
+      if (dy > tap.maxDy) tap.maxDy = dy;
+    }
+    function relatedPointerUp(e) {
+      var tap = relatedPointerTap;
+      if (!tap || !tap.card || tap.done) return;
+      relatedNoteMove(e);
+      if (tap.maxDx > 48 || tap.maxDy > 48) {
+        relatedPointerTap = null;
+        return;
+      }
+      tap.done = true;
+      relatedPointerTap = null;
+      goRelatedHref(relatedCardHref(tap.card));
+    }
+    /* Passive-only: a non-passive document touchend suppresses iOS link clicks. */
+    global.document.addEventListener("pointerdown", relatedPointerDown, true);
+    global.document.addEventListener("pointermove", relatedNoteMove, true);
+    global.document.addEventListener("pointerup", relatedPointerUp, true);
+    global.document.addEventListener("touchstart", relatedPointerDown, {
+      capture: true,
+      passive: true,
+    });
+    global.document.addEventListener("touchmove", relatedNoteMove, {
+      capture: true,
+      passive: true,
+    });
+    global.document.addEventListener("touchend", relatedPointerUp, {
+      capture: true,
+      passive: true,
+    });
+    global.document.addEventListener(
+      "click",
+      function (eRel) {
+        var card =
+          eRel.target && eRel.target.closest
+            ? eRel.target.closest(".mc-related-plp-card")
+            : null;
+        if (!card) return;
+        var href = relatedCardHref(card);
+        if (!href) return;
+        if (href === relatedNavKey && Date.now() - relatedNavAt < 800) {
+          try {
+            eRel.preventDefault();
+          } catch (eDup) {}
+          return;
+        }
+        if (eRel.target.closest && eRel.target.closest("a[href]")) return;
+        try {
+          eRel.preventDefault();
+        } catch (ePrevRel) {}
+        goRelatedHref(href);
+      },
+      true
+    );
+    try {
+      var st = global.document.getElementById("mc-related-plp-card-nav-css");
+      if (!st) {
+        st = global.document.createElement("style");
+        st.id = "mc-related-plp-card-nav-css";
+        (global.document.head || global.document.documentElement).appendChild(st);
+      }
+      st.textContent =
+        ".mc-related-plp-card{cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(0,0,0,.06)!important}" +
+        ".mc-related-plp-card a,.mc-related-plp-card img{touch-action:manipulation!important}" +
+        "#v65-product-related a[href],#related_products_content a[href],.mc-related-plp-card a[href]{pointer-events:auto!important}";
+    } catch (eRelCss) {}
+  }
+
     function revealSaranoniRelated() {
     if (!isSaranoniPdpPage()) return;
+    ensureRelatedPlpCardNavigation();
     var related = global.document.getElementById("related_products_content");
     var relatedRoot = global.document.getElementById("v65-product-related");
     if (!related && !relatedRoot) return;
@@ -12769,6 +12901,7 @@
 
 function revealBeanBagRelated() {
     if (!isBeanBagPdpPage()) return;
+    ensureRelatedPlpCardNavigation();
     var related = global.document.getElementById("related_products_content");
     var relatedRoot = global.document.getElementById("v65-product-related");
     if (!related && !relatedRoot) return;
@@ -13978,6 +14111,9 @@ function revealBeanBagRelated() {
       scheduleAtcBlackLock();
       scheduleBeanBagOptionRepair();
       scheduleSaranoniColorRepair();
+      try {
+        ensureRelatedPlpCardNavigation();
+      } catch (eRelNavBoot) {}
       markCloseoutPdpPage();
       injectPdpTopGapCss();
       scheduleSteveSilverLayoutRepair();
@@ -14089,6 +14225,15 @@ function revealBeanBagRelated() {
 
     function saranoniTapControlFromEvent(e) {
       if (!e || !e.target || !e.target.closest || !isSaranoniPdpPage()) return null;
+      /* Never hijack Related Items / normal links — a document-level touch
+         handler must not compete with product-card navigation. */
+      if (
+        e.target.closest(
+          "#v65-product-related, #related_products_content, .mc-related-plp-grid, .mc-related-plp-card, .mc-related-carousel, a[href]"
+        )
+      ) {
+        return null;
+      }
       /* Color + size only here. Accordion keeps its own delegated click handler
          so pointer+click do not open-then-immediately-close a row. */
       return e.target.closest(".mc-configured-color-swatch, .mc-saranoni-size-thumb");
@@ -14177,12 +14322,10 @@ function revealBeanBagRelated() {
       }
       tap.done = true;
       saranoniPointerTap = null;
-      if (saranoniApplyTapControl(tap.el)) {
-        try {
-          e.preventDefault();
-          e.stopPropagation();
-        } catch (eStopTap) {}
-      }
+      /* Do not preventDefault here. A non-passive document touchend (or
+         preventDefault on touch/pointer up) suppresses click on iOS for
+         unrelated links like Related Items. Debounce blocks double-apply. */
+      saranoniApplyTapControl(tap.el);
     }
 
     function saranoniPointerCancel() {
@@ -14197,7 +14340,7 @@ function revealBeanBagRelated() {
     global.document.addEventListener("pointercancel", saranoniPointerCancel, true);
     global.document.addEventListener("touchstart", saranoniPointerDown, { capture: true, passive: true });
     global.document.addEventListener("touchmove", saranoniNoteTapMovement, { capture: true, passive: true });
-    global.document.addEventListener("touchend", saranoniPointerUp, { capture: true, passive: false });
+    global.document.addEventListener("touchend", saranoniPointerUp, { capture: true, passive: true });
     global.document.addEventListener("touchcancel", saranoniPointerCancel, true);
 
     global.document.addEventListener(
