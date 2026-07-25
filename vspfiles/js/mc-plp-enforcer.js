@@ -1,15 +1,15 @@
-/**
- * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260723restore13 — bean bag free-ship img fallback (no icon font)
+﻿/**
+ * PLP fixes â€” DOM-driven, scoped to inspected Volusion markup.
+ * MC_PLP_ENFORCER_20260723restore13 â€” bean bag free-ship img fallback (no icon font)
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  /* forceLoveyStyleCta REMOVED 20260722manual4 — was unloading CTA and freezing lovey PDPs */
+  /* forceLoveyStyleCta REMOVED 20260722manual4 â€” was unloading CTA and freezing lovey PDPs */
 
-  var VERSION = "20260725fix2";
+  var VERSION = "20260725fix3";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -24,8 +24,8 @@
   function upgradePdpAuthCtaForm() {
     try {
       if (!global.document.getElementById("v65-product-parent")) return;
-      var WANT = "20260725fix2";
-      var WANT_RANK = 20260725024;
+      var WANT = "20260725fix3";
+      var WANT_RANK = 20260725025;
       var curRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
       if (curRank >= WANT_RANK) return;
       if (String(global.__MC_DEPLOY_FP__ || "") === WANT) return;
@@ -42,6 +42,32 @@
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eUp) {}
+  }
+
+  function upgradeAltViewRow() {
+    try {
+      if (!global.document.getElementById("v65-product-parent")) return;
+      var WANT = "20260725fix3";
+      if (global.document.documentElement.getAttribute("data-mc-plp-altrow-upgrade") === WANT) return;
+      var existing = global.document.querySelector('script[src*="mc-pdp-alt-view-row.js"]');
+      if (existing && String(existing.getAttribute("src") || "").indexOf(WANT) !== -1) {
+        global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", WANT);
+        return;
+      }
+      global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", WANT);
+      global.document.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
+        try { old.remove(); } catch (eRm) {}
+      });
+      try {
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260725fix2__;
+        delete global.__MC_TMH_ALT_VIEW_ROW_20260725fix3__;
+      } catch (eDel) {}
+      var s = global.document.createElement("script");
+      s.id = "mc-pdp-alt-view-row-js";
+      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + WANT + "&mcrd=" + Date.now();
+      s.async = false;
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eAlt) {}
   }
 
 
@@ -172,7 +198,7 @@
   }
 
   /* template.min.js matches [class*=mc-cart-float] and also styles the inner
-     svg (mc-cart-float__icon) as a second fixed 42px box — ripping the glyph
+     svg (mc-cart-float__icon) as a second fixed 42px box â€” ripping the glyph
      out / blanking it. Do not fight its position/size. Hide the hijacked svg
      and paint the cart glyph as an inline background-image on the anchor. */
   var MC_CART_GLYPH_BG =
@@ -519,7 +545,7 @@
     return tbl.rows.length <= 1;
   }
 
-  /** Only unwrap single-cell product-list tables — never hoist grid out of #content_area. */
+  /** Only unwrap single-cell product-list tables â€” never hoist grid out of #content_area. */
   function unwrapProductGridShell(grid) {
     var node = grid;
     var contentArea = document.getElementById("content_area");
@@ -633,7 +659,7 @@
       changed = true;
     }
 
-    /* Stray </section></div> in baked cat HTML pops #content_area out of .container — footer loses theme CSS. */
+    /* Stray </section></div> in baked cat HTML pops #content_area out of .container â€” footer loses theme CSS. */
     if (container && contentArea && !container.contains(contentArea)) {
       var row = container.querySelector(":scope > .row");
       if (!row) {
@@ -1037,7 +1063,7 @@
         /* MC_PLP_FREESHIP_CLONE_FIX_20260716: native Volusion markup is a plain
            <img alt="Free Shipping" src=".../Icon_FreeShipping_Small.gif">, never
            class="vol-free-shipping-icon" (that class is only added by the JS
-           fallback badge elsewhere in this file) — so this querySelector never
+           fallback badge elsewhere in this file) â€” so this querySelector never
            matched and the icon was silently dropped every time this card was
            rebuilt. Match the native markup directly. */
         var shipping =
@@ -1375,7 +1401,7 @@
     "TMH-TRV-TEAL-TRELLIS-MAT": "TMH-MAT-TEAL-TRELLIS-MAT",
   };
 
-  /** Duplicate/incomplete numeric SS imports → existing slug photo stems on CDN. */
+  /** Duplicate/incomplete numeric SS imports â†’ existing slug photo stems on CDN. */
   var PLP_PHOTO_ALIASES = {
     "SS-3105415": "SS-GATLIN-BROWN-RECL",
     "SS-2968622": "SS-OLSEN-DOVE-PWR-RECL",
@@ -1444,7 +1470,7 @@
     });
   }
 
-  /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP — probe and swap. */
+  /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP â€” probe and swap. */
   function fixNoPhotoThumbnails() {
     if (isCloseoutSalePlp()) return;
     var root = document.getElementById("content_area");
@@ -1797,12 +1823,12 @@
   /* MC_PLP_FREESHIP_BADGE_ROBUST_20260716: the grid-conversion functions clone
      the native <img alt="Free Shipping"> into each card's price block as-is
      (no class, no forced visibility), and this function's OWN "already has
-     one" check only recognized the CSS-only fallback badge's class names — so
+     one" check only recognized the CSS-only fallback badge's class names â€” so
      a native icon that clones in unstyled, or gets buried under nested markup
      from a wholesale td.innerHTML copy, was never detected OR force-shown.
      Now: if a native icon exists anywhere in the card, force its visibility
      directly (belt-and-suspenders alongside the CSS !important rules); only
-     build the synthetic fallback badge when no icon — native or synthetic —
+     build the synthetic fallback badge when no icon â€” native or synthetic â€”
      exists at all. */
   function plpCardQualifiesFreeShipping(card) {
     if (!card) return false;
@@ -1837,7 +1863,7 @@
     cards.forEach(function (card) {
       var qualifies = plpCardQualifiesFreeShipping(card);
       if (!qualifies) {
-        /* Strip synthetic AND native free-ship badges — Volusion often marks every card. */
+        /* Strip synthetic AND native free-ship badges â€” Volusion often marks every card. */
         card.querySelectorAll(
           ".mc-plp-free-ship, img.mc-plp-free-ship-img, .vol-free-shipping-icon, " +
           "img[alt='Free Shipping' i], img[src*='Icon_FreeShipping' i], " +
@@ -1999,12 +2025,22 @@
   }
 
   try { upgradePdpAuthCtaForm(); } catch (eUp0) {}
+  try { upgradeAltViewRow(); } catch (eAlt0) {}
   if (global.document.readyState === "loading") {
-    global.document.addEventListener("DOMContentLoaded", function () { try { upgradePdpAuthCtaForm(); } catch (eUp1) {} });
+    global.document.addEventListener("DOMContentLoaded", function () {
+      try { upgradePdpAuthCtaForm(); } catch (eUp1) {}
+      try { upgradeAltViewRow(); } catch (eAlt1) {}
+    });
   }
-  global.addEventListener("load", function () { try { upgradePdpAuthCtaForm(); } catch (eUp2) {} });
+  global.addEventListener("load", function () {
+    try { upgradePdpAuthCtaForm(); } catch (eUp2) {}
+    try { upgradeAltViewRow(); } catch (eAlt2) {}
+  });
   [0, 300, 1200, 2800].forEach(function (ms) {
-    global.setTimeout(function () { try { upgradePdpAuthCtaForm(); } catch (eUp3) {} }, ms);
+    global.setTimeout(function () {
+      try { upgradePdpAuthCtaForm(); } catch (eUp3) {}
+      try { upgradeAltViewRow(); } catch (eAlt3) {}
+    }, ms);
   });
   global.mcPlpEnforcerRun = run;
 
@@ -2090,14 +2126,14 @@
     }
   }
 
-  /* Must match VERSION in mc-pdp-auth-cta-fix.js — that is the string that script writes into
+  /* Must match VERSION in mc-pdp-auth-cta-fix.js â€” that is the string that script writes into
      global.__MC_PDP_AUTH_CTA_FIX_VER__. This constant had drifted out of sync (was
      "20260625sarrepair2", then briefly "20260708sarmob1" which was itself stale/incorrect),
      which permanently broke the version-match guard below and caused loadPdpAuthCtaFix() to
      re-inject the script on every call. Confirmed against the live deployed script on
-     20260713 — update this if mc-pdp-auth-cta-fix.js's VERSION is bumped again.
+     20260713 â€” update this if mc-pdp-auth-cta-fix.js's VERSION is bumped again.
      MC_PDP_AUTH_VERSION_GUARD_FIX_20260713 */
-  var PDP_AUTH_WANT = "20260725fix2";
+  var PDP_AUTH_WANT = "20260725fix3";
 
   function isSaranoniPdpPage() {
     try {
@@ -2124,7 +2160,7 @@
       if (!onPdp) return;
       /* template_266.html already loads mc-pdp-auth-cta-fix.js on every PDP via its own
          head-boot + fallback loaders. If a copy is already present, do not remove it and
-         inject another — that produced multiple live copies of the same ~11k-line script
+         inject another â€” that produced multiple live copies of the same ~11k-line script
          running concurrently on the same PDP. MC_PDP_AUTH_DUPLICATE_LOAD_FIX_20260713 */
       if (global.document.querySelector('script[src*="mc-pdp-auth-cta-fix.js"]')) return;
       if (String(global.__MC_PDP_AUTH_CTA_FIX_VER__ || "") === PDP_AUTH_WANT) return;
@@ -2156,7 +2192,7 @@
     global.setTimeout(loadPdpAuthCtaFix, ms);
   });
 
-  /* MC_CAT142_BEDROOM_LANDING — inject Steve Silver bedroom PLP hero (template rebake lags). */
+  /* MC_CAT142_BEDROOM_LANDING â€” inject Steve Silver bedroom PLP hero (template rebake lags). */
   (function cat142BedroomLanding(doc, win) {
     var FRAG_URL = "/v/vspfiles/category-landings/cat142-bedroom.html?v=20260620";
     var guard = "__MC_CAT142_BEDROOM__";

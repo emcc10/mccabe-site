@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725fix2 — restore Saranoni size Additional \$ pricing
-  var MC_DEPLOY_FINGERPRINT = "20260725fix2";
-  var VERSION = "20260725fix2";
+  // MC_DEPLOY_FINGERPRINT_20260725fix3 — Additional $ contrast + Canova alt cleanup
+  var MC_DEPLOY_FINGERPRINT = "20260725fix3";
+  var VERSION = "20260725fix3";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725024;
+  var DEPLOY_RANK = 20260725025;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -27,6 +27,29 @@
       try { old.remove(); } catch (eRmFix) {}
     });
   } catch (eStripFix) {}
+
+  /* Storefront HTML can lag template rebake — force alt-view-row to this fingerprint. */
+  try {
+    if (global.document.getElementById("v65-product-parent")) {
+      var altWant = VERSION;
+      var altExisting = global.document.querySelector('script[src*="mc-pdp-alt-view-row.js"]');
+      var altSrc = altExisting ? String(altExisting.getAttribute("src") || "") : "";
+      if (altSrc.indexOf(altWant) === -1) {
+        global.document.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
+          try { old.remove(); } catch (eRmAlt) {}
+        });
+        try {
+          delete global.__MC_TMH_ALT_VIEW_ROW_20260725fix2__;
+          delete global.__MC_TMH_ALT_VIEW_ROW_20260725fix3__;
+        } catch (eDelAlt) {}
+        var altScript = global.document.createElement("script");
+        altScript.id = "mc-pdp-alt-view-row-js";
+        altScript.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + altWant + "&mcrd=" + Date.now();
+        altScript.async = false;
+        (global.document.head || global.document.documentElement).appendChild(altScript);
+      }
+    }
+  } catch (eAltBoot) {}
 
   /* Same guard as mc-sectional-pdp-emergency.js — only load on sectional configurator PDPs */
   (function () {
@@ -8918,7 +8941,7 @@
       ".mc-saranoni-size-thumb img{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;aspect-ratio:1/1!important;object-fit:cover!important;margin:0!important;padding:0!important;border:0!important;border-radius:2px!important}" +
       ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{margin:0!important;font:600 11px/1.15 Inter,Arial,sans-serif!important;max-width:100%!important;color:#444!important;text-align:center!important;white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;letter-spacing:0!important}" +
       "@media (max-width:991px){.mc-saranoni-size-thumbs{gap:6px!important}.mc-saranoni-size-thumb{padding:8px 2px!important}.mc-saranoni-size-thumb .mc-saranoni-size-thumb__label{font:600 10.5px/1.1 Inter,Arial,sans-serif!important}}" +
-      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__price{margin:2px 0 0!important;font:500 11px/1.2 Inter,Arial,sans-serif!important;color:#cfcfcf!important;text-align:center!important;white-space:nowrap!important;display:block!important;visibility:visible!important;opacity:1!important}" +
+      ".mc-saranoni-size-thumb .mc-saranoni-size-thumb__price{margin:2px 0 0!important;font:500 12px/1.25 Inter,Arial,sans-serif!important;color:#555!important;text-align:center!important;white-space:nowrap!important;display:block!important;visibility:visible!important;opacity:1!important}" +
       ".mc-saranoni-size-thumb.active{border:1px solid #d8d8d8!important;box-shadow:0 0 0 1px #d8d8d8 inset!important}" +
       /* Size row must never sit in a scroll-host / get rail arrows. */
       ".mc-saranoni-scroll-host:has(> #mc-saranoni-size-thumbs) > .mc-saranoni-scroll-arrow{display:none!important}" +
@@ -8993,7 +9016,7 @@
           priceEl.style.setProperty("display", "block", "important");
           priceEl.style.setProperty("visibility", "visible", "important");
           priceEl.style.setProperty("opacity", "1", "important");
-          priceEl.style.setProperty("color", "#cfcfcf", "important");
+          priceEl.style.setProperty("color", "#555", "important");
         } catch (eShow) {}
       } else if (priceEl && priceEl.parentNode) {
         priceEl.parentNode.removeChild(priceEl);
@@ -15583,13 +15606,35 @@ try {
     var zoom = d.getElementById("product_photo_zoom_url") || d.getElementById("product_photo_zoom_url2");
     if (zoom) zoom.setAttribute("href", full(productCode, slot));
   }
+  function customAltRowActive() {
+    var row = d.getElementById("mc-pdp-alt-view-row");
+    return !!(row && row.querySelector("img"));
+  }
+  function hideRestoredAlt(alt) {
+    if (!alt) return;
+    alt.style.setProperty("display", "none", "important");
+    alt.style.setProperty("visibility", "hidden", "important");
+    alt.style.setProperty("height", "0", "important");
+    alt.style.setProperty("max-height", "0", "important");
+    alt.style.setProperty("overflow", "hidden", "important");
+    alt.style.setProperty("margin", "0", "important");
+    alt.style.setProperty("padding", "0", "important");
+    alt.setAttribute("data-mc-altviews-suppressed", "1");
+  }
   function restore() {
     var productCode = code();
     var hero = d.getElementById("product_photo");
     var root = d.getElementById("v65-product-parent");
     if (!root || !productCode || !hero || /^(?:TMH-|BB-|SS-)/.test(productCode)) return;
+    /* When mc-pdp-alt-view-row owns the gallery (closeouts/furniture), do not
+       resurrect Volusion -N/-NT thumbs — those often keep stale wrong-product
+       files (Canova -1T was still the round CV520 while the hero was Camolson). */
+    if (customAltRowActive() || (d.body && d.body.classList.contains("mc-pdp-custom-alt-row"))) {
+      hideRestoredAlt(d.getElementById("altviews") || d.querySelector("span#altviews,.altviews"));
+      return;
+    }
     var alt = d.getElementById("altviews") || d.querySelector("span#altviews,.altviews");
-    if (alt && alt.querySelector("img")) return;
+    if (alt && alt.querySelector("img") && !alt.querySelector("[data-mc-numbered-alt]")) return;
     if (!alt) {
       alt = d.createElement("span");
       alt.id = "altviews";
@@ -15626,6 +15671,11 @@ try {
         image.style.setProperty("height", "88px", "important");
         image.style.setProperty("object-fit", "cover", "important");
         image.onload = function () {
+          if (customAltRowActive()) {
+            hideRestoredAlt(alt);
+            link.style.setProperty("display", "none", "important");
+            return;
+          }
           link.style.setProperty("display", "inline-flex", "important");
           alt.style.setProperty("display", "flex", "important");
         };
@@ -15651,6 +15701,16 @@ try {
   }
   if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", restore, { once: true });
   else restore();
+  /* Custom alt row probes async — keep killing restored -N thumbs once it wins. */
+  [400, 1200, 2500, 5000].forEach(function (delay) {
+    g.setTimeout(function () {
+      if (!customAltRowActive()) return;
+      hideRestoredAlt(d.getElementById("altviews") || d.querySelector("span#altviews,.altviews"));
+      try {
+        if (d.body) d.body.classList.add("mc-pdp-custom-alt-row");
+      } catch (eBody) {}
+    }, delay);
+  });
 })(window, document);
 
 /* MC_PDP_RELATED_FIX_20260630 — NoPhoto thumbs + visible prices when template rail is still native table */

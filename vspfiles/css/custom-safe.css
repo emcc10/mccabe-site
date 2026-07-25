@@ -23918,11 +23918,14 @@ html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__labe
 
 html body.mc-saranoni-pdp #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__price {
   display: block !important;
-  margin: 0 !important;
+  margin: 2px 0 0 !important;
   text-align: center !important;
   font-weight: 500 !important;
-  color: #666 !important;
+  font-size: 12px !important;
+  color: #555 !important;
   white-space: nowrap !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 /* END REMOVABLE: Saranoni color horizontal scroll rail (20260718; size grid 20260720sarfix4) */
 /* BEGIN REMOVABLE: PDP alt-view row stable placement/no visible scrollbar (20260718) */
@@ -24486,11 +24489,14 @@ html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__label {
   word-break: break-word !important;
 }
 html body #mc-saranoni-size-thumbs .mc-saranoni-size-thumb__price {
-  margin: 0 !important;
-  font: 500 11px/1.2 Inter, Arial, sans-serif !important;
-  color: #666 !important;
+  margin: 2px 0 0 !important;
+  font: 500 12px/1.25 Inter, Arial, sans-serif !important;
+  color: #555 !important;
   text-align: center !important;
   white-space: nowrap !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 /* END REMOVABLE: Saranoni size options with images (20260721style3) */
 
@@ -26134,5 +26140,39 @@ html body.mc-pdp-unified-ready td.mc-pdp-media-td #product_photo {
   width: 100% !important;
   max-width: 650px !important;
   height: auto !important;
+}
+
+/* Furniture / Coaster unified PDP: center 650/420 media+info (soft goods excluded). */
+@media (min-width: 992px) {
+  html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent tr.mc-unified-pdp-row,
+  html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area tr.mc-unified-pdp-row,
+  html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area tr.mc-pdp-main-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 40px !important;
+    width: 100% !important;
+    max-width: 1120px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+  }
+  html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent td.mc-unified-pdp-media,
+  html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent td.mc-pdp-media-td {
+    display: block !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    flex: 0 0 650px !important;
+  }
+  html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready:not(.mc-bean-bag-pdp):not(.mc-cordaroys-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent td.mc-pdp-options-td {
+    display: block !important;
+    width: 420px !important;
+    max-width: 420px !important;
+    flex: 0 0 420px !important;
+  }
 }
 
