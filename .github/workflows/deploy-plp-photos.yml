@@ -54,7 +54,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          # Need full history so github.event.before (often many commits back
+          # after a batch push) can resolve for changed-photo detection.
+          fetch-depth: 0
 
       - name: Install lftp and Paramiko
         run: |
