@@ -6,10 +6,20 @@ import hashlib
 import os
 import sys
 
-NEEDLE = "mcEnsurePdpPriceStack"
+# local path -> (remote path, needle)
 CANONICAL = {
-    "vspfiles/js/mc-pdp-auth-cta-fix.js": "/v/vspfiles/js/mc-pdp-auth-cta-fix.js",
-    "vspfiles/js/mc-pdp-price-stack.js": "/v/vspfiles/js/mc-pdp-price-stack.js",
+    "vspfiles/js/mc-pdp-auth-cta-form.js": (
+        "/v/vspfiles/js/mc-pdp-auth-cta-form.js",
+        "MC_PDP_AUTH_ONCE_20260727010once1",
+    ),
+    "vspfiles/js/mc-pdp-auth-cta-form-impl.js": (
+        "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js",
+        "mcEnsurePdpPriceStack",
+    ),
+    "vspfiles/js/mc-pdp-price-stack.js": (
+        "/v/vspfiles/js/mc-pdp-price-stack.js",
+        "mcEnsurePdpPriceStack",
+    ),
 }
 
 
@@ -44,7 +54,7 @@ def main() -> int:
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)
         try:
-            for local, remote in CANONICAL.items():
+            for local, (remote, needle) in CANONICAL.items():
                 if not os.path.isfile(local):
                     print(
                         f"::warning::SKIP verify {local!r} — not in repo "
@@ -55,8 +65,9 @@ def main() -> int:
                 checked += 1
                 with open(local, "rb") as handle:
                     local_data = handle.read()
-                if NEEDLE not in local_data.decode("utf-8", errors="replace"):
-                    print(f"::error::Local {local} missing {NEEDLE}", file=sys.stderr)
+                text = local_data.decode("utf-8", errors="replace")
+                if needle not in text:
+                    print(f"::error::Local {local} missing {needle}", file=sys.stderr)
                     all_ok = False
                     continue
                 want_md5 = md5_hex(local_data)
@@ -73,7 +84,7 @@ def main() -> int:
                     all_ok = False
                     continue
                 md5_ok = md5_hex(remote_data) == want_md5
-                needle_ok = NEEDLE in remote_data.decode("utf-8", errors="replace")
+                needle_ok = needle in remote_data.decode("utf-8", errors="replace")
                 ok = md5_ok and needle_ok and len(remote_data) == want_size
                 print(
                     f"::notice::CHECK {remote!r} size={len(remote_data)} want={want_size} "
