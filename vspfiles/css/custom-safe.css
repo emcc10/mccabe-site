@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260727001fix1 - home grid + centered cats, aligned > */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260725nav1 - mobile category > toggles */
 /* MC_PDP_LAYOUT_20260616pdp32 â€” stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY â€” PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -482,7 +482,7 @@ body:not(.is-home) #if_homepage {
 }
 
 /* Full-bleed: homepage hero only (never on category â€” avoids black bar when body.is-home is wrong) */
-html.mc-allow-home-hero body.is-home #if_homepage,
+hthtml.mc-allow-home-hero body.is-home #if_homepage,
 html.mc-allow-home-hero body.is-home #slideshow-container {
   width: 100vw !important;
   max-width: 100vw !important;
@@ -23123,43 +23123,33 @@ html body.mc-pdp-hero-ready.mc-pdp-hero-pending td.mc-pdp-options-td {
     margin: 4px 0 10px !important;
   }
 
-  /* Category label stays centered; ">" arrows share one right-edge column. */
   .mc-mobile-vnav__row {
-    position: relative !important;
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 0 40px !important;
-    text-align: center !important;
   }
 
-  #push-nav__menu .mc-mobile-vnav__link,
-  .push-menu__menu-wrapper .mc-mobile-vnav__link,
-  nav.push-menu .mc-mobile-vnav__link {
-    display: inline-block !important;
-    width: auto !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
-    text-align: center !important;
-    float: none !important;
-  }
-
-  /* Small ">" only — pinned to the same right edge on every row. */
+  /* Small ">" only â€” do not restyle category link text/font. */
   nav.push-menu button.mc-sub-toggle,
   #push-nav__menu button.mc-sub-toggle,
   .push-menu__menu-wrapper button.mc-sub-toggle {
-    position: absolute !important;
-    right: 4px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
     flex: 0 0 auto !important;
-    margin: 0 !important;
+    align-self: center !important;
+    margin: 0 0 0 4px !important;
     padding: 6px 8px !important;
     min-width: 28px !important;
-    font-size: 16px !important;
+    font-size: 14px !important;
     font-weight: 400 !important;
     line-height: 1 !important;
     color: #fff !important;
+  }
+
+  #push-nav__menu .mc-mobile-vnav__link,
+  .push-menu__menu-wrapper .mc-mobile-vnav__link {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
   }
 }
 
