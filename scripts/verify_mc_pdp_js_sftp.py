@@ -3,7 +3,7 @@
 from __future__ import annotations
 import hashlib, os, sys
 CANONICAL = {
-    "vspfiles/js/mc-pdp-auth-cta-form.js": ("/v/vspfiles/js/mc-pdp-auth-cta-form.js", "MC_PDP_AUTH_ONCE_20260727013alex1"),
+    "vspfiles/js/mc-pdp-auth-cta-form.js": ("/v/vspfiles/js/mc-pdp-auth-cta-form.js", "MC_PDP_AUTH_ONCE_20260727014alex2"),
     "vspfiles/js/mc-pdp-auth-cta-form-impl.js": ("/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js", "mcEnsurePdpPriceStack"),
     "vspfiles/js/mc-pdp-price-stack.js": ("/v/vspfiles/js/mc-pdp-price-stack.js", "mcEnsurePdpPriceStack"),
 }
