@@ -1,0 +1,6 @@
+productcode,productname,on_site,notes
+SS-BUR500NSV,Burlington Cathedral Doored Server,Y,CORRECT: BUR500 = Burlington (vendor SKU BUR500NSV). Live McCabe currently mislabels this code as Magnolia — rename title/description to Burlington and use stevesilver.com Burlington copy. Images refreshed from Burlington product page (not Magnolia MM520*).
+SS-MM520KSV,"Magnolia Cathedral Doored Server, Black",N,Magnolia server uses MM520* SKUs (not BUR500). Import as SS-MM520KSV. Do not map Magnolia images onto SS-BUR500NSV.
+SS-AUB500SV,Auburn/Aubrey Server (on site),Y,Already on site. Title says Auburn; Steve Silver listing is Aubrey Server Black (SS-ABR500KSV). Current description incorrectly mentions expanding table — replace with Aubrey server copy. Images available under SS-ABR500KSV / synced to SS-AUB500SV.
+KARINA-SIDEBOARD,Karina Sideboard,Y,Already on site. Not Burlington/Magnolia. Optional: rename to SS- style code on re-import.
+SS-ABR500KSV,"Aubrey Server, Black (import row)",N,"Correct Aubrey server SKU/format. Use to replace/fix SS-AUB500SV content, or import as new and retire SS-AUB500SV."
