@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Rewrite stale mc-plp-enforcer.js?v=… refs in baked Volusion .htm files via SFTP.
+"""Patch baked Volusion .htm files via SFTP (no Cloudflare needed).
 
-No Cloudflare purge needed: homepage/category HTML is CF DYNAMIC. Changing the
-script query string makes browsers request a URL that is not year-cached.
-
-Also injects a tiny &mcrd= hotloader before </body> when missing.
+Goals:
+  - Product pages: do NOT load mc-plp-enforcer (sticky CDN thrash froze Barron/sofas)
+  - Product pages: single stable auth boot (no strip/reinject, no Date.now() double load)
+  - Remove thrashing mc-plp-enforcer-hotload-* injectors from older deploys
+  - Category/home: bump enforcer ?v= only (never re-inject hotloaders)
 """
 from __future__ import annotations
 
@@ -14,27 +15,118 @@ import sys
 
 from verify_template_sftp import connect_paramiko_transport
 
-WANT = os.environ.get("MC_ENFORCER_WANT", "20260727001fix1").strip() or "20260727001fix1"
+WANT = os.environ.get("MC_ENFORCER_WANT", "20260727002pdp1").strip() or "20260727002pdp1"
+AUTH_SRC = (
+    os.environ.get("MC_AUTH_SRC", "").strip()
+    or "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725sofa5&mcrd=sofa5"
+)
+DEPLOY_META = os.environ.get("MC_DEPLOY_META", "20260727006bake1").strip() or "20260727006bake1"
+
 OLD_VER_RE = re.compile(
     r'(src=["\'])/v/vspfiles/js/mc-plp-enforcer\.js\?v=[^"\']+(["\'])',
     re.I,
 )
-HOT_ID = f"mc-plp-enforcer-hotload-{WANT}"
-HOTLOADER = f"""<script id="{HOT_ID}">
-(function(g,d){{var W="{WANT}",vn=function(v){{var n=parseInt(String(v||"").replace(/\\D/g,""),10);return isNaN(n)?0:n;}};
-function go(){{if(vn(g.__MC_PLP_ENFORCER_VER__)>=vn(W)&&typeof g.mcPlpEnforcerRun==="function"){{try{{g.mcPlpEnforcerRun();}}catch(e){{}}return;}}
-d.querySelectorAll('script[src*="mc-plp-enforcer"]').forEach(function(s){{try{{s.remove();}}catch(e2){{}}}});
-try{{delete g.__MC_PLP_ENFORCER__;delete g.__MC_PLP_ENFORCER_VER__;delete g.mcPlpEnforcerRun;}}catch(e3){{}}
-var s=d.createElement("script");s.id="mc-plp-enforcer-js";s.src="/v/vspfiles/js/mc-plp-enforcer.js?v="+W+"&mcrd="+Date.now();
-s.onload=function(){{try{{g.mcPlpEnforcerRun&&g.mcPlpEnforcerRun();}}catch(e4){{}}}};
-(d.head||d.documentElement).appendChild(s);}}
-if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",go);else go();
-g.addEventListener("load",go);[50,400,1500].forEach(function(t){{g.setTimeout(go,t);}});
-}})(window,document);
-</script>
-"""
+HOTLOADER_RE = re.compile(
+    r'<script\b[^>]*\bid=["\']mc-plp-enforcer-hotload-[^"\']+["\'][^>]*>.*?</script>',
+    re.I | re.S,
+)
+STATIC_ENF_RE = re.compile(
+    r'<script\b[^>]*\bid=["\']mc-plp-enforcer-js["\'][^>]*>.*?</script>'
+    r'|<script\b[^>]*\bsrc=["\'][^"\']*mc-plp-enforcer\.js[^"\']*["\'][^>]*>\s*</script>',
+    re.I | re.S,
+)
+BOOT_RE = re.compile(
+    r"<script>\s*\(function\s*\(\s*g\s*,\s*d\s*\)\s*\{.*?"
+    r"function\s+bootFreshCta\s*\(\s*\)\s*\{.*?"
+    r"\}\)\s*\(\s*window\s*,\s*document\s*\)\s*;\s*</script>",
+    re.I | re.S,
+)
+FALLBACK_RE = re.compile(
+    r'<script\b[^>]*\bid=["\']mc-pdp-auth-loader-minimal["\'][^>]*>.*?</script>',
+    re.I | re.S,
+)
+META_RE = re.compile(
+    r'<meta\s+name=["\']mc-deploy-verify["\']\s+content=["\'][^"\']*["\']\s*/?>',
+    re.I,
+)
 
-# Volusion often keeps baked category HTML beside the public URL path.
+SAFE_BOOT = f"""<script>
+(function (g, d) {{
+  var FP = "20260725fix3";
+  var AUTH_SRC = "{AUTH_SRC}";
+  function isPdp() {{
+    try {{
+      var p = String(g.location.pathname || "").toLowerCase();
+      if (/\\/product-p\\//.test(p) || /productdetails\\.asp/i.test(p)) return true;
+    }} catch (ePath) {{}}
+    return !!d.getElementById("v65-product-parent");
+  }}
+  function bootFreshCta() {{
+    if (!isPdp()) return;
+    if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
+    if (d.documentElement.getAttribute("data-mc-pdp-auth-head-boot") === FP) return;
+    if (d.querySelector('script[src*="mc-pdp-auth-cta-form.js"]')) {{
+      d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", FP);
+      return;
+    }}
+    d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", FP);
+    var s = d.createElement("script");
+    s.id = "mc-pdp-auth-cta-form-js";
+    s.src = AUTH_SRC;
+    s.async = false;
+    (d.head || d.documentElement).appendChild(s);
+  }}
+  bootFreshCta();
+  d.addEventListener("DOMContentLoaded", bootFreshCta);
+}})(window, document);
+</script>"""
+
+SAFE_FALLBACK = f"""<script id="mc-pdp-auth-loader-minimal">
+(function () {{
+  var FP = "20260725fix3";
+  var AUTH_SRC = "{AUTH_SRC}";
+  if (String(window.__MC_DEPLOY_FP__ || "") === FP) {{
+  }} else if (
+    document.documentElement.getAttribute("data-mc-pdp-auth-reload") !== FP &&
+    document.documentElement.getAttribute("data-mc-pdp-auth-head-boot") !== FP &&
+    !document.querySelector('script[src*="mc-pdp-auth-cta-form.js"]')
+  ) {{
+    document.documentElement.setAttribute("data-mc-pdp-auth-reload", FP);
+    var s = document.createElement("script");
+    s.id = "mc-pdp-auth-cta-form-js-fallback";
+    s.src = AUTH_SRC;
+    s.async = false;
+    (document.head || document.documentElement).appendChild(s);
+  }}
+  window.openPlannerOverlay = function () {{}};
+  window.mcEnsurePlannerLoginGate = function () {{ return null; }};
+  window.mcSetPlannerLoginGateVisible = function () {{}};
+  window.mcApplyPlannerAtcDisabledState = function () {{}};
+  window.mcOpenWmLeatherModal = function () {{}};
+  window.mcOpenWmLeatherOverlay = function () {{ return false; }};
+  window.mcForceInitWmLeather = function () {{ return false; }};
+  window.mcTryInitWmLeather = function () {{ return false; }};
+  window.mcMountInlineConfig = function () {{}};
+}})();
+</script>"""
+
+PDP_ENF_SKIP = f"""<script id="mc-plp-enforcer-js">
+/* MC_PLP_ENFORCER_STATIC_{WANT} — skip product pages entirely */
+(function (g, d) {{
+  try {{
+    var p = String(g.location.pathname || "").toLowerCase();
+    if (/\\/product-p\\//.test(p) || /productdetails\\.asp/i.test(p)) return;
+    if (d.getElementById("v65-product-parent")) return;
+  }} catch (eSkip) {{}}
+  if (d.getElementById("mc-plp-enforcer-js-src")) return;
+  if (typeof g.mcPlpEnforcerRun === "function" && g.__MC_PLP_ENFORCER_VER__) return;
+  var s = d.createElement("script");
+  s.id = "mc-plp-enforcer-js-src";
+  s.src = "/v/vspfiles/js/mc-plp-enforcer.js?v={WANT}&mcrd=pdp1";
+  (d.head || d.documentElement).appendChild(s);
+}})(window, document);
+</script>"""
+
 SEARCH_ROOTS = (
     "/",
     "/v",
@@ -70,7 +162,7 @@ def _listdir(sftp, path: str) -> list:
         return []
 
 
-def _walk_htm(sftp, root: str, limit: int = 400) -> list[str]:
+def _walk_htm(sftp, root: str, limit: int = 800) -> list[str]:
     found: list[str] = []
     stack = [root.rstrip("/") or "/"]
     seen: set[str] = set()
@@ -99,7 +191,6 @@ def _walk_htm(sftp, root: str, limit: int = 400) -> list[str]:
                     "mccabestheaterandliving.com",
                 )
             if is_dir:
-                # Stay shallow-ish: only descend into category-like folders.
                 if name.endswith("-s") or name in (
                     "v",
                     "vspfiles",
@@ -115,25 +206,76 @@ def _walk_htm(sftp, root: str, limit: int = 400) -> list[str]:
     return found
 
 
-def _patch_bytes(raw: bytes) -> tuple[bytes, bool]:
+def _is_product_html(path: str, text: str) -> bool:
+    pl = path.lower()
+    if "/product-p/" in pl or pl.endswith("-p.htm") or pl.endswith("-p.html"):
+        return True
+    if 'id="v65-product-parent"' in text or "id='v65-product-parent'" in text:
+        return True
+    if "bootFreshCta" in text and "mc-pdp-auth-cta-form.js" in text:
+        return True
+    return False
+
+
+def _patch_bytes(path: str, raw: bytes) -> tuple[bytes, bool]:
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError:
         text = raw.decode("latin-1")
-    if "mc-plp-enforcer.js" not in text:
+
+    if "mc-plp-enforcer" not in text and "bootFreshCta" not in text and "mc-pdp-auth" not in text:
         return raw, False
+
     changed = False
-    new_text, n = OLD_VER_RE.subn(rf'\1/v/vspfiles/js/mc-plp-enforcer.js?v={WANT}\2', text)
-    if n:
+    is_pdp = _is_product_html(path, text)
+
+    # Always strip thrashing hotloaders from prior deploys.
+    new_text, n_hot = HOTLOADER_RE.subn("", text)
+    if n_hot:
         changed = True
         text = new_text
-    if HOT_ID not in text and "mc-plp-enforcer.js" in text:
-        if re.search(r"</body\s*>", text, re.I):
-            text = re.sub(r"</body\s*>", HOTLOADER + "</body>", text, count=1, flags=re.I)
+
+    if is_pdp:
+        new_text, n_boot = BOOT_RE.subn(SAFE_BOOT, text, count=1)
+        if n_boot:
             changed = True
-        elif re.search(r"</html\s*>", text, re.I):
-            text = re.sub(r"</html\s*>", HOTLOADER + "</html>", text, count=1, flags=re.I)
+            text = new_text
+        new_text, n_fb = FALLBACK_RE.subn(SAFE_FALLBACK, text, count=1)
+        if n_fb:
             changed = True
+            text = new_text
+        if STATIC_ENF_RE.search(text):
+            new_text, n_enf = STATIC_ENF_RE.subn(PDP_ENF_SKIP, text, count=1)
+            if n_enf:
+                changed = True
+                text = new_text
+        # Remove any remaining static enforcer src tags on PDPs.
+        new_text, n_src = re.subn(
+            r'<script\b[^>]*\bsrc=["\'][^"\']*mc-plp-enforcer\.js[^"\']*["\'][^>]*>\s*</script>',
+            "",
+            text,
+            flags=re.I,
+        )
+        if n_src:
+            changed = True
+            text = new_text
+        new_text, n_meta = META_RE.subn(
+            f'<meta name="mc-deploy-verify" content="{DEPLOY_META}">',
+            text,
+            count=1,
+        )
+        if n_meta:
+            changed = True
+            text = new_text
+    else:
+        new_text, n = OLD_VER_RE.subn(
+            rf'\1/v/vspfiles/js/mc-plp-enforcer.js?v={WANT}&mcrd=pdp1\2',
+            text,
+        )
+        if n:
+            changed = True
+            text = new_text
+
     if not changed:
         return raw, False
     return text.encode("utf-8"), True
@@ -145,7 +287,10 @@ def main() -> int:
         print("::warning::No SFTP creds — skip baked HTML enforcer patch", flush=True)
         return 0
 
-    print(f"=== Patch baked HTML enforcer refs → v={WANT} (no Cloudflare needed) ===", flush=True)
+    print(
+        f"=== Patch baked HTML (PDP unfreeze + enforcer v={WANT}, no hotloaders) ===",
+        flush=True,
+    )
     try:
         transport = connect_paramiko_transport(host, port, user, password)
     except Exception as exc:  # noqa: BLE001
@@ -156,13 +301,13 @@ def main() -> int:
 
     patched = 0
     scanned = 0
+    pdp_patched = 0
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)
         assert sftp is not None
         candidates: list[str] = []
         for root in SEARCH_ROOTS:
             candidates.extend(_walk_htm(sftp, root))
-        # Dedupe
         seen: set[str] = set()
         uniq: list[str] = []
         for p in candidates:
@@ -178,9 +323,13 @@ def main() -> int:
                     raw = handle.read()
             except OSError:
                 continue
-            if b"mc-plp-enforcer" not in raw and b"20260725fix3" not in raw:
+            if (
+                b"mc-plp-enforcer" not in raw
+                and b"bootFreshCta" not in raw
+                and b"mc-pdp-auth" not in raw
+            ):
                 continue
-            new_raw, changed = _patch_bytes(raw)
+            new_raw, changed = _patch_bytes(remote, raw)
             if not changed:
                 continue
             tmp = remote + ".enf-patch-tmp"
@@ -200,6 +349,8 @@ def main() -> int:
                 print(f"::warning::Failed to write {remote}: {exc}", flush=True)
                 continue
             patched += 1
+            if _is_product_html(remote, new_raw.decode("utf-8", errors="ignore")):
+                pdp_patched += 1
             print(f"::notice::Patched {remote}", flush=True)
     finally:
         try:
@@ -208,15 +359,13 @@ def main() -> int:
             pass
 
     print(
-        f"::notice::Baked HTML enforcer patch done scanned={scanned} patched={patched}",
+        f"::notice::Baked HTML patch done scanned={scanned} patched={patched} pdp={pdp_patched}",
         flush=True,
     )
     if patched == 0:
         print(
             "::warning::No baked .htm files patched on SFTP. "
-            "Homepage still needs Volusion Design → File Editor → template_266.html → Save "
-            "(no Cloudflare). That rebake points / at ?v="
-            f"{WANT} which is already a good CDN entry.",
+            "Do Volusion Design → File Editor → template_266.html → Save to rebake.",
             flush=True,
         )
     return 0
