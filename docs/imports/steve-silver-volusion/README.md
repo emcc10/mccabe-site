@@ -1,0 +1,27 @@
+# Steve Silver → Volusion import pack
+
+## Spreadsheets
+- `steve_silver_game_table_sets_import.csv` — game table sets only (Rylie, Tournament, Cambridge)
+- `steve_silver_dining_groups_import.csv` — Colvin, Magnolia, Reid, Napa, Garland, Aubrey, Ventura, Artemis (+ servers/curios)
+- `steve_silver_game_dining_server_import.csv` / `.xlsx` — full combined workbook
+- `servers_on_site_format_notes.csv` — existing McCabe server SKUs and required edits
+
+## Columns
+`productcode, productname, productprice, productweight, freeshipping, availability, productdescription, techspecs`
+(plus helper columns: `group, vendor_sku, source_url, volusion_images`)
+
+- **productdescription** = Steve Silver short description (e.g. Rylie “Get ready for game night…”)
+- **techspecs** = bullet list starting at “Set includes…” / crafted specs
+- **productprice / productweight** often blank — Steve Silver retailer site does not expose dealer MAP/weight for most bundles; fill from your cost sheet before import
+- **freeshipping** = `N`, **availability** = `Available` unless page said out of stock
+
+## Images
+Downloaded into `vspfiles/photos/` as Volusion names:
+- `{productcode}-1.jpg` main
+- `{productcode}-2T.jpg` thumbnail proxy
+- `{productcode}-altview1.jpg` … alt views
+
+## Rebuild
+```bash
+python3 scripts/build_ss_volusion_import.py
+```

@@ -1,0 +1,6 @@
+productcode,productname,on_site,notes
+SS-BUR500NSV,"Magnolia Cathedral Doored Server, Black (on site)",Y,Already in cat 217. Vendor SKU on Steve Silver is MM520KSV. Images synced from SS-MM520KSV-1 / altviews into SS-BUR500NSV-*. Prefer keeping SS-BUR500NSV for live continuity OR remap to SS-MM520KSV. Refresh productdescription/techspecs from Magnolia Cathedral Doored Server Black page.
+SS-AUB500SV,Auburn/Aubrey Server (on site),Y,Already on site. Title says Auburn; Steve Silver listing is Aubrey Server Black (SS-ABR500KSV). Current description incorrectly mentions expanding table — replace with Aubrey server copy. Images synced from SS-ABR500KSV into SS-AUB500SV-1/altviews.
+KARINA-SIDEBOARD,Karina Sideboard,Y,Already on site. Not part of requested dining groups. Optional: rename to SS- style code on re-import.
+SS-MM520KSV,"Magnolia Cathedral Doored Server, Black (import row)",N,New import code matching Steve Silver SKU. Duplicate of live SS-BUR500NSV — import only if migrating product codes.
+SS-ABR500KSV,"Aubrey Server, Black (import row)",N,"Correct Aubrey server SKU/format. Use to replace/fix SS-AUB500SV content, or import as new and retire SS-AUB500SV."
