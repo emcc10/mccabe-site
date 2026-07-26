@@ -5,7 +5,9 @@ import hashlib, os, sys
 CANONICAL = {
     "vspfiles/js/mc-pdp-auth-cta-form.js": ("/v/vspfiles/js/mc-pdp-auth-cta-form.js", "MC_PDP_AUTH_ONCE_20260727014alex2"),
     "vspfiles/js/mc-pdp-auth-cta-form-impl.js": ("/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js", "mcEnsurePdpPriceStack"),
-    "vspfiles/js/mc-pdp-price-stack.js": ("/v/vspfiles/js/mc-pdp-price-stack.js", "mcEnsurePdpPriceStack"),
+    "vspfiles/js/mc-pdp-price-stack.js": ("/v/vspfiles/js/mc-pdp-price-stack.js", "fixSsBrokenPhotosEarly"),
+    "vspfiles/js/mc-ss-pdp-layout.js": ("/v/vspfiles/js/mc-ss-pdp-layout.js", "MC_SS_PDP_LAYOUT_20260726audit1"),
+    "vspfiles/js/mc-pdp-alt-view-row.js": ("/v/vspfiles/js/mc-pdp-alt-view-row.js", "MC_ALT_VIEW_ROW_20260726audit1"),
 }
 def md5_hex(data: bytes) -> str:
     return hashlib.md5(data).hexdigest()

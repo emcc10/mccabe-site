@@ -18,6 +18,8 @@ CRITICAL = (
     "vspfiles/js/mc-pdp-auth-cta-fix-v21.js",
     "vspfiles/js/mc-unified-pdp-layout.js",
     "vspfiles/js/mc-pdp-price-stack.js",
+    "vspfiles/js/mc-ss-pdp-layout.js",
+    "vspfiles/js/mc-pdp-alt-view-row.js",
     "vspfiles/css/mc-plp-body-last.css",
 )
 

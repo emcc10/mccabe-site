@@ -491,7 +491,7 @@ for f in vspfiles/boards/showcase/*.png; do
     boards_fail=$((boards_fail + 1))
   fi
 done
-shopt -u nullglob
+shopt -s nullglob
 for f in vspfiles/boards/mood/*.svg; do
   if ! deploy_file_changed "$f"; then
     echo "=== skip boards-mood: ${f} unchanged ==="
@@ -502,45 +502,49 @@ for f in vspfiles/boards/mood/*.svg; do
     "/v/vspfiles/boards/mood/${base}" \
     "/vspfiles/boards/mood/${base}" || true
 done
+shopt -u nullglob
 if [[ "$boards_fail" -gt 0 ]]; then
   echo "::warning::${boards_fail} My Boards showcase PNG(s) failed lftp upload (non-blocking; Paramiko chunked upload is primary)"
 fi
 
 echo "=== My Boards canonical /v/vspfiles force upload (fixes stale HTTP path) ==="
-if deploy_prefix_changed "vspfiles/boards/" || deploy_file_changed "vspfiles/my-boards.html"; then
+if [[ -f vspfiles/boards/my-boards-page.js ]] && { deploy_prefix_changed "vspfiles/boards/" || deploy_file_changed "vspfiles/my-boards.html"; }; then
 set +e
 python3 scripts/upload_boards_canonical.py
 boards_canon_rc=$?
 set -e
 if [[ "$boards_canon_rc" -ne 0 ]]; then
-  echo "::error::upload_boards_canonical.py failed — my-boards-page.js may still be stale on live site"
+  echo "::warning::upload_boards_canonical.py failed — my-boards-page.js may still be stale on live site (non-blocking)"
 fi
 
 else
-  echo "=== My Boards unchanged; canonical force upload skipped ==="
+  echo "=== My Boards missing or unchanged; canonical force upload skipped ==="
   boards_canon_rc=0
 fi
 
 echo "=== My Boards byte-size check (/v/vspfiles is what browsers load) ==="
-if deploy_prefix_changed "vspfiles/boards/" || deploy_file_changed "vspfiles/my-boards.html"; then
+if [[ -f vspfiles/boards/my-boards-page.js ]] && { deploy_prefix_changed "vspfiles/boards/" || deploy_file_changed "vspfiles/my-boards.html"; }; then
 for pair in \
   "vspfiles/boards/my-boards-page.js|/v/vspfiles/boards/my-boards-page.js" \
-  "vspfiles/boards/board-styles.js|/v/vspfiles/boards/board-styles.js" \
   "vspfiles/boards/board-styles.js|/v/vspfiles/boards/board-styles.js" \
   "vspfiles/boards/my-boards-bundle.css|/v/vspfiles/boards/my-boards-bundle.css"; do
   local_file="${pair%%|*}"
   live_path="${pair##*|}"
+  if [[ ! -f "$local_file" ]]; then
+    echo "=== skip boards size check: ${local_file} not in repo ==="
+    continue
+  fi
   want=$(wc -c < "$local_file" | tr -d ' ')
   got=$(curl -fsSL "https://www.mccabestheaterandliving.com${live_path}?v=$(date +%s)" -H "Cache-Control: no-cache" 2>/dev/null | wc -c | tr -d ' ' || echo 0)
   if [[ "$got" == "$want" ]]; then
     echo "  OK ${live_path} bytes=${got}"
   else
-    echo "::error::SIZE ${live_path} live=${got} want=${want} — boards JS/CSS not updated on origin"
+    echo "::warning::SIZE ${live_path} live=${got} want=${want} — boards JS/CSS not updated on origin"
     boards_canon_rc=1
   fi
 done
 else
-  echo "=== My Boards unchanged; byte-size check skipped ==="
+  echo "=== My Boards missing or unchanged; byte-size check skipped ==="
 fi
 if [[ "${boards_canon_rc:-0}" -ne 0 ]]; then
   echo "::warning::My Boards live byte check failed (non-blocking for template/CSS deploy)"
