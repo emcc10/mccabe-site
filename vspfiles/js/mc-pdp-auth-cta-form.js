@@ -52,10 +52,13 @@
       st.id = "mc-ss-pdp-gap-kill";
       st.textContent =
         "body.mc-product-page #slideshow-container,body.productdetails #slideshow-container," +
-        "body.mc-product-page #if_homepage,body.productdetails #if_homepage{" +
+        "body.mc-product-page #if_homepage,body.productdetails #if_homepage," +
+        "body.mc-product-page aside.vol-list-grid,body.productdetails aside.vol-list-grid," +
+        "body.mc-product-page .vol-list-grid.text-right,body.productdetails .vol-list-grid.text-right{" +
         "display:none!important;height:0!important;min-height:0!important;max-height:0!important;" +
         "margin:0!important;padding:0!important;overflow:hidden!important}" +
         "body.mc-product-page header.header,body.productdetails header.header{min-height:0!important}" +
+        "body.mc-product-page .container.container--content{padding-top:0!important;margin-top:0!important}" +
         "body.mc-product-page #product_photo,body.productdetails #product_photo{" +
         "max-width:100%!important;height:auto!important;object-fit:contain!important}";
       (global.document.head || global.document.documentElement).appendChild(st);
