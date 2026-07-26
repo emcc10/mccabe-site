@@ -161,7 +161,6 @@ CRITICAL_ALWAYS=(
   # verify_mc_pdp_js_sftp.py gates on these every run — must upload even on changed-only pushes.
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
   "vspfiles/js/mc-pdp-auth-cta-form.js"
-  "vspfiles/js/mc-pdp-auth-cta-form-impl.js"
   "vspfiles/js/mc-pdp-auth-cta-fix-v21.js"
   "vspfiles/js/mc-tmh-product-descriptions.js"
   "vspfiles/js/mc-pdp-price-stack.js"
@@ -328,15 +327,11 @@ maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-fix.js" "mc-pdp-auth-cta-fix" \
   "/vspfiles/js/mc-pdp-auth-cta-fix.js" \
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
 
+
 maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-form.js" "mc-pdp-auth-cta-form" \
   "/v/vspfiles/js/mc-pdp-auth-cta-form.js" \
   "/vspfiles/js/mc-pdp-auth-cta-form.js" \
   "vspfiles/js/mc-pdp-auth-cta-form.js"
-
-maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-form-impl.js" "mc-pdp-auth-cta-form-impl" \
-  "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js" \
-  "/vspfiles/js/mc-pdp-auth-cta-form-impl.js" \
-  "vspfiles/js/mc-pdp-auth-cta-form-impl.js"
 
 maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-fix-v21.js" "mc-pdp-auth-cta-fix-v21" \
   "/v/vspfiles/js/mc-pdp-auth-cta-fix-v21.js" \
@@ -606,23 +601,12 @@ verify_live_template_http "$TEMPLATE_ENFORCER_TAG"
 echo ""
 echo "Category/product HTML is Volusion-BAKED: after SFTP template updates, open Volusion"
 echo "Design → File Editor → template_266.html → Save once so /category-s/*.htm picks up changes."
-echo "If homepage/PLP still jumbled, Cloudflare Purge by URL (1-year cache on ?v=):"
-echo "  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260725fix3"
-echo "  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260727001fix1"
+echo "If still broken, Cloudflare Purge by URL:"
 echo "  /v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"
 echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
 echo ""
-echo "=== Cloudflare purge (optional CLOUDFLARE_API_TOKEN + CLOUDFLARE_ZONE_ID) ==="
-python3 scripts/purge_cloudflare_storefront.py || true
-echo ""
-echo "=== Patch baked .htm enforcer refs via SFTP (no Cloudflare needed) ==="
-python3 scripts/patch_baked_html_enforcer.py || true
-echo ""
 echo "=== Live storefront verify (soft — does not fail CI) ==="
 python3 scripts/verify_live_plp_deploy.py --soft || true
-echo ""
-echo "NO CLOUDFLARE? Volusion Design → File Editor → template_266.html → Save once."
-echo "That rebakes / and category pages to the new enforcer ?v= (already cached correctly)."
 
 echo "=== Core deploy gate (template + custom-safe + mccabe-overrides — SFTP MD5 + HTTP markers) ==="
 set +e
