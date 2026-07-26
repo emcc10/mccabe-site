@@ -2145,6 +2145,11 @@
   }
 
   function runGlobalPriceDisplayFix() {
+    try {
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (/\/product-p\//.test(p) || /productdetails\.asp/i.test(p)) return;
+      if (global.document.getElementById("v65-product-parent")) return;
+    } catch (ePdpPrice) {}
     stripPriceZeroCentsLocal();
   }
 
