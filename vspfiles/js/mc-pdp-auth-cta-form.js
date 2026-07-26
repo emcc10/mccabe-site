@@ -8,10 +8,10 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260725revert1";
+  var VERSION = "20260725live1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725050;
+  var DEPLOY_RANK = 20260725060;
   var ALT_VIEW_ROW_VER = "20260725altmatch1";
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
@@ -19,6 +19,31 @@
     global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ = DEPLOY_RANK;
     global.__MC_PDP_AUTH_CTA_MAX_VER__ = VERSION;
   } catch (eMax) {}
+  /* Do NOT strip/reinject mc-plp-enforcer from PDP boots — that caused load loops. */
+
+  /* Barron / SS sofa freeze: baked pages still load sticky mc-plp-enforcer
+     (?mcrd=safe1). Its #content_area price MutationObserver walks the whole
+     tree on every childList mutation. Auth boots with ?mcrd=Date.now(), so
+     neutralize that path here even before template rebake. */
+  try {
+    if (global.document && global.document.getElementById("v65-product-parent")) {
+      global.mcStripPriceZeroCents = function () {};
+      global.mcPlpEnforcerRun = function () {};
+      try {
+        var prevPlp = parseInt(
+          String(global.__MC_PLP_ENFORCER_VER__ || "").replace(/\D/g, ""),
+          10
+        );
+        var wantPlp = 202607270091;
+        if (!(prevPlp >= wantPlp)) {
+          global.__MC_PLP_ENFORCER_VER__ = "20260727009live1";
+        }
+      } catch (ePlpLatch) {
+        global.__MC_PLP_ENFORCER_VER__ = "20260727009live1";
+      }
+    }
+  } catch (eUnfreeze) {}
+
   /* Do NOT strip form.js script tags. Baked boots require tag presence and
      __MC_DEPLOY_FP__==="20260725fix3"; stripping caused endless reinject/loading loops. */
 
@@ -841,7 +866,15 @@
     } catch (eStrip) {}
   }
 
-  global.mcStripPriceZeroCents = stripPriceZeroCents;
+  /* On PDPs, keep this a no-op. mc-plp-enforcer's price MO calls
+     global.mcStripPriceZeroCents when present; a real implementation here
+     would still mutate text and re-trigger that observer (Barron freeze). */
+  global.mcStripPriceZeroCents = function (root) {
+    try {
+      if (global.document.getElementById("v65-product-parent")) return;
+    } catch (ePdpStrip) {}
+    return stripPriceZeroCents(root);
+  };
 
   function authDelay(ms) {
     return new Promise(function (resolve) {
