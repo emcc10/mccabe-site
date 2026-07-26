@@ -21,6 +21,11 @@ Downloaded into `vspfiles/photos/` as Volusion names:
 - `{productcode}-2T.jpg` thumbnail proxy
 - `{productcode}-altview1.jpg` … alt views
 
+## Existing servers on site
+- `SS-BUR500NSV` = **Burlington** Cathedral Doored Server (vendor `BUR500NSV`). Live McCabe currently mislabels this SKU as Magnolia — fix title/description.
+- Magnolia servers use `SS-MM520*` (e.g. `SS-MM520KSV`), not BUR500.
+- `SS-AUB500SV` should follow Aubrey Server copy (`SS-ABR500KSV`).
+
 ## Rebuild
 ```bash
 python3 scripts/build_ss_volusion_import.py
