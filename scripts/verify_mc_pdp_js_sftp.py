@@ -10,7 +10,7 @@ import sys
 CANONICAL = {
     "vspfiles/js/mc-pdp-auth-cta-form.js": (
         "/v/vspfiles/js/mc-pdp-auth-cta-form.js",
-        "MC_PDP_AUTH_ONCE_20260727010once1",
+        "MC_PDP_AUTH_ONCE_20260727011once2",
     ),
     "vspfiles/js/mc-pdp-auth-cta-form-impl.js": (
         "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js",
