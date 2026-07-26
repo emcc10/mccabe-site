@@ -1,6 +1,6 @@
 ﻿/**
  * PLP fixes â€” DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260727001fix1 â€” CDN unfreeze: beat 202607259999 latch + home grid
+ * MC_PLP_ENFORCER_20260727002pdp1 — skip PDPs entirely (price MO + auth reinject froze sofas)
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
@@ -11,7 +11,7 @@
 
   /* Digit string must beat prior live latch 202607259999 or this file no-ops.
      20260726001 alone LOSES to 9999; trailing fix1 makes 202607270011 > 202607259999. */
-  var VERSION = "20260727001fix1"; /* CDN unfreeze + home featured parallel-table convert */
+  var VERSION = "20260727002pdp1"; /* PDP early-exit: no price MO / auth reinject on product pages */
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -29,6 +29,30 @@
   }
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
+
+  /* Product pages already boot auth/alt via template_266. The PLP enforcer used to
+     keep running on PDPs (static footer tag): content_area price MutationObserver +
+     loadPdpAuthCtaFix reinject timers fought mc-pdp-auth-cta-form.js and froze
+     Steve Silver sofa PDPs. Exit before any observers or reinjectors install. */
+  function isProductDetailPageEarly() {
+    try {
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (/\/product-p\//.test(p) || /productdetails\.asp/i.test(p)) return true;
+      if (global.document && global.document.getElementById("v65-product-parent")) return true;
+      var b = global.document && global.document.body;
+      if (
+        b &&
+        (b.classList.contains("productdetails") || b.classList.contains("mc-product-page"))
+      ) {
+        return true;
+      }
+    } catch (ePdpEarly) {}
+    return false;
+  }
+  if (isProductDetailPageEarly()) {
+    global.mcPlpEnforcerRun = function () {};
+    return;
+  }
 
   function upgradePdpAuthCtaForm() {
     try {
@@ -2121,6 +2145,11 @@
   }
 
   function runGlobalPriceDisplayFix() {
+    try {
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (/\/product-p\//.test(p) || /productdetails\.asp/i.test(p)) return;
+      if (global.document.getElementById("v65-product-parent")) return;
+    } catch (ePdpPrice) {}
     stripPriceZeroCentsLocal();
   }
 
