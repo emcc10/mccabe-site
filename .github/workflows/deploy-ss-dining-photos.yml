@@ -1,0 +1,66 @@
+name: Deploy Steve Silver dining photos
+
+# Game/dining/server import pack → /v/vspfiles/photos/
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "vspfiles/imports/steve-silver-volusion/**"
+      - "vspfiles/photos/SS-RL*.jpg"
+      - "vspfiles/photos/SS-ABR*.jpg"
+      - "vspfiles/photos/SS-COL*.jpg"
+      - "vspfiles/photos/SS-MM*.jpg"
+      - "vspfiles/photos/SS-NP*.jpg"
+      - "vspfiles/photos/SS-GA*.jpg"
+      - "vspfiles/photos/SS-TU*.jpg"
+      - "vspfiles/photos/SS-RED*.jpg"
+      - "vspfiles/photos/SS-JS*.jpg"
+      - "vspfiles/photos/SS-CBR*.jpg"
+      - "vspfiles/photos/SS-BUR*.jpg"
+      - "vspfiles/photos/SS-VCM*.jpg"
+      - "scripts/upload_steve_silver_dining_photos.py"
+      - ".github/workflows/deploy-ss-dining-photos.yml"
+
+concurrency:
+  group: deploy-ss-dining-photos
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Paramiko
+        run: pip3 install paramiko
+
+      - name: Upload dining/game/server photos (Paramiko SFTP)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_steve_silver_dining_photos.py
+
+      - name: Verify key import heroes on live CDN
+        run: |
+          set -e
+          for f in \
+            SS-ABR500KSV-1.jpg SS-RL500K-GT-D6PC-1.jpg SS-BUR500NSV-1.jpg \
+            SS-VCM420WTN-C5PC-1.jpg SS-COL500KSV-1.jpg SS-MM520KSV-1.jpg \
+            SS-NP500SV-1.jpg SS-GA500SV-1.jpg SS-RED500KSV-1.jpg; do
+            if [ ! -f "vspfiles/photos/$f" ]; then
+              echo "skip $f (not in repo)"
+              continue
+            fi
+            local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
+            live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s)" | wc -c | tr -d ' ')
+            echo "$f local=$local live=$live"
+            if [ "$live" -lt "$((local / 2))" ]; then
+              echo "::error::Photo not synced to CDN: $f (local=$local live=$live)"
+              exit 1
+            fi
+          done

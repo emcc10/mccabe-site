@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Upload Steve Silver PLP/PDP photos to Volusion SFTP.
 
-Ensures SS-* bedroom, upholstery, game, dining, and server images reach
-/v/vspfiles/photos/ even when the generic changed-files deploy misses files.
+Ensures SS-* bedroom and upholstery images reach /v/vspfiles/photos/ even when
+the generic changed-files deploy misses files.
+
+Game/dining/server import photos use upload_steve_silver_dining_photos.py.
 """
 from __future__ import annotations
 
@@ -14,7 +16,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
 PATTERNS = (
-    # Bedroom / upholstery
     "SS-BC*.jpg",
     "SS-CAS*.jpg",
     "SS-HP900*.jpg",
@@ -31,19 +32,6 @@ PATTERNS = (
     "SS-OLSEN*.jpg",
     "SS-KEILY*.jpg",
     "SS-NOAH*.jpg",
-    # Game table sets, dining groups, servers (Volusion import pack)
-    "SS-RL*.jpg",
-    "SS-ABR*.jpg",
-    "SS-COL*.jpg",
-    "SS-MM*.jpg",
-    "SS-NP*.jpg",
-    "SS-GA*.jpg",
-    "SS-TU*.jpg",
-    "SS-RED*.jpg",
-    "SS-JS*.jpg",
-    "SS-CBR*.jpg",
-    "SS-BUR*.jpg",
-    "SS-VCM*.jpg",
 )
 
 
