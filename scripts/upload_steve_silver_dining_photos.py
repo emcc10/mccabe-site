@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Fast upload of Steve Silver game/dining/server import photos to Volusion.
 
-Only writes the HTTP-canonical path /v/vspfiles/photos/<file>.
-Prioritizes product heroes (-1.jpg), then thumbs, then altviews.
-Skips remotes that already match local size. Uses parallel SFTP workers.
+Writes both HTTP-serving paths:
+  /v/vspfiles/photos/<file>
+  /vspfiles/photos/<file>
+
+Prioritizes product heroes (-1.jpg). Skips only when BOTH remotes already
+match local size (unless FORCE_REUPLOAD=1). Uses parallel SFTP workers.
 """
 from __future__ import annotations
 
@@ -18,9 +21,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
 IMPORT_CSV = ROOT / "vspfiles" / "imports" / "steve-silver-volusion" / "volusion_import_all.csv"
-REMOTE_DIR = "/v/vspfiles/photos"
+REMOTE_DIRS = (
+    "/v/vspfiles/photos",
+    "/vspfiles/photos",
+)
 WORKERS = int(os.environ.get("SS_DINING_UPLOAD_WORKERS", "6"))
 CHUNK = 256 * 1024
+FORCE = os.environ.get("FORCE_REUPLOAD", "").strip().lower() in {"1", "true", "yes"}
+HEROES_ONLY = os.environ.get("SS_DINING_HEROES_ONLY", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+}
 
 
 def product_codes() -> list[str]:
@@ -44,6 +56,11 @@ def product_codes() -> list[str]:
 def collect_targets() -> list[str]:
     names: set[str] = set()
     for code in product_codes():
+        if HEROES_ONLY:
+            hero = PHOTOS / f"{code}-1.jpg"
+            if hero.is_file():
+                names.add(hero.name)
+            continue
         for path in PHOTOS.glob(f"{code}*.jpg"):
             if path.is_file():
                 names.add(path.name)
@@ -76,11 +93,17 @@ def _connect():
     return transport, sftp
 
 
+def _remote_matches(sftp, remote: str, want: int) -> bool:
+    try:
+        return sftp.stat(remote).st_size == want
+    except OSError:
+        return False
+
+
 def _put_one(sftp, local: str, remote: str, want: int) -> bool:
     try:
         try:
-            if sftp.stat(remote).st_size == want:
-                return True
+            sftp.remove(remote)
         except OSError:
             pass
         with open(local, "rb") as src, sftp.open(remote, "wb") as dst:
@@ -91,10 +114,26 @@ def _put_one(sftp, local: str, remote: str, want: int) -> bool:
                     break
                 dst.write(buf)
         got = sftp.stat(remote).st_size
-        return got == want
+        if got != want:
+            print(f"SIZE_MISMATCH {remote} want={want} got={got}", flush=True)
+            return False
+        return True
     except Exception as exc:  # noqa: BLE001
         print(f"FAIL {remote}: {exc}", flush=True)
         return False
+
+
+def _upload_name(sftp, name: str) -> str:
+    """Return 'ok', 'skip', or 'fail'."""
+    local = str(PHOTOS / name)
+    want = os.path.getsize(local)
+    remotes = [f"{d}/{name}" for d in REMOTE_DIRS]
+    if not FORCE and all(_remote_matches(sftp, r, want) for r in remotes):
+        return "skip"
+    for remote in remotes:
+        if not _put_one(sftp, local, remote, want):
+            return "fail"
+    return "ok"
 
 
 def _worker(batch: list[str]) -> tuple[int, int, int]:
@@ -104,35 +143,33 @@ def _worker(batch: list[str]) -> tuple[int, int, int]:
     try:
         transport, sftp = _connect()
         for name in batch:
-            local = str(PHOTOS / name)
-            want = os.path.getsize(local)
-            remote = f"{REMOTE_DIR}/{name}"
-            try:
-                if sftp.stat(remote).st_size == want:
-                    skip += 1
-                    continue
-            except OSError:
-                pass
-            if _put_one(sftp, local, remote, want):
+            result = _upload_name(sftp, name)
+            if result == "skip":
+                skip += 1
+                continue
+            if result == "ok":
                 ok += 1
                 print(f"OK {name}", flush=True)
+                continue
+            # reconnect + retry once
+            try:
+                sftp.close()
+            except Exception:
+                pass
+            try:
+                transport.close()
+            except Exception:
+                pass
+            transport, sftp = _connect()
+            result = _upload_name(sftp, name)
+            if result == "ok":
+                ok += 1
+                print(f"OK {name} (retry)", flush=True)
+            elif result == "skip":
+                skip += 1
             else:
-                # one retry on fresh connection
-                try:
-                    sftp.close()
-                except Exception:
-                    pass
-                try:
-                    transport.close()
-                except Exception:
-                    pass
-                transport, sftp = _connect()
-                if _put_one(sftp, local, remote, want):
-                    ok += 1
-                    print(f"OK {name} (retry)", flush=True)
-                else:
-                    fail += 1
-                    print(f"FAIL {name}", flush=True)
+                fail += 1
+                print(f"FAIL {name}", flush=True)
     finally:
         if sftp is not None:
             try:
@@ -160,14 +197,14 @@ def main() -> int:
         return 1
 
     workers = max(1, min(WORKERS, len(targets)))
-    # Split into N roughly equal batches (one connection per worker).
     batches: list[list[str]] = [[] for _ in range(workers)]
     for i, name in enumerate(targets):
         batches[i % workers].append(name)
 
     print(
         f"Uploading {len(targets)} files via {workers} SFTP workers "
-        f"to {REMOTE_DIR}/ (heroes first)",
+        f"to {', '.join(REMOTE_DIRS)} "
+        f"(heroes_only={HEROES_ONLY} force={FORCE})",
         flush=True,
     )
     t0 = time.time()

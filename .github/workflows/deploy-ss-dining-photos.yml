@@ -39,12 +39,25 @@ jobs:
       - name: Install Paramiko
         run: pip3 install paramiko
 
-      - name: Upload dining/game/server photos (Paramiko SFTP)
+      - name: Force-upload product heroes first (both SFTP paths)
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_PORT: "2222"
+          SS_DINING_HEROES_ONLY: "1"
+          FORCE_REUPLOAD: "1"
+          SS_DINING_UPLOAD_WORKERS: "6"
+        run: python3 scripts/upload_steve_silver_dining_photos.py
+
+      - name: Upload remaining dining/game/server photos
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+          FORCE_REUPLOAD: "0"
+          SS_DINING_UPLOAD_WORKERS: "6"
         run: python3 scripts/upload_steve_silver_dining_photos.py
 
       - name: Verify key import heroes on live CDN
@@ -59,8 +72,15 @@ jobs:
               continue
             fi
             local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
-            live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s)" | wc -c | tr -d ' ')
-            echo "$f local=$local live=$live"
+            live=0
+            for attempt in 1 2 3 4 5 6; do
+              live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s%N)" | wc -c | tr -d ' ' || echo 0)
+              echo "$f attempt=$attempt local=$local live=$live"
+              if [ "$live" -ge $((local / 2)) ]; then
+                break
+              fi
+              sleep 5
+            done
             if [ "$live" -lt "$((local / 2))" ]; then
               echo "::error::Photo not synced to CDN: $f (local=$local live=$live)"
               exit 1
