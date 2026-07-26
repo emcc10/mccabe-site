@@ -21,11 +21,12 @@ on:
       - "vspfiles/photos/SS-VCM*.jpg"
       - "vspfiles/photos/.ss-dining-missing-altviews.txt"
       - "vspfiles/photos/.ss-colvin-garland-fix.txt"
+      - "vspfiles/photos/.ss-ga500tsv-upload.txt"
       - "scripts/upload_steve_silver_dining_photos.py"
       - ".github/workflows/deploy-ss-dining-photos.yml"
 
 concurrency:
-  group: deploy-ss-dining-photos-v5
+  group: deploy-ss-dining-photos-v6
   cancel-in-progress: true
 
 jobs:
