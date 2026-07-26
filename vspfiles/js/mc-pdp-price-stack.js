@@ -1,7 +1,18 @@
 
 /* MC_FORCE_LOVEY_STYLE_CTA REMOVED 20260722manual4 */
 
-
+/* Before baked enforcer bridge: latch sticky CDN enforcer on product pages. */
+(function (g) {
+  "use strict";
+  try {
+    var p = String((g.location && g.location.pathname) || "").toLowerCase();
+    if (!/\/product-p\//.test(p) && !(g.document && g.document.getElementById("v65-product-parent"))) return;
+    var prev = parseInt(String(g.__MC_PLP_ENFORCER_VER__ || "").replace(/\D/g, ""), 10);
+    if (!(prev >= 20269999999)) g.__MC_PLP_ENFORCER_VER__ = "20269999999pricestack";
+    g.mcPlpEnforcerRun = function () {};
+    g.mcStripPriceZeroCents = function () {};
+  } catch (eEarly) {}
+})(window);
 
 /**
  * PDP retail/member/sale stack repair — works without template_266 rebake.
