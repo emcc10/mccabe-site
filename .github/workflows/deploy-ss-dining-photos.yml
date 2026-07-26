@@ -23,7 +23,9 @@ on:
       - ".github/workflows/deploy-ss-dining-photos.yml"
 
 concurrency:
-  group: deploy-ss-dining-photos
+  # Bump group name when replacing a stuck slow uploader so the new job
+  # does not wait on the old concurrency lock.
+  group: deploy-ss-dining-photos-v2
   cancel-in-progress: true
 
 jobs:
