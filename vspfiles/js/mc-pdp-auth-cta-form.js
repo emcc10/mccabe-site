@@ -4,7 +4,7 @@
  * sticky CDN enforcer + MutationObserver thrash freeze the main thread.
  * This stub is cheap to load twice; impl loads once; MOs are neutered on SS PDPs
  * so layout can finish without the observer death-spiral.
- * MC_PDP_AUTH_ONCE_20260727013alex1
+ * MC_PDP_AUTH_ONCE_20260727014alex2
  * mcEnsurePdpPriceStack — provided by mc-pdp-auth-cta-form-impl.js
  */
 (function (global) {
