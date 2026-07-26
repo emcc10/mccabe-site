@@ -25,7 +25,7 @@ on:
 concurrency:
   # Bump group name when replacing a stuck slow uploader so the new job
   # does not wait on the old concurrency lock.
-  group: deploy-ss-dining-photos-v2
+  group: deploy-ss-dining-photos-v3
   cancel-in-progress: true
 
 jobs:
