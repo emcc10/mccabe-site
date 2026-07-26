@@ -26,33 +26,51 @@
   } catch (eEarly) {}
 })(window);
 
-/* Alexandria heroes: many -2.jpg URLs 404; force -1.jpg early. */
+/* SS heroes + "Main product image" thumbs: many -2.jpg URLs 404; force -1.jpg early. */
 (function (g) {
   "use strict";
-  function fixAlexHeroEarly() {
+  function fixSsBrokenPhotosEarly() {
     try {
-      if (!/ss-alex/i.test(String((g.location && g.location.pathname) || ""))) return;
+      var path = String((g.location && g.location.pathname) || "").toLowerCase();
+      if (!/\/product-p\/ss-/.test(path) && !/ss-alex/i.test(path)) return;
+      var pc = String(
+        ((g.document.querySelector('#v65-product-parent input[name="ProductCode"], input[name="ProductCode"]') || {})
+          .value) || ""
+      ).toUpperCase();
+      if (!pc && /\/product-p\/(ss-[a-z0-9-]+)\.htm/i.test(path)) {
+        pc = RegExp.$1.toUpperCase();
+      }
+      if (!pc) return;
+      var want = "/v/vspfiles/photos/" + pc + "-1.jpg";
       var img = g.document && g.document.getElementById("product_photo");
-      if (!img) return;
-      var src = String(img.getAttribute("src") || img.src || "");
-      var pc = String(((g.document.querySelector('#v65-product-parent input[name="ProductCode"], input[name="ProductCode"]') || {}).value) || "").toUpperCase();
-      var want = pc ? ("/v/vspfiles/photos/" + pc + "-1.jpg") : src.replace(/-2T?\.(jpg|jpeg|png|webp)/i, "-1.$1");
-      if (!want) return;
-      if (src.indexOf("-1.") !== -1 && img.naturalWidth) return;
-      img.setAttribute("src", want);
-      img.src = want;
-      img.removeAttribute("srcset");
-      var a = img.closest && img.closest("a");
-      if (a) a.setAttribute("href", want);
+      if (img) {
+        var src = String(img.getAttribute("src") || img.src || "");
+        if (!src || /\/-2T?\./i.test(src) || (img.complete && !img.naturalWidth)) {
+          img.setAttribute("src", want);
+          img.src = want;
+          img.removeAttribute("srcset");
+          var a = img.closest && img.closest("a");
+          if (a) a.setAttribute("href", want);
+        }
+      }
+      g.document.querySelectorAll("#altviews img, .altviews img, #mc-pdp-alt-view-row img").forEach(function (thumb) {
+        var tsrc = String(thumb.getAttribute("src") || thumb.src || "");
+        var alt = String(thumb.alt || "");
+        if (!/-2\.(?:jpe?g|png|webp)/i.test(tsrc)) return;
+        if (/Main product image/i.test(alt) || (thumb.complete && !thumb.naturalWidth)) {
+          thumb.setAttribute("src", want);
+          thumb.src = want;
+        }
+      });
     } catch (e) {}
   }
   if (g.document && g.document.readyState === "loading") {
-    g.document.addEventListener("DOMContentLoaded", fixAlexHeroEarly);
+    g.document.addEventListener("DOMContentLoaded", fixSsBrokenPhotosEarly);
   } else {
-    fixAlexHeroEarly();
+    fixSsBrokenPhotosEarly();
   }
   [0, 200, 800, 2000, 5000].forEach(function (ms) {
-    g.setTimeout(fixAlexHeroEarly, ms);
+    g.setTimeout(fixSsBrokenPhotosEarly, ms);
   });
 })(window);
 

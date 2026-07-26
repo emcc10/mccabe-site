@@ -1,9 +1,10 @@
 (function (window, document) {
   "use strict";
 
-  /* MC_ALT_VIEW_ROW_20260725baby1 — ignore Saranoni size-thumb clicks (404 data-main-image).
+  /* MC_ALT_VIEW_ROW_20260726audit1 — SS furniture: stop altview 404 storms (cap + early exit).
      Prefer -altviewN over Volusion -N restore leftovers. */
-  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260725baby1__) return;
+  if (!window || !document || window.__MC_TMH_ALT_VIEW_ROW_20260726audit1__) return;
+  window.__MC_TMH_ALT_VIEW_ROW_20260726audit1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725baby1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725alt3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260725alt2__ = true;
@@ -23,11 +24,16 @@
   var ROW_ID = "mc-pdp-alt-view-row";
   var TRACK_CLASS = "mc-pdp-alt-view-row__track";
   var MAX_ALT_VIEWS = 64;
-  var ALT_PROBE_VER = "20260725baby1";
+  var MAX_SS_ALT_VIEWS = 8;
+  var ALT_PROBE_VER = "20260726audit1";
   var discoveredByCode = {};
   var probeInFlight = {};
   var stickyHeroTimer = null;
   var altRowMutating = false;
+
+  function isSteveSilverCode(code) {
+    return /^SS-/.test(String(code || ""));
+  }
 
   function productCode() {
     var field = document.querySelector('input[name="ProductCode"],input[name="productcode"]');
@@ -359,15 +365,34 @@
     probeInFlight[code] = true;
     discoveredByCode[code] = [];
     /* Closeout / furniture: prefer -altviewN only. Legacy -2/-3/-4.jpg slots on
-       products like TYLER-BAR-SET often contain unrelated supplier photos. */
-    var remaining = MAX_ALT_VIEWS;
+       products like TYLER-BAR-SET often contain unrelated supplier photos.
+       Steve Silver: cap probes — Alexandria had ~50× 404s probing to 64. */
+    var maxSlots = isSteveSilverCode(code) ? MAX_SS_ALT_VIEWS : MAX_ALT_VIEWS;
+    var remaining = maxSlots;
+    var consecutiveMisses = 0;
+    var stoppedEarly = false;
 
-    function completeOne() {
+    function finish() {
+      if (stoppedEarly) return;
+      stoppedEarly = true;
+      probeInFlight[code] = false;
+      render();
+    }
+
+    function completeOne(hit) {
+      if (stoppedEarly) return;
+      if (hit) consecutiveMisses = 0;
+      else consecutiveMisses += 1;
       remaining -= 1;
-      if (remaining <= 0) {
-        probeInFlight[code] = false;
-        render();
+      /* SS: two misses in a row after at least one hit, or 3 leading misses → stop. */
+      if (
+        isSteveSilverCode(code) &&
+        (consecutiveMisses >= 3 || (discoveredByCode[code].length && consecutiveMisses >= 2))
+      ) {
+        finish();
+        return;
       }
+      if (remaining <= 0) finish();
     }
 
     function addItem(slot, src, labelPrefix) {
@@ -383,7 +408,7 @@
       schedule();
     }
 
-    for (var altSlot = 1; altSlot <= MAX_ALT_VIEWS; altSlot += 1) {
+    for (var altSlot = 1; altSlot <= maxSlots; altSlot += 1) {
       (function (photoSlot) {
         var src =
           "/v/vspfiles/photos/" +
@@ -392,10 +417,16 @@
           photoSlot +
           ".jpg?v=" +
           ALT_PROBE_VER;
-        probeImage(src, function () {
-          addItem(photoSlot, src, "Alternate product view");
-          completeOne();
-        }, completeOne);
+        probeImage(
+          src,
+          function () {
+            addItem(photoSlot, src, "Alternate product view");
+            completeOne(true);
+          },
+          function () {
+            completeOne(false);
+          }
+        );
       })(altSlot);
     }
   }

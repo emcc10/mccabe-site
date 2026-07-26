@@ -165,6 +165,7 @@ CRITICAL_ALWAYS=(
   "vspfiles/js/mc-pdp-auth-cta-fix-v21.js"
   "vspfiles/js/mc-tmh-product-descriptions.js"
   "vspfiles/js/mc-pdp-price-stack.js"
+  "vspfiles/js/mc-ss-pdp-layout.js"
   "vspfiles/js/mc-unified-pdp-layout.js"
   "vspfiles/js/mc-plp-enforcer.js"
   "vspfiles/css/mc-plp-body-last.css"
@@ -357,6 +358,29 @@ maybe_put_primary "vspfiles/js/mc-pdp-price-stack.js" "mc-pdp-price-stack" \
   "/v/vspfiles/js/mc-pdp-price-stack.js" \
   "/vspfiles/js/mc-pdp-price-stack.js" \
   "vspfiles/js/mc-pdp-price-stack.js"
+
+maybe_put_primary "vspfiles/js/mc-ss-pdp-layout.js" "mc-ss-pdp-layout" \
+  "/v/vspfiles/js/mc-ss-pdp-layout.js" \
+  "/vspfiles/js/mc-ss-pdp-layout.js" \
+  "vspfiles/js/mc-ss-pdp-layout.js"
+
+maybe_put_primary "vspfiles/js/mc-pdp-alt-view-row.js" "mc-pdp-alt-view-row" \
+  "/v/vspfiles/js/mc-pdp-alt-view-row.js" \
+  "/vspfiles/js/mc-pdp-alt-view-row.js" \
+  "vspfiles/js/mc-pdp-alt-view-row.js"
+
+# Category landing heroes referenced by CMS Description HTML (mc-lp13 banners).
+maybe_put_primary "vspfiles/landing/mc-sofas-sectionals-hero-20260721.jpg" "landing-sofas-sectionals-hero" \
+  "/v/vspfiles/landing/mc-sofas-sectionals-hero-20260721.jpg" \
+  "/vspfiles/landing/mc-sofas-sectionals-hero-20260721.jpg"
+
+maybe_put_primary "vspfiles/landing/mc-loveseats-hero-20260715.jpg" "landing-loveseats-hero" \
+  "/v/vspfiles/landing/mc-loveseats-hero-20260715.jpg" \
+  "/vspfiles/landing/mc-loveseats-hero-20260715.jpg"
+
+maybe_put_primary "vspfiles/landing/mc-reclining-sectionals-hero-20260715.jpg" "landing-reclining-sectionals-hero" \
+  "/v/vspfiles/landing/mc-reclining-sectionals-hero-20260715.jpg" \
+  "/vspfiles/landing/mc-reclining-sectionals-hero-20260715.jpg"
 
 # Boot logic is inline in template_266.html (<script id="mc-pdp-auth-cta-boot">) — no standalone file.
 
