@@ -90,6 +90,7 @@ _ALWAYS_DEPLOY = frozenset(
         "vspfiles/js/mc-pdp-auth-cta-fix.js",
         "vspfiles/js/mc-pdp-auth-cta-fix-v21.js",
         "vspfiles/js/mc-pdp-auth-cta-form.js",
+        "vspfiles/js/mc-pdp-auth-cta-form-impl.js",
         "vspfiles/js/mc-pdp-alt-view-row.js",
         "vspfiles/js/mc-pdp-price-stack.js",
         "vspfiles/js/mc-unified-pdp-layout.js",
