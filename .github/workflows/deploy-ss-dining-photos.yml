@@ -19,13 +19,12 @@ on:
       - "vspfiles/photos/SS-CBR*.jpg"
       - "vspfiles/photos/SS-BUR*.jpg"
       - "vspfiles/photos/SS-VCM*.jpg"
+      - "vspfiles/photos/.ss-dining-missing-altviews.txt"
       - "scripts/upload_steve_silver_dining_photos.py"
       - ".github/workflows/deploy-ss-dining-photos.yml"
 
 concurrency:
-  # Bump group name when replacing a stuck slow uploader so the new job
-  # does not wait on the old concurrency lock.
-  group: deploy-ss-dining-photos-v3
+  group: deploy-ss-dining-photos-v4
   cancel-in-progress: true
 
 jobs:
@@ -39,18 +38,19 @@ jobs:
       - name: Install Paramiko
         run: pip3 install paramiko
 
-      - name: Force-upload product heroes first (both SFTP paths)
+      - name: Force-upload missing altviews (both SFTP paths)
+        if: hashFiles('vspfiles/photos/.ss-dining-missing-altviews.txt') != ''
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_PORT: "2222"
-          SS_DINING_HEROES_ONLY: "1"
           FORCE_REUPLOAD: "1"
-          SS_DINING_UPLOAD_WORKERS: "6"
+          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-dining-missing-altviews.txt"
+          SS_DINING_UPLOAD_WORKERS: "8"
         run: python3 scripts/upload_steve_silver_dining_photos.py
 
-      - name: Upload remaining dining/game/server photos
+      - name: Upload any remaining dining/game/server photos
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -60,26 +60,28 @@ jobs:
           SS_DINING_UPLOAD_WORKERS: "6"
         run: python3 scripts/upload_steve_silver_dining_photos.py
 
-      - name: Verify key import heroes on live CDN
+      - name: Verify heroes, 2T, and sample altviews on live CDN
         run: |
           set -e
           for f in \
-            SS-ABR500KSV-1.jpg SS-RL500K-GT-D6PC-1.jpg SS-BUR500NSV-1.jpg \
-            SS-VCM420WTN-C5PC-1.jpg SS-COL500KSV-1.jpg SS-MM520KSV-1.jpg \
-            SS-NP500SV-1.jpg SS-GA500SV-1.jpg SS-RED500KSV-1.jpg; do
+            SS-ABR500KSV-1.jpg SS-ABR500KSV-2T.jpg SS-ABR500KSV-altview1.jpg \
+            SS-RL500K-GT-D6PC-1.jpg SS-RL500K-GT-D6PC-2T.jpg SS-RL500K-GT-D6PC-altview1.jpg \
+            SS-VCM420WTN-C5PC-1.jpg SS-VCM420WTN-C5PC-2T.jpg SS-VCM420WTN-C5PC-altview1.jpg \
+            SS-NP500SV-1.jpg SS-NP500SV-2T.jpg SS-NP500SV-altview1.jpg \
+            SS-RED500KSV-1.jpg SS-RED500KSV-2T.jpg SS-RED500TSV-altview2.jpg; do
             if [ ! -f "vspfiles/photos/$f" ]; then
               echo "skip $f (not in repo)"
               continue
             fi
             local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
             live=0
-            for attempt in 1 2 3 4 5 6; do
+            for attempt in 1 2 3 4 5 6 7 8; do
               live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s%N)" | wc -c | tr -d ' ' || echo 0)
               echo "$f attempt=$attempt local=$local live=$live"
               if [ "$live" -ge $((local / 2)) ]; then
                 break
               fi
-              sleep 5
+              sleep 4
             done
             if [ "$live" -lt "$((local / 2))" ]; then
               echo "::error::Photo not synced to CDN: $f (local=$local live=$live)"

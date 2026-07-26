@@ -33,6 +33,12 @@ HEROES_ONLY = os.environ.get("SS_DINING_HEROES_ONLY", "").strip().lower() in {
     "true",
     "yes",
 }
+ALTVIEWS_ONLY = os.environ.get("SS_DINING_ALTVIEWS_ONLY", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+}
+UPLOAD_LIST_FILE = os.environ.get("UPLOAD_LIST_FILE", "").strip()
 
 
 def product_codes() -> list[str]:
@@ -55,14 +61,28 @@ def product_codes() -> list[str]:
 
 def collect_targets() -> list[str]:
     names: set[str] = set()
-    for code in product_codes():
-        if HEROES_ONLY:
-            hero = PHOTOS / f"{code}-1.jpg"
-            if hero.is_file():
-                names.add(hero.name)
-            continue
-        for path in PHOTOS.glob(f"{code}*.jpg"):
-            if path.is_file():
+    if UPLOAD_LIST_FILE:
+        list_path = Path(UPLOAD_LIST_FILE)
+        if not list_path.is_file():
+            list_path = ROOT / UPLOAD_LIST_FILE
+        for line in list_path.read_text(encoding="utf-8").splitlines():
+            name = line.strip()
+            if not name or name.startswith("#"):
+                continue
+            if (PHOTOS / name).is_file():
+                names.add(name)
+    else:
+        for code in product_codes():
+            if HEROES_ONLY:
+                hero = PHOTOS / f"{code}-1.jpg"
+                if hero.is_file():
+                    names.add(hero.name)
+                continue
+            for path in PHOTOS.glob(f"{code}*.jpg"):
+                if not path.is_file():
+                    continue
+                if ALTVIEWS_ONLY and "altview" not in path.name.lower():
+                    continue
                 names.add(path.name)
 
     def rank(name: str) -> tuple[int, str]:
