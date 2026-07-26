@@ -20,11 +20,12 @@ on:
       - "vspfiles/photos/SS-BUR*.jpg"
       - "vspfiles/photos/SS-VCM*.jpg"
       - "vspfiles/photos/.ss-dining-missing-altviews.txt"
+      - "vspfiles/photos/.ss-colvin-garland-fix.txt"
       - "scripts/upload_steve_silver_dining_photos.py"
       - ".github/workflows/deploy-ss-dining-photos.yml"
 
 concurrency:
-  group: deploy-ss-dining-photos-v4
+  group: deploy-ss-dining-photos-v5
   cancel-in-progress: true
 
 jobs:
@@ -38,6 +39,19 @@ jobs:
       - name: Install Paramiko
         run: pip3 install paramiko
 
+      - name: Force-upload Colvin/Garland corrected product photos
+        if: hashFiles('vspfiles/photos/.ss-colvin-garland-fix.txt') != ''
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+          FORCE_REUPLOAD: "1"
+          CLEAN_REMOTE_EXTRAS: "1"
+          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-colvin-garland-fix.txt"
+          SS_DINING_UPLOAD_WORKERS: "6"
+        run: python3 scripts/upload_steve_silver_dining_photos.py
+
       - name: Force-upload missing altviews (both SFTP paths)
         if: hashFiles('vspfiles/photos/.ss-dining-missing-altviews.txt') != ''
         env:
@@ -50,25 +64,13 @@ jobs:
           SS_DINING_UPLOAD_WORKERS: "8"
         run: python3 scripts/upload_steve_silver_dining_photos.py
 
-      - name: Upload any remaining dining/game/server photos
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          SFTP_PORT: "2222"
-          FORCE_REUPLOAD: "0"
-          SS_DINING_UPLOAD_WORKERS: "6"
-        run: python3 scripts/upload_steve_silver_dining_photos.py
-
-      - name: Verify heroes, 2T, and sample altviews on live CDN
+      - name: Verify Colvin colors + Garland curio/sideboard heroes
         run: |
           set -e
           for f in \
-            SS-ABR500KSV-1.jpg SS-ABR500KSV-2T.jpg SS-ABR500KSV-altview1.jpg \
-            SS-RL500K-GT-D6PC-1.jpg SS-RL500K-GT-D6PC-2T.jpg SS-RL500K-GT-D6PC-altview1.jpg \
-            SS-VCM420WTN-C5PC-1.jpg SS-VCM420WTN-C5PC-2T.jpg SS-VCM420WTN-C5PC-altview1.jpg \
-            SS-NP500SV-1.jpg SS-NP500SV-2T.jpg SS-NP500SV-altview1.jpg \
-            SS-RED500KSV-1.jpg SS-RED500KSV-2T.jpg SS-RED500TSV-altview2.jpg; do
+            SS-COL500KSV-1.jpg SS-COL500NSV-1.jpg SS-COL500ESV-1.jpg SS-COL500WSV-1.jpg \
+            SS-GA500C-1.jpg SS-GA500TC-1.jpg SS-GA500SV-1.jpg \
+            SS-COL500ESV-2T.jpg SS-GA500C-2T.jpg SS-GA500SV-2T.jpg; do
             if [ ! -f "vspfiles/photos/$f" ]; then
               echo "skip $f (not in repo)"
               continue

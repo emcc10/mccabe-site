@@ -39,6 +39,11 @@ ALTVIEWS_ONLY = os.environ.get("SS_DINING_ALTVIEWS_ONLY", "").strip().lower() in
     "yes",
 }
 UPLOAD_LIST_FILE = os.environ.get("UPLOAD_LIST_FILE", "").strip()
+CLEAN_REMOTE_EXTRAS = os.environ.get("CLEAN_REMOTE_EXTRAS", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+}
 
 
 def product_codes() -> list[str]:
@@ -204,6 +209,60 @@ def _worker(batch: list[str]) -> tuple[int, int, int]:
     return ok, skip, fail
 
 
+def _cleanup_remote_extras(keep_names: list[str]) -> int:
+    """Delete remote CODE*.jpg files that are not in the keep set (wrong leftovers)."""
+    prefixes: set[str] = set()
+    for name in keep_names:
+        # SS-COL500KSV-1.jpg -> SS-COL500KSV
+        stem = name[:-4] if name.lower().endswith(".jpg") else name
+        for suffix in ("-altview", "-2T", "-1T", "-2", "-1"):
+            idx = stem.find(suffix)
+            if idx > 0:
+                prefixes.add(stem[:idx])
+                break
+        else:
+            prefixes.add(stem)
+    keep = set(keep_names)
+    removed = 0
+    transport, sftp = _connect()
+    try:
+        for prefix in sorted(prefixes):
+            for remote_dir in REMOTE_DIRS:
+                try:
+                    entries = sftp.listdir(remote_dir)
+                except OSError as exc:
+                    print(f"listdir skip {remote_dir}: {exc}", flush=True)
+                    continue
+                for entry in entries:
+                    if not entry.startswith(prefix):
+                        continue
+                    if not entry.lower().endswith(".jpg"):
+                        continue
+                    # Only this product family (next char is '-' or end)
+                    rest = entry[len(prefix) :]
+                    if rest and not rest.startswith("-"):
+                        continue
+                    if entry in keep:
+                        continue
+                    for remote in (f"{remote_dir}/{entry}",):
+                        try:
+                            sftp.remove(remote)
+                            removed += 1
+                            print(f"REMOVED {remote}", flush=True)
+                        except OSError as exc:
+                            print(f"remove skip {remote}: {exc}", flush=True)
+    finally:
+        try:
+            sftp.close()
+        except Exception:
+            pass
+        try:
+            transport.close()
+        except Exception:
+            pass
+    return removed
+
+
 def main() -> int:
     os.chdir(ROOT)
     for key in ("FTP_SERVER", "FTP_USERNAME", "FTP_PASSWORD"):
@@ -215,6 +274,10 @@ def main() -> int:
     if not targets:
         print("No Steve Silver dining/game/server photos found", file=sys.stderr)
         return 1
+
+    if CLEAN_REMOTE_EXTRAS:
+        n = _cleanup_remote_extras(targets)
+        print(f"Cleaned {n} remote leftover photo(s)", flush=True)
 
     workers = max(1, min(WORKERS, len(targets)))
     batches: list[list[str]] = [[] for _ in range(workers)]

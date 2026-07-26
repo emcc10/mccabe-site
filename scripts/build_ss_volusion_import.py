@@ -57,35 +57,70 @@ def volusion_code(sku: str) -> str:
     return sku
 
 
-def extract_images(html: str) -> list[str]:
-    raw = re.findall(
+def extract_images(html: str, vendor_sku: str = "") -> list[str]:
+    """Pull gallery images for this product only (SKU in filename).
+
+    Related-product / "you may also like" images on the page are ignored when
+    a vendor SKU is known, so e.g. Colvin Green does not get Black server shots.
+    """
+    # Prefer Woo gallery payloads over scraping every upload URL on the page.
+    raw: list[str] = []
+    for pat in (
+        r'data-large_image="([^"]+)"',
+        r'woocommerce-product-gallery__image[\s\S]{0,500}?href="([^"]+)"',
         r"(https://stevesilver\.com/wp-content/uploads/\d{4}/\d{2}/[^\"'\s]+\.(?:jpe?g|png|webp))",
-        html,
-        re.I,
-    )
+    ):
+        raw.extend(re.findall(pat, html, re.I))
+
+    aliases = []
+    sku = (vendor_sku or "").strip().upper()
+    if sku:
+        aliases.append(sku)
+        # Ivory Colvin gallery files use COL500LWSV while page SKU is COL500WSV.
+        if sku == "COL500WSV":
+            aliases.append("COL500LWSV")
+    aliases_l = [a.lower() for a in aliases]
+
     out: list[str] = []
     seen: set[str] = set()
     for u in raw:
+        if not u.startswith("http"):
+            continue
         u = u.split("?")[0]
         # skip resized derivatives: name-100x100.jpg etc.
         if re.search(r"-\d+x\d+\.(?:jpe?g|png|webp)$", u, re.I):
             continue
         if any(x in u.lower() for x in ("logo", "favicon", "sprite", "placeholder")):
             continue
-        # prefer full lifestyle / product shots
         base = u.rsplit("/", 1)[-1]
+        bl = base.lower()
         if base in seen:
+            continue
+        if aliases_l and not any(a in bl for a in aliases_l):
+            continue
+        if "swatch" in bl:
             continue
         seen.add(base)
         out.append(u)
-    # Prefer collection hero images first (LS/RS without tiny component-only if mixed)
+
+    # Product studio shots (WS) first; deprioritize multi-SKU room sets.
     def rank(u: str) -> tuple:
         b = u.lower()
         score = 0
-        if re.search(r"_ls\d|_rs\d|set|dining|game", b):
-            score -= 10
-        if "chair" in b and "set" not in b:
-            score += 5
+        if re.search(r"_ws1\b|_ws1\.", b):
+            score -= 100
+        elif re.search(r"_ws2a?\b|_ws2a?\.", b):
+            score -= 80
+        elif re.search(r"_ws\d", b):
+            score -= 70
+        elif re.search(r"_vg\d|_dtl", b):
+            score -= 50
+        if re.search(r"_rs\d|morefloor", b):
+            score += 80
+        if "dims" in b or "_dim" in b:
+            score += 120
+        if "chair" in b and (not aliases_l or not any(a in b for a in aliases_l)):
+            score += 100
         return (score, u)
 
     return sorted(out, key=rank)
@@ -199,7 +234,7 @@ def extract_product(url: str, html: str) -> dict:
     elif stock:
         availability = "Available"
 
-    images = extract_images(html)
+    images = extract_images(html, vendor_sku=sku)
     group = "other"
     low = (name + " " + url).lower()
     if "game" in low or "tournament" in low or "cambridge" in low and "game" in low or "rylie" in low:
