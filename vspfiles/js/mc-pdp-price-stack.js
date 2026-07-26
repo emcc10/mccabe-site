@@ -1,17 +1,59 @@
 
 /* MC_FORCE_LOVEY_STYLE_CTA REMOVED 20260722manual4 */
 
-/* Before baked enforcer bridge: latch sticky CDN enforcer on product pages. */
+/* Before baked enforcer bridge / alt-view: stop SS PDP freezes. */
 (function (g) {
   "use strict";
   try {
     var p = String((g.location && g.location.pathname) || "").toLowerCase();
-    if (!/\/product-p\//.test(p) && !(g.document && g.document.getElementById("v65-product-parent"))) return;
+    var onPdp = /\/product-p\//.test(p) || !!(g.document && g.document.getElementById("v65-product-parent"));
+    if (!onPdp) return;
     var prev = parseInt(String(g.__MC_PLP_ENFORCER_VER__ || "").replace(/\D/g, ""), 10);
     if (!(prev >= 20269999999)) g.__MC_PLP_ENFORCER_VER__ = "20269999999pricestack";
     g.mcPlpEnforcerRun = function () {};
     g.mcStripPriceZeroCents = function () {};
+    /* Must run before alt-view-row / sticky enforcer install observers. */
+    if (/\/product-p\/ss-/.test(p) && !g.__MC_SS_MO_NEUTER__) {
+      g.__MC_SS_MO_NEUTER__ = true;
+      g.MutationObserver = function () {
+        this.observe = function () {};
+        this.disconnect = function () {};
+        this.takeRecords = function () {
+          return [];
+        };
+      };
+    }
   } catch (eEarly) {}
+})(window);
+
+/* Alexandria heroes: many -2.jpg URLs 404; force -1.jpg early. */
+(function (g) {
+  "use strict";
+  function fixAlexHeroEarly() {
+    try {
+      if (!/ss-alex/i.test(String((g.location && g.location.pathname) || ""))) return;
+      var img = g.document && g.document.getElementById("product_photo");
+      if (!img) return;
+      var src = String(img.getAttribute("src") || img.src || "");
+      var pc = String(((g.document.querySelector('#v65-product-parent input[name="ProductCode"], input[name="ProductCode"]') || {}).value) || "").toUpperCase();
+      var want = pc ? ("/v/vspfiles/photos/" + pc + "-1.jpg") : src.replace(/-2T?\.(jpg|jpeg|png|webp)/i, "-1.$1");
+      if (!want) return;
+      if (src.indexOf("-1.") !== -1 && img.naturalWidth) return;
+      img.setAttribute("src", want);
+      img.src = want;
+      img.removeAttribute("srcset");
+      var a = img.closest && img.closest("a");
+      if (a) a.setAttribute("href", want);
+    } catch (e) {}
+  }
+  if (g.document && g.document.readyState === "loading") {
+    g.document.addEventListener("DOMContentLoaded", fixAlexHeroEarly);
+  } else {
+    fixAlexHeroEarly();
+  }
+  [0, 200, 800, 2000, 5000].forEach(function (ms) {
+    g.setTimeout(fixAlexHeroEarly, ms);
+  });
 })(window);
 
 /**
