@@ -40,6 +40,18 @@ jobs:
       - name: Install Paramiko
         run: pip3 install paramiko
 
+      - name: Force-upload Garland greige sideboard SS-GA500TSV
+        if: hashFiles('vspfiles/photos/.ss-ga500tsv-upload.txt') != ''
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+          FORCE_REUPLOAD: "1"
+          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-ga500tsv-upload.txt"
+          SS_DINING_UPLOAD_WORKERS: "4"
+        run: python3 scripts/upload_steve_silver_dining_photos.py
+
       - name: Force-upload Colvin/Garland corrected product photos
         if: hashFiles('vspfiles/photos/.ss-colvin-garland-fix.txt') != ''
         env:
@@ -53,25 +65,12 @@ jobs:
           SS_DINING_UPLOAD_WORKERS: "6"
         run: python3 scripts/upload_steve_silver_dining_photos.py
 
-      - name: Force-upload missing altviews (both SFTP paths)
-        if: hashFiles('vspfiles/photos/.ss-dining-missing-altviews.txt') != ''
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          SFTP_PORT: "2222"
-          FORCE_REUPLOAD: "1"
-          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-dining-missing-altviews.txt"
-          SS_DINING_UPLOAD_WORKERS: "8"
-        run: python3 scripts/upload_steve_silver_dining_photos.py
-
-      - name: Verify Colvin colors + Garland curio/sideboard heroes
+      - name: Verify GA500TSV + key Garland heroes
         run: |
           set -e
           for f in \
-            SS-COL500KSV-1.jpg SS-COL500NSV-1.jpg SS-COL500ESV-1.jpg SS-COL500WSV-1.jpg \
-            SS-GA500C-1.jpg SS-GA500TC-1.jpg SS-GA500SV-1.jpg \
-            SS-COL500ESV-2T.jpg SS-GA500C-2T.jpg SS-GA500SV-2T.jpg; do
+            SS-GA500TSV-1.jpg SS-GA500TSV-2T.jpg SS-GA500TSV-altview1.jpg \
+            SS-GA500SV-1.jpg SS-GA500C-1.jpg; do
             if [ ! -f "vspfiles/photos/$f" ]; then
               echo "skip $f (not in repo)"
               continue
