@@ -23,6 +23,20 @@
         };
       };
     }
+    /* Baked .htm rarely picks up new template script tags — load SS layout from
+       price-stack (already on every PDP) so ATC/accordion stabilize without rebake. */
+    if (
+      /\/product-p\/ss-/.test(p) &&
+      !g.__MC_SS_PDP_LAYOUT_BOOT__ &&
+      g.document &&
+      !g.document.querySelector('script[src*="mc-ss-pdp-layout.js"]')
+    ) {
+      g.__MC_SS_PDP_LAYOUT_BOOT__ = true;
+      var s = g.document.createElement("script");
+      s.src = "/v/vspfiles/js/mc-ss-pdp-layout.js?v=20260726audit1";
+      s.async = false;
+      (g.document.head || g.document.documentElement).appendChild(s);
+    }
   } catch (eEarly) {}
 })(window);
 
