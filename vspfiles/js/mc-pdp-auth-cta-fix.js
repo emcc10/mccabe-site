@@ -8,7 +8,7 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725bbatc3 — restore bean bag ATC/qty purchase stack
   var MC_DEPLOY_FINGERPRINT = "20260725bbatc3";
-  var VERSION = "20260725bbatc3";
+  var VERSION = "20260727cozyhero1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
   var DEPLOY_RANK = 20260725020;
@@ -515,6 +515,26 @@
     });
   }
 
+  function ssHeroPhotoUrl(pc) {
+    var file = pc + "-1.jpg";
+    var rel = "/v/vspfiles/photos/" + file;
+    var prefix = "";
+    try {
+      var el = global.document.getElementById("product_photo");
+      var cur0 = String((el && (el.getAttribute("src") || el.src)) || "");
+      var m = cur0.match(/^((?:https?:)?\/\/cdn\d+\.volusion\.store\/[^/]+\/)v\/vspfiles\/photos\//i);
+      if (m) prefix = m[1].indexOf("//") === 0 ? "https:" + m[1] : m[1];
+    } catch (ePref) {}
+    var url = prefix ? prefix + "v/vspfiles/photos/" + file : rel;
+    var parts = ["mcimg=" + VERSION];
+    try {
+      var seed = String(global.global_ImageSeed || "");
+      if (seed.charAt(0) === "?") seed = seed.slice(1);
+      if (seed) parts.unshift(seed.indexOf("=") >= 0 ? seed : "v-cache=" + seed);
+    } catch (eSeed) {}
+    return url + "?" + parts.join("&");
+  }
+
   function ensureSteveSilverHeroPhotoSrc() {
     if (!isProductPdp()) return false;
     var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
@@ -529,13 +549,15 @@
     var img = global.document.getElementById("product_photo");
     if (!img) return false;
     if (img.__mcSsUserSelectedAlt) return true;
-    var full = "/v/vspfiles/photos/" + pc + "-1.jpg";
+    // Never use a bare -1.jpg URL: browsers/CDN keep old blurry copies without a cache-buster.
+    var full = ssHeroPhotoUrl(pc);
     var cur = String(img.getAttribute("src") || img.src || "");
     var normalizedCur = cur.replace(/\?.*$/, "").split("#")[0];
     var normalizedFull = full.replace(/\?.*$/, "").split("#")[0];
     var needsSwap =
       /-2T\.|-2\.jpg/i.test(cur) ||
-      (normalizedCur.indexOf(pc) !== -1 && normalizedCur.indexOf("-1.") === -1);
+      (normalizedCur.indexOf(pc) !== -1 && normalizedCur.indexOf("-1.") === -1) ||
+      (normalizedCur === normalizedFull && cur.indexOf("mcimg=") === -1);
     if (needsSwap || normalizedCur !== normalizedFull) {
       try {
         img.setAttribute("src", full);
@@ -547,7 +569,8 @@
       .querySelectorAll("a#product_photo_zoom_url, a#product_photo_zoom_url2")
       .forEach(function (link) {
         var href = String(link.getAttribute("href") || "");
-        if (!href || /-2T\.|-2\.jpg/i.test(href)) {
+        var normHref = href.replace(/\?.*$/, "").split("#")[0];
+        if (!href || /-2T\.|-2\.jpg/i.test(href) || normHref !== normalizedFull || href.indexOf("mcimg=") === -1) {
           try {
             link.setAttribute("href", full);
           } catch (eHref) {}
