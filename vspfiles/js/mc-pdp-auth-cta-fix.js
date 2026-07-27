@@ -6,12 +6,12 @@
 (function (global) {
   "use strict";
 
-  // MC_DEPLOY_FINGERPRINT_20260725bbatc3 — restore bean bag ATC/qty purchase stack
-  var MC_DEPLOY_FINGERPRINT = "20260725bbatc3";
-  var VERSION = "20260727cozyhero1";
+  // MC_DEPLOY_FINGERPRINT_20260727sarsize1 — size variants use optionId photos (Batman etc.)
+  var MC_DEPLOY_FINGERPRINT = "20260727sarsize1";
+  var VERSION = "20260727sarsize1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260725020;
+  var DEPLOY_RANK = 20260727001;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -7704,6 +7704,8 @@
 
   function saranoniLabelSlug(label) {
     return String(label || "")
+      .replace(/\[[^\]]*\]/g, " ")
+      .replace(/\(\s*additional[^)]*\)/gi, " ")
       .split(/[:(]/)[0]
       .replace(/\s+/g, " ")
       .trim()
@@ -7725,24 +7727,26 @@
       if (seen[val]) continue;
       seen[val] = true;
       var slug = saranoniLabelSlug(text);
-      /* Prefer label slug files when present (Bear-S / Elephant-S). Numeric
-         optionIds often point at missing/tiny CDN stubs (1536-S 404). */
-      var swatchImage =
-        slug && slug.toLowerCase() !== val.toLowerCase()
-          ? productCode + "-" + slug + "-S.jpg"
-          : productCode + "-" + val + "-S.jpg";
-      var mainImage =
+      /* Prefer optionId heroes first (Batman Mini=1202-T, nursery Cover/Sheet).
+         Keep cleaned label slug as alt for rocker-style assets (Bear-T / Elephant-T). */
+      var mainImage = productCode + "-" + val + "-T.jpg";
+      var mainImageAlt =
         slug && slug.toLowerCase() !== val.toLowerCase()
           ? productCode + "-" + slug + "-T.jpg"
-          : productCode + "-" + val + "-T.jpg";
+          : "";
+      var swatchImage = productCode + "-" + val + "-S.jpg";
+      var swatchImageAlt =
+        slug && slug.toLowerCase() !== val.toLowerCase()
+          ? productCode + "-" + slug + "-S.jpg"
+          : "";
       out.push({
         optionId: val,
         label: text,
         labelSlug: slug,
         swatchImage: swatchImage,
         mainImage: mainImage,
-        swatchImageAlt: productCode + "-" + val + "-S.jpg",
-        mainImageAlt: productCode + "-" + val + "-T.jpg",
+        swatchImageAlt: swatchImageAlt,
+        mainImageAlt: mainImageAlt,
       });
     }
     return out;
@@ -8323,14 +8327,42 @@
     });
   }
 
-  function applySaranoniSizeHeroPhoto(productCode, fileName, label) {
-    if (!productCode || !fileName) return;
-    saranoniSizeActiveImageFile = fileName;
-    loadProductScopedColorImage(productCode, fileName, function (resolvedSrc) {
-      if (!resolvedSrc || saranoniSizeActiveImageFile !== fileName) return;
-      setSaranoniSizePhotoSrc(resolvedSrc, label, productCode);
-      scheduleSaranoniSizeHeroLock(productCode, fileName, label);
-    });
+  function applySaranoniSizeHeroPhoto(productCode, entryOrFile, label) {
+    if (!productCode || !entryOrFile) return;
+    var files = [];
+    var displayLabel = label || "";
+    function pushFile(name) {
+      var f = String(name || "").trim();
+      if (f && files.indexOf(f) === -1) files.push(f);
+    }
+    if (typeof entryOrFile === "string") {
+      pushFile(entryOrFile);
+    } else {
+      displayLabel = displayLabel || entryOrFile.label || "";
+      pushFile(entryOrFile.mainImage);
+      pushFile(entryOrFile.mainImageAlt);
+      pushFile(entryOrFile.swatchImage);
+      pushFile(entryOrFile.swatchImageAlt);
+    }
+    if (!files.length) return;
+    var token = String(Date.now()) + ":size:" + files[0];
+    saranoniSizeActiveImageFile = token;
+    function tryAt(idx) {
+      if (saranoniSizeActiveImageFile !== token) return;
+      if (idx >= files.length) return;
+      var fileName = files[idx];
+      loadProductScopedColorImage(productCode, fileName, function (resolvedSrc) {
+        if (saranoniSizeActiveImageFile !== token) return;
+        if (!resolvedSrc) {
+          tryAt(idx + 1);
+          return;
+        }
+        saranoniSizeActiveImageFile = fileName;
+        setSaranoniSizePhotoSrc(resolvedSrc, displayLabel, productCode);
+        scheduleSaranoniSizeHeroLock(productCode, fileName, displayLabel);
+      });
+    }
+    tryAt(0);
   }
 
   function syncSaranoniSizeSelect(select, opt) {
@@ -8867,7 +8899,7 @@
     }
     updateSaranoniSizeThumbUi(entry.optionId);
     if (updateHero !== false) {
-      applySaranoniSizeHeroPhoto(ctx.productCode, entry.mainImage, entry.label);
+      applySaranoniSizeHeroPhoto(ctx.productCode, entry, entry.label);
     }
     return true;
   }
@@ -8981,14 +9013,18 @@
             img.style.removeProperty("display");
             return;
           }
-          loadProductScopedColorImage(productCode, entry.mainImage, function (mainSrc) {
-            if (mainSrc) {
-              img.src = mainSrc;
-              img.style.removeProperty("display");
-            } else {
-              hideBrokenSizeImg();
+          loadProductScopedColorImage(
+            productCode,
+            entry.swatchImageAlt || entry.mainImageAlt || entry.mainImage,
+            function (mainSrc) {
+              if (mainSrc) {
+                img.src = mainSrc;
+                img.style.removeProperty("display");
+              } else {
+                hideBrokenSizeImg();
+              }
             }
-          });
+          );
         });
         img.onerror = hideBrokenSizeImg;
       } else {
@@ -9256,7 +9292,7 @@
     return true;
   }
 
-  function applyConfiguredColorMainPhoto(fileName, label, productCode) {
+  function applyConfiguredColorMainPhoto(fileName, label, productCode, altFileName) {
     var mainImg = global.document.getElementById("product_photo");
     if (!mainImg || !fileName) return;
     var pc = productCode || resolveConfiguredColorProductCode(null);
@@ -9272,7 +9308,10 @@
     }
     var token = String(Date.now()) + ":" + Math.random();
     global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ = token;
-    loadProductScopedColorImage(pc, fileName, function (resolvedSrc) {
+    var files = [fileName];
+    var alt = String(altFileName || "").trim();
+    if (alt && alt !== fileName) files.push(alt);
+    function finishWith(resolvedSrc) {
       if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
       var finalSrc = resolvedSrc;
       if (!finalSrc && configuredColorActiveEntry) {
@@ -9293,7 +9332,23 @@
       configuredColorEnforceUntil = Date.now() + (configuredColorActiveEntry ? 8000 : 2500);
       setConfiguredColorPhotoSrc(finalSrc, label, pc);
       enforceConfiguredColorPhoto(pc);
-    });
+    }
+    function tryAt(idx) {
+      if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
+      if (idx >= files.length) {
+        finishWith("");
+        return;
+      }
+      loadProductScopedColorImage(pc, files[idx], function (resolvedSrc) {
+        if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
+        if (resolvedSrc) {
+          finishWith(resolvedSrc);
+          return;
+        }
+        tryAt(idx + 1);
+      });
+    }
+    tryAt(0);
   }
 
   function enforceConfiguredColorPhoto(productCode) {
@@ -10460,7 +10515,8 @@
         applyConfiguredColorMainPhoto(
           selected.mainImage,
           selected.label,
-          resolveConfiguredColorProductCode(ctx)
+          resolveConfiguredColorProductCode(ctx),
+          selected.mainImageAlt
         );
         configuredColorLastAppliedOptionId = selected.optionId;
       }
