@@ -1,7 +1,7 @@
 # Steve Silver → Volusion import pack
 
 ## Spreadsheets
-- **`steve_silver_accent_chairs_import.xlsx`** / `.csv` — Annie barrel accent chairs from [stevesilver.com/new-2](https://stevesilver.com/new-2/) (`SS-ANE500NS`, `SS-ANE500WS`, `SS-ANE500GS`)
+- **`steve_silver_accent_chairs_import.xlsx`** / `.csv` — Annie barrel chairs (`SS-ANE500NS`, `SS-ANE500WS`, `SS-ANE500GS`) plus Conroe power recliners (`SS-CONROE-PWR-RECL`, `SS-CONROE-GRAY-PWR-RECL`)
 - `steve_silver_game_table_sets_import.csv` — game table sets only (Rylie, Tournament, Cambridge)
 - `steve_silver_dining_groups_import.csv` — Colvin, Magnolia, Reid, Napa, Garland, Aubrey, Ventura, Artemis (+ servers/curios)
 - `steve_silver_game_dining_server_import.csv` / `.xlsx` — full combined workbook

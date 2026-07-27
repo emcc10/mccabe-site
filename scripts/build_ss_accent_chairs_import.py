@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scrape Annie accent chairs from stevesilver.com/new-2 → Volusion import + images.
+"""Scrape Annie accent chairs + Conroe power recliners → Volusion import + images.
 
 Columns match prior McCabe Volusion packs only:
 productcode, productname, productprice, productweight, freeshipping,
@@ -38,11 +38,36 @@ UA = {
     "Accept": "text/html,application/xhtml+xml,image/avif,image/webp,*/*",
 }
 
-# Accent chairs listed on https://stevesilver.com/new-2/
-CHAIR_URLS = [
-    "https://stevesilver.com/product/annie-cotton-barrel-chair-w-casters/",  # ANE500NS chocolate
-    "https://stevesilver.com/product/annie-cotton-barrel-chair-w-casters-2/",  # ANE500WS eggshell
-    "https://stevesilver.com/product/annie-gray-velvet-barrel-chair-w-casters/",  # ANE500GS gray
+# Annie chairs from https://stevesilver.com/new-2/ plus Conroe power recliners.
+# Optional productcode overrides numeric vendor SKUs to McCabe-style names.
+PRODUCTS = [
+    {
+        "url": "https://stevesilver.com/product/annie-cotton-barrel-chair-w-casters/",
+        "image_tokens": ["ANE500NS"],
+    },
+    {
+        "url": "https://stevesilver.com/product/annie-cotton-barrel-chair-w-casters-2/",
+        "image_tokens": ["ANE500WS"],
+    },
+    {
+        "url": "https://stevesilver.com/product/annie-gray-velvet-barrel-chair-w-casters/",
+        "image_tokens": ["ANE500GS"],
+    },
+    {
+        "url": "https://stevesilver.com/product/conroe-power-recliner/",
+        "productcode": "SS-CONROE-PWR-RECL",
+        "image_tokens": ["3165612", "conroe_3165612"],
+    },
+    {
+        "url": "https://stevesilver.com/product/conroe-dual-power-recliner-gray/",
+        "productcode": "SS-CONROE-GRAY-PWR-RECL",
+        "image_tokens": [
+            "3165922",
+            "conroegrayrecliner",
+            "conroe_recliner_gray",
+            "conroe_recliner_grey",
+        ],
+    },
 ]
 
 COLUMNS = [
@@ -103,7 +128,7 @@ def volusion_code(sku: str) -> str:
     return sku
 
 
-def extract_images(html: str, vendor_sku: str) -> list[str]:
+def extract_images(html: str, tokens: list[str]) -> list[str]:
     raw: list[str] = []
     for pat in (
         r'data-large_image="([^"]+)"',
@@ -112,7 +137,7 @@ def extract_images(html: str, vendor_sku: str) -> list[str]:
     ):
         raw.extend(re.findall(pat, html, re.I))
 
-    sku_l = vendor_sku.lower()
+    tokens_l = [t.lower() for t in tokens if t]
     out: list[str] = []
     seen: set[str] = set()
     for u in raw:
@@ -122,12 +147,14 @@ def extract_images(html: str, vendor_sku: str) -> list[str]:
         if re.search(r"-\d+x\d+\.(?:jpe?g|png|webp)$", u, re.I):
             continue
         base = u.rsplit("/", 1)[-1]
-        bl = base.lower()
+        bl = base.lower().replace("-", "").replace("_", "")
         if base in seen:
             continue
-        if any(x in bl for x in ("swatch", "swch", "logo", "favicon")):
+        if any(x in base.lower() for x in ("swatch", "swch", "logo", "favicon")):
             continue
-        if sku_l not in bl:
+        if tokens_l and not any(
+            t.replace("-", "").replace("_", "") in bl for t in tokens_l
+        ):
             continue
         seen.add(base)
         out.append(u)
@@ -135,13 +162,13 @@ def extract_images(html: str, vendor_sku: str) -> list[str]:
     def rank(u: str) -> tuple:
         b = u.lower()
         score = 0
-        if re.search(r"_ls1\b|_ls1\.", b):
+        if re.search(r"_ls1\b|_ls1\.|ls1\.", b) or b.endswith("reclinerls.jpg"):
             score -= 200
-        elif re.search(r"_ls\d", b):
+        elif re.search(r"_ls\d|ls\d", b):
             score -= 150
         elif re.search(r"_ws1\b|_ws1\.", b):
             score -= 120
-        elif re.search(r"_ws\d", b):
+        elif re.search(r"_ws\d|whitesweep", b):
             score -= 80
         elif re.search(r"_dtl|_vg", b):
             score -= 40
@@ -150,7 +177,7 @@ def extract_images(html: str, vendor_sku: str) -> list[str]:
     return sorted(out, key=rank)
 
 
-def extract_product(url: str, html: str) -> dict:
+def extract_product(url: str, html: str, *, productcode: str = "", image_tokens: list[str] | None = None) -> dict:
     title_m = re.search(
         r'<h1[^>]*class="[^"]*product_title[^"]*"[^>]*>([^<]+)', html, re.I
     )
@@ -196,11 +223,24 @@ def extract_product(url: str, html: str) -> dict:
     tech = "\n".join(f"* {b}" for b in bullets)
 
     availability = "Available"
-    if re.search(r"product type-product[^\"]*outofstock", html, re.I):
+    m_cls = re.search(
+        r'<div[^>]+id="product-\d+"[^>]*class="([^"]+)"', html, re.I
+    ) or re.search(r'class="(product type-product[^"]+)"', html, re.I)
+    main_cls = m_cls.group(1).lower() if m_cls else ""
+    if "outofstock" in main_cls:
+        availability = "Out of Stock"
+    elif "instock" in main_cls or re.search(r'class="stock in-stock"', html, re.I):
+        availability = "Available"
+    elif re.search(r'class="stock out-of-stock"', html, re.I):
         availability = "Out of Stock"
 
+    code = productcode.strip() if productcode else (volusion_code(sku) if sku else "")
+    tokens = list(image_tokens or [])
+    if sku and sku not in tokens:
+        tokens.insert(0, sku)
+
     return {
-        "productcode": volusion_code(sku) if sku else "",
+        "productcode": code,
         "productname": name,
         "productprice": "",
         "productweight": "",
@@ -209,7 +249,7 @@ def extract_product(url: str, html: str) -> dict:
         "productdescription": short,
         "techspecs": tech,
         "vendor_sku": sku,
-        "image_urls": extract_images(html, vendor_sku=sku),
+        "image_urls": extract_images(html, tokens),
     }
 
 
@@ -248,13 +288,19 @@ def download_images(code: str, urls: list[str]) -> list[str]:
 def main() -> None:
     products: list[dict] = []
     upload_names: list[str] = []
-    for i, url in enumerate(CHAIR_URLS, 1):
-        print(f"[{i}/{len(CHAIR_URLS)}] {url}")
+    for i, spec in enumerate(PRODUCTS, 1):
+        url = spec["url"]
+        print(f"[{i}/{len(PRODUCTS)}] {url}")
         html, final = get(url)
         if not html:
             print("  FAIL")
             continue
-        p = extract_product(final, html)
+        p = extract_product(
+            final,
+            html,
+            productcode=spec.get("productcode", ""),
+            image_tokens=spec.get("image_tokens", []),
+        )
         print(
             " ",
             p["productcode"],
@@ -263,6 +309,8 @@ def main() -> None:
             "imgs",
             len(p["image_urls"]),
         )
+        for u in p["image_urls"]:
+            print("   ", u.rsplit("/", 1)[-1])
         imgs = download_images(p["productcode"], p["image_urls"])
         upload_names.extend(imgs)
         products.append(p)
@@ -294,7 +342,7 @@ def main() -> None:
         if n not in seen:
             seen.add(n)
             uniq.append(n)
-    list_path = PHOTO_DIR / ".ss-annie-chairs-upload.txt"
+    list_path = PHOTO_DIR / ".ss-accent-chairs-upload.txt"
     list_path.write_text("\n".join(uniq) + "\n", encoding="utf-8")
     print("upload list", list_path, len(uniq), "products", len(rows))
 
