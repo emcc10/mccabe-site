@@ -9,11 +9,12 @@ on:
     paths:
       - "vspfiles/photos/SS-*.jpg"
       - "vspfiles/photos/.ss-montana-sand-fix.txt"
+      - "vspfiles/photos/.ss-chair-photos-upload.txt"
       - "scripts/upload_steve_silver_bedroom_photos.py"
       - ".github/workflows/deploy-ss-bedroom-photos.yml"
 
 concurrency:
-  group: deploy-ss-bedroom-photos-v2
+  group: deploy-ss-bedroom-photos-v3
   cancel-in-progress: false
 
 jobs:
@@ -37,8 +38,18 @@ jobs:
           UPLOAD_LIST_FILE: "vspfiles/photos/.ss-montana-sand-fix.txt"
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
 
+      - name: Force-upload Steve Silver chair photos
+        if: hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') != ''
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-chair-photos-upload.txt"
+        run: python3 scripts/upload_steve_silver_bedroom_photos.py
+
       - name: Upload all SS photos (Paramiko SFTP)
-        if: hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') == '' }}
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -46,7 +57,37 @@ jobs:
           SFTP_PORT: "2222"
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
 
+      - name: Verify chair heroes on live CDN
+        if: hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') != ''
+        run: |
+          set -e
+          for f in \
+            SS-GG850AC-1.jpg SS-GG850AC-2T.jpg \
+            SS-GEORGE-ACCENT-CHR-1.jpg SS-GEORGE-ACCENT-CHR-2T.jpg \
+            SS-HEL850KAC-1.jpg SS-HEL850KAC-2T.jpg \
+            SS-HEL850NAC-1.jpg SS-HEL850NAC-2T.jpg; do
+            if [ ! -f "vspfiles/photos/$f" ]; then
+              echo "skip $f (not in repo)"
+              continue
+            fi
+            local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
+            live=0
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
+              live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s%N)" | wc -c | tr -d ' ' || echo 0)
+              echo "$f attempt=$attempt local=$local live=$live"
+              if [ "$live" -eq "$local" ] || [ "$live" -ge $((local / 2)) ]; then
+                break
+              fi
+              sleep 5
+            done
+            if [ "$live" -lt "$((local / 2))" ]; then
+              echo "::error::Photo not synced to CDN: $f (local=$local live=$live)"
+              exit 1
+            fi
+          done
+
       - name: Verify Montana sand alts on live CDN
+        if: hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') != ''
         run: |
           set -e
           for f in \
@@ -73,6 +114,7 @@ jobs:
           done
 
       - name: Verify key photos on live CDN
+        if: ${{ hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') == '' }}
         run: |
           set -e
           for f in \
