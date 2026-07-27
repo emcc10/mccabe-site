@@ -1,0 +1,81 @@
+name: Deploy accent chairs import CSV
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "vspfiles/imports/steve-silver-volusion/steve_silver_accent_chairs_import.csv"
+      - "vspfiles/imports/steve-silver-volusion/steve_silver_accent_chairs_import.xlsx"
+      - ".github/workflows/deploy-ss-accent-chairs-import.yml"
+
+concurrency:
+  group: deploy-ss-accent-chairs-import
+  cancel-in-progress: true
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Paramiko
+        run: pip3 install paramiko
+      - name: Upload accent chairs import CSV/XLSX to Volusion SFTP
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: |
+          set -e
+          python3 <<'PY'
+          import os, sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from deploy_volusion_assets import _upload_one
+          from verify_template_sftp import connect_paramiko_transport
+          import paramiko
+
+          host = os.environ["FTP_SERVER"]
+          port = int(os.environ.get("SFTP_PORT", "2222"))
+          user = os.environ["FTP_USERNAME"]
+          password = os.environ["FTP_PASSWORD"]
+          files = [
+            "vspfiles/imports/steve-silver-volusion/steve_silver_accent_chairs_import.csv",
+            "vspfiles/imports/steve-silver-volusion/steve_silver_accent_chairs_import.xlsx",
+          ]
+          transport = connect_paramiko_transport(host, port, user, password)
+          sftp = paramiko.SFTPClient.from_transport(transport)
+          fail = 0
+          try:
+            for local in files:
+              if not Path(local).is_file():
+                print(f"missing {local}")
+                fail += 1
+                continue
+              ok = _upload_one(sftp, local)
+              print(("OK" if ok else "FAIL"), local)
+              if not ok:
+                fail += 1
+          finally:
+            sftp.close()
+            transport.close()
+          raise SystemExit(fail)
+          PY
+      - name: Verify CSV reachable on store
+        run: |
+          set -e
+          for f in steve_silver_accent_chairs_import.csv steve_silver_accent_chairs_import.xlsx; do
+            url="https://www.mccabestheaterandliving.com/v/vspfiles/imports/steve-silver-volusion/${f}"
+            for i in 1 2 3 4 5 6 7 8; do
+              code=$(curl -sI -o /dev/null -w '%{http_code}' "$url?v=$(date +%s)")
+              echo "$f attempt=$i http=$code"
+              if [ "$code" = "200" ]; then break; fi
+              sleep 5
+            done
+            if [ "$code" != "200" ]; then
+              echo "::error::$f not reachable ($code)"
+              exit 1
+            fi
+          done
