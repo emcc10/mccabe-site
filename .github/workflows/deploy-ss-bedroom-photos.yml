@@ -94,6 +94,7 @@ jobs:
         if: hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') != ''
         run: |
           set -e
+          pip3 install pillow >/dev/null
           python3 << 'PY'
           import hashlib, io, time, urllib.request
           from pathlib import Path
