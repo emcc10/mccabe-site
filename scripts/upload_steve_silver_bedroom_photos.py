@@ -20,6 +20,7 @@ PATTERNS = (
     "SS-CAS*.jpg",
     "SS-HP900*.jpg",
     "SS-MON*.jpg",
+    "SS-RH*.jpg",
     "SS-RV*.jpg",
     "SS-SIG*.jpg",
     "SS-CONROE*.jpg",
