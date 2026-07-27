@@ -79,7 +79,20 @@ def extract_images(html: str, vendor_sku: str = "") -> list[str]:
         # Ivory Colvin gallery files use COL500LWSV while page SKU is COL500WSV.
         if sku == "COL500WSV":
             aliases.append("COL500LWSV")
+        # Set SKUs often shorten in filenames:
+        #   RL600N-GT-C6PC -> RL600N / RL600-GT / RL600
+        #   VCM420GKK-D5PC -> VCM420GKK-D5PC / VCM420GKK
+        parts = re.split(r"[-_]", sku)
+        if len(parts) >= 2:
+            aliases.append(parts[0])  # RL600N / VCM420GKK
+            aliases.append("-".join(parts[:2]))  # RL600N-GT / VCM420GKK-D5PC
+        # Color-letter variants: RL600N -> RL600, RL500K -> RL500
+        m = re.match(r"^([A-Z]+\d+)[A-Z]*$", parts[0]) if parts else None
+        if m and m.group(1) not in aliases:
+            aliases.append(m.group(1))
     aliases_l = [a.lower() for a in aliases]
+    # Strongest match tokens for set lifestyle heroes (prefer exact set code).
+    set_token = sku.lower() if sku else ""
 
     out: list[str] = []
     seen: set[str] = set()
@@ -103,11 +116,21 @@ def extract_images(html: str, vendor_sku: str = "") -> list[str]:
         seen.add(base)
         out.append(u)
 
-    # Product studio shots (WS) first; deprioritize multi-SKU room sets.
+    # Prefer full-set lifestyle heroes; demote chair/table-only and dims.
     def rank(u: str) -> tuple:
         b = u.lower()
         score = 0
-        if re.search(r"_ws1\b|_ws1\.", b):
+        if set_token and set_token in b and re.search(r"_ls1\b|_ls1\.", b):
+            score -= 200
+        elif set_token and set_token in b and re.search(r"_ls\d", b):
+            score -= 160
+        elif re.search(r"[dc]\d?5pc|_gt-|[dc]6pc|[dc]7pc", b) and re.search(
+            r"_ls1\b|_ls1\.", b
+        ):
+            score -= 140
+        elif re.search(r"_ls1\b|_ls1\.", b):
+            score -= 110
+        elif re.search(r"_ws1\b|_ws1\.", b):
             score -= 100
         elif re.search(r"_ws2a?\b|_ws2a?\.", b):
             score -= 80
@@ -117,8 +140,13 @@ def extract_images(html: str, vendor_sku: str = "") -> list[str]:
             score -= 50
         if re.search(r"_rs\d|morefloor", b):
             score += 80
-        if "dims" in b or "_dim" in b:
+        if "dims" in b or "_dim" in b or "_info" in b:
             score += 120
+        # Side-chair / single-piece SKUs often pollute set galleries.
+        if re.search(r"skn|swn|act_|chair|side.?chair", b) and not (
+            set_token and set_token in b
+        ):
+            score += 150
         if "chair" in b and (not aliases_l or not any(a in b for a in aliases_l)):
             score += 100
         return (score, u)
