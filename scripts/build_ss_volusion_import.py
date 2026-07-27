@@ -41,7 +41,22 @@ def clean_text(s: str) -> str:
     s = re.sub(r"<br\s*/?>", "\n", s, flags=re.I)
     s = re.sub(r"</p\s*>", "\n\n", s, flags=re.I)
     s = re.sub(r"<[^>]+>", " ", s)
-    s = s.replace("\xa0", " ")
+    # Volusion/Excel often render fancy Unicode as "?"; prefer ASCII.
+    for src, dst in (
+        ("\u2033", '"'),  # inches ″
+        ("\u2032", "'"),
+        ("\u201d", '"'),
+        ("\u201c", '"'),
+        ("\u2019", "'"),
+        ("\u2018", "'"),
+        ("\u2014", "-"),
+        ("\u2013", "-"),
+        ("\u2022", "*"),
+        ("\xa0", " "),
+        ("\ufeff", ""),
+        ("\ufffd", ""),
+    ):
+        s = s.replace(src, dst)
     s = re.sub(r"[ \t]+", " ", s)
     s = re.sub(r"\n{3,}", "\n\n", s)
     return s.strip()
