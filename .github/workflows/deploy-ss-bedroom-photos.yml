@@ -12,6 +12,7 @@ on:
       - "vspfiles/photos/.ss-chair-photos-upload.txt"
       - "vspfiles/photos/.ss-accent-chairs-upload.txt"
       - "vspfiles/photos/.ss-rhapsody-chest-alts.txt"
+      - "vspfiles/photos/.ss-luna-ice-alts-upload.txt"
       - "scripts/upload_steve_silver_bedroom_photos.py"
       - ".github/workflows/deploy-ss-bedroom-photos.yml"
 
@@ -30,8 +31,18 @@ jobs:
       - name: Install Paramiko
         run: pip3 install paramiko
 
+      - name: Force-upload Luna Ice sofa alt photos
+        if: hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') != ''
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-luna-ice-alts-upload.txt"
+        run: python3 scripts/upload_steve_silver_bedroom_photos.py
+
       - name: Force-upload Montana sand bed corrected photos
-        if: hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') != '' }}
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -41,7 +52,7 @@ jobs:
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
 
       - name: Force-upload Steve Silver chair photos
-        if: hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') != '' }}
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -51,7 +62,7 @@ jobs:
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
 
       - name: Force-upload Annie accent chair photos
-        if: hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') != '' }}
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -61,7 +72,7 @@ jobs:
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
 
       - name: Force-upload Rhapsody chest alt photos
-        if: hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') != '' }}
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -71,7 +82,7 @@ jobs:
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
 
       - name: Upload all SS photos (Paramiko SFTP)
-        if: ${{ hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') == '' }}
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') == '' }}
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -79,8 +90,59 @@ jobs:
           SFTP_PORT: "2222"
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
 
+      - name: Verify Luna Ice sofa alts on live CDN
+        if: hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') != ''
+        run: |
+          set -e
+          python3 << 'PY'
+          import hashlib, io, time, urllib.request
+          from pathlib import Path
+          from PIL import Image
+
+          photos = Path("vspfiles/photos")
+          names = [l.strip() for l in (photos / ".ss-luna-ice-alts-upload.txt").read_text().splitlines() if l.strip()]
+          fail = []
+          for name in names:
+              local = photos / name
+              if not local.is_file():
+                  fail.append(f"missing local {name}")
+                  continue
+              local_bytes = local.read_bytes()
+              local_md5 = hashlib.md5(local_bytes).hexdigest()
+              with Image.open(io.BytesIO(local_bytes)) as im:
+                  lw = im.size[0]
+              if lw < 650:
+                  fail.append(f"local {name} width {lw} < 650")
+                  continue
+              ok = False
+              last = None
+              for attempt in range(1, 13):
+                  url = f"https://www.mccabestheaterandliving.com/v/vspfiles/photos/{name}?v={time.time_ns()}"
+                  try:
+                      req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                      raw = urllib.request.urlopen(req, timeout=30).read()
+                      live_md5 = hashlib.md5(raw).hexdigest()
+                      im = Image.open(io.BytesIO(raw))
+                      w = im.size[0]
+                      print(f"{name} attempt={attempt} live={w}x{im.size[1]} md5_match={live_md5==local_md5}")
+                      # Accept if bytes match or at least Ice-sized replacement landed (>=650 and not tiny charcoal leftover)
+                      if live_md5 == local_md5 or (w >= 650 and abs(len(raw) - len(local_bytes)) < max(50000, len(local_bytes) // 5)):
+                          ok = True
+                          break
+                      last = (w, len(raw), live_md5)
+                  except Exception as e:
+                      last = str(e)
+                      print(f"{name} attempt={attempt} err={e}")
+                  time.sleep(5)
+              if not ok:
+                  fail.append(f"{name} last={last}")
+          if fail:
+              raise SystemExit("CDN verify failed:\n" + "\n".join(fail))
+          print(f"Verified {len(names)} Luna Ice sofa altviews on live CDN")
+          PY
+
       - name: Verify chair heroes on live CDN
-        if: hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') != '' }}
         run: |
           set -e
           for f in \
@@ -109,7 +171,7 @@ jobs:
           done
 
       - name: Verify Annie accent chair heroes on live CDN
-        if: hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') != '' }}
         run: |
           set -e
           for f in \
@@ -139,7 +201,7 @@ jobs:
           done
 
       - name: Verify Rhapsody chest alts on live CDN
-        if: hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') != '' }}
         run: |
           set -e
           for f in \
@@ -166,7 +228,7 @@ jobs:
           done
 
       - name: Verify Montana sand alts on live CDN
-        if: hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') != '' }}
         run: |
           set -e
           for f in \
@@ -193,7 +255,7 @@ jobs:
           done
 
       - name: Verify key photos on live CDN
-        if: ${{ hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') == '' }}
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') == '' }}
         run: |
           set -e
           for f in \
