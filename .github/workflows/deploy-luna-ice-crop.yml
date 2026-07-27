@@ -1,0 +1,83 @@
+name: Deploy Luna Ice cropped hero
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "vspfiles/photos/.ss-luna-ice-crop-upload.txt"
+      - "vspfiles/photos/SS-LUNA-ICE-PWR-SOFA-1.jpg"
+      - "vspfiles/photos/SS-LUNA-ICE-PWR-SOFA-1T.jpg"
+      - "vspfiles/photos/SS-LUNA-ICE-PWR-SOFA-altview4.jpg"
+      - "scripts/upload_photo_list.py"
+      - ".github/workflows/deploy-luna-ice-crop.yml"
+
+concurrency:
+  group: deploy-luna-ice-crop
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Paramiko + Pillow
+        run: pip3 install paramiko Pillow
+
+      - name: Force-upload cropped Luna Ice photos
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-luna-ice-crop-upload.txt"
+        run: python3 scripts/upload_photo_list.py
+
+      - name: Verify Luna Ice hero on CDN
+        run: |
+          set -e
+          python3 <<'PY'
+          import hashlib, io, time, urllib.request
+          from pathlib import Path
+          from PIL import Image
+          import numpy as np
+
+          name = "SS-LUNA-ICE-PWR-SOFA-1.jpg"
+          local = Path("vspfiles/photos") / name
+          local_bytes = local.read_bytes()
+          local_md5 = hashlib.md5(local_bytes).hexdigest()
+          with Image.open(io.BytesIO(local_bytes)) as im:
+              arr = np.asarray(im.convert("RGB")).mean(axis=2)
+              right = arr[:, -5:].mean()
+              if right < 40:
+                  raise SystemExit(f"local {name} still has dark right edge mean={right}")
+              if im.size[0] < 650:
+                  raise SystemExit(f"local {name} width {im.size[0]}")
+          ok = False
+          last = None
+          for attempt in range(1, 13):
+              url = f"https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/{name}?v={time.time_ns()}"
+              try:
+                  raw = urllib.request.urlopen(
+                      urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}),
+                      timeout=30,
+                  ).read()
+                  im = Image.open(io.BytesIO(raw))
+                  match = hashlib.md5(raw).hexdigest() == local_md5
+                  bright = np.asarray(im.convert("RGB")).mean(axis=2)
+                  right = float(bright[:, -5:].mean())
+                  print(f"attempt={attempt} size={im.size} match={match} right_mean={right:.1f}")
+                  if match and im.size[0] >= 650 and right > 100:
+                      ok = True
+                      break
+                  last = (im.size, right)
+              except Exception as e:
+                  last = str(e)
+                  print(f"attempt={attempt} err={e}")
+              time.sleep(5)
+          if not ok:
+              raise SystemExit(f"CDN verify failed last={last}")
+          print("Verified cropped Luna Ice hero on CDN4")
+          PY
