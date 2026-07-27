@@ -8,17 +8,18 @@ on:
     branches: [main]
     paths:
       - "vspfiles/photos/SS-*.jpg"
+      - "vspfiles/photos/.ss-montana-sand-fix.txt"
       - "scripts/upload_steve_silver_bedroom_photos.py"
       - ".github/workflows/deploy-ss-bedroom-photos.yml"
 
 concurrency:
-  group: deploy-ss-bedroom-photos
+  group: deploy-ss-bedroom-photos-v2
   cancel-in-progress: false
 
 jobs:
   upload:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
 
     steps:
       - uses: actions/checkout@v4
@@ -26,13 +27,50 @@ jobs:
       - name: Install Paramiko
         run: pip3 install paramiko
 
+      - name: Force-upload Montana sand bed corrected photos
+        if: hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') != ''
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-montana-sand-fix.txt"
+        run: python3 scripts/upload_steve_silver_bedroom_photos.py
+
       - name: Upload all SS photos (Paramiko SFTP)
+        if: hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == ''
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_PORT: "2222"
         run: python3 scripts/upload_steve_silver_bedroom_photos.py
+
+      - name: Verify Montana sand alts on live CDN
+        run: |
+          set -e
+          for f in \
+            SS-MON900QFB-1.jpg SS-MON900QFB-altview1.jpg SS-MON900QFB-altview2.jpg \
+            SS-MON900QFB-altview3.jpg SS-MON900KFB-altview1.jpg SS-MON900QFB-Grey-0.jpg; do
+            if [ ! -f "vspfiles/photos/$f" ]; then
+              echo "skip $f (not in repo)"
+              continue
+            fi
+            local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
+            live=0
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
+              live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s%N)" | wc -c | tr -d ' ' || echo 0)
+              echo "$f attempt=$attempt local=$local live=$live"
+              if [ "$live" -eq "$local" ] || [ "$live" -ge $((local / 2)) ]; then
+                break
+              fi
+              sleep 5
+            done
+            if [ "$live" -lt "$((local / 2))" ]; then
+              echo "::error::Photo not synced to CDN: $f (local=$local live=$live)"
+              exit 1
+            fi
+          done
 
       - name: Verify key photos on live CDN
         run: |

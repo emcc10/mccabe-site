@@ -37,6 +37,19 @@ PATTERNS = (
 
 def collect_targets() -> list[str]:
     names: set[str] = set()
+    list_file = os.environ.get("UPLOAD_LIST_FILE", "").strip()
+    if list_file:
+        path = Path(list_file)
+        if not path.is_file():
+            path = ROOT / list_file
+        for line in path.read_text(encoding="utf-8").splitlines():
+            name = line.strip()
+            if not name or name.startswith("#"):
+                continue
+            if (PHOTOS / name).is_file():
+                names.add(name)
+        return sorted(names)
+
     for pat in PATTERNS:
         for path in PHOTOS.glob(pat):
             if path.is_file():
