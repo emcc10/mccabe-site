@@ -201,7 +201,7 @@ jobs:
           done
 
       - name: Verify Rhapsody chest alts on live CDN
-        if: hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') != '' }}
         run: |
           set -e
           for f in \
@@ -228,7 +228,7 @@ jobs:
           done
 
       - name: Verify Montana sand alts on live CDN
-        if: hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') != ''
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') != '' }}
         run: |
           set -e
           for f in \
@@ -255,7 +255,7 @@ jobs:
           done
 
       - name: Verify key photos on live CDN
-        if: ${{ hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') == '' }}
+        if: ${{ hashFiles('vspfiles/photos/.ss-luna-ice-alts-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-montana-sand-fix.txt') == '' && hashFiles('vspfiles/photos/.ss-chair-photos-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-accent-chairs-upload.txt') == '' && hashFiles('vspfiles/photos/.ss-rhapsody-chest-alts.txt') == '' }}
         run: |
           set -e
           for f in \
