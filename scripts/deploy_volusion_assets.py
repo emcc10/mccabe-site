@@ -66,6 +66,7 @@ OPTIONAL = (
     "vspfiles/imports/steve-silver-volusion/volusion_import_dining_and_servers.csv",
     "vspfiles/imports/steve-silver-volusion/volusion_import_game_table_sets.csv",
     "vspfiles/imports/steve-silver-volusion/volusion_import_all_excel.csv",
+    "vspfiles/imports/steve-silver-volusion/McCabe_SteveSilver_Import.csv",
     "vspfiles/imports/steve-silver-volusion/McCabe_SteveSilver_Import.xlsx",
     "vspfiles/imports/steve-silver-volusion/volusion_import_all.xlsx",
     "vspfiles/mahjong/hero-community.jpg",
