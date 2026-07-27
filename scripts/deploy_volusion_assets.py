@@ -65,6 +65,8 @@ OPTIONAL = (
     "vspfiles/imports/steve-silver-volusion/volusion_import_all.csv",
     "vspfiles/imports/steve-silver-volusion/volusion_import_dining_and_servers.csv",
     "vspfiles/imports/steve-silver-volusion/volusion_import_game_table_sets.csv",
+    "vspfiles/imports/steve-silver-volusion/volusion_import_all_excel.csv",
+    "vspfiles/imports/steve-silver-volusion/volusion_import_all.xlsx",
     "vspfiles/mahjong/hero-community.jpg",
     "vspfiles/mahjong/category-tiles.jpg",
     "vspfiles/mahjong/category-travel.jpg",
