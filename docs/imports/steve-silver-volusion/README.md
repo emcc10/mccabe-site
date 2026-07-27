@@ -1,6 +1,7 @@
 # Steve Silver → Volusion import pack
 
 ## Spreadsheets
+- **`steve_silver_accent_chairs_import.xlsx`** / `.csv` — Annie barrel chairs (`SS-ANE500NS`, `SS-ANE500WS`, `SS-ANE500GS`) plus Conroe power recliners (`SS-CONROE-PWR-RECL`, `SS-CONROE-GRAY-PWR-RECL`)
 - `steve_silver_game_table_sets_import.csv` — game table sets only (Rylie, Tournament, Cambridge)
 - `steve_silver_dining_groups_import.csv` — Colvin, Magnolia, Reid, Napa, Garland, Aubrey, Ventura, Artemis (+ servers/curios)
 - `steve_silver_game_dining_server_import.csv` / `.xlsx` — full combined workbook
@@ -8,7 +9,6 @@
 
 ## Columns
 `productcode, productname, productprice, productweight, freeshipping, availability, productdescription, techspecs`
-(plus helper columns: `group, vendor_sku, source_url, volusion_images`)
 
 - **productdescription** = Steve Silver short description (e.g. Rylie “Get ready for game night…”)
 - **techspecs** = bullet list starting at “Set includes…” / crafted specs
@@ -39,4 +39,5 @@ Product images: `/vspfiles/photos/`
 ## Rebuild
 ```bash
 python3 scripts/build_ss_volusion_import.py
+python3 scripts/build_ss_accent_chairs_import.py
 ```

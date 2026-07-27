@@ -35,6 +35,7 @@ PATTERNS = (
     "SS-HEL*.jpg",
     "SS-GG*.jpg",
     "SS-GEORGE*.jpg",
+    "SS-ANE*.jpg",
     "SS-BS850*.jpg",
 )
 

@@ -70,6 +70,8 @@ OPTIONAL = (
     "vspfiles/imports/steve-silver-volusion/McCabe_SteveSilver_Import_AvailableOnly.csv",
     "vspfiles/imports/steve-silver-volusion/McCabe_SteveSilver_Import_AvailableOnly.xlsx",
     "vspfiles/imports/steve-silver-volusion/McCabe_SteveSilver_Import.xlsx",
+    "vspfiles/imports/steve-silver-volusion/steve_silver_accent_chairs_import.csv",
+    "vspfiles/imports/steve-silver-volusion/steve_silver_accent_chairs_import.xlsx",
     "vspfiles/imports/steve-silver-volusion/volusion_import_all.xlsx",
     "vspfiles/mahjong/hero-community.jpg",
     "vspfiles/mahjong/category-tiles.jpg",
