@@ -1592,7 +1592,7 @@ html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion{
 </script>
   <script id="mc-ss-piece-hero-boot">
 (function (g, d) {
-  var SS_HERO_VER = "20260701sshero2";
+  var SS_HERO_VER = "20260727cozyhero1";
   function productCode() {
     var input = d.querySelector('input[name="ProductCode"]');
     return String(
@@ -1601,8 +1601,28 @@ html.mc-mahjong-pdp-init:not(.mc-mahjong-pdp-ready) #mc-pdp-accordion{
       ""
     ).toUpperCase();
   }
+  function photoCacheQuery() {
+    var parts = [];
+    try {
+      var seed = String(g.global_ImageSeed || "");
+      if (seed.charAt(0) === "?") seed = seed.slice(1);
+      if (seed) parts.push(seed.indexOf("=") >= 0 ? seed : ("v-cache=" + seed));
+    } catch (eSeed) {}
+    // Always bust: hero swap used bare -1.jpg URLs that browsers/CDN kept as old blurry copies.
+    parts.push("mcimg=" + SS_HERO_VER);
+    return "?" + parts.join("&");
+  }
   function photo(code, n, thumb) {
-    return "/v/vspfiles/photos/" + code + "-" + n + (thumb ? "T" : "") + ".jpg";
+    var file = code + "-" + n + (thumb ? "T" : "") + ".jpg";
+    var rel = "/v/vspfiles/photos/" + file;
+    var prefix = "";
+    try {
+      var el = d.getElementById("product_photo");
+      var cur = String((el && (el.getAttribute("src") || el.src)) || "");
+      var m = cur.match(/^((?:https?:)?\/\/cdn\d+\.volusion\.store\/[^/]+\/)v\/vspfiles\/photos\//i);
+      if (m) prefix = (m[1].indexOf("//") === 0 ? "https:" + m[1] : m[1]);
+    } catch (ePref) {}
+    return (prefix ? prefix + "v/vspfiles/photos/" + file : rel) + photoCacheQuery();
   }
   function normalizePhotoUrl(url) {
     return String(url || "").replace(/\?.*$/, "").split("#")[0];
