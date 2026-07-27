@@ -1,7 +1,12 @@
 {
-  "product_count": 66,
-  "game": 9,
-  "dining": 41,
-  "server": 16,
+  "product_count": 23,
+  "total_products": 23,
+  "available_only": true,
+  "availability_filter": "Available",
+  "groups": {
+    "dining": 12,
+    "server": 8,
+    "game": 3
+  },
   "csv": "docs/imports/steve-silver-volusion/steve_silver_game_dining_server_import.csv"
 }

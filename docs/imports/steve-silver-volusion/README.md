@@ -13,7 +13,7 @@
 - **productdescription** = Steve Silver short description (e.g. Rylie “Get ready for game night…”)
 - **techspecs** = bullet list starting at “Set includes…” / crafted specs
 - **productprice / productweight** often blank — Steve Silver retailer site does not expose dealer MAP/weight for most bundles; fill from your cost sheet before import
-- **freeshipping** = `N`, **availability** = `Available` unless page said out of stock
+- **freeshipping** = `N`, **availability** = `Available` only — Out of Stock Steve Silver pages are excluded from these import files
 
 ## Images
 Downloaded into `vspfiles/photos/` as Volusion names:

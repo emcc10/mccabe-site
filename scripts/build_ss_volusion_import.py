@@ -295,6 +295,9 @@ def download_volusion_images(code: str, urls: list[str]) -> list[str]:
     return saved
 
 
+AVAILABLE_ONLY = True  # exclude Out of Stock from Volusion import packs
+
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     payload = json.loads(URLS_PATH.read_text())
@@ -317,6 +320,11 @@ def main() -> None:
         p["volusion_images"] = ";".join(imgs)
         products.append(p)
         time.sleep(0.8)
+
+    if AVAILABLE_ONLY:
+        before = len(products)
+        products = [p for p in products if p.get("availability") == "Available"]
+        print(f"availability filter: {before} scraped -> {len(products)} Available")
 
     # Existing site server audit notes
     existing_servers = [
@@ -439,6 +447,8 @@ def main() -> None:
         "game": sum(1 for p in products if p["group"] == "game"),
         "dining": sum(1 for p in products if p["group"] == "dining"),
         "server": sum(1 for p in products if p["group"] == "server"),
+        "available_only": AVAILABLE_ONLY,
+        "availability_filter": "Available" if AVAILABLE_ONLY else "all",
         "csv": str(csv_path.relative_to(ROOT)),
     }
     (OUT_DIR / "summary.json").write_text(json.dumps(summary, indent=2))

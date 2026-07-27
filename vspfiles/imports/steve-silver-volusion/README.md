@@ -1,6 +1,9 @@
 # Steve Silver → Volusion import pack
 
 ## Spreadsheets
+Import packs include **Available** Steve Silver products only (Out of Stock excluded).
+
+- `McCabe_SteveSilver_Import.xlsx` / `.csv` — Excel-ready Volusion import (23 Available SKUs)
 - `steve_silver_game_table_sets_import.csv` — game table sets only (Rylie, Tournament, Cambridge)
 - `steve_silver_dining_groups_import.csv` — Colvin, Magnolia, Reid, Napa, Garland, Aubrey, Ventura, Artemis (+ servers/curios)
 - `steve_silver_game_dining_server_import.csv` / `.xlsx` — full combined workbook
@@ -13,7 +16,7 @@
 - **productdescription** = Steve Silver short description (e.g. Rylie “Get ready for game night…”)
 - **techspecs** = bullet list starting at “Set includes…” / crafted specs
 - **productprice / productweight** often blank — Steve Silver retailer site does not expose dealer MAP/weight for most bundles; fill from your cost sheet before import
-- **freeshipping** = `N`, **availability** = `Available` unless page said out of stock
+- **freeshipping** = `N`, **availability** = `Available` only — Out of Stock Steve Silver pages are excluded from these import files
 
 ## Images
 Downloaded into `vspfiles/photos/` as Volusion names:
