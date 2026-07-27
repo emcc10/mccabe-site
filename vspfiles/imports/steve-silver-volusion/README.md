@@ -3,7 +3,8 @@
 ## Spreadsheets
 Import packs include **Available** Steve Silver products only (Out of Stock excluded).
 
-- `McCabe_SteveSilver_Import.xlsx` / `.csv` — Excel-ready Volusion import (23 Available SKUs)
+- **`McCabe_SteveSilver_Import_AvailableOnly.xlsx`** / `.csv` — Excel-ready Volusion import (**23 Available SKUs only**)
+- `McCabe_SteveSilver_Import.xlsx` / `.csv` — same Available-only content (legacy filename)
 - `steve_silver_game_table_sets_import.csv` — game table sets only (Rylie, Tournament, Cambridge)
 - `steve_silver_dining_groups_import.csv` — Colvin, Magnolia, Reid, Napa, Garland, Aubrey, Ventura, Artemis (+ servers/curios)
 - `steve_silver_game_dining_server_import.csv` / `.xlsx` — full combined workbook
