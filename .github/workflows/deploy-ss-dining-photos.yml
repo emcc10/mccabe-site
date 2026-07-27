@@ -24,6 +24,8 @@ on:
       - "vspfiles/photos/.ss-ga500tsv-upload.txt"
       - "vspfiles/photos/.ss-artemis-rylie-heroes-fix.txt"
       - "vspfiles/photos/.ss-aubrey-heroes-fix.txt"
+      - "vspfiles/photos/.ss-reid-napa-heroes-fix.txt"
+      - "vspfiles/photos/.ss-aubrey-reid-napa-heroes-fix.txt"
       - "scripts/upload_steve_silver_dining_photos.py"
       - ".github/workflows/deploy-ss-dining-photos.yml"
 
@@ -92,7 +94,19 @@ jobs:
           SS_DINING_UPLOAD_WORKERS: "6"
         run: python3 scripts/upload_steve_silver_dining_photos.py
 
-      - name: Verify Artemis/Rylie/Aubrey full-set heroes on CDN
+      - name: Force-upload Reid + Napa corrected main photos
+        if: hashFiles('vspfiles/photos/.ss-reid-napa-heroes-fix.txt') != ''
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+          FORCE_REUPLOAD: "1"
+          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-reid-napa-heroes-fix.txt"
+          SS_DINING_UPLOAD_WORKERS: "6"
+        run: python3 scripts/upload_steve_silver_dining_photos.py
+
+      - name: Verify Artemis/Rylie/Aubrey/Reid/Napa heroes on CDN
         run: |
           set -e
           for f in \
@@ -100,7 +114,9 @@ jobs:
             SS-VCM420KK-D5PC-1.jpg SS-VCM420KW-D5PC-1.jpg \
             SS-RL600N-GT-C6PC-1.jpg SS-RL500K-GT-D6PC-1.jpg \
             SS-ABR5454K-D5PC-1.jpg SS-ABR5454N-4US-D5PC-1.jpg \
-            SS-ABR400N-C5PC-1.jpg; do
+            SS-ABR400N-C5PC-1.jpg \
+            SS-RED500K-D5PC-1.jpg SS-RED500-D5PC-1.jpg SS-RED500KSV-1.jpg \
+            SS-NP500-5PC-1.jpg; do
             if [ ! -f "vspfiles/photos/$f" ]; then
               echo "skip $f (not in repo)"
               continue
