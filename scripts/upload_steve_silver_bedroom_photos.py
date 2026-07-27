@@ -38,6 +38,12 @@ PATTERNS = (
     "SS-GEORGE*.jpg",
     "SS-ANE*.jpg",
     "SS-BS850*.jpg",
+    "SS-COZY*.jpg",
+    "SS-GASTON*.jpg",
+    "SS-BARRON*.jpg",
+    "SS-NOA*.jpg",
+    "SS-TU*.jpg",
+    "SS-ABR*.jpg",
 )
 
 
