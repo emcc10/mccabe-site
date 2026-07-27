@@ -22,6 +22,7 @@ on:
       - "vspfiles/photos/.ss-dining-missing-altviews.txt"
       - "vspfiles/photos/.ss-colvin-garland-fix.txt"
       - "vspfiles/photos/.ss-ga500tsv-upload.txt"
+      - "vspfiles/photos/.ss-artemis-rylie-heroes-fix.txt"
       - "scripts/upload_steve_silver_dining_photos.py"
       - ".github/workflows/deploy-ss-dining-photos.yml"
 
@@ -65,25 +66,38 @@ jobs:
           SS_DINING_UPLOAD_WORKERS: "6"
         run: python3 scripts/upload_steve_silver_dining_photos.py
 
-      - name: Verify GA500TSV + key Garland heroes
+      - name: Force-upload Artemis + Rylie full-set main photos
+        if: hashFiles('vspfiles/photos/.ss-artemis-rylie-heroes-fix.txt') != ''
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+          FORCE_REUPLOAD: "1"
+          UPLOAD_LIST_FILE: "vspfiles/photos/.ss-artemis-rylie-heroes-fix.txt"
+          SS_DINING_UPLOAD_WORKERS: "6"
+        run: python3 scripts/upload_steve_silver_dining_photos.py
+
+      - name: Verify Artemis/Rylie full-set heroes on CDN
         run: |
           set -e
           for f in \
-            SS-GA500TSV-1.jpg SS-GA500TSV-2T.jpg SS-GA500TSV-altview1.jpg \
-            SS-GA500SV-1.jpg SS-GA500C-1.jpg; do
+            SS-VCM420GKK-D5PC-1.jpg SS-VCM420GKW-D5PC-1.jpg \
+            SS-VCM420KK-D5PC-1.jpg SS-VCM420KW-D5PC-1.jpg \
+            SS-RL600N-GT-C6PC-1.jpg SS-RL500K-GT-D6PC-1.jpg; do
             if [ ! -f "vspfiles/photos/$f" ]; then
               echo "skip $f (not in repo)"
               continue
             fi
             local=$(wc -c < "vspfiles/photos/$f" | tr -d ' ')
             live=0
-            for attempt in 1 2 3 4 5 6 7 8; do
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
               live=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}?v=$(date +%s%N)" | wc -c | tr -d ' ' || echo 0)
               echo "$f attempt=$attempt local=$local live=$live"
-              if [ "$live" -ge $((local / 2)) ]; then
+              if [ "$live" -eq "$local" ] || [ "$live" -ge $((local / 2)) ]; then
                 break
               fi
-              sleep 4
+              sleep 5
             done
             if [ "$live" -lt "$((local / 2))" ]; then
               echo "::error::Photo not synced to CDN: $f (local=$local live=$live)"
