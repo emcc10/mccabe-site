@@ -5,7 +5,6 @@
   var SARANONI_FREE_THRESHOLD = 99;
 
   var RATE_TYPES = {
-    curbside: /curbside/i,
     beanBagFree: /(?:bean\s*bag|\bbb\b).{0,35}free|free.{0,35}(?:bean\s*bag|\bbb\b)/i,
     saranoniFree: /saranoni.{0,35}free|free.{0,35}saranoni/i,
     whiteGlove: /white\s*glove|local\s+(?:white\s*glove\s+)?delivery/i,
@@ -65,7 +64,6 @@
 
   function rateType(label) {
     var text = String(label || "").replace(/\s+/g, " ").trim();
-    if (RATE_TYPES.curbside.test(text)) return "curbside";
     if (RATE_TYPES.beanBagFree.test(text)) return "beanBagFree";
     if (RATE_TYPES.saranoniFree.test(text)) return "saranoniFree";
     if (RATE_TYPES.whiteGlove.test(text)) return "whiteGlove";
@@ -101,36 +99,9 @@
     return summary;
   }
 
-  function parseMileRange(label) {
-    var text = String(label || "").replace(/[‐-―]/g, "-");
-    var m = text.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*miles?\s*from\s*forney/i);
-    if (m) return { min: parseFloat(m[1]), max: parseFloat(m[2]) };
-    m = text.match(/up\s*to\s*(\d+(?:\.\d+)?)\s*miles?\s*from\s*(?:forney|frisco)/i);
-    if (m) return { min: 0, max: parseFloat(m[1]) };
-    return null;
-  }
-
-  function parsePrice(label) {
-    var m = String(label || "").match(/\$\s*([\d,]+(?:\.\d+)?)/);
-    if (!m) return null;
-    return parseFloat(m[1].replace(/,/g, ""));
-  }
-
-  function whiteGloveLabelAllowed(label, zip) {
-    var quote = whiteGloveQuote(zip, 0);
-    if (!quote) return false;
-    var range = parseMileRange(label);
-    if (range) return quote.distanceMiles >= range.min && quote.distanceMiles <= range.max;
-    var price = parsePrice(label);
-    if (price !== null) return Math.abs(price - quote.total) < 0.01;
-    return true;
-  }
-
   function isRateAllowed(label, summary, zip) {
     var type = rateType(label);
     var cart = summary || summarizeCart([]);
-
-    if (type === "curbside") return false;
 
     if (cart.onlyBeanBags) return type === "beanBagFree" || type === "genericFree";
 
@@ -147,9 +118,7 @@
     }
 
     if (type === "beanBagFree" || type === "saranoniFree" || type === "genericFree") return false;
-    // Volusion owns the White Glove ZIP-tier dropdown and its rate selection.
-    // Never hide or replace those existing delivery choices here.
-    if (type === "whiteGlove") return true;
+    if (type === "whiteGlove") return isDfwZip(zip);
     return true;
   }
 
@@ -169,25 +138,6 @@
     if (!root || !root.querySelectorAll) return [];
     var seen = {};
     var lines = [];
-
-    root.querySelectorAll(".v65-onepage-ordersummary-itemcode").forEach(function (codeCell) {
-      var code = normalizeCode(codeCell.textContent);
-      if (!code) return;
-      var row = codeCell.closest("tr") || codeCell.parentElement;
-      if (!row) return;
-      var key = code + "|" + String(row.rowIndex || lines.length);
-      if (seen[key]) return;
-      seen[key] = true;
-
-      var qtyCell = row.querySelector(".v65-onepage-ordersummary-itemqty");
-      var totalCell = row.querySelector(".v65-onepage-ordersummary-itemtotal");
-      lines.push({
-        code: code,
-        quantity: qtyCell ? qtyCell.textContent : 1,
-        unitPrice: totalCell ? totalCell.textContent : 0,
-        total: totalCell ? totalCell.textContent : 0,
-      });
-    });
 
     root.querySelectorAll('a[href*="ProductCode=" i], a[href*="/product-p/" i]').forEach(function (link) {
       var code = codeFromHref(link.getAttribute("href"));
@@ -212,16 +162,10 @@
 
   function readZip(root) {
     if (!root || !root.querySelector) return "";
-    var inputs = Array.prototype.slice.call(root.querySelectorAll(
+    var input = root.querySelector(
       '#postalCode, input[name="postalCode" i], input[name*="zip" i], input[id*="zip" i], input[name*="postal" i], input[id*="postal" i]'
-    ));
-    var entered = inputs.find(function (input) { return normalizeZip(input.value); });
-    if (entered) return entered.value;
-    var visible = inputs.find(function (input) {
-      var rect = input.getBoundingClientRect && input.getBoundingClientRect();
-      return rect && rect.width > 0 && rect.height > 0;
-    });
-    return visible ? visible.value : (inputs[0] ? inputs[0].value : "");
+    );
+    return input ? input.value : "";
   }
 
   function optionContainer(input) {
@@ -367,6 +311,7 @@
     if (!d || !d.body) return;
     var root = d.getElementById("content_area") || d.body;
     var lines = readCartLines(root);
+    if (!lines.length) return;
     var summary = summarizeCart(lines);
     var zip = readZip(root);
     var options = findRateOptions(root);
