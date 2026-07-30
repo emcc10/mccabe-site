@@ -118,7 +118,9 @@
     }
 
     if (type === "beanBagFree" || type === "saranoniFree" || type === "genericFree") return false;
-    if (type === "whiteGlove") return isDfwZip(zip);
+    // Keep Volusion's White Glove dropdown visible before the ZIP is entered;
+    // its own shipping rules select the applicable ZIP tier afterward.
+    if (type === "whiteGlove") return !normalizeZip(zip) || isDfwZip(zip);
     return true;
   }
 
