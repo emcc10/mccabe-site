@@ -147,7 +147,9 @@
     }
 
     if (type === "beanBagFree" || type === "saranoniFree" || type === "genericFree") return false;
-    if (type === "whiteGlove") return !normalizeZip(zip) || whiteGloveLabelAllowed(label, zip);
+    // Volusion owns the White Glove ZIP-tier dropdown and its rate selection.
+    // Never hide or replace those existing delivery choices here.
+    if (type === "whiteGlove") return true;
     return true;
   }
 
