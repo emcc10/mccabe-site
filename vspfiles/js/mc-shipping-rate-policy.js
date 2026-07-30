@@ -147,7 +147,7 @@
     }
 
     if (type === "beanBagFree" || type === "saranoniFree" || type === "genericFree") return false;
-    if (type === "whiteGlove") return whiteGloveLabelAllowed(label, zip);
+    if (type === "whiteGlove") return !normalizeZip(zip) || whiteGloveLabelAllowed(label, zip);
     return true;
   }
 
@@ -210,10 +210,16 @@
 
   function readZip(root) {
     if (!root || !root.querySelector) return "";
-    var input = root.querySelector(
+    var inputs = Array.prototype.slice.call(root.querySelectorAll(
       '#postalCode, input[name="postalCode" i], input[name*="zip" i], input[id*="zip" i], input[name*="postal" i], input[id*="postal" i]'
-    );
-    return input ? input.value : "";
+    ));
+    var entered = inputs.find(function (input) { return normalizeZip(input.value); });
+    if (entered) return entered.value;
+    var visible = inputs.find(function (input) {
+      var rect = input.getBoundingClientRect && input.getBoundingClientRect();
+      return rect && rect.width > 0 && rect.height > 0;
+    });
+    return visible ? visible.value : (inputs[0] ? inputs[0].value : "");
   }
 
   function optionContainer(input) {

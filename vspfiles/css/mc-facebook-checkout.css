@@ -1,0 +1,101 @@
+/* Facebook Marketplace checkout only: activated by ?fbcheckout=1. */
+html.mc-facebook-checkout body .header,
+html.mc-facebook-checkout body header,
+html.mc-facebook-checkout body #header,
+html.mc-facebook-checkout body #headerTop,
+html.mc-facebook-checkout body #footer,
+html.mc-facebook-checkout body footer,
+html.mc-facebook-checkout body .mc-cart-float,
+html.mc-facebook-checkout body .mc-promo-banner,
+html.mc-facebook-checkout body .mc-site-promo-bar,
+html.mc-facebook-checkout body nav,
+html.mc-facebook-checkout body .vNav,
+html.mc-facebook-checkout body .breadcrumbs,
+html.mc-facebook-checkout body .v65-breadcrumbs {
+  display: none !important;
+}
+html.mc-facebook-checkout body #mcPromoBanner.mc-promo-banner,
+html.mc-facebook-checkout body .mc-promo-banner,
+html.mc-facebook-checkout body nav.menu,
+html.mc-facebook-checkout body ul.vnav,
+html.mc-facebook-checkout body #v65-footer,
+html.mc-facebook-checkout body .footer-container,
+html.mc-facebook-checkout body .footer-wrapper,
+html.mc-facebook-checkout body .social-media-links {
+  display: none !important;
+}
+/* The theme's PDP rules have higher specificity than the basic selectors above. */
+html.mc-facebook-checkout body.productdetails header.header,
+html.mc-facebook-checkout body.productdetails header.header *,
+html.mc-facebook-checkout body.productdetails .microblock.main-menu,
+html.mc-facebook-checkout body.productdetails #display_menu_1,
+html.mc-facebook-checkout body.productdetails footer.footer,
+html.mc-facebook-checkout body.productdetails #related_products_header,
+html.mc-facebook-checkout body.productdetails #related_products_content,
+html.mc-facebook-checkout body.productdetails .v65-product-related-details-row,
+html.mc-facebook-checkout body.productdetails [data-mc-related-plp="1"] {
+  display: none !important;
+}
+html.mc-facebook-checkout body.productdetails .mc-account-float,
+html.mc-facebook-checkout body.productdetails .mc-cart-float,
+html.mc-facebook-checkout body.productdetails .mc-home-float,
+html.mc-facebook-checkout body.productdetails .mc-search-float {
+  display: none !important;
+}
+html.mc-facebook-checkout body { background: #fff !important; }
+html.mc-facebook-checkout body #content_area,
+html.mc-facebook-checkout body #content_area_home { max-width: 920px !important; margin: 0 auto !important; padding: 20px !important; }
+html.mc-facebook-checkout body .content_area-wrapper { width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important; }
+html.mc-facebook-checkout body .mc-fb-offer {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 24px;
+  padding: 16px 20px;
+  background: #000 !important;
+  color: #fff !important;
+  font-family: Arial, Helvetica, sans-serif;
+}
+html.mc-facebook-checkout body .mc-fb-white-glove { margin: 0 0 24px; padding: 16px 20px; border: 1px solid #111; background: #fff; font-family: Arial, Helvetica, sans-serif; }
+html.mc-facebook-checkout body .mc-fb-white-glove strong { display: block; margin-bottom: 4px; color: #111 !important; font-size: 16px; }
+html.mc-facebook-checkout body .mc-fb-white-glove span { display: block; color: #444 !important; font-size: 14px; }
+html.mc-facebook-checkout body .mc-fb-white-glove > div { display: flex; gap: 8px; margin-top: 12px; }
+html.mc-facebook-checkout body .mc-fb-white-glove input { box-sizing: border-box; width: 150px; height: 40px; padding: 8px 10px; border: 1px solid #777; }
+html.mc-facebook-checkout body .mc-fb-white-glove button { min-height: 40px; padding: 8px 14px; border: 1px solid #111; background: #111; color: #fff; font-weight: 700; cursor: pointer; }
+html.mc-facebook-checkout body .mc-fb-white-glove p { min-height: 20px; margin: 10px 0 0; color: #111 !important; font-size: 14px; font-weight: 700; }
+html.mc-facebook-checkout body.productdetails .mc-fb-offer,
+html.mc-facebook-checkout body.productdetails .mc-fb-offer * { color: #fff !important; font-family: Arial, Helvetica, sans-serif !important; }
+html.mc-facebook-checkout body.productdetails .mc-fb-offer__eyebrow { font-size: 11px !important; font-weight: 700 !important; letter-spacing: .12em !important; text-transform: uppercase !important; opacity: .8 !important; }
+html.mc-facebook-checkout body.productdetails .mc-fb-offer__headline { margin: 2px 0 0 !important; font-size: 19px !important; font-weight: 700 !important; line-height: 1.2 !important; }
+html.mc-facebook-checkout body.productdetails .mc-fb-offer__code { padding: 9px 12px !important; border: 1px solid rgba(255,255,255,.65) !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: .08em !important; }
+html.mc-facebook-checkout body.productdetails .mc-fb-offer__delivery { font-size: 13px !important; white-space: nowrap !important; }
+html.mc-facebook-checkout body #v65-product-parent > tbody > tr > td:first-child { flex: 0 0 58% !important; max-width: 58% !important; }
+html.mc-facebook-checkout body #v65-product-parent > tbody > tr > td:nth-child(2) { flex: 0 0 42% !important; max-width: 42% !important; }
+html.mc-facebook-checkout body input[name="btnaddtocart"],
+html.mc-facebook-checkout body button[name="btnaddtocart"] { background: #000 !important; border-color: #000 !important; color: #fff !important; min-height: 56px !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: .1em !important; }
+/* Keep one-page checkout entry fields inside their cells at every browser zoom/width. */
+html.mc-facebook-checkout body #v65-onepage-Shipping,
+html.mc-facebook-checkout body #v65-onepage-Billing { width: 100% !important; max-width: 100% !important; }
+html.mc-facebook-checkout body .v65-onepage-shipping-value-cell,
+html.mc-facebook-checkout body .v65-onepage-billing-value-cell { min-width: 0 !important; }
+html.mc-facebook-checkout body .v65-onepage-shipping-value-cell > input,
+html.mc-facebook-checkout body .v65-onepage-shipping-value-cell > select,
+html.mc-facebook-checkout body .v65-onepage-billing-value-cell > input,
+html.mc-facebook-checkout body .v65-onepage-billing-value-cell > select,
+html.mc-facebook-checkout body #v65-onepage-Shipping input,
+html.mc-facebook-checkout body #v65-onepage-Shipping select,
+html.mc-facebook-checkout body #v65-onepage-Billing input,
+html.mc-facebook-checkout body #v65-onepage-Billing select {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+@media (max-width: 767px) {
+  html.mc-facebook-checkout body .mc-fb-offer { grid-template-columns: 1fr; gap: 8px; padding: 15px; }
+  html.mc-facebook-checkout body .mc-fb-offer__delivery { white-space: normal; }
+  html.mc-facebook-checkout body .mc-fb-white-glove > div { align-items: stretch; }
+  html.mc-facebook-checkout body #v65-product-parent > tbody > tr > td:first-child,
+  html.mc-facebook-checkout body #v65-product-parent > tbody > tr > td:nth-child(2) { flex: 0 0 100% !important; max-width: 100% !important; }
+}
