@@ -575,8 +575,8 @@ display:none!important;visibility:hidden!important;height:0!important;max-height
 <script src="/v/vspfiles/js/mc-cart-checkout-fix.js?v=20260719cart4"></script><!-- MC_CART_CHECKOUT_FIX -->
 <link rel="stylesheet" href="/v/vspfiles/css/mc-facebook-checkout.css?v=20260730fb9"><script src="/v/vspfiles/js/mc-facebook-checkout.js?v=20260730fb8"></script><!-- MC_FACEBOOK_CHECKOUT -->
 <script src="/v/vspfiles/js/mc-saranoni-accordion-lock.js?v=20260730saracc1"></script><!-- MC_SARANONI_ACCORDION_LOCK -->
-<script src="/v/vspfiles/js/mc-delivery-zones.js?v=20260730delivery2"></script><!-- MC_SHIPPING_RATE_POLICY -->
-<script src="/v/vspfiles/js/mc-shipping-rate-policy.js?v=20260730ship9"></script><!-- MC_SHIPPING_RATE_POLICY -->
+<script src="/v/vspfiles/js/mc-white-glove-zip-tiers-data.js?v=20260719ship1"></script><!-- MC_SHIPPING_RATE_POLICY -->
+<script src="/v/vspfiles/js/mc-shipping-rate-policy.js?v=20260719ship1"></script><!-- MC_SHIPPING_RATE_POLICY -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
   <meta id="v65-layout-mode" data-cart="storedot" data-checkout="storedot" data-use-simplified-checkout="true">
@@ -1495,7 +1495,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725bbsw1&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725gat2&mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -2733,7 +2733,7 @@ document.addEventListener("DOMContentLoaded", function () {
        Always use the versioned URL â€” unversioned CDN still serves stale copies. */
     document.documentElement.setAttribute("data-mc-pdp-auth-reload", FP);
     var s = document.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725bbsw1&mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?v=20260725gat2&mcrd=" + Date.now();
     s.async = false;
     (document.head || document.documentElement).appendChild(s);
   }
@@ -5392,7 +5392,8 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
         btn.type = 'button';
         btn.className = 'mc-sub-toggle';
         btn.setAttribute('aria-expanded','false');
-        btn.textContent = 'â–¾';
+        btn.setAttribute('aria-label','Show subcategories');
+        btn.textContent = '>';
         row.appendChild(btn);
 
         var subList = buildFromVnav(sub);
@@ -5509,10 +5510,12 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     var btn = e.target.closest('button.mc-sub-toggle');
     if (btn){
       e.preventDefault();
+      e.stopPropagation();
       var li = btn.closest('li.mc-has-sub');
       if (!li) return;
       var open = li.classList.toggle('mc-open');
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Hide subcategories' : 'Show subcategories');
       return;
     }
 
@@ -5700,69 +5703,16 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
 })();
 </script>
 <script>
+/* MC_MOBILE_SUBCATS_20260725nav1 — keep parent links + small ">" toggles.
+   Previously this block stripped .mc-sub-toggle and nested ULs on mobile. */
 (function () {
-  function isMobile() {
-    return window.matchMedia('(max-width: 991px)').matches;
-  }
-
-  function stripSubmenus(scope) {
-    if (!scope) return;
-
-    /* remove all submenu toggle buttons/icons in MOBILE menu only */
-    scope.querySelectorAll(
-      '.vnav__icon, .vnav__arrow, .vnav__caret, .vnav__toggle, .vnav__expand, .mc-sub-toggle, .mc-mobile-vnav__toggle'
-    ).forEach(function (el) {
-      el.remove();
-    });
-
-    /* remove nested ULs in MOBILE menu only */
-    scope.querySelectorAll('li > ul').forEach(function (ul) {
-      ul.remove();
-    });
-
-    scope.querySelectorAll('li').forEach(function (li) {
-      li.classList.remove('mc-has-sub', 'has-sub', 'mc-open', 'is-open');
-    });
-  }
-
-  function run() {
-    if (!isMobile()) return;
-
-    stripSubmenus(document.querySelector('#push-nav__menu'));
-    stripSubmenus(document.querySelector('.push-menu__menu-wrapper'));
-
-    setTimeout(function () {
-      if (!isMobile()) return;
-      stripSubmenus(document.querySelector('#push-nav__menu'));
-      stripSubmenus(document.querySelector('.push-menu__menu-wrapper'));
-    }, 200);
-
-    setTimeout(function () {
-      if (!isMobile()) return;
-      stripSubmenus(document.querySelector('#push-nav__menu'));
-      stripSubmenus(document.querySelector('.push-menu__menu-wrapper'));
-    }, 800);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', run);
-  } else {
-    run();
-  }
-
-  window.addEventListener('load', run);
-  window.addEventListener('resize', run);
-
-  if (!window.__mcStripSubmenusObserver) {
-    window.__mcStripSubmenusObserver = new MutationObserver(function () {
-      if (!isMobile()) return;
-      run();
-    });
-    window.__mcStripSubmenusObserver.observe(document.documentElement, {
-      childList: true,
-      subtree: true
-    });
-  }
+  try {
+    if (window.__mcStripSubmenusObserver && typeof window.__mcStripSubmenusObserver.disconnect === 'function') {
+      window.__mcStripSubmenusObserver.disconnect();
+    }
+  } catch (eDisc) {}
+  window.__mcStripSubmenusObserver = null;
+  window.__mcStripSubmenusDisabled = true;
 })();
 </script>
 <script>
@@ -15667,6 +15617,6 @@ body.mc-product-page #v65-product-related img {
   window.addEventListener('load', removeOnlyStaleCustomSafeCss, { once: true });
 })();
 </script>
-<script src="/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260725fix3"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"219322d1a28c40a88da65ab074cf5d58","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script src="/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260725gat2"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"219322d1a28c40a88da65ab074cf5d58","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1c9facf1ed8f075',t:'MTc4NDI5ODk5NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
