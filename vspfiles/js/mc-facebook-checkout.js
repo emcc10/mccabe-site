@@ -86,10 +86,8 @@
       area.insertBefore(offer, area.firstChild);
     }
     hideNormalSiteChrome();
-    mountWhiteGloveFinder();
     g.setTimeout(hideNormalSiteChrome, 250);
     g.setTimeout(hideNormalSiteChrome, 1200);
-    [200, 900, 2200].forEach(function (delay) { g.setTimeout(mountWhiteGloveFinder, delay); });
   }
   function getCode() {
     var input = d.querySelector('input[name="ProductCode"], input[name="productcode"]');
