@@ -33,7 +33,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  white_glove_checkout:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.git_ref == 'codex/white-glove-live' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref }}
+      - run: pip3 install paramiko
+      - name: Deploy only White Glove checkout files
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/deploy_white_glove_checkout.py
+
   deploy:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.git_ref == 'codex/white-glove-live') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
