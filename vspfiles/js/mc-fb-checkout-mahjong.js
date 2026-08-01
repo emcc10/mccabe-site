@@ -103,10 +103,20 @@
     });
   }
 
+  function offerNeedsMahjongCopy(offer) {
+    var text = String((offer && offer.innerText) || '');
+    if (/FBSALE|Extra 10%\s*off|Facebook Marketplace Exclusive|Mahjong Set Offer|MAHJ20/i.test(text)) {
+      return true;
+    }
+    return text.indexOf('Mahjong Sale Ends Monday') === -1;
+  }
+
   function applyMahjongOffer() {
     var offer = d.getElementById(OFFER_ID);
     if (!offer) return false;
-    if (offer.getAttribute(APPLIED_ATTR) !== '1') {
+    /* Always re-assert copy. Checkout layout rebuilds can put FBSALE back while
+       leaving data-mc-fb-mahjong="1", which used to make us stop updating. */
+    if (offer.getAttribute(APPLIED_ATTR) !== '1' || offerNeedsMahjongCopy(offer)) {
       offer.innerHTML = MAHJONG_OFFER_HTML;
       offer.setAttribute(APPLIED_ATTR, '1');
     }
@@ -114,28 +124,32 @@
     return true;
   }
 
-  /* The banner is inserted by mc-facebook-checkout.js on DOMContentLoaded, which
-     may be after the cart lookup above resolves, so keep watching for it. */
+  /* Keep enforcing the Mahjong banner. mc-facebook-checkout.js inserts #mc-fb-offer
+     once, then checkout layout scripts can rebuild the DOM and resurrect FBSALE.
+     A one-shot watch was why the banner looked right and then went wrong again. */
   function watchForOffer() {
-    if (applyMahjongOffer()) return;
     var startedAt = Date.now();
     var observer = null;
     var timer = null;
 
-    function stop() {
-      if (observer) observer.disconnect();
-      if (timer) g.clearInterval(timer);
-    }
-
     function attempt() {
-      if (applyMahjongOffer() || Date.now() - startedAt > GIVE_UP_AFTER_MS) stop();
+      applyMahjongOffer();
+      /* Keep watching past the first success — only idle after the settle window. */
+      if (Date.now() - startedAt > GIVE_UP_AFTER_MS) {
+        if (observer) observer.disconnect();
+        if (timer) g.clearInterval(timer);
+      }
     }
 
+    attempt();
     timer = g.setInterval(attempt, 200);
     if (g.MutationObserver && d.body) {
       observer = new g.MutationObserver(attempt);
       observer.observe(d.body, { childList: true, subtree: true });
     }
+    /* One late pass after checkout cards finish moving. */
+    g.setTimeout(attempt, 3500);
+    g.setTimeout(attempt, 6000);
   }
 
   function start() {

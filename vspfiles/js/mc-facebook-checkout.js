@@ -255,45 +255,64 @@
     return cartCodes().then(codesAreMahjongOnly);
   }
 
-  function ready() {
-    if (!d.body) return;
-    d.body.classList.add('mc-facebook-checkout-ready');
-    if (isCheckout) d.body.classList.add('mc-facebook-checkout-page');
+  function ensureOffer() {
     var area = d.getElementById('content_area');
-    if (area && !d.getElementById('mc-fb-offer')) {
-      var productCode = getCode();
-      var mattressOffer = /^MHH-/.test(productCode);
-      /* Prefer sync DOM cart read on checkout so we never paint FBSALE for
-         Mahjong-only carts (they are not part of the Extra 10% FB sale). */
-      var mahjongOffer = /^TMH-/.test(productCode) || ((isCheckout || isCart) && codesAreMahjongOnly(cartCodesFromDom()));
-      var offer = d.createElement('section');
+    if (!area) return null;
+    var offer = d.getElementById('mc-fb-offer');
+    var productCode = getCode();
+    var mattressOffer = /^MHH-/.test(productCode);
+    var mahjongOffer = /^TMH-/.test(productCode) || ((isCheckout || isCart) && codesAreMahjongOnly(cartCodesFromDom()));
+    var created = false;
+    if (!offer) {
+      offer = d.createElement('section');
       offer.id = 'mc-fb-offer';
       offer.className = 'mc-fb-offer';
       offer.setAttribute('aria-label', 'Facebook Marketplace offer');
-      if (mahjongOffer) {
-        applyMahjongOfferHtml(offer);
-      } else if (mattressOffer) {
+      created = true;
+    }
+    if (mahjongOffer) {
+      applyMahjongOfferHtml(offer);
+    } else if (created) {
+      if (mattressOffer) {
         offer.innerHTML = '<div><div class="mc-fb-offer__eyebrow">CordaRoy\u2019s Mattress Offer</div><div class="mc-fb-offer__headline">Save 10% + Free Shipping</div></div><div class="mc-fb-offer__code">CODE: CORD10</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>';
       } else {
         offer.innerHTML = '<div><div class="mc-fb-offer__eyebrow">Facebook Marketplace Exclusive</div><div class="mc-fb-offer__headline">Extra 10% off through Friday</div></div><div class="mc-fb-offer__code">CODE: FBSALE</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>';
       }
-      area.insertBefore(offer, area.firstChild);
-      if (!mahjongOffer && (isCheckout || isCart)) {
-        isMahjongContext().then(function (yes) {
-          if (yes) {
-            applyMahjongOfferHtml(offer);
-            hideNormalSiteChrome();
-          }
-        });
-      }
+    } else if (
+      (isCheckout || isCart) &&
+      /FBSALE|Extra 10%\s*off/i.test(String(offer.innerText || ''))
+    ) {
+      /* Layout may have restored FBSALE after we already fixed Mahjong — re-check. */
+      isMahjongContext().then(function (yes) {
+        if (yes) {
+          applyMahjongOfferHtml(offer);
+          hideNormalSiteChrome();
+        }
+      });
     }
+    if (created) area.insertBefore(offer, area.firstChild);
+    if (!mahjongOffer && (isCheckout || isCart)) {
+      isMahjongContext().then(function (yes) {
+        if (yes) {
+          applyMahjongOfferHtml(offer);
+          hideNormalSiteChrome();
+        }
+      });
+    }
+    return offer;
+  }
+
+  function ready() {
+    if (!d.body) return;
+    d.body.classList.add('mc-facebook-checkout-ready');
+    if (isCheckout) d.body.classList.add('mc-facebook-checkout-page');
+    ensureOffer();
     hideNormalSiteChrome();
     polishCheckoutUi();
-    g.setTimeout(hideNormalSiteChrome, 250);
-    g.setTimeout(polishCheckoutUi, 250);
-    g.setTimeout(hideNormalSiteChrome, 1200);
-    g.setTimeout(polishCheckoutUi, 1200);
-    g.setTimeout(polishCheckoutUi, 2500);
+    g.setTimeout(function () { ensureOffer(); hideNormalSiteChrome(); polishCheckoutUi(); }, 250);
+    g.setTimeout(function () { ensureOffer(); hideNormalSiteChrome(); polishCheckoutUi(); }, 1200);
+    g.setTimeout(function () { ensureOffer(); polishCheckoutUi(); }, 2500);
+    g.setTimeout(function () { ensureOffer(); hideNormalSiteChrome(); }, 5000);
   }
 
   function getCode() {
@@ -350,15 +369,18 @@
   else { ready(); wireBuyButton(); }
   if (isCart) g.setTimeout(function () { g.location.replace('/one-page-checkout.asp?fbcheckout=1'); }, 600);
 
-  /* Layout finishes after us on slow loads — keep watching briefly. */
-  if (isCheckout && g.MutationObserver && d.documentElement) {
+  /* Layout finishes after us on slow loads — keep watching so Mahjong never
+     falls back to the Extra 10% FBSALE banner after card rebuilds. */
+  if ((isCheckout || isProduct) && g.MutationObserver && d.documentElement) {
     var tries = 0;
     var observer = new g.MutationObserver(function () {
       tries += 1;
+      ensureOffer();
+      hideNormalSiteChrome();
       polishCheckoutUi();
-      if (tries > 40) observer.disconnect();
+      if (tries > 60) observer.disconnect();
     });
     observer.observe(d.documentElement, { childList: true, subtree: true });
-    g.setTimeout(function () { observer.disconnect(); }, 8000);
+    g.setTimeout(function () { observer.disconnect(); }, 10000);
   }
 }(window, document));
