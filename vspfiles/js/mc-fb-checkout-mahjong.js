@@ -46,16 +46,28 @@
     return found ? decodeURIComponent(found[1]) : '';
   }
 
+  function cartCodesFromDom() {
+    var codes = [];
+    d.querySelectorAll('.v65-onepage-ordersummary-itemcode').forEach(function (el) {
+      var text = String(el.textContent || '').replace(/\s+/g, '').toUpperCase();
+      if (!text || /^(CODE|ITEM|SKU|PRODUCT|PRODUCTCODE|QTY|TOTAL)$/.test(text)) return;
+      if (codes.indexOf(text) === -1) codes.push(text);
+    });
+    return codes;
+  }
+
   function cartCodes() {
     var id = cartId();
-    if (!id) return Promise.resolve([]);
+    var domCodes = cartCodesFromDom();
+    if (!id) return Promise.resolve(domCodes);
     return fetch('/api/v1/carts/' + encodeURIComponent(id), { credentials: 'include' })
       .then(function (response) { return response.ok ? response.json() : null; })
       .then(function (payload) {
         var items = (payload && payload.data && payload.data.items) || [];
-        return items.map(function (item) { return String(item.code || '').toUpperCase(); });
+        var codes = items.map(function (item) { return String(item.code || '').toUpperCase(); }).filter(Boolean);
+        return codes.length ? codes : domCodes;
       })
-      .catch(function () { return []; });
+      .catch(function () { return domCodes; });
   }
 
   /* True only when everything being bought is Mahjong. On a product page the
@@ -68,6 +80,10 @@
   function isMahjongContext() {
     var code = productCode();
     if (code) return Promise.resolve(MAHJONG_CODE.test(code));
+    var domCodes = cartCodesFromDom();
+    if (domCodes.length) {
+      return Promise.resolve(domCodes.every(function (item) { return MAHJONG_CODE.test(item); }));
+    }
     return cartCodes().then(function (codes) {
       if (!codes.length) return false;
       return codes.every(function (item) { return MAHJONG_CODE.test(item); });
