@@ -16,11 +16,8 @@
         cart holding nothing but tile sets. Mahjong is on its own MAHJ20 promo and
         must never be advertised as part of the FBSALE sale.
 
-     2. Shipping was missing from the Mahjong banner. The delivery line ended at
-        "Fast Shipping!" with an empty second line, so the buyer saw no shipping
-        terms at all. The amount below was read off the live rate rather than
-        assumed: a one tile-set cart quotes "Free Shipping (7 Day Ground) $10.00"
-        and a three-set cart quotes $30.00, so the charge really is per set. */
+     2. The Mahjong banner copy is kept separate from the generic FBSALE /
+        mattress banners so storefront and other FB products stay untouched. */
 
   var params = new URLSearchParams(g.location.search || '');
   if (params.get('fbcheckout') !== '1') return;
@@ -32,12 +29,9 @@
   var GIVE_UP_AFTER_MS = 12000;
 
   var MAHJONG_OFFER_HTML =
-    '<div>' +
-    '<div class="mc-fb-offer__eyebrow">Mahjong Set Offer</div>' +
-    '<div class="mc-fb-offer__headline">Save 20% on your tile set</div>' +
-    '</div>' +
-    '<div class="mc-fb-offer__code">CODE: MAHJ20</div>' +
-    '<div class="mc-fb-offer__delivery">Fast Shipping!<br>$10 per set</div>';
+    '<div class="mc-fb-offer__headline" style="font-size:14px!important;line-height:1.35!important;text-align:center!important;margin:0!important;">' +
+    'Mahjong Sale Ends Monday!' +
+    '</div>';
 
   function productCode() {
     var input = d.querySelector('input[name="ProductCode"], input[name="productcode"]');

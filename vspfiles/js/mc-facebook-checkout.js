@@ -68,7 +68,10 @@
       'flex:0 0 auto!important;min-height:42px!important;padding:8px 14px!important;' +
       'border:1px solid #111!important;background:#111!important;color:#fff!important;' +
       'font:700 12px/1 Arial,Helvetica,sans-serif!important;letter-spacing:.06em!important;' +
-      'text-transform:uppercase!important;cursor:pointer!important;}';
+      'text-transform:uppercase!important;cursor:pointer!important;}' +
+      'html.mc-facebook-checkout #mc-fb-offer[data-mc-fb-mahjong="1"],' +
+      'html.mc-facebook-checkout #mc-fb-offer[data-mc-fb-mahjong="1"] .mc-fb-offer__headline{' +
+      'font-size:14px!important;line-height:1.35!important;}';
     d.head.appendChild(style);
   }
 
@@ -208,7 +211,7 @@
         ? '<div><div class="mc-fb-offer__eyebrow">CordaRoy\u2019s Mattress Offer</div><div class="mc-fb-offer__headline">Save 10% + Free Shipping</div></div><div class="mc-fb-offer__code">CODE: CORD10</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>'
         : '<div><div class="mc-fb-offer__eyebrow">Facebook Marketplace Exclusive</div><div class="mc-fb-offer__headline">Extra 10% off through Friday</div></div><div class="mc-fb-offer__code">CODE: FBSALE</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>';
       if (mahjongOffer) {
-        offer.innerHTML = '<div><div class="mc-fb-offer__eyebrow">Mahjong Set Offer</div><div class="mc-fb-offer__headline">Save 20% on your tile set</div></div><div class="mc-fb-offer__code">CODE: MAHJ20</div><div class="mc-fb-offer__delivery">Fast Shipping!<br>$10 per set</div>';
+        offer.innerHTML = '<div class="mc-fb-offer__headline" style="font-size:14px!important;line-height:1.35!important;text-align:center!important;margin:0!important;">Mahjong Sale Ends Monday!</div>';
       }
       area.insertBefore(offer, area.firstChild);
     }
