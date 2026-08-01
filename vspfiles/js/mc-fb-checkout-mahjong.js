@@ -1,0 +1,139 @@
+(function (g, d) {
+  'use strict';
+
+  /* Mahjong-only overrides for the Facebook Marketplace checkout flow.
+     Kept in its own file so nothing here can reach the regular storefront or
+     the other Facebook checkout products: the whole script exits immediately
+     unless the page carries ?fbcheckout=1, and every change below is additionally
+     gated on the page/cart being Mahjong (TMH-).
+
+     Two things this fixes, both confirmed live on 2026-08-01:
+
+     1. Extra 10% off leaked onto Mahjong. mc-facebook-checkout.js picks the offer
+        banner from the product code, but one-page-checkout.asp has no
+        ProductCode input, so its getCode() returns "" there and the generic
+        "Extra 10% off through Friday / CODE: FBSALE" banner rendered even for a
+        cart holding nothing but tile sets. Mahjong is on its own MAHJ20 promo and
+        must never be advertised as part of the FBSALE sale.
+
+     2. Shipping was missing from the Mahjong banner. The delivery line ended at
+        "Fast Shipping!" with an empty second line, so the buyer saw no shipping
+        terms at all. The amount below was read off the live rate rather than
+        assumed: a one tile-set cart quotes "Free Shipping (7 Day Ground) $10.00"
+        and a three-set cart quotes $30.00, so the charge really is per set. */
+
+  var params = new URLSearchParams(g.location.search || '');
+  if (params.get('fbcheckout') !== '1') return;
+
+  var OFFER_ID = 'mc-fb-offer';
+  var APPLIED_ATTR = 'data-mc-fb-mahjong';
+  var MAHJONG_CODE = /^TMH-/;
+  var SERIF = 'Cormorant Garamond, Georgia, Times New Roman, serif';
+  var GIVE_UP_AFTER_MS = 12000;
+
+  var MAHJONG_OFFER_HTML =
+    '<div>' +
+    '<div class="mc-fb-offer__eyebrow">Mahjong Set Offer</div>' +
+    '<div class="mc-fb-offer__headline">Save 20% on your tile set</div>' +
+    '</div>' +
+    '<div class="mc-fb-offer__code">CODE: MAHJ20</div>' +
+    '<div class="mc-fb-offer__delivery">Fast Shipping!<br>$10 per set</div>';
+
+  function productCode() {
+    var input = d.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var match = String(g.location.href).match(/[?&]ProductCode=([^&]+)/i);
+    return String((input && input.value) || (match && match[1]) || '')
+      .replace(/%2d/ig, '-')
+      .toUpperCase();
+  }
+
+  function cartId() {
+    var found = d.cookie.match(/(?:^|;\s*)CartID5=([^;]+)/);
+    return found ? decodeURIComponent(found[1]) : '';
+  }
+
+  function cartCodes() {
+    var id = cartId();
+    if (!id) return Promise.resolve([]);
+    return fetch('/api/v1/carts/' + encodeURIComponent(id), { credentials: 'include' })
+      .then(function (response) { return response.ok ? response.json() : null; })
+      .then(function (payload) {
+        var items = (payload && payload.data && payload.data.items) || [];
+        return items.map(function (item) { return String(item.code || '').toUpperCase(); });
+      })
+      .catch(function () { return []; });
+  }
+
+  /* True only when everything being bought is Mahjong. On a product page the
+     code on the page decides on its own - falling through to the cart there
+     would let a leftover Mahjong cart rewrite the banner on, say, a mattress
+     PDP. Elsewhere (cart, one-page checkout) there is no code to read, so the
+     cart decides, and a mixed cart keeps whatever banner
+     mc-facebook-checkout.js chose. Either way this file can never change the
+     offer shown for another product family. */
+  function isMahjongContext() {
+    var code = productCode();
+    if (code) return Promise.resolve(MAHJONG_CODE.test(code));
+    return cartCodes().then(function (codes) {
+      if (!codes.length) return false;
+      return codes.every(function (item) { return MAHJONG_CODE.test(item); });
+    });
+  }
+
+  /* mc-facebook-checkout.js paints these inline on the nodes it created, and it
+     re-runs at 250ms and 1200ms. Matching it here keeps the replacement looking
+     identical no matter which of the two lands last. */
+  function paint(offer) {
+    offer.style.setProperty('background', '#f8f8f8', 'important');
+    offer.style.setProperty('color', '#333', 'important');
+    offer.style.setProperty('font-family', SERIF, 'important');
+    offer.querySelectorAll('*').forEach(function (node) {
+      node.style.setProperty('color', '#333', 'important');
+      node.style.setProperty('font-family', SERIF, 'important');
+    });
+  }
+
+  function applyMahjongOffer() {
+    var offer = d.getElementById(OFFER_ID);
+    if (!offer) return false;
+    if (offer.getAttribute(APPLIED_ATTR) !== '1') {
+      offer.innerHTML = MAHJONG_OFFER_HTML;
+      offer.setAttribute(APPLIED_ATTR, '1');
+    }
+    paint(offer);
+    return true;
+  }
+
+  /* The banner is inserted by mc-facebook-checkout.js on DOMContentLoaded, which
+     may be after the cart lookup above resolves, so keep watching for it. */
+  function watchForOffer() {
+    if (applyMahjongOffer()) return;
+    var startedAt = Date.now();
+    var observer = null;
+    var timer = null;
+
+    function stop() {
+      if (observer) observer.disconnect();
+      if (timer) g.clearInterval(timer);
+    }
+
+    function attempt() {
+      if (applyMahjongOffer() || Date.now() - startedAt > GIVE_UP_AFTER_MS) stop();
+    }
+
+    timer = g.setInterval(attempt, 200);
+    if (g.MutationObserver && d.body) {
+      observer = new g.MutationObserver(attempt);
+      observer.observe(d.body, { childList: true, subtree: true });
+    }
+  }
+
+  function start() {
+    isMahjongContext().then(function (isMahjong) {
+      if (isMahjong) watchForOffer();
+    });
+  }
+
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', start);
+  else start();
+}(window, document));
