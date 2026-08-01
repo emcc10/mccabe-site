@@ -1,0 +1,32 @@
+# Fix Mahjong FB banner (Cloudflare is caching the old JS)
+
+The new banner text is already on the server. Browsers still load:
+  /v/vspfiles/js/mc-facebook-checkout.js?v=20260730fb15
+and Cloudflare is serving a year-cached copy of the old MAHJ20 banner.
+
+## Fastest fix — Cloudflare Worker (recommended)
+
+1. Sign in: https://dash.cloudflare.com
+2. Workers & Pages → open the Worker already routed to mccabestheaterandliving.com
+3. Paste in worker.js from this folder (or merge the Facebook proxy/rewrite
+   blocks into your existing worker)
+4. Deploy
+5. Hard-refresh a Mahjong FB page:
+   https://www.mccabestheaterandliving.com/product-p/tmh-tile-salmon-island-tiles.htm?fbcheckout=1
+   Banner must read: Mahjong Sale Ends Monday!
+
+## Alternate — purge one URL
+
+Cloudflare → Caching → Configuration → Purge Cache → Custom Purge:
+
+  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-facebook-checkout.js?v=20260730fb15
+  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-fb-checkout-mahjong.js
+
+## Alternate — Volusion template tag
+
+Change the script src from:
+  mc-facebook-checkout.js?v=20260730fb15
+to:
+  mc-facebook-checkout-20260801fb17.js?v=1
+
+If you reply "signed in" (Cloudflare), I can apply the Worker change in the dashboard.
