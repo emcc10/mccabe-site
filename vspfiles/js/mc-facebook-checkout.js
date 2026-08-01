@@ -194,6 +194,40 @@
     ensurePromoBox();
   }
 
+  var MAHJONG_OFFER_HTML =
+    '<div class="mc-fb-offer__headline" style="font-size:14px!important;line-height:1.35!important;text-align:center!important;margin:0!important;">Mahjong Sale Ends Monday!</div>';
+
+  function applyMahjongOfferHtml(offer) {
+    if (!offer) return;
+    offer.innerHTML = MAHJONG_OFFER_HTML;
+    offer.setAttribute('data-mc-fb-mahjong', '1');
+  }
+
+  function cartCodes() {
+    var id = cartId();
+    if (!id) return Promise.resolve([]);
+    return fetch('/api/v1/carts/' + encodeURIComponent(id), { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (payload) {
+        var items = (payload && payload.data && payload.data.items) || [];
+        return items.map(function (item) { return String(item.code || '').toUpperCase(); });
+      })
+      .catch(function () { return []; });
+  }
+
+  /* Product pages use ProductCode. Checkout has no ProductCode input, so a
+     Mahjong-only cart must be detected from the cart API or the FBSALE banner
+     incorrectly stays up. */
+  function isMahjongContext() {
+    var code = getCode();
+    if (code) return Promise.resolve(/^TMH-/.test(code));
+    if (!isCheckout && !isCart) return Promise.resolve(false);
+    return cartCodes().then(function (codes) {
+      if (!codes.length) return false;
+      return codes.every(function (item) { return /^TMH-/.test(item); });
+    });
+  }
+
   function ready() {
     if (!d.body) return;
     d.body.classList.add('mc-facebook-checkout-ready');
@@ -210,10 +244,16 @@
       offer.innerHTML = mattressOffer
         ? '<div><div class="mc-fb-offer__eyebrow">CordaRoy\u2019s Mattress Offer</div><div class="mc-fb-offer__headline">Save 10% + Free Shipping</div></div><div class="mc-fb-offer__code">CODE: CORD10</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>'
         : '<div><div class="mc-fb-offer__eyebrow">Facebook Marketplace Exclusive</div><div class="mc-fb-offer__headline">Extra 10% off through Friday</div></div><div class="mc-fb-offer__code">CODE: FBSALE</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>';
-      if (mahjongOffer) {
-        offer.innerHTML = '<div class="mc-fb-offer__headline" style="font-size:14px!important;line-height:1.35!important;text-align:center!important;margin:0!important;">Mahjong Sale Ends Monday!</div>';
-      }
+      if (mahjongOffer) applyMahjongOfferHtml(offer);
       area.insertBefore(offer, area.firstChild);
+      if (!mahjongOffer && (isCheckout || isCart)) {
+        isMahjongContext().then(function (yes) {
+          if (yes) {
+            applyMahjongOfferHtml(offer);
+            hideNormalSiteChrome();
+          }
+        });
+      }
     }
     hideNormalSiteChrome();
     polishCheckoutUi();
