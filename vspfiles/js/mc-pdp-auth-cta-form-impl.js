@@ -8,12 +8,12 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260802altsar1";
+  var VERSION = "20260802flash4";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260802002;
-  var ALT_VIEW_ROW_VER = "20260802flash2";
-  var ALT_VIEW_ROW_RANK = 20260802;
+  var DEPLOY_RANK = 20260802003;
+  var ALT_VIEW_ROW_VER = "20260802flash4";
+  var ALT_VIEW_ROW_RANK = 20260803;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;

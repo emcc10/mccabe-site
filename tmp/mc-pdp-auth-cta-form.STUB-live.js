@@ -148,6 +148,38 @@
     }
   } catch (ePromoBoot) {}
 
+  /* MC_ALT_VIEW_FLASH4_20260802: poison baked tmhnum4 (early-returns on altfix2)
+     and load a uniquely named flash4 copy before the template tag runs. */
+  try {
+    var pathAlt = String((global.location && global.location.pathname) || "");
+    if (/product-p\/|productdetails|ProductDetails/i.test(pathAlt)) {
+      global.__MC_TMH_ALT_VIEW_ROW_20260728altfix2__ = true;
+      global.__MC_TMH_ALT_VIEW_ROW_20260728altfix1__ = true;
+      global.__MC_TMH_ALT_VIEW_ROW_20260727fixflash1__ = true;
+      if (!global.document.getElementById("mc-alt-flash4-early-css")) {
+        var altCss = global.document.createElement("style");
+        altCss.id = "mc-alt-flash4-early-css";
+        altCss.textContent =
+          "#altviews,.altviews{display:none!important;visibility:hidden!important;height:0!important;" +
+          "overflow:hidden!important}" +
+          "#mc-pdp-alt-view-row-host,#mc-pdp-alt-view-row,#mc-pdp-alt-view-row a,#mc-pdp-alt-view-row img{" +
+          "transition:none!important;animation:none!important}";
+        (global.document.head || global.document.documentElement).appendChild(altCss);
+      }
+      if (
+        !global.__MC_ALT_VIEW_FLASH4_LOADING__ &&
+        !(global.document && global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260802flash4.js"]'))
+      ) {
+        global.__MC_ALT_VIEW_FLASH4_LOADING__ = true;
+        var altScript = global.document.createElement("script");
+        altScript.id = "mc-pdp-alt-view-row-flash4-js";
+        altScript.src =
+          "/v/vspfiles/js/mc-pdp-alt-view-row-20260802flash4.js?v=1&mcrd=" + Date.now();
+        altScript.async = false;
+        (global.document.head || global.document.documentElement).appendChild(altScript);
+      }
+    }
+  } catch (eAltFlash4) {}
 
   try {
     if (global.document && global.document.querySelector('script[src*="mc-pdp-auth-cta-form-impl.js"]')) {
@@ -156,7 +188,7 @@
     }
   } catch (eHas) {}
 
-  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260802altsar1&mcrd=altsar1";
+  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260802flash4&mcrd=flash4";
   try {
     var s = global.document.createElement("script");
     s.id = "mc-pdp-auth-cta-form-impl-js";

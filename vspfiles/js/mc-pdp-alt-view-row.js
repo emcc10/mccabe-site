@@ -36,7 +36,7 @@
      BOTH instances executed and fought over #mc-pdp-alt-view-row (9+ rebuilds /
      continuous flashing on tmh-trv-texas-tiles-pink). Numeric version + generation
      token: newer copy takes over; older observers/schedulers go inert. */
-  var ROW_VERSION = 20260802;
+  var ROW_VERSION = 20260803;
   var prevRowVer = Number(window.__MC_ALT_VIEW_ROW_VER__ || 0) || 0;
   if (prevRowVer > ROW_VERSION) return;
   if (prevRowVer === ROW_VERSION && window.__MC_ALT_VIEW_ROW_OWNED__) return;
@@ -50,6 +50,9 @@
   function isRowOwner() {
     return rowGen === window.__MC_ALT_VIEW_ROW_GEN__;
   }
+  /* flash4: kill inherited transition:all + stop display-toggling the active
+     thumb (both looked like continuous alt-row flashing on Saranoni). */
+  window.__MC_TMH_ALT_VIEW_ROW_20260802flash4__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260802flash3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260802flash2__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260802flash1__ = true;
@@ -1037,30 +1040,19 @@
   function syncActiveSaranoniThumb(heroCanon) {
     var row = document.getElementById(ROW_ID);
     if (!row) return;
-    /* MC_ALT_VIEW_DEBUG_20260727: log heroCanon itself whenever it changes
-       from the last time this ran, plus every actual show/hide toggle. If
-       heroCanon is flipping between two values repeatedly, that confirms the
-       hero image's src is unstable (something else is fighting over it) and
-       this toggle — not a full row rebuild — is the flashing. */
-    try {
-      if (window.__mcLastHeroCanon !== heroCanon) {
-        console.log(
-          "[MC-ALT-DEBUG] heroCanon changed:",
-          "\n  old:", window.__mcLastHeroCanon,
-          "\n  new:", heroCanon
-        );
-        window.__mcLastHeroCanon = heroCanon;
-      }
-    } catch (eDbg3) {}
+    /* Mark the active thumb in place. Hiding it with display:none reflowed the
+       strip (and inherited transition:all animated that reflow) whenever the
+       hero src was re-asserted — visible as continuous alt-row flashing. */
     Array.prototype.forEach.call(row.querySelectorAll("a[data-mc-tmh-alt-slot]"), function (link) {
       var isActive = canonicalUrl(link.getAttribute("href") || "") === heroCanon;
-      var currentlyHidden = link.style.getPropertyValue("display") === "none";
-      if (isActive && !currentlyHidden) {
-        try { console.log("[MC-ALT-DEBUG] hiding thumb (now active):", link.getAttribute("href")); } catch (eDbg4) {}
-        link.style.setProperty("display", "none", "important");
-      } else if (!isActive && currentlyHidden) {
-        try { console.log("[MC-ALT-DEBUG] showing thumb (no longer active):", link.getAttribute("href")); } catch (eDbg5) {}
-        link.style.setProperty("display", "block", "important");
+      if (isActive) {
+        link.classList.add("is-active");
+        link.setAttribute("aria-current", "true");
+        link.style.removeProperty("display");
+      } else {
+        link.classList.remove("is-active");
+        link.removeAttribute("aria-current");
+        link.style.removeProperty("display");
       }
     });
   }
@@ -1325,6 +1317,8 @@
       (document.head || document.documentElement).appendChild(st);
     }
     st.textContent =
+      "#mc-pdp-alt-view-row-host,#mc-pdp-alt-view-row,#mc-pdp-alt-view-row .mc-pdp-alt-view-row__track," +
+      "#mc-pdp-alt-view-row a,#mc-pdp-alt-view-row img{transition:none!important;animation:none!important}" +
       "#mc-pdp-alt-view-row-host{display:block!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;box-sizing:border-box!important}" +
       "#mc-pdp-alt-view-row{display:block!important;position:relative!important;clear:both!important;float:none!important;z-index:1!important;" +
       "overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;" +
@@ -1332,6 +1326,7 @@
       "#mc-pdp-alt-view-row .mc-pdp-alt-view-row__track{display:inline-flex!important;flex-wrap:nowrap!important;align-items:center!important;" +
       "gap:8px!important;width:max-content!important;max-width:none!important}" +
       "#mc-pdp-alt-view-row a,#mc-pdp-alt-view-row img{float:none!important;position:relative!important;z-index:1!important}" +
+      "#mc-pdp-alt-view-row a.is-active{outline:2px solid #222!important;outline-offset:2px!important}" +
       "#mc-pdp-alt-view-row-host .mc-pdp-alt-view-row__arrow{appearance:none!important;-webkit-appearance:none!important;position:absolute!important;" +
       "top:50%!important;transform:translateY(-50%)!important;z-index:5!important;width:28px!important;height:40px!important;" +
       "border:1px solid #ddd!important;border-radius:999px!important;background:rgba(255,255,255,.96)!important;color:#444!important;" +
