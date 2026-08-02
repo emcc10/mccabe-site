@@ -170,7 +170,31 @@
     g.setTimeout(attempt, 6000);
   }
 
+  /* Same CF trap as the banner: baked PDPs keep an old alt-view-row ?v= that
+     fights a newer copy and flashes thumbs. Pull flash1 from this Mahjong file
+     (already on a fresh URL) so the rail stabilizes even before the facebook
+     checkout tag is bumped. */
+  function ensureFreshAltViewRow() {
+    if ((Number(g.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) >= 20260802) return;
+    if (g.__MC_TMH_ALT_VIEW_ROW_20260802flash1__) return;
+    if (d.querySelector('script[data-mc-fb-alt-view-flash1="1"]')) return;
+    var want = '20260802flash1';
+    try {
+      d.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
+        var src = String(old.getAttribute('src') || '');
+        if (src.indexOf(want) !== -1) return;
+        try { old.remove(); } catch (eRm) {}
+      });
+    } catch (eSweep) {}
+    var s = d.createElement('script');
+    s.setAttribute('data-mc-fb-alt-view-flash1', '1');
+    s.src = '/v/vspfiles/js/mc-pdp-alt-view-row.js?v=' + want + '&mcrd=mj' + Date.now();
+    s.async = false;
+    (d.head || d.documentElement).appendChild(s);
+  }
+
   function start() {
+    ensureFreshAltViewRow();
     isMahjongContext().then(function (isMahjong) {
       if (isMahjong) watchForOffer();
     });

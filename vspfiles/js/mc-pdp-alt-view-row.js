@@ -30,20 +30,27 @@
      - Don't let a single bad altview suppress good numbered photos
      - Deny known wrong-color/wrong-SKU altview sets (Zenith beige on dark SKU) */
   if (!window || !document) return;
-  /* Facebook checkout (?fbcheckout=1) loads this file twice: the legacy loader
-     can win with a stale cached copy that has no numbered-Mahjong support, so
-     the template's cache-busted copy must still be allowed to run. Grant that
-     exactly one extra pass, and only on fbcheckout=1 — every regular site page
-     keeps the strict duplicate guard that stopped two instances fighting over
-     #mc-pdp-alt-view-row. */
-  var mcFbCheckout = false;
-  try {
-    mcFbCheckout = /(?:^|[?&])fbcheckout=1(?:&|$)/i.test(window.location.search || "");
-  } catch (eFbRun) {}
-  var mcAlreadyRan = !!window.__MC_TMH_ALT_VIEW_ROW_20260731tmhprobe1__;
-  var mcFbPasses = Number(window.__MC_TMH_ALT_VIEW_ROW_FB_PASSES__ || 0) || 0;
-  if (mcAlreadyRan && !(mcFbCheckout && mcFbPasses < 1)) return;
-  if (mcAlreadyRan) window.__MC_TMH_ALT_VIEW_ROW_FB_PASSES__ = mcFbPasses + 1;
+  /* MC_ALT_VIEW_ROW_20260802flash1 — single-owner generation.
+     FB checkout was loading this file twice (legacy CTA force-load + template
+     tag) under different ?v= keys. Each bump renamed the "already ran" flag, so
+     BOTH instances executed and fought over #mc-pdp-alt-view-row (9+ rebuilds /
+     continuous flashing on tmh-trv-texas-tiles-pink). Numeric version + generation
+     token: newer copy takes over; older observers/schedulers go inert. */
+  var ROW_VERSION = 20260802;
+  var prevRowVer = Number(window.__MC_ALT_VIEW_ROW_VER__ || 0) || 0;
+  if (prevRowVer > ROW_VERSION) return;
+  if (prevRowVer === ROW_VERSION && window.__MC_ALT_VIEW_ROW_OWNED__) return;
+  window.__MC_ALT_VIEW_ROW_VER__ = ROW_VERSION;
+  window.__MC_ALT_VIEW_ROW_OWNED__ = true;
+  /* Exhaust the legacy FB double-pass so a stale cached copy (tmhnum4) that
+     still allows one extra fbcheckout run cannot start a second owner and
+     paint mojibake scroll arrows over the stable rail. */
+  window.__MC_TMH_ALT_VIEW_ROW_FB_PASSES__ = 99;
+  var rowGen = (window.__MC_ALT_VIEW_ROW_GEN__ = (Number(window.__MC_ALT_VIEW_ROW_GEN__ || 0) || 0) + 1);
+  function isRowOwner() {
+    return rowGen === window.__MC_ALT_VIEW_ROW_GEN__;
+  }
+  window.__MC_TMH_ALT_VIEW_ROW_20260802flash1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260731tmhprobe1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260729racefix1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260728altfix2__ = true;
@@ -904,6 +911,7 @@
   }
 
   function render() {
+    if (!isRowOwner()) return;
     var code = productCode();
     var isSaranoni = isSaranoniProductPage(code);
     var isMahjong = isMahjongProductPage(code);
@@ -911,14 +919,15 @@
     if (!isMahjong && !isSaranoni && !isGenericPdp) return;
     /* Facebook checkout must build the numbered Mahjong rail even when Volusion
        emitted a partial native #altviews container — in that case collectItems()
-       returns a short list, so the empty-list probe further down never runs. */
-    if (
-      isMahjong &&
-      isFacebookCheckoutPage() &&
-      !probeInFlight[code] &&
-      !Object.prototype.hasOwnProperty.call(discoveredByCode, code)
-    ) {
-      probeMahjongNumberedViews(code);
+       returns a short list, so the empty-list probe further down never runs.
+       Wait for that probe before painting native/partial thumbs — progressive
+       collectItems() signatures were rebuilding the row as each image arrived. */
+    if (isMahjong && isFacebookCheckoutPage()) {
+      if (probeInFlight[code]) return;
+      if (!Object.prototype.hasOwnProperty.call(discoveredByCode, code)) {
+        probeMahjongNumberedViews(code);
+        return;
+      }
     }
     var hero = heroImage();
     var mediaCell = mediaCellFor(hero);
@@ -1077,6 +1086,7 @@
      (-2/-2T probe) paths — builds/positions the thumbnail row and wires up
      hero-swap clicks. Nothing here is product-type-specific. */
   function renderRow(hero, mediaCell, row, items) {
+    if (!isRowOwner()) return;
     ensureAltRowCss();
     if (!row) {
       /* MC_ALT_VIEW_DEBUG_20260727: temporary diagnostic — logs every time the
@@ -1161,8 +1171,9 @@
 
     var signature = items.map(function (item) { return canonicalUrl(item.full); }).join("|");
     if (row.getAttribute("data-mc-items") === signature && row.querySelector("." + TRACK_CLASS)) {
-      /* Already built — only ensure arrows once, never rebuild thumbs. */
-      if (row.dataset.mcAltArrowReady !== "1") ensureAltRowScrollArrows(row, mediaCell);
+      /* Already built — never rebuild thumbs; still refresh arrows so a prior
+         instance's mojibake glyphs (â?¹) get replaced with ASCII < >. */
+      ensureAltRowScrollArrows(row, mediaCell);
       return;
     }
     /* MC_ALT_VIEW_DEBUG_20260727: temporary diagnostic — logs every actual
@@ -1238,9 +1249,6 @@
 
   function ensureAltRowScrollArrows(row, mediaCell) {
     if (!row || !row.parentNode) return;
-    if (row.dataset.mcAltArrowReady === "1" && document.getElementById("mc-pdp-alt-view-row-host")) {
-      return;
-    }
     altRowMutating = true;
     try {
       var host = row.parentNode;
@@ -1274,10 +1282,13 @@
           btn.type = "button";
           btn.className = "mc-pdp-alt-view-row__arrow " + cls;
           btn.setAttribute("aria-label", dir < 0 ? "Scroll alternate views left" : "Scroll alternate views right");
-          btn.textContent = dir < 0 ? "\u2039" : "\u203A";
           if (dir < 0) host.insertBefore(btn, row);
           else host.appendChild(btn);
         }
+        /* ASCII only — some Volusion/CDN pipelines corrupt U+2039/U+203A into
+           mojibake ("â?¹") that painted over the thumbnail strip. Always
+           re-assert so a prior instance's broken glyphs get replaced. */
+        btn.textContent = dir < 0 ? "<" : ">";
         btn.onclick = function (event) {
           event.preventDefault();
           event.stopPropagation();
@@ -1349,6 +1360,7 @@
   }
 
   function schedule() {
+    if (!isRowOwner()) return;
     window.clearTimeout(schedule.timer);
     schedule.timer = window.setTimeout(render, 80);
   }
@@ -1356,6 +1368,7 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", schedule);
   else schedule();
   document.addEventListener("click", function (event) {
+    if (!isRowOwner()) return;
     if (!isSaranoniProductPage(productCode())) return;
     var full = variantHeroFromClickTarget(event.target);
     if (!full) return;
@@ -1366,8 +1379,18 @@
   [300, 900, 1800, 3500, 7000, 11000].forEach(function (delay) {
     window.setTimeout(schedule, delay);
   });
+  /* Re-assert ASCII arrows after late stale copies finish their FB pass. */
+  [500, 1500, 3000].forEach(function (delay) {
+    window.setTimeout(function () {
+      if (!isRowOwner()) return;
+      var row = document.getElementById(ROW_ID);
+      if (!row) return;
+      ensureAltRowScrollArrows(row, mediaCellFor(heroImage()) || row.parentNode);
+    }, delay);
+  });
   if (window.MutationObserver) {
     var observer = new window.MutationObserver(function (mutations) {
+      if (!isRowOwner()) return;
       if (altRowMutating) return;
       var i, j, nodes, node, ignore;
       for (i = 0; i < mutations.length; i++) {

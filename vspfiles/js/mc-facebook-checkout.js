@@ -408,8 +408,32 @@
     }, true);
   }
 
-  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', function () { ready(); wireBuyButton(); });
-  else { ready(); wireBuyButton(); }
+  /* FB PDPs still bake an old ?v= for mc-pdp-alt-view-row.js (CF HIT for a year).
+     That stale copy + the CTA force-load fought over the thumbnail rail
+     (continuous flashing). Load the flash1 owner from this already-fresh
+     fbcheckout script so Mahjong alt thumbs stabilize without a template rebake. */
+  function ensureFreshAltViewRow() {
+    if (!isProduct) return;
+    if ((Number(g.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) >= 20260802) return;
+    if (g.__MC_TMH_ALT_VIEW_ROW_20260802flash1__) return;
+    if (d.querySelector('script[data-mc-fb-alt-view-flash1="1"]')) return;
+    var want = '20260802flash1';
+    try {
+      d.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
+        var src = String(old.getAttribute('src') || '');
+        if (src.indexOf(want) !== -1) return;
+        try { old.remove(); } catch (eRm) {}
+      });
+    } catch (eSweep) {}
+    var s = d.createElement('script');
+    s.setAttribute('data-mc-fb-alt-view-flash1', '1');
+    s.src = '/v/vspfiles/js/mc-pdp-alt-view-row.js?v=' + want + '&mcrd=fb' + Date.now();
+    s.async = false;
+    (d.head || d.documentElement).appendChild(s);
+  }
+
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', function () { ready(); wireBuyButton(); ensureFreshAltViewRow(); });
+  else { ready(); wireBuyButton(); ensureFreshAltViewRow(); }
   if (isCart) g.setTimeout(function () { g.location.replace('/one-page-checkout.asp?fbcheckout=1'); }, 600);
 
   /* Layout finishes after us on slow loads — keep watching so Mahjong never
