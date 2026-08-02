@@ -50,6 +50,7 @@
   function isRowOwner() {
     return rowGen === window.__MC_ALT_VIEW_ROW_GEN__;
   }
+  window.__MC_TMH_ALT_VIEW_ROW_20260802flash3__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260802flash2__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260802flash1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260731tmhprobe1__ = true;
@@ -804,9 +805,6 @@
   }
 
   function addSaranoniDiscovered(code, slot, src) {
-    /* After the first settled paint, ignore late CDN hits so the signature
-       cannot change and rebuild the rail (visible flash). */
-    if (saranoniProbeDone[code] && (discoveredByCode[code] || []).length) return;
     var list = discoveredByCode[code] || (discoveredByCode[code] = []);
     var idx = -1;
     for (var i = 0; i < list.length; i += 1) {
@@ -823,9 +821,6 @@
           full: src,
           alt: "Alternate product view " + slot
         };
-        /* MC_ALT_VIEW_NO_PARTIAL_RENDER_20260727: no schedule() — see note in
-           probeAltViews above. finish() renders once after probeSaranoniAltViews
-           settles (all MAX_SAR_ALT_SLOT probes done, or the 10s timeout). */
       }
       return;
     }
@@ -840,78 +835,41 @@
     if (!code || probeInFlight[code]) return;
     /* Allow re-probe when a prior pass latched empty (CDN race / blocked imgs). */
     if (saranoniProbeDone[code] && (discoveredByCode[code] || []).length) return;
-    /* Keep any discoveries already found — never wipe mid-flight successes. */
     if (!discoveredByCode[code]) discoveredByCode[code] = [];
-    if ((discoveredByCode[code] || []).length) {
-      saranoniProbeDone[code] = true;
-      render();
-      return;
-    }
     probeInFlight[code] = true;
-    var remaining = MAX_SAR_ALT_SLOT;
-    var finished = false;
-    /* MC_ALT_VIEW_SLOW_LOAD_FIX_20260729: probeGenericAltViews (SS/furniture,
-       above) already learned this lesson from a real incident ("Alexandria had
-       ~50x 404s probing to 64" — see its comment) and stops early once enough
-       consecutive misses come back. The Saranoni path never got the same
-       fix, so it always waited on all MAX_SAR_ALT_SLOT (24) probes — or the
-       full batch timeout — even for products with far fewer real alt views.
-       Confirmed live on sar-hp-hp-msln-nrs.htm (8 real images, slots 9-24 all
-       404): the alt-view row silently sat empty for ~19s while this ran.
-       Mirroring the same early-exit here bounds the wait without changing
-       correct-case behavior for products that do have many real alt views. */
-    var consecutiveMisses = 0;
 
-    function finish() {
-      if (finished) return;
-      finished = true;
-      probeInFlight[code] = false;
-      saranoniProbeDone[code] = true;
-      discoveredByCode[code].sort(function (a, b) { return a.slot - b.slot; });
-      /* If nothing found, clear the latch so a later schedule can retry. */
-      if (!(discoveredByCode[code] || []).length) {
-        saranoniProbeDone[code] = false;
-      }
-      render();
-    }
-
-    setTimeout(finish, 6000);
-
-    function completeOne(hit) {
-      if (finished) return;
-      if (hit) {
-        consecutiveMisses = 0;
-      } else {
-        consecutiveMisses += 1;
-      }
-      remaining -= 1;
-      /* At least one real image found, then several straight misses in a row →
-         we've run past the end of this product's real gallery; stop waiting on
-         the rest. Threshold is more generous than SS's (2-3) since Saranoni is
-         a broad, actively-photographed line, not a closeout edge case. */
-      if (discoveredByCode[code].length && consecutiveMisses >= 5) {
-        finish();
-        return;
-      }
-      if (remaining <= 0) finish();
-    }
-
+    /* MC_ALT_VIEW_SAR_WINDOW_20260802: previously all 24 slots fired at once.
+       Fast 404s on high slots tripped consecutiveMisses>=5 while slots 2–14
+       were still loading, finish() latched one thumb, and late hits were
+       dropped — Peter Rabbit muslin showed a single alt. Probe in slot order
+       with a small window (same helper as Mahjong) so stopAfterMisses means
+       "past the end of the gallery", not "random parallel 404s". */
+    var slots = [];
     for (var altSlot = 1; altSlot <= MAX_SAR_ALT_SLOT; altSlot += 1) {
-      (function (photoSlot) {
-        var src = "/v/vspfiles/photos/" + code + "-altview" + photoSlot + ".jpg";
-        /* Image probes (DOM-attached) are more reliable than fetch on Volusion CDN. */
-        probeImage(
-          src,
-          function () {
-            addSaranoniDiscovered(code, photoSlot, src);
-            completeOne(true);
-          },
-          function () {
-            completeOne(false);
-          }
-        );
-      })(altSlot);
+      slots.push({
+        slot: altSlot,
+        src: "/v/vspfiles/photos/" + code + "-altview" + altSlot + ".jpg"
+      });
     }
+
+    probeSlotWindow({
+      slots: slots,
+      concurrency: PROBE_WINDOW,
+      stopAfterMisses: 5,
+      timeoutMs: WINDOWED_PROBE_TIMEOUT,
+      onHit: function (entry) {
+        addSaranoniDiscovered(code, entry.slot, entry.src);
+      },
+      onDone: function () {
+        probeInFlight[code] = false;
+        saranoniProbeDone[code] = true;
+        discoveredByCode[code].sort(function (a, b) { return a.slot - b.slot; });
+        if (!(discoveredByCode[code] || []).length) {
+          saranoniProbeDone[code] = false;
+        }
+        render();
+      }
+    });
   }
 
   function suppressNativeAltviews(row) {
