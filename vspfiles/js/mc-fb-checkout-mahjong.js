@@ -46,11 +46,27 @@
     return found ? decodeURIComponent(found[1]) : '';
   }
 
+  function isProductSku(code) {
+    return /^[A-Z]{2,}[A-Z0-9]*(?:-[A-Z0-9]+)+$/.test(code || '');
+  }
+
+  function isIgnorableCartCode(code) {
+    return (
+      !code ||
+      /^(CODE|ITEM|SKU|PRODUCT|PRODUCTCODE|QTY|TOTAL)$/.test(code) ||
+      /^DSC-/.test(code) ||
+      /DISCOUNT|COUPON|PROMO|GIFT|CERTIFICATE|SHIPPING|TAX|%OFF|OFFTRAVEL/i.test(code)
+    );
+  }
+
   function cartCodesFromDom() {
     var codes = [];
     d.querySelectorAll('.v65-onepage-ordersummary-itemcode').forEach(function (el) {
-      var text = String(el.textContent || '').replace(/\s+/g, '').toUpperCase();
-      if (!text || /^(CODE|ITEM|SKU|PRODUCT|PRODUCTCODE|QTY|TOTAL)$/.test(text)) return;
+      var text = String(el.textContent || '')
+        .replace(/%2d/gi, '-')
+        .replace(/\s+/g, '')
+        .toUpperCase();
+      if (isIgnorableCartCode(text) || !isProductSku(text)) return;
       if (codes.indexOf(text) === -1) codes.push(text);
     });
     return codes;
@@ -64,7 +80,9 @@
       .then(function (response) { return response.ok ? response.json() : null; })
       .then(function (payload) {
         var items = (payload && payload.data && payload.data.items) || [];
-        var codes = items.map(function (item) { return String(item.code || '').toUpperCase(); }).filter(Boolean);
+        var codes = items
+          .map(function (item) { return String(item.code || '').toUpperCase(); })
+          .filter(function (code) { return !isIgnorableCartCode(code) && isProductSku(code); });
         return codes.length ? codes : domCodes;
       })
       .catch(function () { return domCodes; });

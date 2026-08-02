@@ -207,19 +207,32 @@
     offer.setAttribute('data-mc-fb-mahjong', '1');
   }
 
+  function isIgnorableCartCode(code) {
+    return (
+      !code ||
+      /^(CODE|ITEM|SKU|PRODUCT|PRODUCTCODE|QTY|TOTAL)$/.test(code) ||
+      /^DSC-/.test(code) ||
+      /DISCOUNT|COUPON|PROMO|GIFT|CERTIFICATE|SHIPPING|TAX|%OFF|OFFTRAVEL|OFF\s/i.test(code)
+    );
+  }
+
+  /* Real Volusion SKUs look like TMH-TRV-… / MHH-… — not discount labels. */
+  function isProductSku(code) {
+    return /^[A-Z]{2,}[A-Z0-9]*(?:-[A-Z0-9]+)+$/.test(code || '');
+  }
+
+  /* Order-summary codes only. Do NOT scan every product link on the page —
+     footer/related links made Mahjong carts look "mixed" and kept FBSALE up. */
   function cartCodesFromDom() {
     var codes = [];
-    d.querySelectorAll('.v65-onepage-ordersummary-itemcode, a[href*="ProductCode="], a[href*="/product-p/"]').forEach(function (el) {
-      var text = '';
-      if (el.tagName === 'A') {
-        var href = el.getAttribute('href') || '';
-        var m = href.match(/[?&]ProductCode=([^&#]+)/i) || href.match(/\/product-p\/([^/?#]+)\.html?/i);
-        text = m ? m[1] : '';
-      } else {
-        text = el.textContent || '';
-      }
-      text = String(text).replace(/%2d/ig, '-').replace(/\s+/g, '').toUpperCase();
-      if (!text || /^(CODE|ITEM|SKU|PRODUCT|PRODUCTCODE|QTY|TOTAL)$/.test(text)) return;
+    d.querySelectorAll('.v65-onepage-ordersummary-itemcode').forEach(function (el) {
+      var row = el.closest('tr') || el.parentElement;
+      if (row && !/\$\s*[\d,]/.test(row.textContent || '')) return;
+      var text = String(el.textContent || '')
+        .replace(/%2d/gi, '-')
+        .replace(/\s+/g, '')
+        .toUpperCase();
+      if (isIgnorableCartCode(text) || !isProductSku(text)) return;
       if (codes.indexOf(text) === -1) codes.push(text);
     });
     return codes;
@@ -232,15 +245,26 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (payload) {
         var items = (payload && payload.data && payload.data.items) || [];
-        var codes = items.map(function (item) { return String(item.code || '').toUpperCase(); }).filter(Boolean);
+        var codes = items
+          .map(function (item) { return String(item.code || '').toUpperCase(); })
+          .filter(function (code) { return !isIgnorableCartCode(code) && isProductSku(code); });
         return codes.length ? codes : cartCodesFromDom();
       })
       .catch(function () { return cartCodesFromDom(); });
   }
 
   function codesAreMahjongOnly(codes) {
-    if (!codes || !codes.length) return false;
-    return codes.every(function (item) { return /^TMH-/.test(item); });
+    var real = (codes || []).filter(function (item) {
+      return !isIgnorableCartCode(item) && isProductSku(item);
+    });
+    if (!real.length) return false;
+    return real.every(function (item) { return /^TMH-/.test(item); });
+  }
+
+  function cartHasMahjong(codes) {
+    return (codes || []).some(function (item) {
+      return /^TMH-/.test(item) && isProductSku(item) && !isIgnorableCartCode(item);
+    });
   }
 
   /* Product pages use ProductCode. Checkout has no ProductCode input, so a
@@ -255,13 +279,23 @@
     return cartCodes().then(codesAreMahjongOnly);
   }
 
+  function paintDefaultOffer(offer, productCode) {
+    if (/^MHH-/.test(productCode)) {
+      offer.innerHTML = '<div><div class="mc-fb-offer__eyebrow">CordaRoy\u2019s Mattress Offer</div><div class="mc-fb-offer__headline">Save 10% + Free Shipping</div></div><div class="mc-fb-offer__code">CODE: CORD10</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>';
+      offer.removeAttribute('data-mc-fb-mahjong');
+      return;
+    }
+    offer.innerHTML = '<div><div class="mc-fb-offer__eyebrow">Facebook Marketplace Exclusive</div><div class="mc-fb-offer__headline">Extra 10% off through Friday</div></div><div class="mc-fb-offer__code">CODE: FBSALE</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>';
+    offer.removeAttribute('data-mc-fb-mahjong');
+  }
+
   function ensureOffer() {
     var area = d.getElementById('content_area');
     if (!area) return null;
     var offer = d.getElementById('mc-fb-offer');
     var productCode = getCode();
-    var mattressOffer = /^MHH-/.test(productCode);
-    var mahjongOffer = /^TMH-/.test(productCode) || ((isCheckout || isCart) && codesAreMahjongOnly(cartCodesFromDom()));
+    var domCodes = cartCodesFromDom();
+    var mahjongOffer = /^TMH-/.test(productCode) || ((isCheckout || isCart) && codesAreMahjongOnly(domCodes));
     var created = false;
     if (!offer) {
       offer = d.createElement('section');
@@ -273,16 +307,22 @@
     if (mahjongOffer) {
       applyMahjongOfferHtml(offer);
     } else if (created) {
-      if (mattressOffer) {
-        offer.innerHTML = '<div><div class="mc-fb-offer__eyebrow">CordaRoy\u2019s Mattress Offer</div><div class="mc-fb-offer__headline">Save 10% + Free Shipping</div></div><div class="mc-fb-offer__code">CODE: CORD10</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>';
+      /* On checkout, never paint FBSALE until the cart is known. Mahjong-only
+         carts were getting stuck on Extra 10% when the summary/API lagged. */
+      if ((isCheckout || isCart) && !productCode) {
+        if (cartHasMahjong(domCodes)) {
+          applyMahjongOfferHtml(offer);
+        } else {
+          offer.innerHTML = '<div class="mc-fb-offer__headline" style="font-size:14px!important;text-align:center!important;margin:0!important;">&nbsp;</div>';
+          offer.setAttribute('data-mc-fb-pending', '1');
+        }
       } else {
-        offer.innerHTML = '<div><div class="mc-fb-offer__eyebrow">Facebook Marketplace Exclusive</div><div class="mc-fb-offer__headline">Extra 10% off through Friday</div></div><div class="mc-fb-offer__code">CODE: FBSALE</div><div class="mc-fb-offer__delivery">Quick delivery<br>2\u20133 days after purchase</div>';
+        paintDefaultOffer(offer, productCode);
       }
     } else if (
       (isCheckout || isCart) &&
       /FBSALE|Extra 10%\s*off/i.test(String(offer.innerText || ''))
     ) {
-      /* Layout may have restored FBSALE after we already fixed Mahjong — re-check. */
       isMahjongContext().then(function (yes) {
         if (yes) {
           applyMahjongOfferHtml(offer);
@@ -296,6 +336,9 @@
         if (yes) {
           applyMahjongOfferHtml(offer);
           hideNormalSiteChrome();
+        } else if (offer.getAttribute('data-mc-fb-pending') === '1' || !offer.innerText.trim()) {
+          paintDefaultOffer(offer, productCode);
+          offer.removeAttribute('data-mc-fb-pending');
         }
       });
     }
