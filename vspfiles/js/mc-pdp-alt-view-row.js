@@ -50,6 +50,7 @@
   function isRowOwner() {
     return rowGen === window.__MC_ALT_VIEW_ROW_GEN__;
   }
+  window.__MC_TMH_ALT_VIEW_ROW_20260802flash2__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260802flash1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260731tmhprobe1__ = true;
   window.__MC_TMH_ALT_VIEW_ROW_20260729racefix1__ = true;
@@ -803,6 +804,9 @@
   }
 
   function addSaranoniDiscovered(code, slot, src) {
+    /* After the first settled paint, ignore late CDN hits so the signature
+       cannot change and rebuild the rail (visible flash). */
+    if (saranoniProbeDone[code] && (discoveredByCode[code] || []).length) return;
     var list = discoveredByCode[code] || (discoveredByCode[code] = []);
     var idx = -1;
     for (var i = 0; i < list.length; i += 1) {
@@ -910,6 +914,23 @@
     }
   }
 
+  function suppressNativeAltviews(row) {
+    var nativeAlt = nativeAltContainer();
+    if (!nativeAlt || nativeAlt.id === ROW_ID || (row && nativeAlt.contains(row))) return;
+    nativeAlt.style.setProperty("display", "none", "important");
+    nativeAlt.style.setProperty("visibility", "hidden", "important");
+    nativeAlt.style.setProperty("height", "0", "important");
+    nativeAlt.style.setProperty("max-height", "0", "important");
+    nativeAlt.style.setProperty("overflow", "hidden", "important");
+    nativeAlt.style.setProperty("margin", "0", "important");
+    nativeAlt.style.setProperty("padding", "0", "important");
+    nativeAlt.style.setProperty("left", "-9999px", "important");
+    nativeAlt.setAttribute("data-mc-altviews-suppressed", "1");
+    try {
+      if (document.body) document.body.classList.add("mc-pdp-custom-alt-row");
+    } catch (eCls) {}
+  }
+
   function render() {
     if (!isRowOwner()) return;
     var code = productCode();
@@ -917,6 +938,9 @@
     var isMahjong = isMahjongProductPage(code);
     var isGenericPdp = isAnyProductPage() && !!code && !isSaranoni && !isMahjong;
     if (!isMahjong && !isSaranoni && !isGenericPdp) return;
+    /* Hide native #altviews immediately on Saranoni — before probes finish —
+       so CTA numbered-restore cannot flash a second rail during load. */
+    if (isSaranoni) suppressNativeAltviews(document.getElementById(ROW_ID));
     /* Facebook checkout must build the numbered Mahjong rail even when Volusion
        emitted a partial native #altviews container — in that case collectItems()
        returns a short list, so the empty-list probe further down never runs.
@@ -985,6 +1009,7 @@
         probeSaranoniAltViews(code);
         return;
       }
+      suppressNativeAltviews(row);
       renderRow(hero, mediaCell, row, sarItems);
       syncActiveSaranoniThumb(heroCanon);
       return;
@@ -1171,9 +1196,10 @@
 
     var signature = items.map(function (item) { return canonicalUrl(item.full); }).join("|");
     if (row.getAttribute("data-mc-items") === signature && row.querySelector("." + TRACK_CLASS)) {
-      /* Already built — never rebuild thumbs; still refresh arrows so a prior
-         instance's mojibake glyphs (â?¹) get replaced with ASCII < >. */
-      ensureAltRowScrollArrows(row, mediaCell);
+      /* Already built — never rebuild thumbs. Only touch arrows if glyphs are
+         still the corrupted U+2039 form from an older instance. */
+      var prevBtn = document.querySelector("#mc-pdp-alt-view-row-host .mc-pdp-alt-view-row__arrow--prev");
+      if (!prevBtn || prevBtn.textContent !== "<") ensureAltRowScrollArrows(row, mediaCell);
       return;
     }
     /* MC_ALT_VIEW_DEBUG_20260727: temporary diagnostic — logs every actual
@@ -1386,6 +1412,14 @@
       var row = document.getElementById(ROW_ID);
       if (!row) return;
       ensureAltRowScrollArrows(row, mediaCellFor(heroImage()) || row.parentNode);
+    }, delay);
+  });
+  /* Keep native #altviews dead while CTA restore onloads try to flex it. */
+  [100, 300, 700, 1200, 2000, 3500, 6000].forEach(function (delay) {
+    window.setTimeout(function () {
+      if (!isRowOwner()) return;
+      if (!isSaranoniProductPage(productCode())) return;
+      suppressNativeAltviews(document.getElementById(ROW_ID));
     }, delay);
   });
   if (window.MutationObserver) {
