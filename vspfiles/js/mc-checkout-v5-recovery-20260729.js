@@ -377,12 +377,22 @@
   }
 
   function start() {
-    if (build()) return;
+    /* Layout may already exist from a stale cached recovery copy that never
+       painted the promo box — always ensure the coupon UI after build(). */
+    if (build()) {
+      ensurePromoBox(byId("mc-checkout-v5-order"));
+      return;
+    }
 
     var attempts = 0;
     var timer = window.setInterval(function () {
       attempts++;
-      if (build() || attempts >= 40) window.clearInterval(timer);
+      if (build()) {
+        ensurePromoBox(byId("mc-checkout-v5-order"));
+        window.clearInterval(timer);
+      } else if (attempts >= 40) {
+        window.clearInterval(timer);
+      }
     }, 200);
   }
 
