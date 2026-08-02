@@ -8,12 +8,12 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260802flash4";
+  var VERSION = "20260802flash5";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260802003;
-  var ALT_VIEW_ROW_VER = "20260802flash4";
-  var ALT_VIEW_ROW_RANK = 20260803;
+  var DEPLOY_RANK = 20260802005;
+  var ALT_VIEW_ROW_VER = "20260802flash5";
+  var ALT_VIEW_ROW_RANK = 20260804;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -28,36 +28,16 @@
      Never tear down a copy that already owns a newer/equal __MC_ALT_VIEW_ROW_VER__ —
      that remove+reinject race was double-loading the rail on FB Mahjong PDPs. */
   try {
-    if (global.document.getElementById("v65-product-parent")) {
-      var altWant = ALT_VIEW_ROW_VER;
-      var altOwnedVer = Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0;
-      if (
-        altOwnedVer >= ALT_VIEW_ROW_RANK ||
-        global["__MC_TMH_ALT_VIEW_ROW_" + altWant + "__"] ||
-        global.__MC_ALT_VIEW_ROW_LOADING__
-      ) {
-        /* already good */
-      } else {
-        var altExisting = global.document.querySelector('script[src*="mc-pdp-alt-view-row.js"]');
-        var altSrc = altExisting ? String(altExisting.getAttribute("src") || "") : "";
-        if (altSrc.indexOf(altWant) === -1) {
-          global.__MC_ALT_VIEW_ROW_LOADING__ = true;
-          global.document.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
-            try { old.remove(); } catch (eRmAlt) {}
-          });
-          var altScript = global.document.createElement("script");
-          altScript.id = "mc-pdp-alt-view-row-js";
-          altScript.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + altWant + "&mcrd=" + Date.now();
-          altScript.async = false;
-          altScript.onload = function () {
-            global.__MC_ALT_VIEW_ROW_LOADING__ = false;
-          };
-          altScript.onerror = function () {
-            global.__MC_ALT_VIEW_ROW_LOADING__ = false;
-          };
-          (global.document.head || global.document.documentElement).appendChild(altScript);
-        }
-      }
+    /* Stub loads flash5 once. Never remove/reinject here — that raced and flashed. */
+    if (
+      global.__MC_ALT_VIEW_ROW_LOCK__ ||
+      global.__MC_ALT_VIEW_ROW_OWNED__ ||
+      (Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) >= ALT_VIEW_ROW_RANK ||
+      global.__MC_TMH_ALT_VIEW_ROW_20260802flash5__ ||
+      (global.document &&
+        global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260802flash5.js"]'))
+    ) {
+      /* already loading or present */
     }
   } catch (eAltBoot) {}
 
@@ -10181,44 +10161,11 @@
     }
     /* MC_ALT_VIEW_ROW_20260802flash1 — one fingerprint shared with boot force-load.
        Loading guard prevents chin1/hum1-style remove/reload loops. */
-    var want = ALT_VIEW_ROW_VER || "20260802flash1";
+    var want = ALT_VIEW_ROW_VER || "20260802flash5";
     try {
-      var ownedVer = Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0;
-      if (
-        ownedVer >= ALT_VIEW_ROW_RANK ||
-        global["__MC_TMH_ALT_VIEW_ROW_" + want + "__"] ||
-        global.__MC_ALT_VIEW_ROW_LOADING__
-      ) {
-        global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
-        return;
-      }
-      var existing = global.document.querySelector('script[src*="mc-pdp-alt-view-row.js"]');
-      var existingSrc = existing ? String(existing.getAttribute("src") || "") : "";
-      if (existingSrc.indexOf(want) !== -1) {
-        global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
-        return;
-      }
-      global.__MC_ALT_VIEW_ROW_LOADING__ = true;
-      global.document.querySelectorAll('script[src*="mc-pdp-alt-view-row.js"]').forEach(function (old) {
-        try {
-          old.remove();
-        } catch (eRmAlt) {}
-      });
-      var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=" + want + "&mcrd=" + Date.now();
-      s.async = false;
-      s.onload = function () {
-        global.__MC_ALT_VIEW_ROW_LOADING__ = false;
-      };
-      s.onerror = function () {
-        global.__MC_ALT_VIEW_ROW_LOADING__ = false;
-      };
-      (global.document.head || global.document.documentElement).appendChild(s);
-    } catch (eAltBoot) {
-      try {
-        global.__MC_ALT_VIEW_ROW_LOADING__ = false;
-      } catch (eClr) {}
-    }
+      /* Never remove/reinject — stub owns the single flash5 load. */
+      global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
+    } catch (eAltBoot) {}
   }
 
   function restoreSaranoniNativeColorUi(select) {

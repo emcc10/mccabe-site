@@ -48,44 +48,9 @@
   }
 
   function upgradeAltViewRow() {
+    /* Auth stub owns the single flash5 alt-view load - PLP must not inject. */
     try {
-      if (!global.document.getElementById("v65-product-parent")) return;
-      /* MC_ALT_VIEW_ROW_DUPLICATE_GUARD_20260727: this function used to load
-         its own separate copy of mc-pdp-alt-view-row.js under a DIFFERENT
-         ?v= than mc-pdp-auth-cta-fix.js's own loader (ensureFreshSaranoniAltViewRowScript),
-         and cta-fix.js's loader didn't check for this one's tag before tearing
-         it down and replacing it — confirmed live via debug logging that two
-         separate instances of the alt-view-row script were both executing and
-         fighting over the same DOM element, which is what was causing the
-         continuous alt-view thumbnail flashing on Saranoni PDPs. Both loaders
-         now target the SAME "v=" value and share the same pending-tag marker. */
-      if (
-        (Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) >= 20260802 ||
-        global.__MC_TMH_ALT_VIEW_ROW_20260802flash1__ ||
-        global.__MC_TMH_ALT_VIEW_ROW_20260728altfix2__ ||
-        global.__MC_TMH_ALT_VIEW_ROW_20260728altfix1__ ||
-        global.__MC_TMH_ALT_VIEW_ROW_20260727fixflash1__ ||
-        global.__MC_TMH_ALT_VIEW_ROW_20260725alt3__ ||
-        global.__MC_TMH_ALT_VIEW_ROW_20260725alt2__
-      ) {
-        global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "flash1");
-        return;
-      }
-      if (global.document.documentElement.getAttribute("data-mc-plp-altrow-upgrade") === "flash1") return;
-      var existing = global.document.querySelector(
-        'script[src*="mc-pdp-alt-view-row.js"], script[data-mc-alt-view-row-pending="1"]'
-      );
-      if (existing) {
-        global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "flash1");
-        return;
-      }
-      global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "flash1");
-      var s = global.document.createElement("script");
-      s.id = "mc-pdp-alt-view-row-js";
-      s.setAttribute("data-mc-alt-view-row-pending", "1");
-      s.src = "/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260802flash1&mcrd=" + Date.now();
-      s.async = false;
-      (global.document.head || global.document.documentElement).appendChild(s);
+      global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "flash5-skip");
     } catch (eAlt) {}
   }
 
