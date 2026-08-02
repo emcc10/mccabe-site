@@ -148,39 +148,55 @@
     }
   } catch (ePromoBoot) {}
 
-  /* MC_ALT_VIEW_FLASH5_20260802: poison baked tmhnum4, strip competing loaders,
-     and always load uniquely named flash5 (mid-probe paint was the Saranoni flash). */
+  /* MC_ALT_VIEW_FLASH6_20260802: CF still HITs baked plp-enforcer?v=20260725fix3
+     which re-injects alt-view-row.js on a timer (Peter Rabbit flash). Trap that
+     upgrade fingerprint, hide the rail until flash6 marks ready, and load a
+     uniquely named owner. */
   try {
     var pathAlt = String((global.location && global.location.pathname) || "");
     if (/product-p\/|productdetails|ProductDetails/i.test(pathAlt)) {
       global.__MC_TMH_ALT_VIEW_ROW_20260728altfix2__ = true;
       global.__MC_TMH_ALT_VIEW_ROW_20260728altfix1__ = true;
       global.__MC_TMH_ALT_VIEW_ROW_20260727fixflash1__ = true;
-      if (!global.document.getElementById("mc-alt-flash5-early-css")) {
+      global.__MC_TMH_ALT_VIEW_ROW_20260725fix2__ = true;
+      global.__MC_TMH_ALT_VIEW_ROW_20260725fix3__ = true;
+      try {
+        /* Old CF plp upgradeAltViewRow returns early when attribute === WANT. */
+        global.document.documentElement.setAttribute(
+          "data-mc-plp-altrow-upgrade",
+          "20260725fix3"
+        );
+      } catch (ePlpTrap) {}
+      if (!global.document.getElementById("mc-alt-flash6-early-css")) {
         var altCss = global.document.createElement("style");
-        altCss.id = "mc-alt-flash5-early-css";
+        altCss.id = "mc-alt-flash6-early-css";
         altCss.textContent =
           "#altviews,.altviews{display:none!important;visibility:hidden!important;height:0!important;" +
           "overflow:hidden!important}" +
+          "#mc-pdp-alt-view-row-host:not([data-mc-alt-ready=\"1\"]),#mc-pdp-alt-view-row:not([data-mc-alt-ready=\"1\"]){" +
+          "opacity:0!important;visibility:hidden!important;pointer-events:none!important}" +
           "#mc-pdp-alt-view-row-host,#mc-pdp-alt-view-row,#mc-pdp-alt-view-row a,#mc-pdp-alt-view-row img{" +
           "transition:none!important;animation:none!important}";
         (global.document.head || global.document.documentElement).appendChild(altCss);
       }
+      function stripCompetingAltViewScripts() {
+        try {
+          global.document
+            .querySelectorAll(
+              'script[src*="mc-pdp-alt-view-row.js"], script[src*="mc-pdp-alt-view-row-20260802flash4.js"], script[src*="mc-pdp-alt-view-row-20260802flash5.js"]'
+            )
+            .forEach(function (old) {
+              var src = String(old.getAttribute("src") || "");
+              if (/mc-pdp-alt-view-row-20260802flash6\.js/i.test(src)) return;
+              try {
+                old.remove();
+              } catch (eRm) {}
+            });
+        } catch (eStripAlt) {}
+      }
+      stripCompetingAltViewScripts();
       try {
-        global.document
-          .querySelectorAll(
-            'script[src*="mc-pdp-alt-view-row.js"], script[src*="mc-pdp-alt-view-row-20260802flash4.js"]'
-          )
-          .forEach(function (old) {
-            var src = String(old.getAttribute("src") || "");
-            if (/mc-pdp-alt-view-row-20260802flash5\.js/i.test(src)) return;
-            try {
-              old.remove();
-            } catch (eRm) {}
-          });
-      } catch (eStripAlt) {}
-      try {
-        if ((Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) < 20260804) {
+        if ((Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) < 20260805) {
           global.__MC_ALT_VIEW_ROW_LOCK__ = false;
           global.__MC_ALT_VIEW_ROW_OWNED__ = false;
           global.__MC_ALT_VIEW_ROW_GEN__ =
@@ -188,22 +204,40 @@
         }
       } catch (eUnlock) {}
       if (
-        !global.__MC_ALT_VIEW_FLASH5_LOADING__ &&
+        !global.__MC_ALT_VIEW_FLASH6_LOADING__ &&
         !(
           global.document &&
-          global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260802flash5.js"]')
+          global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260802flash6.js"]')
         )
       ) {
-        global.__MC_ALT_VIEW_FLASH5_LOADING__ = true;
+        global.__MC_ALT_VIEW_FLASH6_LOADING__ = true;
         var altScript = global.document.createElement("script");
-        altScript.id = "mc-pdp-alt-view-row-flash5-js";
+        altScript.id = "mc-pdp-alt-view-row-flash6-js";
         altScript.src =
-          "/v/vspfiles/js/mc-pdp-alt-view-row-20260802flash5.js?v=1&mcrd=" + Date.now();
+          "/v/vspfiles/js/mc-pdp-alt-view-row-20260802flash6.js?v=1&mcrd=" + Date.now();
         altScript.async = false;
         (global.document.head || global.document.documentElement).appendChild(altScript);
       }
+      if (!global.__MC_ALT_VIEW_FLASH6_MO__ && global.MutationObserver && global.document.documentElement) {
+        global.__MC_ALT_VIEW_FLASH6_MO__ = true;
+        try {
+          var altMo = new global.MutationObserver(function () {
+            stripCompetingAltViewScripts();
+            try {
+              global.document.documentElement.setAttribute(
+                "data-mc-plp-altrow-upgrade",
+                "20260725fix3"
+              );
+            } catch (eReTrap) {}
+          });
+          altMo.observe(global.document.documentElement, { childList: true, subtree: true });
+        } catch (eAltMo) {}
+        [200, 600, 1200, 2500, 5000].forEach(function (ms) {
+          global.setTimeout(stripCompetingAltViewScripts, ms);
+        });
+      }
     }
-  } catch (eAltFlash5) {}
+  } catch (eAltFlash6) {}
 
   try {
     if (global.document && global.document.querySelector('script[src*="mc-pdp-auth-cta-form-impl.js"]')) {
@@ -212,7 +246,7 @@
     }
   } catch (eHas) {}
 
-  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260802flash5&mcrd=flash5";
+  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260802flash6&mcrd=flash6";
   try {
     var s = global.document.createElement("script");
     s.id = "mc-pdp-auth-cta-form-impl-js";

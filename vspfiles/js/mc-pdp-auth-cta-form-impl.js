@@ -8,12 +8,12 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260802flash5";
+  var VERSION = "20260802flash6";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260802005;
-  var ALT_VIEW_ROW_VER = "20260802flash5";
-  var ALT_VIEW_ROW_RANK = 20260804;
+  var DEPLOY_RANK = 20260802006;
+  var ALT_VIEW_ROW_VER = "20260802flash6";
+  var ALT_VIEW_ROW_RANK = 20260805;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -28,14 +28,14 @@
      Never tear down a copy that already owns a newer/equal __MC_ALT_VIEW_ROW_VER__ —
      that remove+reinject race was double-loading the rail on FB Mahjong PDPs. */
   try {
-    /* Stub loads flash5 once. Never remove/reinject here — that raced and flashed. */
+    /* Stub loads flash6 once. Never remove/reinject here — that raced and flashed. */
     if (
       global.__MC_ALT_VIEW_ROW_LOCK__ ||
       global.__MC_ALT_VIEW_ROW_OWNED__ ||
       (Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) >= ALT_VIEW_ROW_RANK ||
-      global.__MC_TMH_ALT_VIEW_ROW_20260802flash5__ ||
+      global.__MC_TMH_ALT_VIEW_ROW_20260802flash6__ ||
       (global.document &&
-        global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260802flash5.js"]'))
+        global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260802flash6.js"]'))
     ) {
       /* already loading or present */
     }
@@ -10161,10 +10161,12 @@
     }
     /* MC_ALT_VIEW_ROW_20260802flash1 — one fingerprint shared with boot force-load.
        Loading guard prevents chin1/hum1-style remove/reload loops. */
-    var want = ALT_VIEW_ROW_VER || "20260802flash5";
+    var want = ALT_VIEW_ROW_VER || "20260802flash6";
     try {
-      /* Never remove/reinject — stub owns the single flash5 load. */
+      /* Never remove/reinject — stub owns the single flash6 load. */
       global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
+      /* Keep CF-cached plp-enforcer?v=20260725fix3 from re-injecting alt-view-row. */
+      global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "20260725fix3");
     } catch (eAltBoot) {}
   }
 

@@ -48,9 +48,12 @@
   }
 
   function upgradeAltViewRow() {
-    /* Auth stub owns the single flash5 alt-view load - PLP must not inject. */
+    /* Auth stub owns the single flash6 alt-view load - PLP must not inject.
+       Also stamp the old CF HIT fingerprint (20260725fix3) so that stale
+       cached enforcer copy's upgradeAltViewRow early-returns instead of
+       re-injecting mc-pdp-alt-view-row.js (Peter Rabbit flash). */
     try {
-      global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "flash5-skip");
+      global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "20260725fix3");
     } catch (eAlt) {}
   }
 
