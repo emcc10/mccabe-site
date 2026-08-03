@@ -8,10 +8,10 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260803atc4";
+  var VERSION = "20260803warr1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260803011;
+  var DEPLOY_RANK = 20260803012;
   var ALT_VIEW_ROW_VER = "20260803flash7";
   var ALT_VIEW_ROW_RANK = 20260806;
   try {
@@ -4233,7 +4233,18 @@
       "border:1px solid #111!important;border-radius:0!important;font-size:13px!important;font-weight:600!important;" +
       "letter-spacing:.12em!important;text-transform:uppercase!important;min-height:48px!important;padding:0 28px!important;opacity:1!important;outline:none!important;box-shadow:none!important;transition:none!important}" +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper{" +
-      "display:none!important}";
+      "display:none!important}" +
+      /* MC_PDP_WARRANTY_TAB_20260803: content-only styles for warranty panel.
+         Does not alter Features/Details/ATC/media spacing. */
+      "#mc-acc-warranty-host,#mc-acc-warranty-host.mc-acc-content--warranty{" +
+      "display:block!important;padding:12px 4px 4px!important;box-sizing:border-box!important}" +
+      "#mc-acc-warranty-host .mc-pdp-warranty{" +
+      "font-family:Inter,Arial,sans-serif!important;font-size:14px!important;line-height:1.55!important;" +
+      "letter-spacing:0.02em!important;color:#444!important;margin:0!important;padding:0!important;text-align:left!important}" +
+      "#mc-acc-warranty-host .mc-pdp-warranty p{margin:0 0 10px!important;padding:0!important}" +
+      "#mc-acc-warranty-host .mc-pdp-warranty ul{margin:0 0 10px!important;padding:0 0 0 1.1em!important;list-style:disc!important}" +
+      "#mc-acc-warranty-host .mc-pdp-warranty li{margin:0 0 6px!important;padding:0!important}" +
+      "#mc-acc-warranty-host .mc-pdp-warranty__note{font-size:13px!important;color:#666!important}";
   }
 
   global.mcPlaceBrandLogoAboveTitle = placeBrandLogoAboveTitle;
@@ -5296,6 +5307,181 @@
     return txt.length >= 20;
   }
 
+  /* MC_PDP_WARRANTY_TAB_20260803 — Manufacturer's Warranty accordion row.
+     Only injected when a supported brand resolves; no effect on other brands. */
+  function collectPdpBrandHaystack() {
+    var parts = [];
+    try {
+      var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      parts.push(String((pcEl && pcEl.value) || global.global_Current_ProductCode || ""));
+    } catch (ePc) {}
+    try {
+      parts.push(String((global.location && global.location.pathname) || ""));
+    } catch (ePath) {}
+    try {
+      var titleEl = global.document.querySelector(
+        '#mc-pdp-title-right [itemprop="name"], #mc-pdp-title-right h1, [itemprop="name"], h1.productnamecolorLARGE, .productnamecolorLARGE, .colors_productname'
+      );
+      parts.push(String((titleEl && titleEl.textContent) || global.document.title || ""));
+    } catch (eTitle) {}
+    try {
+      global.document
+        .querySelectorAll(
+          '.product_manufacturer, [itemprop="brand"], #manufacturer_name, img.vCSS_img_mfg_logo, #mc-pdp-brand-logo img, img[src*="/manufacturers/"]'
+        )
+        .forEach(function (el) {
+          parts.push(String(el.textContent || ""));
+          parts.push(String(el.getAttribute("alt") || ""));
+          parts.push(String(el.getAttribute("src") || ""));
+          parts.push(String(el.getAttribute("title") || ""));
+        });
+    } catch (eMfg) {}
+    return parts.join(" ").toLowerCase();
+  }
+
+  function isCoasterPdpPage() {
+    try {
+      if (isSteveSilverPdpPage() || isMahjongHousePdpPage() || isCordaroysBrandPdpPage() || isSaranoniPdpPage()) {
+        return false;
+      }
+      var hay = collectPdpBrandHaystack();
+      if (/\bcoaster(?:\s+(?:company|of\s+america|furniture))?\b/.test(hay)) return true;
+      if (/\/manufacturers\/[^"'?\s]*coaster/i.test(hay)) return true;
+      if (global.document.body && global.document.body.classList.contains("mc-coaster-pdp")) return true;
+    } catch (eCo) {}
+    return false;
+  }
+
+  function resolvePdpWarrantyBrand() {
+    try {
+      if (isMahjongHousePdpPage()) return "mahjong-house";
+      if (isCordaroysBrandPdpPage()) return "cordaroys";
+      if (isSteveSilverPdpPage()) return "steve-silver";
+      if (isCoasterPdpPage()) return "coaster";
+      var hay = collectPdpBrandHaystack();
+      if (/mahjong\s*house|\/tmh-/.test(hay)) return "mahjong-house";
+      if (/corda\s*roy/.test(hay)) return "cordaroys";
+      if (/steve\s*silver|\/ss-/.test(hay)) return "steve-silver";
+      if (/\bcoaster\b/.test(hay)) return "coaster";
+    } catch (eBrand) {}
+    return "";
+  }
+
+  function resolveSteveSilverWarrantyKind() {
+    var hay = collectPdpBrandHaystack();
+    if (/\b(outdoor|patio|wicker|all-?weather)\b/.test(hay)) return "outdoor";
+    if (
+      /\b(reclin|sectional|sofa|loveseat|love\s*seat|chaise|recliner|pwr-sect|pwr-recl|power\s+reclin)\b/.test(
+        hay
+      ) ||
+      /-(?:sect|sofa|love|recl|pwr)/i.test(hay)
+    ) {
+      return "upholstery";
+    }
+    return "casegoods";
+  }
+
+  function getPdpWarrantyHtml(brand) {
+    var key = String(brand || "").toLowerCase();
+    if (key === "steve-silver") {
+      var kind = resolveSteveSilverWarrantyKind();
+      if (kind === "outdoor") {
+        return (
+          '<div class="mc-pdp-warranty" data-mc-warranty-brand="steve-silver" data-mc-warranty-kind="outdoor">' +
+          "<p>Steve Silver Company outdoor furniture limited warranty (residential use):</p>" +
+          "<ul>" +
+          "<li><strong>Frame:</strong> 3 years (structural failure of metal frame/welds)</li>" +
+          "<li><strong>Wicker &amp; fabric:</strong> 2 years (structural failure, excessive fade/mildew under stated terms)</li>" +
+          "<li><strong>Finish, foam &amp; component parts:</strong> 1 year</li>" +
+          "</ul>" +
+          '<p class="mc-pdp-warranty__note">Claims are handled through McCabe\'s Theater &amp; Living (the selling retailer). Normal wear, improper care, and non-residential use are excluded. See full manufacturer warranty for complete terms.</p>' +
+          "</div>"
+        );
+      }
+      if (kind === "upholstery") {
+        return (
+          '<div class="mc-pdp-warranty" data-mc-warranty-brand="steve-silver" data-mc-warranty-kind="upholstery">' +
+          "<p>Steve Silver Company upholstery limited warranty:</p>" +
+          "<ul>" +
+          "<li><strong>Reclining mechanism:</strong> 5 years</li>" +
+          "<li><strong>Wooden frame components, cushions &amp; springs:</strong> 5 years (normal cushion softening is not a defect)</li>" +
+          "<li><strong>Power reclining motor:</strong> 3 years</li>" +
+          "<li><strong>Leather/fabric coverings, lumbar units &amp; electrical components:</strong> 1 year</li>" +
+          "</ul>" +
+          '<p class="mc-pdp-warranty__note">Warranty coverage is through the retailer only and is not transferable. Physical damage, improper use, improper cleaning, and normal wear are excluded. See full manufacturer warranty for complete terms.</p>' +
+          "</div>"
+        );
+      }
+      return (
+        '<div class="mc-pdp-warranty" data-mc-warranty-brand="steve-silver" data-mc-warranty-kind="casegoods">' +
+        "<p>Steve Silver Company casegoods limited warranty:</p>" +
+        "<ul>" +
+        "<li><strong>Manufacturing defects in material and/or workmanship:</strong> 1 year from date of purchase to the original purchaser</li>" +
+        "</ul>" +
+        '<p class="mc-pdp-warranty__note">Claims are handled through McCabe\'s Theater &amp; Living. Coverage applies to normal indoor residential household use. Abuse, accidents, improper cleaning agents, and normal wear are excluded. See full manufacturer warranty for complete terms.</p>' +
+        "</div>"
+      );
+    }
+    if (key === "coaster") {
+      return (
+        '<div class="mc-pdp-warranty" data-mc-warranty-brand="coaster">' +
+        "<p>Coaster Company of America limited warranty:</p>" +
+        "<ul>" +
+        "<li><strong>Manufacturing defects (workmanship and/or material):</strong> up to 1 year from date of purchase</li>" +
+        "<li>Coaster may credit or replace defective parts through the selling retailer</li>" +
+        "<li>Some motion and bunk-bed products may carry longer component-specific terms from Coaster</li>" +
+        "</ul>" +
+        '<p class="mc-pdp-warranty__note">Claims must go through McCabe\'s Theater &amp; Living with proof of purchase. Coaster does not handle consumer claims directly. Residential use only; normal wear, abuse, as-is/floor samples, and commercial use are excluded.</p>' +
+        "</div>"
+      );
+    }
+    if (key === "cordaroys") {
+      return (
+        '<div class="mc-pdp-warranty" data-mc-warranty-brand="cordaroys">' +
+        "<p>CordaRoy\'s lifetime guarantee:</p>" +
+        "<ul>" +
+        "<li>Covers manufacturer defects in materials or workmanship for the life of the product</li>" +
+        "<li>Includes seams and zipper slides/pulls</li>" +
+        "<li>CordaRoy\'s will repair or replace defective parts; shipping costs may apply</li>" +
+        "</ul>" +
+        '<p class="mc-pdp-warranty__note">Not covered: damage from pets or moisture, normal wear and tear, zipper teeth, and discoloration from sunlight or chemicals (such as bleach). Hybrid mattresses also include a limited lifetime guarantee plus an in-home trial for comfort preference (trial terms are separate from warranty).</p>' +
+        "</div>"
+      );
+    }
+    if (key === "mahjong-house") {
+      return (
+        '<div class="mc-pdp-warranty" data-mc-warranty-brand="mahjong-house">' +
+        "<p>The Mahjong House does not publish a multi-year product warranty.</p>" +
+        "<ul>" +
+        "<li>Returns/exchanges are not offered unless the order arrives damaged or is lost in transit</li>" +
+        "<li>Damaged goods must be reported within <strong>7 days</strong> of delivery with photos</li>" +
+        "</ul>" +
+        '<p class="mc-pdp-warranty__note">Contact McCabe\'s Theater &amp; Living promptly if your set arrives damaged, or email The Mahjong House customer care with order details and photos when purchasing directly from them. After 7 days, shipping-damage replacements are not available under their policy.</p>' +
+        "</div>"
+      );
+    }
+    return "";
+  }
+
+  function ensurePdpWarrantyHost() {
+    var brand = resolvePdpWarrantyBrand();
+    var html = getPdpWarrantyHtml(brand);
+    if (!html) return null;
+    var host = global.document.getElementById("mc-acc-warranty-host");
+    if (!host) {
+      host = global.document.createElement("div");
+      host.id = "mc-acc-warranty-host";
+      host.className = "mc-acc-content mc-acc-content--warranty";
+    } else {
+      host.classList.add("mc-acc-content", "mc-acc-content--warranty");
+    }
+    if (host.getAttribute("data-mc-warranty-filled") !== brand) {
+      host.innerHTML = html;
+      host.setAttribute("data-mc-warranty-filled", brand);
+    }
+    return host;
+  }
+
   function ensureSaranoniPdpAccordion() {
     if (!isUnifiedAccordionPdp()) {
       return null;
@@ -5438,6 +5624,10 @@
     }
     addRow("saranoni-features", "FEATURES", featuresHost, true);
     addRow("saranoni-product-details", "PRODUCT DETAILS", detailsHost, true);
+    try {
+      var warrantyHost = ensurePdpWarrantyHost();
+      if (warrantyHost) addRow("warranty", "MANUFACTURER'S WARRANTY", warrantyHost, false);
+    } catch (eWarrantyRow) {}
     addRow("saranoni-shipping-returns", "SHIPPING & RETURNS", shippingHost, false);
     addRow("saranoni-faq", "FAQ", faqHost, false);
 
@@ -5850,6 +6040,12 @@
     }
     try { revealAccordionProductDescription(); } catch (eRevSeed) {}
     rows.push({ id: "details", label: "PRODUCT DETAILS", host: description });
+    try {
+      var warrantyHostBb = ensurePdpWarrantyHost();
+      if (warrantyHostBb) {
+        rows.push({ id: "warranty", label: "MANUFACTURER'S WARRANTY", host: warrantyHostBb });
+      }
+    } catch (eWarrantyBb) {}
     if (!rows.length) return null;
 
     var signature = rows.map(function (row) { return row.id; }).join("|");

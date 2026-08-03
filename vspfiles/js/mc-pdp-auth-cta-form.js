@@ -245,7 +245,7 @@
     }
   } catch (eHas) {}
 
-  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260803atc4&mcrd=atc4";
+  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260803warr1&mcrd=warr1";
   try {
     var s = global.document.createElement("script");
     s.id = "mc-pdp-auth-cta-form-impl-js";
