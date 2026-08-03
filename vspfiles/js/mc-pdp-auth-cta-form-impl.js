@@ -8,12 +8,12 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260802flash6";
+  var VERSION = "20260803atc4";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260802006;
-  var ALT_VIEW_ROW_VER = "20260802flash6";
-  var ALT_VIEW_ROW_RANK = 20260805;
+  var DEPLOY_RANK = 20260803011;
+  var ALT_VIEW_ROW_VER = "20260803flash7";
+  var ALT_VIEW_ROW_RANK = 20260806;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -28,14 +28,14 @@
      Never tear down a copy that already owns a newer/equal __MC_ALT_VIEW_ROW_VER__ —
      that remove+reinject race was double-loading the rail on FB Mahjong PDPs. */
   try {
-    /* Stub loads flash6 once. Never remove/reinject here — that raced and flashed. */
+    /* Stub loads flash7 once. Never remove/reinject here — that raced and flashed. */
     if (
       global.__MC_ALT_VIEW_ROW_LOCK__ ||
       global.__MC_ALT_VIEW_ROW_OWNED__ ||
       (Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) >= ALT_VIEW_ROW_RANK ||
-      global.__MC_TMH_ALT_VIEW_ROW_20260802flash6__ ||
+      global.__MC_TMH_ALT_VIEW_ROW_20260803flash7__ ||
       (global.document &&
-        global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260802flash6.js"]'))
+        global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260803flash7.js"]'))
     ) {
       /* already loading or present */
     }
@@ -3684,7 +3684,14 @@
     try {
       if (btn.getAttribute("data-mc-atc-black") !== VERSION) return false;
       var c = global.getComputedStyle(btn);
-      return c.backgroundColor === "rgb(0, 0, 0)" && c.color === "rgb(255, 255, 255)";
+      if (!(c.backgroundColor === "rgb(0, 0, 0)" && c.color === "rgb(255, 255, 255)")) return false;
+      /* Template clearAddToCartWrapperBackground paints wrap #fff — treat that as unsettled. */
+      var wrap = btn.closest && btn.closest(".mc-atc-button-wrap");
+      if (wrap) {
+        var w = global.getComputedStyle(wrap);
+        if (w.backgroundColor === "rgb(255, 255, 255)") return false;
+      }
+      return true;
     } catch (eSettled) {
       return false;
     }
@@ -3748,12 +3755,13 @@
        button sat 12px outside its wrapper.  The colour-churn guard belongs in
        forceBlackAtcButton alone; this pass must always run. */
     try {
-      wrap.style.setProperty("border", "none", "important");
-      wrap.style.setProperty("border-color", "transparent", "important");
+      wrap.style.setProperty("border", "1px solid #000", "important");
+      wrap.style.setProperty("border-color", "#000", "important");
       wrap.style.setProperty("box-shadow", "none", "important");
       wrap.style.setProperty("border-radius", "0", "important");
-      wrap.style.setProperty("background", "transparent", "important");
-      wrap.style.setProperty("background-color", "transparent", "important");
+      wrap.style.setProperty("background", "#000", "important");
+      wrap.style.setProperty("background-color", "#000", "important");
+      wrap.style.setProperty("color", "#fff", "important");
       wrap.style.setProperty("padding", "0", "important");
       wrap.style.setProperty("width", "100%", "important");
       wrap.style.setProperty("min-width", "0", "important");
@@ -3768,11 +3776,10 @@
         "input[name='btnaddtocart'], button[name='btnaddtocart'], input[type='submit'], input, button"
       );
       if (btn) {
-        var softGoods = isSoftGoodsPdpPage();
-        btn.style.setProperty("border", "1px solid #111", "important");
+        btn.style.setProperty("border", "1px solid #000", "important");
         btn.style.setProperty("box-shadow", "none", "important");
-        btn.style.setProperty("background", "#111", "important");
-        btn.style.setProperty("background-color", "#111", "important");
+        btn.style.setProperty("background", "#000", "important");
+        btn.style.setProperty("background-color", "#000", "important");
         btn.style.setProperty("background-image", "none", "important");
         btn.style.setProperty("color", "#fff", "important");
         btn.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
@@ -3871,12 +3878,161 @@
 
   var ATC_MO_OPTIONS = { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style"] };
 
+  /* Template clearAddToCartWrapperBackground paints wrap #fff via a closed-over
+     forceProductFixes (window wrap alone never sees those calls). paintAtcBlackHard
+     + rAF settle wins the race after each template pass. */
+  function paintAtcBlackHard() {
+    try {
+      global.document
+        .querySelectorAll(
+          ".mc-atc-button-wrap, #content_area input[name='btnaddtocart'], #v65-product-parent input[name='btnaddtocart'], #content_area button[name='btnaddtocart'], #v65-product-parent button[name='btnaddtocart']"
+        )
+        .forEach(function (node) {
+          var wrap =
+            node.classList && node.classList.contains("mc-atc-button-wrap")
+              ? node
+              : node.closest && node.closest(".mc-atc-button-wrap");
+          if (wrap) {
+            wrap.style.setProperty("background", "#000", "important");
+            wrap.style.setProperty("background-color", "#000", "important");
+            wrap.style.setProperty("color", "#fff", "important");
+            var atcBorder = "1px solid #000";
+            try {
+              if (
+                global.document.body &&
+                global.document.body.classList.contains("mc-steve-silver-altview-pdp")
+              ) {
+                atcBorder = "1px solid #fff";
+              }
+            } catch (eBr) {}
+            wrap.style.setProperty("border", atcBorder, "important");
+            wrap.style.setProperty("border-color", atcBorder.indexOf("#fff") >= 0 ? "#fff" : "#000", "important");
+            wrap.style.setProperty("border-radius", "0", "important");
+            wrap.style.setProperty("box-shadow", "none", "important");
+            var icon = wrap.querySelector(".mc-cart-icon-wrapper");
+            if (icon) icon.style.setProperty("display", "none", "important");
+          }
+          var btn =
+            node.matches && node.matches("input, button")
+              ? node
+              : wrap &&
+                wrap.querySelector(
+                  "input[name='btnaddtocart'], button[name='btnaddtocart'], input[type='submit']"
+                );
+          if (!btn) return;
+          try {
+            if (btn.tagName === "INPUT" && (btn.type || "").toLowerCase() === "image") {
+              btn.type = "submit";
+              btn.removeAttribute("src");
+            }
+            if (btn.tagName === "INPUT" && !btn.value) btn.value = "ADD TO CART";
+          } catch (eTyp) {}
+          btn.style.setProperty("background", "#000", "important");
+          btn.style.setProperty("background-color", "#000", "important");
+          btn.style.setProperty("background-image", "none", "important");
+          btn.style.setProperty("color", "#fff", "important");
+          var btnBorder = "1px solid #000";
+          try {
+            if (
+              global.document.body &&
+              global.document.body.classList.contains("mc-steve-silver-altview-pdp")
+            ) {
+              btnBorder = "1px solid #fff";
+            }
+          } catch (eBr2) {}
+          btn.style.setProperty("border", btnBorder, "important");
+          btn.style.setProperty("border-radius", "0", "important");
+          btn.style.setProperty("-webkit-appearance", "none", "important");
+          btn.style.setProperty("appearance", "none", "important");
+          btn.setAttribute("data-mc-atc-black", VERSION);
+        });
+    } catch (eHard) {}
+  }
+
+  function installForceProductFixesAtcPatch() {
+    function wrapOrig(orig) {
+      if (typeof orig !== "function") return null;
+      if (orig.__mcAtcBlackPatched) return orig;
+      function patched() {
+        var ret;
+        try {
+          ret = orig.apply(this, arguments);
+        } catch (eOrig) {
+          throw eOrig;
+        }
+        try {
+          paintAtcBlackHard();
+          fixAddToCartChrome();
+          paintAtcBlackHard();
+        } catch (eFix) {}
+        return ret;
+      }
+      patched.__mcAtcBlackPatched = true;
+      return patched;
+    }
+    function ensure() {
+      var cur = global.forceProductFixes;
+      var wrapped = wrapOrig(cur);
+      if (wrapped && wrapped !== cur) global.forceProductFixes = wrapped;
+      if (wrapped) global.__MC_ATC_FPF_PATCH__ = VERSION;
+    }
+    ensure();
+    if (global.__MC_ATC_FPF_SETTLE__ === VERSION) return;
+    global.__MC_ATC_FPF_SETTLE__ = VERSION;
+    var n = 0;
+    var iv = global.setInterval(function () {
+      ensure();
+      try {
+        paintAtcBlackHard();
+        fixAddToCartChrome();
+        paintAtcBlackHard();
+      } catch (eFix2) {}
+      if (++n > 100) global.clearInterval(iv);
+    }, 50);
+    if (!global.__MC_ATC_BLACK_RAF__) {
+      var frames = 0;
+      var stable = 0;
+      function tick() {
+        global.__MC_ATC_BLACK_RAF__ = global.requestAnimationFrame(tick);
+        frames += 1;
+        try {
+          var wrap = global.document.querySelector(".mc-atc-button-wrap");
+          if (!wrap) return;
+          var bg = global.getComputedStyle(wrap).backgroundColor;
+          if (bg !== "rgb(0, 0, 0)") {
+            paintAtcBlackHard();
+            stable = 0;
+          } else {
+            stable += 1;
+          }
+          if (frames > 600 && stable > 90) {
+            global.cancelAnimationFrame(global.__MC_ATC_BLACK_RAF__);
+            global.__MC_ATC_BLACK_RAF__ = 0;
+          }
+        } catch (eRaf) {}
+      }
+      tick();
+    }
+  }
+
   function scheduleAtcBlackLock() {
-    if (global.__MC_PDP_ATC_BLACK_LOCK__ === VERSION) return;
+    if (global.__MC_PDP_ATC_BLACK_LOCK__ === VERSION) {
+      try {
+        installForceProductFixesAtcPatch();
+      } catch (ePatch2) {}
+      return;
+    }
     global.__MC_PDP_ATC_BLACK_LOCK__ = VERSION;
+    try {
+      installForceProductFixesAtcPatch();
+    } catch (ePatch) {}
     [80, 250, 700, 1400, 2600, 5000, 9000].forEach(function (ms) {
       global.setTimeout(function () {
-        try { fixAddToCartChrome(); } catch (eAtcLock) {}
+        try {
+          paintAtcBlackHard();
+          fixAddToCartChrome();
+          paintAtcBlackHard();
+        } catch (eAtcLock) {}
       }, ms);
     });
     try {
@@ -3888,26 +4044,44 @@
             if (shouldRun) return;
             var t = m.target;
             if (!t || !t.matches) return;
-            if (t.matches(".mc-atc-button-wrap, input[name='btnaddtocart'], button[name='btnaddtocart'], input.vCSS_input_addtocart, input.mc-unified-atc-btn") || (t.closest && t.closest(".mc-atc-button-wrap"))) shouldRun = true;
+            if (
+              t.matches(
+                ".mc-atc-button-wrap, input[name='btnaddtocart'], button[name='btnaddtocart'], input.vCSS_input_addtocart, input.mc-unified-atc-btn"
+              ) ||
+              (t.closest && t.closest(".mc-atc-button-wrap"))
+            ) {
+              shouldRun = true;
+            }
           });
           if (!shouldRun || pending) return;
           pending = true;
           global.requestAnimationFrame(function () {
             pending = false;
-            /* fixAddToCartChrome writes inline styles on the very nodes this
-               observer watches, so its own repair re-armed it every frame and the
-               two owners (this file and the template's forceProductFixes pass)
-               repainted the button thousands of times a second.  Detach for the
-               duration of the repair and drop the records it generates. */
             var mo = global.__MC_PDP_ATC_BLACK_MO__;
-            try { if (mo) mo.disconnect(); } catch (eMoOff) {}
-            try { fixAddToCartChrome(); } catch (eMoAtc) {}
+            try {
+              if (mo) mo.disconnect();
+            } catch (eMoOff) {}
+            try {
+              paintAtcBlackHard();
+              fixAddToCartChrome();
+              paintAtcBlackHard();
+            } catch (eMoAtc) {}
             try {
               if (mo) {
                 mo.takeRecords();
                 mo.observe(global.document.documentElement, ATC_MO_OPTIONS);
               }
             } catch (eMoOn) {}
+            global.setTimeout(function () {
+              try {
+                paintAtcBlackHard();
+              } catch (eLate) {}
+            }, 0);
+            global.setTimeout(function () {
+              try {
+                paintAtcBlackHard();
+              } catch (eLate2) {}
+            }, 32);
           });
         });
         global.__MC_PDP_ATC_BLACK_MO__.observe(global.document.documentElement, ATC_MO_OPTIONS);
@@ -10161,9 +10335,9 @@
     }
     /* MC_ALT_VIEW_ROW_20260802flash1 — one fingerprint shared with boot force-load.
        Loading guard prevents chin1/hum1-style remove/reload loops. */
-    var want = ALT_VIEW_ROW_VER || "20260802flash6";
+    var want = ALT_VIEW_ROW_VER || "20260803flash7";
     try {
-      /* Never remove/reinject — stub owns the single flash6 load. */
+      /* Never remove/reinject — stub owns the single flash7 load. */
       global.document.documentElement.setAttribute("data-mc-alt-view-row-fp", want);
       /* Keep CF-cached plp-enforcer?v=20260725fix3 from re-injecting alt-view-row. */
       global.document.documentElement.setAttribute("data-mc-plp-altrow-upgrade", "20260725fix3");

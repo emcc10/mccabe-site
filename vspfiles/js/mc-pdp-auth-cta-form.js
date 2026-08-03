@@ -148,10 +148,9 @@
     }
   } catch (ePromoBoot) {}
 
-  /* MC_ALT_VIEW_FLASH6_20260802: CF still HITs baked plp-enforcer?v=20260725fix3
-     which re-injects alt-view-row.js on a timer (Peter Rabbit flash). Trap that
-     upgrade fingerprint, hide the rail until flash6 marks ready, and load a
-     uniquely named owner. */
+  /* MC_ALT_VIEW_FLASH7_20260803: Wearable Blanket thrashed 8↔20 thumbs because a
+     stale CF loader kept rewriting the rail while flash6's MO re-scheduled.
+     Load uniquely named flash7 (latches after probe) and keep stripping rivals. */
   try {
     var pathAlt = String((global.location && global.location.pathname) || "");
     if (/product-p\/|productdetails|ProductDetails/i.test(pathAlt)) {
@@ -167,9 +166,9 @@
           "20260725fix3"
         );
       } catch (ePlpTrap) {}
-      if (!global.document.getElementById("mc-alt-flash6-early-css")) {
+      if (!global.document.getElementById("mc-alt-flash7-early-css")) {
         var altCss = global.document.createElement("style");
-        altCss.id = "mc-alt-flash6-early-css";
+        altCss.id = "mc-alt-flash7-early-css";
         altCss.textContent =
           "#altviews,.altviews{display:none!important;visibility:hidden!important;height:0!important;" +
           "overflow:hidden!important}" +
@@ -183,11 +182,11 @@
         try {
           global.document
             .querySelectorAll(
-              'script[src*="mc-pdp-alt-view-row.js"], script[src*="mc-pdp-alt-view-row-20260802flash4.js"], script[src*="mc-pdp-alt-view-row-20260802flash5.js"]'
+              'script[src*="mc-pdp-alt-view-row.js"], script[src*="mc-pdp-alt-view-row-20260802flash4.js"], script[src*="mc-pdp-alt-view-row-20260802flash5.js"], script[src*="mc-pdp-alt-view-row-20260802flash6.js"]'
             )
             .forEach(function (old) {
               var src = String(old.getAttribute("src") || "");
-              if (/mc-pdp-alt-view-row-20260802flash6\.js/i.test(src)) return;
+              if (/mc-pdp-alt-view-row-20260803flash7\.js/i.test(src)) return;
               try {
                 old.remove();
               } catch (eRm) {}
@@ -196,7 +195,7 @@
       }
       stripCompetingAltViewScripts();
       try {
-        if ((Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) < 20260805) {
+        if ((Number(global.__MC_ALT_VIEW_ROW_VER__ || 0) || 0) < 20260806) {
           global.__MC_ALT_VIEW_ROW_LOCK__ = false;
           global.__MC_ALT_VIEW_ROW_OWNED__ = false;
           global.__MC_ALT_VIEW_ROW_GEN__ =
@@ -204,22 +203,22 @@
         }
       } catch (eUnlock) {}
       if (
-        !global.__MC_ALT_VIEW_FLASH6_LOADING__ &&
+        !global.__MC_ALT_VIEW_FLASH7_LOADING__ &&
         !(
           global.document &&
-          global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260802flash6.js"]')
+          global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260803flash7.js"]')
         )
       ) {
-        global.__MC_ALT_VIEW_FLASH6_LOADING__ = true;
+        global.__MC_ALT_VIEW_FLASH7_LOADING__ = true;
         var altScript = global.document.createElement("script");
-        altScript.id = "mc-pdp-alt-view-row-flash6-js";
+        altScript.id = "mc-pdp-alt-view-row-flash7-js";
         altScript.src =
-          "/v/vspfiles/js/mc-pdp-alt-view-row-20260802flash6.js?v=1&mcrd=" + Date.now();
+          "/v/vspfiles/js/mc-pdp-alt-view-row-20260803flash7.js?v=1&mcrd=" + Date.now();
         altScript.async = false;
         (global.document.head || global.document.documentElement).appendChild(altScript);
       }
-      if (!global.__MC_ALT_VIEW_FLASH6_MO__ && global.MutationObserver && global.document.documentElement) {
-        global.__MC_ALT_VIEW_FLASH6_MO__ = true;
+      if (!global.__MC_ALT_VIEW_FLASH7_MO__ && global.MutationObserver && global.document.documentElement) {
+        global.__MC_ALT_VIEW_FLASH7_MO__ = true;
         try {
           var altMo = new global.MutationObserver(function () {
             stripCompetingAltViewScripts();
@@ -237,7 +236,7 @@
         });
       }
     }
-  } catch (eAltFlash6) {}
+  } catch (eAltFlash7) {}
 
   try {
     if (global.document && global.document.querySelector('script[src*="mc-pdp-auth-cta-form-impl.js"]')) {
@@ -246,7 +245,7 @@
     }
   } catch (eHas) {}
 
-  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260802flash6&mcrd=flash6";
+  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260803atc4&mcrd=atc4";
   try {
     var s = global.document.createElement("script");
     s.id = "mc-pdp-auth-cta-form-impl-js";
