@@ -8,10 +8,10 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260803warr1";
+  var VERSION = "20260803warr2";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260803012;
+  var DEPLOY_RANK = 20260803013;
   var ALT_VIEW_ROW_VER = "20260803flash7";
   var ALT_VIEW_ROW_RANK = 20260806;
   try {
@@ -5456,7 +5456,7 @@
         "<li>Returns/exchanges are not offered unless the order arrives damaged or is lost in transit</li>" +
         "<li>Damaged goods must be reported within <strong>7 days</strong> of delivery with photos</li>" +
         "</ul>" +
-        '<p class="mc-pdp-warranty__note">Contact McCabe\'s Theater &amp; Living promptly if your set arrives damaged, or email The Mahjong House customer care with order details and photos when purchasing directly from them. After 7 days, shipping-damage replacements are not available under their policy.</p>' +
+        '<p class="mc-pdp-warranty__note">Contact McCabe\'s Theater &amp; Living promptly if your set arrives damaged, and include photos with your order details. After 7 days, shipping-damage replacements are not available under this policy.</p>' +
         "</div>"
       );
     }
