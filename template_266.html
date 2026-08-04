@@ -572,7 +572,7 @@ display:none!important;visibility:hidden!important;height:0!important;max-height
   } catch (e) {}
 })();
 </script>
-<script src="/v/vspfiles/js/mc-cart-checkout-fix.js?v=20260620cart3"></script><!-- MC_CART_CHECKOUT_FIX -->
+<script src="/v/vspfiles/js/mc-cart-checkout-fix.js?v=20260804promo1"></script><!-- MC_CART_CHECKOUT_FIX -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
   <meta id="v65-layout-mode" data-cart="storedot" data-checkout="storedot" data-use-simplified-checkout="true">
@@ -1477,20 +1477,31 @@ document.addEventListener("DOMContentLoaded", function () {
  
   <!-- DESIGN TOOLKIT -->
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
-  <script id="mc-pdp-auth-cta-boot">/* PDP: mc-pdp-auth-cta-fix.js */</script>
+  <script id="mc-pdp-auth-cta-boot">/* PDP auth CTA + site promo banner */</script>
   <script>
 (function (g, d) {
   var FP = "20260624A";
+  function ensureSitePromoScript() {
+    if (/(?:^|[?&])fbcheckout=1(?:&|$)/i.test(String(g.location.search || ""))) return;
+    if (d.getElementById("mc-site-promo-banner-js")) return;
+    if (d.querySelector('script[src*="mc-site-promo-banner-20260804.js"]')) return;
+    var p = d.createElement("script");
+    p.id = "mc-site-promo-banner-js";
+    p.src = "/v/vspfiles/js/mc-site-promo-banner-20260804.js?v=1&mcrd=" + Date.now();
+    p.async = false;
+    (d.head || d.documentElement).appendChild(p);
+  }
   function bootFreshCta() {
+    ensureSitePromoScript();
     if (!d.getElementById("v65-product-parent")) return;
     if (String(g.__MC_DEPLOY_FP__ || "") === FP) return;
     if (d.documentElement.getAttribute("data-mc-pdp-auth-head-boot")) return;
     d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", "1");
-    d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+    d.querySelectorAll('script[src*="mc-pdp-auth-cta-form.js"]').forEach(function (old) {
       try { old.remove(); } catch (eRm) {}
     });
     var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?mcrd=" + Date.now();
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form.js?mcrd=" + Date.now();
     s.async = false;
     (d.head || d.documentElement).appendChild(s);
   }
@@ -1700,6 +1711,18 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 ========================================= -->
 
 <body>
+<div id="mcPromoBanner" class="mc-promo-banner" role="region" aria-label="Current offers">
+  <p class="mc-promo-banner__line mc-promo-banner__line--offers">
+    Save <span class="mc-promo-banner__num">20%</span> on Select Mahjong Sets with code <span class="mc-promo-banner__num">MAHJ20</span>
+    <span class="mc-promo-banner__pipe" aria-hidden="true">|</span>
+    Save <span class="mc-promo-banner__num">10%</span> on All Hybrid Mattresses and Bean Bags with code <span class="mc-promo-banner__num">CORD10</span>
+    <span class="mc-promo-banner__pipe" aria-hidden="true">|</span>
+    Save <span class="mc-promo-banner__num">10%</span> on Saranoni Purchases over <span class="mc-promo-banner__num">$99</span> with code <span class="mc-promo-banner__num">SUMMER</span>
+  </p>
+  <p class="mc-promo-banner__line mc-promo-banner__line--shipping">
+    Free Shipping on all Bean Bags &amp; Mattresses and Saranoni Purchases of <span class="mc-promo-banner__num">$99+</span>
+  </p>
+</div>
  
 <script>
 (function () {

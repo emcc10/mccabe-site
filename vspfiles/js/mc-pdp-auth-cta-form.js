@@ -128,6 +128,46 @@
   }
   global.__MC_PDP_AUTH_ONCE_LOADER__ = true;
 
+  /* MC_SITE_PROMO_BANNER_20260804: restore #mcPromoBanner when template bake
+     dropped it. Banner-only — does not touch nav or homepage category tiles.
+     Skip Facebook checkout (has its own offer strip). */
+  function ensureSitePromoBanner() {
+    try {
+      var search = String((global.location && global.location.search) || "");
+      if (/(?:^|[?&])fbcheckout=1(?:&|$)/i.test(search)) return;
+      var d = global.document;
+      if (!d || !d.body) return;
+      if (d.getElementById("mcPromoBanner") || d.querySelector(".mc-promo-banner")) return;
+      var banner = d.createElement("div");
+      banner.id = "mcPromoBanner";
+      banner.className = "mc-promo-banner";
+      banner.setAttribute("role", "region");
+      banner.setAttribute("aria-label", "Current offers");
+      banner.innerHTML =
+        '<p class="mc-promo-banner__line mc-promo-banner__line--offers">' +
+        'Save <span class="mc-promo-banner__num">20%</span> on Select Mahjong Sets with code <span class="mc-promo-banner__num">MAHJ20</span>' +
+        '<span class="mc-promo-banner__pipe" aria-hidden="true">|</span>' +
+        'Save <span class="mc-promo-banner__num">10%</span> on All Hybrid Mattresses and Bean Bags with code <span class="mc-promo-banner__num">CORD10</span>' +
+        '<span class="mc-promo-banner__pipe" aria-hidden="true">|</span>' +
+        'Save <span class="mc-promo-banner__num">10%</span> on Saranoni Purchases over <span class="mc-promo-banner__num">$99</span> with code <span class="mc-promo-banner__num">SUMMER</span>' +
+        "</p>" +
+        '<p class="mc-promo-banner__line mc-promo-banner__line--shipping">' +
+        "Free Shipping on all Bean Bags &amp; Mattresses and Saranoni Purchases of " +
+        '<span class="mc-promo-banner__num">$99+</span>' +
+        "</p>";
+      d.body.insertBefore(banner, d.body.firstChild);
+    } catch (eBanner) {}
+  }
+  try {
+    if (global.document && global.document.body) ensureSitePromoBanner();
+    else if (global.document) {
+      global.document.addEventListener("DOMContentLoaded", ensureSitePromoBanner);
+    }
+    [0, 200, 800, 2000].forEach(function (ms) {
+      global.setTimeout(ensureSitePromoBanner, ms);
+    });
+  } catch (eBannerBoot) {}
+
   /* MC_CHECKOUT_MAIN_PROMO_20260802: main-site coupon box via cache-busted stub */
   try {
     var pathPromo = String((global.location && global.location.pathname) || "");
@@ -245,7 +285,7 @@
     }
   } catch (eHas) {}
 
-  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260803warr2&mcrd=warr2";
+  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl.js?v=20260803warr3&mcrd=warr3";
   try {
     var s = global.document.createElement("script");
     s.id = "mc-pdp-auth-cta-form-impl-js";
