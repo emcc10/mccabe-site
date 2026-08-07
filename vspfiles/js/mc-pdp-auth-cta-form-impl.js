@@ -8,10 +8,10 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260807paylater1";
+  var VERSION = "20260807fffd1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260807001;
+  var DEPLOY_RANK = 20260807002;
   var ALT_VIEW_ROW_VER = "20260803flash7";
   var ALT_VIEW_ROW_RANK = 20260807;
   try {
@@ -7492,8 +7492,9 @@
 
   function normalizeFeatureText(text) {
     return String(text || "")
+      .replace(/\uFFFD/g, "")
       .replace(/\s+/g, " ")
-      .replace(/^[\s\u2022\u00b7\u25aa\u25cf\u25e6\u2023\u2043\u2219•·▪‣◦\-–—*]+\s*/u, "")
+      .replace(/^[\s\uFFFD\u2022\u00b7\u25aa\u25cf\u25e6\u2023\u2043\u2219•·▪‣◦\-–—*]+\s*/u, "")
       .trim();
   }
 
