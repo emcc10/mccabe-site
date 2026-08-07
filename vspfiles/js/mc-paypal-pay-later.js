@@ -141,6 +141,14 @@
           stack.appendChild(node);
         } catch (eApp) {}
       }
+      /* Purchase stack is flex column with order:1 qty / order:2 ATC.
+         Default order:0 would paint Pay Later above both. */
+      try {
+        node.style.setProperty("order", "3", "important");
+        node.style.setProperty("display", "block", "important");
+        node.style.setProperty("width", "100%", "important");
+        node.style.setProperty("margin-top", "8px", "important");
+      } catch (eStyle) {}
       return;
     }
     if (!anchor.parentNode) return;

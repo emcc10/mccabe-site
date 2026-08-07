@@ -54,7 +54,7 @@
       if (!looksPdp) return;
       var s = global.document.createElement("script");
       s.id = "mc-paypal-pay-later-js";
-      s.src = "/v/vspfiles/js/mc-paypal-pay-later.js?v=20260807paylater6&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-paypal-pay-later.js?v=20260807paylater7&mcrd=" + Date.now();
       s.async = true;
       (global.document.head || global.document.documentElement).appendChild(s);
     })();
