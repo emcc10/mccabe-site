@@ -1,0 +1,15 @@
+PayPal Pay Later messaging (2026-08-07)
+
+Upload these files to the live Volusion site:
+
+1) template_266.html  →  /v/template_266.html
+   (from repo root template_266.html)
+
+2) vspfiles/js/mc-paypal-pay-later.js  →  /v/vspfiles/js/mc-paypal-pay-later.js
+
+What this does:
+- Loads PayPal Messages SDK in <head>
+- On product detail pages, inserts Pay Later text messaging directly under the product price
+- Sets data-pp-amount from the live product price (updates when price changes)
+
+No CSS or layout changes.

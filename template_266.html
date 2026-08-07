@@ -1288,7 +1288,7 @@ document.addEventListener("DOMContentLoaded", function () {
   </style>
   <script id="mc-hero-copy-head-force">
 (function () {
-  var TAG = '';
+  var TAG = 'Fresh Style, New Products, Same Service.';
   function paintTagline(el) {
     if (!el) return;
     el.style.cssText = '';
@@ -1324,7 +1324,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (wrap) wrap.insertAdjacentElement('afterend', t);
       else ov.insertBefore(t, ov.firstChild);
     }
-    if (t.textContent.replace(/\s+/g, ' ').trim().indexOf('CUSTOM FURNITURE') === -1) t.textContent = TAG;
+    if (t.textContent.replace(/\s+/g, ' ').trim() !== TAG) t.textContent = TAG;
     paintTagline(t);
     ov.style.setProperty('z-index', '5', 'important');
     t.style.setProperty('-webkit-text-fill-color', '#d8d6d3', 'important');
@@ -1349,6 +1349,8 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener('load', mcHeroEnsureCopy);
 })();
   </script>
+  <script src="/v/vspfiles/js/mc-hero-tagline-20260804.js?v=20260804tag1"></script>
+  <script src="/v/vspfiles/js/mc-hero-video-skip-windsor-20260807.js?v=20260807v1"></script>
   <!-- Category grid: in-template fallback so layout works even if /v/vspfiles/css/custom-safe.css is stale or blocked -->
   <style id="mc-category-grid-critical">
   @media (min-width: 992px) {
@@ -1510,6 +1512,11 @@ document.addEventListener("DOMContentLoaded", function () {
 })(window, document);
   </script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
+  <script
+      src="https://www.paypal.com/sdk/js?client-id=BAA5Ktre8-h8F-am0mMMNgEdyM-MlrQeoAHfag4_JaPrKyVYX_xsDIWS1SYLFlVXmIKGj7GRgtKUnOAu7A&components=messages"
+      data-namespace="PayPalSDK">
+  </script>
+  <script src="/v/vspfiles/js/mc-paypal-pay-later.js?v=20260807paylater1"></script>
   <script src="/v/vspfiles/js/mc-bedroom-collection-section.js?v=20260620collection2"></script><!-- MC_BEDROOM_COLLECTION_DEPLOY_VERIFY_20260620collection2 -->
   <!-- mc-pdp-auth-cta-fix.js is loaded fresh (?mcrd=Date.now()) by the bootFreshCta loader above.
        A second static ?mcrd=live tag used to live here; it cached an old copy whose stabilizer
@@ -2001,7 +2008,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 
     <!-- HERO VIDEO -->
 <section class="mc-hero-video">
- <video class="mc-hero-video-el" autoplay muted loop playsinline preload="auto">
+ <video class="mc-hero-video-el" autoplay muted playsinline preload="auto">
  <source src="/v/vspfiles/windsor-home.mp4" type="video/mp4">
 </video>
 <script>
@@ -2033,13 +2040,52 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     return true;
   };
 
+  /* Native HTML5 loop resets to 0 — that re-shows the "Windsor" title card.
+     Keep looping from START instead. */
+  window.MC_WINDSOR_HERO_START = 7;
+  window.mcGuardWindsorHeroStart = function (v) {
+    if (!v || v.dataset.mcWindsorLoopGuard === "1") return;
+    v.dataset.mcWindsorLoopGuard = "1";
+    var START = window.MC_WINDSOR_HERO_START || 7;
+    try {
+      v.loop = false;
+      v.removeAttribute("loop");
+    } catch (eLoop) {}
+    v.addEventListener("ended", function () {
+      try {
+        v.currentTime = START;
+        v.play && v.play().catch(function () {});
+      } catch (eEnd) {}
+    });
+    v.addEventListener("timeupdate", function () {
+      try {
+        if (v.dataset.mcStartedAtSeven && !v.seeking && v.currentTime < START - 0.05) {
+          v.currentTime = START;
+        }
+      } catch (eTu) {}
+    });
+    v.addEventListener("seeked", function () {
+      try {
+        if (v.dataset.mcStartedAtSeven && v.currentTime < START - 0.05) {
+          v.currentTime = START;
+          v.play && v.play().catch(function () {});
+        }
+      } catch (eSk) {}
+    });
+  };
+
   window.mcPlayWindsorHeroAtSeven = function (v) {
     if (!v) return;
+    var START = window.MC_WINDSOR_HERO_START || 7;
     v.muted = true;
-    v.loop = true;
+    v.loop = false;
+    try {
+      v.removeAttribute("loop");
+    } catch (eLoop2) {}
     v.playsInline = true;
     v.autoplay = true;
     window.mcEnsureWindsorHeroSrc(v);
+    window.mcGuardWindsorHeroStart(v);
 
     function revealAndPlay() {
       v.classList.remove("is-preloading");
@@ -2068,7 +2114,7 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
           revealAndPlay();
         };
         v.addEventListener("seeked", onSeeked);
-        v.currentTime = 7;
+        v.currentTime = START;
       } catch (e) {
         revealAndPlay();
       }
@@ -2110,9 +2156,9 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 </script>
  <div class="mc-hero-overlay">
         <div class="hero-logo-wrap">
-          <img src="/v/vspfiles/images/mccabe-logo.png" alt="McCabe's Theater & Living" class="hero-logo-img">
+          <img src="/v/vspfiles/images/mccabe-logo-hero.png?v=20260804" alt="McCabe's Theater & Living" class="hero-logo-img">
         </div>
-        <div id="mc-hero-copy-tagline" style="font-size:36px !important;color:#d8d6d3 !important;letter-spacing:0.12em !important;text-transform:none !important;text-align:center !important;display:block !important;">CUSTOM FURNITURE, DESIGNED FOR LIVING</div>
+        <div id="mc-hero-copy-tagline" style="font-size:36px !important;color:#d8d6d3 !important;letter-spacing:0.12em !important;text-transform:none !important;text-align:center !important;display:block !important;">Fresh Style, New Products, Same Service.</div>
       <script>
         (function () {
           if (typeof window.mcHeroEnsureCopy === 'function') window.mcHeroEnsureCopy();
@@ -2165,7 +2211,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var video = document.querySelector(".mc-hero-video-el");
   if (!video) return;
 
-  var startTime = 7;
+  var startTime = window.MC_WINDSOR_HERO_START || 7;
   var hasStarted = false;
 
   function revealVideo() {
@@ -2181,7 +2227,14 @@ document.addEventListener("DOMContentLoaded", function () {
     if (typeof window.mcEnsureWindsorHeroSrc === "function") {
       window.mcEnsureWindsorHeroSrc(video);
     }
+    if (typeof window.mcGuardWindsorHeroStart === "function") {
+      window.mcGuardWindsorHeroStart(video);
+    }
 
+    video.loop = false;
+    try {
+      video.removeAttribute("loop");
+    } catch (eLoop3) {}
     video.pause();
 
     var onSeeked = function () {
@@ -14953,17 +15006,24 @@ s0.parentNode.insertBefore(s1,s0);
         }
 
         v.muted = true;
-        v.loop = true;
+        v.loop = false;
+        try {
+          v.removeAttribute("loop");
+        } catch (eLoopFb) {}
         v.playsInline = true;
         v.autoplay = true;
+        if (typeof window.mcGuardWindsorHeroStart === "function") {
+          window.mcGuardWindsorHeroStart(v);
+        }
         v.classList.remove("is-preloading");
         v.classList.add("is-ready");
 
         function seekAndPlayFallback() {
           try {
+            var START = window.MC_WINDSOR_HERO_START || 7;
             if (!v.dataset.mcStartedAtSeven) {
               v.dataset.mcStartedAtSeven = "1";
-              v.currentTime = 7;
+              v.currentTime = START;
             }
             v.play && v.play().catch(function () {});
           } catch (eSeekFb) {}
