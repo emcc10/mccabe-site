@@ -202,11 +202,27 @@
 
   function start() {
     tick();
-    /* Timed retries only — no MutationObserver. Observing the whole PDP tree
-       re-entered on every layout/PayPal iframe mutation and could hang the tab. */
-    [0, 400, 1200, 3000].forEach(function (ms) {
+    [0, 200, 600, 1200, 2500, 5000].forEach(function (ms) {
       g.setTimeout(tick, ms);
     });
+    try {
+      var root =
+        d.getElementById("v65-product-parent") ||
+        d.getElementById("content_area") ||
+        d.body;
+      if (root && typeof MutationObserver === "function") {
+        var mo = new MutationObserver(function () {
+          tick();
+        });
+        mo.observe(root, {
+          childList: true,
+          subtree: true,
+          characterData: true,
+          attributes: true,
+          attributeFilter: ["content", "value"]
+        });
+      }
+    } catch (eMo) {}
   }
 
   if (d.readyState === "loading") {
