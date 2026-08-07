@@ -8,12 +8,12 @@
 
   // MC_DEPLOY_FINGERPRINT_20260725fix3 — keep boot FP; mobile tap / accordion churn fix
   var MC_DEPLOY_FINGERPRINT = "20260725fix3";
-  var VERSION = "20260803warr2";
+  var VERSION = "20260807paylater1";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260803013;
+  var DEPLOY_RANK = 20260807001;
   var ALT_VIEW_ROW_VER = "20260803flash7";
-  var ALT_VIEW_ROW_RANK = 20260806;
+  var ALT_VIEW_ROW_RANK = 20260807;
   try {
     var prevRank = Number(global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ || 0) || 0;
     if (prevRank >= DEPLOY_RANK) return;
@@ -40,6 +40,25 @@
       /* already loading or present */
     }
   } catch (eAltBoot) {}
+
+  /* Pay Later messaging under PDP price (template may lag; self-load the injector). */
+  try {
+    (function loadPayLater() {
+      if (!global.document) return;
+      if (global.__MC_PAYPAL_PAY_LATER__ || global.document.getElementById("mc-paypal-pay-later-js")) return;
+      var path = String((global.location && global.location.pathname) || "");
+      var looksPdp =
+        /\/product-p\//i.test(path) ||
+        /productdetails\.asp/i.test(path) ||
+        !!(global.document.getElementById && global.document.getElementById("v65-product-parent"));
+      if (!looksPdp) return;
+      var s = global.document.createElement("script");
+      s.id = "mc-paypal-pay-later-js";
+      s.src = "/v/vspfiles/js/mc-paypal-pay-later.js?v=20260807paylater3&mcrd=" + Date.now();
+      s.async = true;
+      (global.document.head || global.document.documentElement).appendChild(s);
+    })();
+  } catch (ePayLater) {}
 
   /* Same guard as mc-sectional-pdp-emergency.js — only load on sectional configurator PDPs */
   (function () {
@@ -5451,10 +5470,10 @@
     if (key === "mahjong-house") {
       return (
         '<div class="mc-pdp-warranty" data-mc-warranty-brand="mahjong-house">' +
-        "<p>The Mahjong House does not publish a multi-year product warranty.</p>" +
+        "<p>The Mahjong House warranty:</p>" +
         "<ul>" +
-        "<li>Returns/exchanges are not offered unless the order arrives damaged or is lost in transit</li>" +
-        "<li>Damaged goods must be reported within <strong>7 days</strong> of delivery with photos</li>" +
+        "<li><strong>Damaged or lost in transit:</strong> covered when reported within <strong>7 days</strong> of delivery with photos</li>" +
+        "<li>Claims are handled through McCabe\'s Theater &amp; Living</li>" +
         "</ul>" +
         '<p class="mc-pdp-warranty__note">Contact McCabe\'s Theater &amp; Living promptly if your set arrives damaged, and include photos with your order details. After 7 days, shipping-damage replacements are not available under this policy.</p>' +
         "</div>"

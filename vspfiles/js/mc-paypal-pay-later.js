@@ -1,6 +1,7 @@
 /**
  * PayPal Pay Later messaging under PDP product price.
  * Inserts PayPal's recommended data-pp-message markup; updates data-pp-amount from the live price.
+ * Works with Volusion's existing PayPal Messages SDK and/or the dedicated messages SDK in template_266.
  */
 (function (g, d) {
   "use strict";
@@ -8,6 +9,8 @@
   g.__MC_PAYPAL_PAY_LATER__ = true;
 
   var MSG_ID = "mc-paypal-pay-later";
+  var SDK_SRC =
+    "https://www.paypal.com/sdk/js?client-id=BAA5Ktre8-h8F-am0mMMNgEdyM-MlrQeoAHfag4_JaPrKyVYX_xsDIWS1SYLFlVXmIKGj7GRgtKUnOAu7A&components=messages";
 
   function isPdp() {
     try {
@@ -15,10 +18,25 @@
       if (d.body && d.body.classList.contains("mc-product-page")) return true;
       if (d.getElementById("v65-product-parent")) return true;
       var p = String(g.location.pathname || "").toLowerCase();
-      return /\.htm(?:\?|$)/i.test(p) && !!d.querySelector(".colors_pricebox, [itemprop='price']");
+      return (
+        (/\/product-p\//i.test(p) || /\.htm(?:\?|$)/i.test(p)) &&
+        !!d.querySelector(
+          ".colors_pricebox, [itemprop='price'], .product_productprice, #mc-mahjong-price-host"
+        )
+      );
     } catch (e) {
       return false;
     }
+  }
+
+  function ensureMessagesSdk() {
+    if (d.querySelector('script[src*="paypal.com/sdk/js"][src*="messages"]')) return;
+    if (d.getElementById("mc-paypal-messages-sdk")) return;
+    var s = d.createElement("script");
+    s.id = "mc-paypal-messages-sdk";
+    s.src = SDK_SRC;
+    s.setAttribute("data-namespace", "PayPalSDK");
+    (d.head || d.documentElement).appendChild(s);
   }
 
   function parseAmount(text) {
@@ -30,6 +48,12 @@
   }
 
   function readPriceAmount() {
+    var mahjong = d.getElementById("mc-mahjong-price-host");
+    if (mahjong) {
+      var mh = parseAmount(mahjong.textContent);
+      if (mh > 0) return mh;
+    }
+
     var el =
       d.querySelector("#mc-pdp-price-stack-host [itemprop='price']") ||
       d.querySelector("#v65-product-parent [itemprop='price']") ||
@@ -65,38 +89,70 @@
   }
 
   function findAnchor() {
+    /* Visible Mahjong price ($425 under title) — must win over hidden colors_pricebox. */
+    var mahjong = d.getElementById("mc-mahjong-price-host");
+    if (mahjong) return mahjong;
+
     var host = d.getElementById("mc-pdp-price-stack-host");
     if (host) return host;
 
     var price =
+      d.querySelector("#mc-pdp-title-right .product_productprice") ||
       d.querySelector(".colors_pricebox .product_productprice") ||
       d.querySelector(".product_productprice") ||
+      d.querySelector("font.pricecolor.colors_productprice") ||
       d.querySelector("[itemprop='price']");
     if (price) {
       return (
-        price.closest(".product_productprice") ||
-        price.closest(".colors_pricebox") ||
+        (price.closest && price.closest(".product_productprice")) ||
+        (price.closest && price.closest("font.pricecolor")) ||
+        (price.closest && price.closest(".colors_pricebox")) ||
         price.parentNode ||
         price
       );
     }
+
+    var title =
+      d.getElementById("mc-pdp-title-right") ||
+      d.querySelector("h1.productnamecolor, #ProductName, h1.vp-product-title");
+    if (title && title.parentNode) {
+      var sib = title.nextElementSibling;
+      while (sib) {
+        if (/\$\s*[\d,]+/.test(String(sib.textContent || ""))) return sib;
+        sib = sib.nextElementSibling;
+      }
+      return title;
+    }
     return null;
+  }
+
+  function placeAfter(anchor, node) {
+    if (!anchor || !anchor.parentNode || !node) return;
+    if (node.previousElementSibling === anchor && node.parentNode === anchor.parentNode) return;
+    if (anchor.nextSibling) anchor.parentNode.insertBefore(node, anchor.nextSibling);
+    else anchor.parentNode.appendChild(node);
   }
 
   function ensureMessage() {
     if (!isPdp()) return;
+    ensureMessagesSdk();
 
     var amount = formatAmount(readPriceAmount());
+    var anchor = findAnchor();
+    if (!anchor || !anchor.parentNode) return;
+
     var existing = d.getElementById(MSG_ID);
     if (existing) {
+      placeAfter(anchor, existing);
       if (amount && existing.getAttribute("data-pp-amount") !== amount) {
         existing.setAttribute("data-pp-amount", amount);
+        try {
+          if (g.PayPalSDK && g.PayPalSDK.Messages) g.PayPalSDK.Messages.render();
+          else if (g.paypal && g.paypal.Messages) g.paypal.Messages.render();
+        } catch (eRender) {}
       }
       return;
     }
-
-    var anchor = findAnchor();
-    if (!anchor || !anchor.parentNode) return;
 
     var msg = d.createElement("div");
     msg.id = MSG_ID;
@@ -106,15 +162,12 @@
     msg.setAttribute("data-pp-style-text-color", "black");
     msg.setAttribute("data-pp-amount", amount || "");
     msg.setAttribute("data-pp-language", "");
+    placeAfter(anchor, msg);
 
-    var bnpl = d.getElementById("messaging-element");
-    if (bnpl && bnpl.parentNode === anchor.parentNode) {
-      anchor.parentNode.insertBefore(msg, bnpl);
-    } else if (anchor.nextSibling) {
-      anchor.parentNode.insertBefore(msg, anchor.nextSibling);
-    } else {
-      anchor.parentNode.appendChild(msg);
-    }
+    try {
+      if (g.PayPalSDK && g.PayPalSDK.Messages) g.PayPalSDK.Messages.render();
+      else if (g.paypal && g.paypal.Messages) g.paypal.Messages.render();
+    } catch (eRender2) {}
   }
 
   function tick() {

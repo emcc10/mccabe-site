@@ -107,7 +107,7 @@
      under this exact URL even after the origin file is replaced. Bumping this
      string on every deploy that touches vspfiles/photos forces a fresh fetch.
      Bumped today for the Olsen Dove recliner photo replacement. */
-  var ALT_PROBE_VER = "20260729altfix3";
+  var ALT_PROBE_VER = "20260807bluefix1";
   /* MC_ALT_VIEW_PROBE_WINDOW_20260731: max probes in flight at once, and the
      safety-net timeout used for those windowed probes. See probeSlotWindow. */
   var PROBE_WINDOW = 4;
