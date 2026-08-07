@@ -123,8 +123,27 @@
     return null;
   }
 
-  function placeAfter(anchor, node) {
-    if (!anchor || !anchor.parentNode || !node) return;
+  function placeUnderAtc(anchor, node) {
+    if (!anchor || !node) return;
+    /* On Steve Silver / unified PDPs the info column uses flex order. A sibling
+       after #mc-pdp-purchase-stack can still paint at the top of the column.
+       Append inside the purchase stack so it stays under the ATC button. */
+    var stack =
+      (anchor.id === "mc-pdp-purchase-stack" && anchor) ||
+      d.getElementById("mc-pdp-purchase-stack") ||
+      (anchor.closest &&
+        (anchor.closest("#mc-pdp-purchase-stack") ||
+          anchor.closest(".mc-unified-purchase-controls") ||
+          anchor.closest(".mc-pdp-purchase-controls")));
+    if (stack) {
+      if (node.parentNode !== stack || stack.lastElementChild !== node) {
+        try {
+          stack.appendChild(node);
+        } catch (eApp) {}
+      }
+      return;
+    }
+    if (!anchor.parentNode) return;
     if (node.previousElementSibling === anchor && node.parentNode === anchor.parentNode) return;
     if (anchor.nextSibling) anchor.parentNode.insertBefore(node, anchor.nextSibling);
     else anchor.parentNode.appendChild(node);
@@ -136,11 +155,11 @@
 
     var amount = formatAmount(readPriceAmount());
     var anchor = findAnchor();
-    if (!anchor || !anchor.parentNode) return;
+    if (!anchor) return;
 
     var existing = d.getElementById(MSG_ID);
     if (existing) {
-      placeAfter(anchor, existing);
+      placeUnderAtc(anchor, existing);
       if (amount && existing.getAttribute("data-pp-amount") !== amount) {
         existing.setAttribute("data-pp-amount", amount);
         try {
@@ -159,7 +178,7 @@
     msg.setAttribute("data-pp-style-text-color", "black");
     msg.setAttribute("data-pp-amount", amount || "");
     msg.setAttribute("data-pp-language", "");
-    placeAfter(anchor, msg);
+    placeUnderAtc(anchor, msg);
 
     try {
       if (g.PayPalSDK && g.PayPalSDK.Messages) g.PayPalSDK.Messages.render();
