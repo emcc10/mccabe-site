@@ -89,40 +89,39 @@
   }
 
   function findAnchor() {
-    /* Visible Mahjong price ($425 under title) — must win over hidden colors_pricebox. */
+    /* Prefer Add to Cart — stable across Mahjong / Steve Silver / furniture PDPs. */
+    var atc =
+      d.querySelector("#mc-pdp-purchase-stack input[name='btnaddtocart']") ||
+      d.querySelector("#mc-pdp-purchase-stack button[name='btnaddtocart']") ||
+      d.querySelector(".mc-unified-purchase-controls input[name='btnaddtocart']") ||
+      d.querySelector(".mc-unified-purchase-controls button[name='btnaddtocart']") ||
+      d.querySelector(".mc-pdp-purchase-controls input[name='btnaddtocart']") ||
+      d.querySelector("#v65-product-parent input[name='btnaddtocart']") ||
+      d.querySelector("#v65-product-parent button[name='btnaddtocart']") ||
+      d.querySelector("input[name='btnaddtocart'], button[name='btnaddtocart']");
+    if (atc) {
+      return (
+        (atc.closest &&
+          (atc.closest(".mc-atc-button-wrap") ||
+            atc.closest(".mc-unified-atc-host") ||
+            atc.closest(".v65-product-addtocart") ||
+            atc.closest("#mc-pdp-purchase-stack") ||
+            atc.closest(".mc-unified-purchase-controls") ||
+            atc.closest(".mc-pdp-purchase-controls"))) ||
+        atc
+      );
+    }
+
+    /* Fallbacks if ATC is not mounted yet. */
+    var stack = d.getElementById("mc-pdp-purchase-stack");
+    if (stack) return stack;
+
     var mahjong = d.getElementById("mc-mahjong-price-host");
     if (mahjong) return mahjong;
 
     var host = d.getElementById("mc-pdp-price-stack-host");
     if (host) return host;
 
-    var price =
-      d.querySelector("#mc-pdp-title-right .product_productprice") ||
-      d.querySelector(".colors_pricebox .product_productprice") ||
-      d.querySelector(".product_productprice") ||
-      d.querySelector("font.pricecolor.colors_productprice") ||
-      d.querySelector("[itemprop='price']");
-    if (price) {
-      return (
-        (price.closest && price.closest(".product_productprice")) ||
-        (price.closest && price.closest("font.pricecolor")) ||
-        (price.closest && price.closest(".colors_pricebox")) ||
-        price.parentNode ||
-        price
-      );
-    }
-
-    var title =
-      d.getElementById("mc-pdp-title-right") ||
-      d.querySelector("h1.productnamecolor, #ProductName, h1.vp-product-title");
-    if (title && title.parentNode) {
-      var sib = title.nextElementSibling;
-      while (sib) {
-        if (/\$\s*[\d,]+/.test(String(sib.textContent || ""))) return sib;
-        sib = sib.nextElementSibling;
-      }
-      return title;
-    }
     return null;
   }
 
