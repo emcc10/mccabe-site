@@ -89,32 +89,30 @@
   }
 
   function findAnchor() {
-    /* Prefer Add to Cart — stable across Mahjong / Steve Silver / furniture PDPs. */
+    /* Prefer the whole purchase stack so Pay Later sits under ATC, not beside it
+       in a flex/grid row with .mc-atc-button-wrap. */
+    var stack = d.getElementById("mc-pdp-purchase-stack");
+    if (stack) return stack;
+
+    var controls =
+      d.querySelector(".mc-unified-purchase-controls") ||
+      d.querySelector(".mc-pdp-purchase-controls") ||
+      d.querySelector(".mc-pdp-cart-row");
+    if (controls) return controls;
+
     var atc =
-      d.querySelector("#mc-pdp-purchase-stack input[name='btnaddtocart']") ||
-      d.querySelector("#mc-pdp-purchase-stack button[name='btnaddtocart']") ||
-      d.querySelector(".mc-unified-purchase-controls input[name='btnaddtocart']") ||
-      d.querySelector(".mc-unified-purchase-controls button[name='btnaddtocart']") ||
-      d.querySelector(".mc-pdp-purchase-controls input[name='btnaddtocart']") ||
       d.querySelector("#v65-product-parent input[name='btnaddtocart']") ||
       d.querySelector("#v65-product-parent button[name='btnaddtocart']") ||
       d.querySelector("input[name='btnaddtocart'], button[name='btnaddtocart']");
     if (atc) {
-      return (
+      var row =
         (atc.closest &&
-          (atc.closest(".mc-atc-button-wrap") ||
-            atc.closest(".mc-unified-atc-host") ||
+          (atc.closest("tr") ||
             atc.closest(".v65-product-addtocart") ||
-            atc.closest("#mc-pdp-purchase-stack") ||
-            atc.closest(".mc-unified-purchase-controls") ||
-            atc.closest(".mc-pdp-purchase-controls"))) ||
-        atc
-      );
+            atc.closest(".mc-atc-button-wrap"))) ||
+        null;
+      return row || atc;
     }
-
-    /* Fallbacks if ATC is not mounted yet. */
-    var stack = d.getElementById("mc-pdp-purchase-stack");
-    if (stack) return stack;
 
     var mahjong = d.getElementById("mc-mahjong-price-host");
     if (mahjong) return mahjong;
