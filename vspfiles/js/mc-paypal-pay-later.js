@@ -1,14 +1,18 @@
 /**
- * PayPal Pay Later messaging under PDP product price.
- * Inserts PayPal's recommended data-pp-message markup; updates data-pp-amount from the live price.
- * Works with Volusion's existing PayPal Messages SDK and/or the dedicated messages SDK in template_266.
+ * PayPal Pay Later under ATC:
+ * 1) static banner linked to paypal.com/buynowpaylater
+ * 2) PayPal Messages widget under that banner
  */
 (function (g, d) {
   "use strict";
   if (g.__MC_PAYPAL_PAY_LATER__) return;
   g.__MC_PAYPAL_PAY_LATER__ = true;
 
+  var BANNER_ID = "mc-paypal-pay-later-banner";
   var MSG_ID = "mc-paypal-pay-later";
+  var BANNER_SRC =
+    "/v/vspfiles/photos/paypal-pay-later-banner.png?v=20260807banner1";
+  var BANNER_HREF = "https://www.paypal.com/buynowpaylater";
   var SDK_SRC =
     "https://www.paypal.com/sdk/js?client-id=BAA5Ktre8-h8F-am0mMMNgEdyM-MlrQeoAHfag4_JaPrKyVYX_xsDIWS1SYLFlVXmIKGj7GRgtKUnOAu7A&components=messages";
 
@@ -89,8 +93,6 @@
   }
 
   function findAnchor() {
-    /* Prefer the whole purchase stack so Pay Later sits under ATC, not beside it
-       in a flex/grid row with .mc-atc-button-wrap. */
     var stack = d.getElementById("mc-pdp-purchase-stack");
     if (stack) return stack;
 
@@ -123,51 +125,91 @@
     return null;
   }
 
-  function placeUnderAtc(anchor, node) {
-    if (!anchor || !node) return;
-    /* On Steve Silver / unified PDPs the info column uses flex order. A sibling
-       after #mc-pdp-purchase-stack can still paint at the top of the column.
-       Append inside the purchase stack so it stays under the ATC button. */
-    var stack =
-      (anchor.id === "mc-pdp-purchase-stack" && anchor) ||
+  function getPurchaseStack(anchor) {
+    return (
+      (anchor && anchor.id === "mc-pdp-purchase-stack" && anchor) ||
       d.getElementById("mc-pdp-purchase-stack") ||
-      (anchor.closest &&
+      (anchor &&
+        anchor.closest &&
         (anchor.closest("#mc-pdp-purchase-stack") ||
           anchor.closest(".mc-unified-purchase-controls") ||
-          anchor.closest(".mc-pdp-purchase-controls")));
-    if (stack) {
-      if (node.parentNode !== stack || stack.lastElementChild !== node) {
-        try {
-          stack.appendChild(node);
-        } catch (eApp) {}
-      }
-      /* Purchase stack is flex column with order:1 qty / order:2 ATC.
-         Default order:0 would paint Pay Later above both. */
+          anchor.closest(".mc-pdp-purchase-controls")))
+    );
+  }
+
+  function stylePayLaterNode(node, order) {
+    try {
+      node.style.setProperty("order", String(order), "important");
+      node.style.setProperty("display", "block", "important");
+      node.style.setProperty("width", "100%", "important");
+      node.style.setProperty("margin-top", "8px", "important");
+      node.style.setProperty("box-sizing", "border-box", "important");
+    } catch (eStyle) {}
+  }
+
+  function placeInStack(stack, node, order) {
+    if (!stack || !node) return;
+    if (node.parentNode !== stack || stack.lastElementChild !== node) {
       try {
-        node.style.setProperty("order", "3", "important");
-        node.style.setProperty("display", "block", "important");
-        node.style.setProperty("width", "100%", "important");
-        node.style.setProperty("margin-top", "8px", "important");
-      } catch (eStyle) {}
-      return;
+        stack.appendChild(node);
+      } catch (eApp) {}
     }
-    if (!anchor.parentNode) return;
+    stylePayLaterNode(node, order);
+  }
+
+  function placeAfter(anchor, node) {
+    if (!anchor || !node || !anchor.parentNode) return;
     if (node.previousElementSibling === anchor && node.parentNode === anchor.parentNode) return;
     if (anchor.nextSibling) anchor.parentNode.insertBefore(node, anchor.nextSibling);
     else anchor.parentNode.appendChild(node);
   }
 
-  function ensureMessage() {
-    if (!isPdp()) return;
+  function ensureBanner(anchor) {
+    var existing = d.getElementById(BANNER_ID);
+    if (existing) {
+      var stack = getPurchaseStack(anchor);
+      if (stack) placeInStack(stack, existing, 3);
+      else placeAfter(anchor, existing);
+      return existing;
+    }
+
+    var a = d.createElement("a");
+    a.id = BANNER_ID;
+    a.href = BANNER_HREF;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.setAttribute("aria-label", "PayPal Buy Now Pay Later — Learn more");
+
+    var img = d.createElement("img");
+    img.src = BANNER_SRC;
+    img.alt = "Love it. Buy it. Pay Later. PayPal";
+    img.width = 468;
+    img.height = 60;
+    img.decoding = "async";
+    img.loading = "lazy";
+    try {
+      img.style.setProperty("display", "block", "important");
+      img.style.setProperty("width", "100%", "important");
+      img.style.setProperty("max-width", "468px", "important");
+      img.style.setProperty("height", "auto", "important");
+    } catch (eImg) {}
+    a.appendChild(img);
+
+    var stack = getPurchaseStack(anchor);
+    if (stack) placeInStack(stack, a, 3);
+    else placeAfter(anchor, a);
+    return a;
+  }
+
+  function ensureMessage(anchor, banner) {
     ensureMessagesSdk();
 
     var amount = formatAmount(readPriceAmount());
-    var anchor = findAnchor();
-    if (!anchor) return;
-
     var existing = d.getElementById(MSG_ID);
     if (existing) {
-      placeUnderAtc(anchor, existing);
+      var stack = getPurchaseStack(anchor);
+      if (stack) placeInStack(stack, existing, 4);
+      else placeAfter(banner || anchor, existing);
       if (amount && existing.getAttribute("data-pp-amount") !== amount) {
         existing.setAttribute("data-pp-amount", amount);
         try {
@@ -186,7 +228,10 @@
     msg.setAttribute("data-pp-style-text-color", "black");
     msg.setAttribute("data-pp-amount", amount || "");
     msg.setAttribute("data-pp-language", "");
-    placeUnderAtc(anchor, msg);
+
+    var stack = getPurchaseStack(anchor);
+    if (stack) placeInStack(stack, msg, 4);
+    else placeAfter(banner || anchor, msg);
 
     try {
       if (g.PayPalSDK && g.PayPalSDK.Messages) g.PayPalSDK.Messages.render();
@@ -194,16 +239,23 @@
     } catch (eRender2) {}
   }
 
+  function ensurePayLater() {
+    if (!isPdp()) return;
+    var anchor = findAnchor();
+    if (!anchor) return;
+    var banner = ensureBanner(anchor);
+    ensureMessage(anchor, banner);
+  }
+
   function tick() {
     try {
-      ensureMessage();
+      ensurePayLater();
     } catch (e) {}
   }
 
   function start() {
     tick();
-    /* Timed retries only — no MutationObserver. Observing the whole PDP tree
-       re-entered on every layout/PayPal iframe mutation and could hang the tab. */
+    /* Timed retries only — no MutationObserver. */
     [0, 400, 1200, 3000].forEach(function (ms) {
       g.setTimeout(tick, ms);
     });
