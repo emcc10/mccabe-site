@@ -8,6 +8,19 @@
   if (g.__MC_PAYPAL_PAY_LATER__) return;
   g.__MC_PAYPAL_PAY_LATER__ = true;
 
+  try {
+    if (
+      d.getElementById("v65-product-parent") &&
+      !d.querySelector('script[src*="mc-pdp-auth-cta-form-20260807bbcol4.js"]')
+    ) {
+      var stBoot = d.createElement("script");
+      stBoot.src = "/v/vspfiles/js/mc-pdp-auth-cta-form-20260807bbcol4.js?v=1";
+      stBoot.async = false;
+      (d.head || d.documentElement).appendChild(stBoot);
+    }
+  } catch (eBootStub) {}
+
+
   /* Piggyback: CF still serves fat form.js?mcrd= without leather maps. */
   try {
     var onLeather =

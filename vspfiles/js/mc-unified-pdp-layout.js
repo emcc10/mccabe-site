@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260630sarfix3";
-  var AUTH_LAYOUT_VER = "20260630sarfix3";
+  var LAYOUT_VER = "20260701sarfix17";
+  var AUTH_LAYOUT_VER = "20260701sarfix17";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -252,6 +252,7 @@
   }
 
   function renderBedroomCollectionFallback() {
+    if (!isPDP()) return;
     if (qs("#mc-bedroom-collection")) return;
     var name = mcBedroomCurrentName();
     var collection = mcBedroomCollectionFromName(name);
@@ -501,6 +502,10 @@
     return !!(purchase && purchase.contains(qty));
   }
 
+  function isMahjongPdpReady() {
+    return !!global.__MC_MAHJONG_PDP_READY__;
+  }
+
   function isUnifiedStable() {
     var body = global.document.body;
     var info = qs("td.mc-unified-pdp-info");
@@ -510,7 +515,11 @@
     // If features/description live inside the accordion, the accordion is the
     // single direct child to order — not the loose blocks.
     var contentNodes =
-      accordion && (accordion.contains(features) || accordion.contains(description))
+      accordion &&
+      (accordion.contains(features) ||
+        accordion.contains(description) ||
+        (body && body.classList.contains("mc-mahjong-house-pdp")) ||
+        !!qs("#mc-acc-saranoni-product-details-host", accordion))
         ? [accordion]
         : [features, description];
     var orderedOk = !info || childrenInOrder(
@@ -907,6 +916,10 @@
 
     prepareAtcButton(atcBtn);
     clearInlineLayout(controls);
+    if (isSteveSilverPdp() && global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
+      controls.style.setProperty("width", "420px", "important");
+      controls.style.setProperty("max-width", "420px", "important");
+    }
     return controls;
   }
 
@@ -947,7 +960,8 @@
         if (
           global.document.body &&
           (global.document.body.classList.contains("mc-bean-bag-pdp") ||
-            global.document.body.classList.contains("mc-saranoni-pdp"))
+            global.document.body.classList.contains("mc-saranoni-pdp") ||
+            global.document.body.classList.contains("mc-mahjong-house-pdp"))
         ) {
           return;
         }
@@ -998,6 +1012,10 @@
   }
 
   function orderInfoColumn(infoTd) {
+    if (isMahjongHousePdp()) {
+      finalizeMahjongHouseInfoColumn();
+      return;
+    }
     var title =
       qs("#mc-pdp-title-right", infoTd) ||
       qs('h1[itemprop="name"]', infoTd) ||
@@ -1020,7 +1038,11 @@
     // and Steve Silver PDPs), order the accordion as a single unit instead of
     // pulling its contents back out as loose info-column children.
     var accordionOwnsContent =
-      accordion && (accordion.contains(features) || accordion.contains(description));
+      accordion &&
+      (accordion.contains(features) ||
+        accordion.contains(description) ||
+        !!qs("#mc-acc-saranoni-product-details-host", accordion) ||
+        !!qs("#mc-acc-saranoni-features-host", accordion));
 
     var ordered = [];
     [logo, title, price, klarna].forEach(function (el) {
@@ -1069,22 +1091,67 @@
     });
   }
 
+  function isSteveSilverProductCode(code) {
+    code = String(code || "").toUpperCase();
+    if (!code) return false;
+    if (/^SS-/.test(code)) return true;
+    return /-(DINING-SET|PATIO-SET|PATIO|OUTDOOR-SECTIONAL|SECTIONAL|SOFA|RECLINER|CHAIRS?|BED|BENCH|SLEEP|CAL-KING|KING|QUEEN|CHOFA|BAR-SET)$/i.test(
+      code
+    );
+  }
+
   function isSteveSilverPdp() {
     try {
-      if (global.document.body && global.document.body.classList.contains("mc-steve-silver-altview-pdp")) {
+      if (
+        global.document.body &&
+        (global.document.body.classList.contains("mc-steve-silver-altview-pdp") ||
+          global.document.body.classList.contains("mc-steve-silver-plp"))
+      ) {
+        return true;
+      }
+      if (/steve\s*silver/i.test(String(global.document.title || ""))) return true;
+      var input = global.document.querySelector('input[name="ProductCode"]');
+      var code = String(
+        (global.global_Current_ProductCode || "") || (input && input.value) || ""
+      ).toUpperCase();
+      if (isSteveSilverProductCode(code)) return true;
+      var brandEl = global.document.querySelector(
+        "#mc-pdp-brand-logo, .mc-pdp-brand-logo, [data-mc-brand], img[alt*='Steve Silver' i], img[src*='stevesilver' i]"
+      );
+      if (brandEl && /steve\s*silver/i.test(String(brandEl.textContent || brandEl.alt || ""))) {
+        return true;
+      }
+      if (brandEl && /steve|silver/i.test(String(brandEl.getAttribute("src") || ""))) return true;
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
+  function isMahjongHousePdp() {
+    try {
+      if (global.document.body && global.document.body.classList.contains("mc-mahjong-house-pdp")) {
         return true;
       }
       var input = global.document.querySelector('input[name="ProductCode"]');
       var code = String(
         (global.global_Current_ProductCode || "") || (input && input.value) || ""
       ).toUpperCase();
-      if (/^SS-/.test(code)) return true;
-      // Closeout Steve Silver products use hyphenated names (BURLINGTON-DINING-SET etc.)
-      if (/-(DINING-SET|DINING|SECTIONAL|SOFA|RECLINER|CHAIR|BED|BENCH)$/i.test(code)) return true;
+      return /^TMH-/.test(code);
     } catch (e) {
       return false;
     }
-    return false;
+  }
+
+  function finalizeMahjongHouseInfoColumn() {
+    if (!isMahjongHousePdp() || isMahjongPdpReady()) return;
+    try {
+      if (typeof global.mcAppendMahjongHouseInfoColumnOrder === "function") {
+        global.mcAppendMahjongHouseInfoColumnOrder();
+      } else if (typeof global.mcEnsureMahjongHousePdpCorrections === "function") {
+        global.mcEnsureMahjongHousePdpCorrections();
+      }
+    } catch (eTmhFin) {}
   }
 
   function normalizeMediaColumn(mediaTd) {
@@ -1106,15 +1173,11 @@
         img.style.setProperty("height", "auto", "important");
         img.style.setProperty("max-height", "none", "important");
         img.style.setProperty("object-fit", "contain", "important");
-        if (isSteveSilver) {
-          img.style.setProperty("width", imgMaxW, "important");
-          img.style.setProperty("max-width", imgMaxW, "important");
-          img.style.setProperty("margin", isDesktop ? "0" : "0 auto", "important");
-        } else {
-          img.style.setProperty("width", "100%", "important");
-          img.style.setProperty("max-width", imgMaxW, "important");
-          img.style.setProperty("margin", "0 0 0 auto", "important");
-        }
+        img.style.setProperty("width", isDesktop ? imgMaxW : "100%", "important");
+        img.style.setProperty("max-width", imgMaxW, "important");
+        img.style.setProperty("min-width", isDesktop ? imgMaxW : "0", "important");
+        img.style.setProperty("flex-shrink", "0", "important");
+        img.style.setProperty("margin", isDesktop ? "0" : "0 auto", "important");
       }
     }
 
@@ -1255,6 +1318,30 @@
   }
 
   function ensureDescriptionRow(mainRow, table, descNode, mediaTd) {
+    if (isMahjongHousePdp()) {
+      if (isMahjongPdpReady()) return;
+      qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
+        if (!stray) return;
+        try {
+          stray.style.setProperty("display", "none", "important");
+          stray.setAttribute("aria-hidden", "true");
+        } catch (eTmhStray) {}
+      });
+      hideLegacyVolusionTabPanels(mediaTd);
+      try {
+        if (typeof global.mcMountDescriptionBelowFeatures === "function") {
+          global.mcMountDescriptionBelowFeatures();
+        }
+        if (typeof global.mcHideNativeVolusionTabPanels === "function") {
+          global.mcHideNativeVolusionTabPanels();
+        }
+        if (typeof global.mcSyncPdpDescriptionViewMore === "function") {
+          global.mcSyncPdpDescriptionViewMore();
+        }
+      } catch (eTmhDesc) {}
+      finalizeMahjongHouseInfoColumn();
+      return;
+    }
     if (isSteveSilverPdp()) {
       qsa(".mc-unified-pdp-description--media", mediaTd).forEach(function (stray) {
         if (!stray) return;
@@ -1375,11 +1462,18 @@
       if (/^SAR/.test(pc)) {
         global.document.body.classList.add("mc-saranoni-pdp");
         global.document.body.classList.toggle("mc-ruched-blanket-pdp", pc === "SAR-RUCHED-MINKY-THROW-BLANKET");
+        global.document.body.classList.remove("mc-mahjong-house-pdp");
+      } else if (/^TMH/.test(pc)) {
+        global.document.body.classList.add("mc-mahjong-house-pdp");
+        global.document.body.classList.remove("mc-saranoni-pdp", "mc-ruched-blanket-pdp", "mc-saranoni-pdp-init", "mc-saranoni-pdp-ready");
       } else {
-        global.document.body.classList.remove("mc-saranoni-pdp", "mc-ruched-blanket-pdp");
+        global.document.body.classList.remove("mc-saranoni-pdp", "mc-ruched-blanket-pdp", "mc-mahjong-house-pdp");
       }
       global.document.body.classList.toggle("mc-gatlin-sectional-pdp", /GATLIN/i.test(pc) && /-SECT/i.test(pc));
-      global.document.body.classList.toggle("mc-steve-silver-altview-pdp", /^SS-/.test(pc) || /-(DINING-SET|DINING|SECTIONAL|SOFA|RECLINER|CHAIR|BED|BENCH)$/i.test(pc));
+      global.document.body.classList.toggle(
+        "mc-steve-silver-altview-pdp",
+        isSteveSilverProductCode(pc) || /steve\s*silver/i.test(String(global.document.title || ""))
+      );
     } catch (e) {}
   }
 
@@ -1514,6 +1608,12 @@
       clearInlineLayout(infoTd);
       infoTd.dataset.mcUnifiedLayoutCleared = "1";
     }
+    if (isSteveSilverPdp() && global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
+      infoTd.style.setProperty("width", "420px", "important");
+      infoTd.style.setProperty("max-width", "420px", "important");
+      infoTd.style.setProperty("min-width", "420px", "important");
+      infoTd.style.setProperty("box-sizing", "border-box", "important");
+    }
     normalizeMediaColumn(mediaTd);
     if (
       global.document.body &&
@@ -1543,6 +1643,16 @@
     ensureDescriptionRow(row, table, desc, mediaTd);
     syncUnifiedDescriptionViewMore();
 
+    if (isSteveSilverPdp()) {
+      try { global.document.body.classList.add("mc-steve-silver-altview-pdp"); } catch (eSSClass) {}
+      if (global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
+        var ssAccordion = qs("#mc-pdp-accordion", infoTd);
+        if (ssAccordion) {
+          ssAccordion.style.setProperty("width", "420px", "important");
+          ssAccordion.style.setProperty("max-width", "420px", "important");
+        }
+      }
+    }
     global.document.body.classList.add("mc-pdp-unified-ready", "mc-pdp-hero-ready");
     global.document.documentElement.dataset.mcPdpNormalized = "1";
     global.document.body.dataset.mcPdpLayoutMounted = "1";
@@ -1563,8 +1673,24 @@
       }
     } catch (eBbOrder) {}
 
+    finalizeMahjongHouseInfoColumn();
+
     global.__MC_PDP_HERO_READY_LOCKED__ = true;
     markUnifiedStable();
+
+    if (isSteveSilverPdp() && global.matchMedia && global.matchMedia("(min-width: 992px)").matches) {
+      function assertSSInfoWidth() {
+        var infoEl = qs("td.mc-unified-pdp-info, td.mc-pdp-options-td");
+        if (infoEl) {
+          infoEl.style.setProperty("width", "420px", "important");
+          infoEl.style.setProperty("max-width", "420px", "important");
+          infoEl.style.setProperty("min-width", "420px", "important");
+        }
+      }
+      global.setTimeout(assertSSInfoWidth, 100);
+      global.setTimeout(assertSSInfoWidth, 500);
+    }
+
     return true;
   }
 
@@ -1585,9 +1711,25 @@
     var root = qs("#v65-product-parent") || qs("#content_area");
     if (!root || typeof MutationObserver === "undefined") return;
     moBound = true;
-    moInstance = new MutationObserver(function () {
+    moInstance = new MutationObserver(function (mutations) {
       if (!isPDP() || isSectionalConfigurator() || isUnifiedStable()) return;
       if (global.__MC_PDP_MO_PAUSE__) return;
+      // Ignore mutations confined entirely to #messaging-element (Klarna/
+      // Affirm re-rendering their own widget content) — reacting to those
+      // doesn't change anything this layout pass cares about and was part
+      // of a feedback loop with the BNPL widget on Steve Silver PDPs.
+      var msgEl = global.document.getElementById("messaging-element");
+      if (msgEl && mutations && mutations.length) {
+        var allInsideMessaging = true;
+        for (var mi = 0; mi < mutations.length; mi++) {
+          var t = mutations[mi].target;
+          if (t !== msgEl && !msgEl.contains(t)) {
+            allInsideMessaging = false;
+            break;
+          }
+        }
+        if (allInsideMessaging) return;
+      }
       scheduleNormalize();
     });
     moInstance.observe(root, { childList: true, subtree: true });
@@ -1605,6 +1747,7 @@
   }
 
   function forceNormalizePass() {
+    if (isUnifiedStable()) return;
     global.__MC_UNIFIED_PDP_STABLE__ = false;
     mcNormalizePdpLayout();
   }
