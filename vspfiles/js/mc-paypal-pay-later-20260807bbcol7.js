@@ -11,10 +11,10 @@
   try {
     if (
       d.getElementById("v65-product-parent") &&
-      !d.querySelector('script[src*="mc-pdp-auth-cta-form-20260807bbcol4.js"]')
+      !d.querySelector('script[src*="mc-pdp-auth-cta-form-20260809chin1.js"]')
     ) {
       var stBoot = d.createElement("script");
-      stBoot.src = "/v/vspfiles/js/mc-pdp-auth-cta-form-20260807bbcol4.js?v=1";
+      stBoot.src = "/v/vspfiles/js/mc-pdp-auth-cta-form-20260809chin1.js?v=1";
       stBoot.async = false;
       (d.head || d.documentElement).appendChild(stBoot);
     }

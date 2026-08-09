@@ -34,7 +34,7 @@
     try {
       if (!global.document.getElementById("v65-product-parent")) return;
       if (global.document.documentElement.getAttribute("data-mc-pdp-auth-bbcol4") === "1") return;
-      if (global.document.querySelector('script[src*="mc-pdp-auth-cta-form-20260807bbcol4.js"]')) {
+      if (global.document.querySelector('script[src*="mc-pdp-auth-cta-form-20260809chin1.js"]')) {
         global.document.documentElement.setAttribute("data-mc-pdp-auth-bbcol4", "1");
         return;
       }
@@ -50,7 +50,7 @@
         });
       var s = global.document.createElement("script");
       s.id = "mc-pdp-auth-cta-form-js";
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form-20260807bbcol4.js?v=1";
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form-20260809chin1.js?v=1";
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eUp) {}

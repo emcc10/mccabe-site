@@ -288,7 +288,7 @@
           old.remove();
         } catch (eRmImpl) {}
       });
-    if (!global.document.querySelector('script[src*="mc-pdp-auth-cta-form-impl-20260809chin1.js"]')) {
+    if (!global.document.querySelector('script[src*="mc-pdp-auth-cta-form-impl-20260809chin1.js"][src*="20260807bbcol4"]')) {
       var s = global.document.createElement("script");
       s.id = "mc-pdp-auth-cta-form-impl-js";
       s.src = IMPL;
@@ -335,7 +335,6 @@
       (global.document.head || global.document.documentElement).appendChild(chinFix);
     }
   } catch (eBbChinFix) {}
-
 
   fixAlexandriaHero();
   if (global.document && global.document.readyState === "loading") {

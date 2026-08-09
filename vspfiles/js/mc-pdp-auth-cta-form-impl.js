@@ -57,6 +57,20 @@
     })();
   } catch (eBbLeatherFixBoot) {}
 
+  try {
+    (function loadBbChinchillaPhotoFix() {
+      if (!global.document) return;
+      if (global.document.querySelector('script[src*="mc-bb-chinchilla-photo-fix-20260809.js"]')) return;
+      var path = String((global.location && global.location.pathname) || "");
+      if (!/bb-chinchilla/i.test(path)) return;
+      var s = global.document.createElement("script");
+      s.id = "mc-bb-chinchilla-photo-fix-js";
+      s.src = "/v/vspfiles/js/mc-bb-chinchilla-photo-fix-20260809.js?v=1";
+      s.async = true;
+      (global.document.head || global.document.documentElement).appendChild(s);
+    })();
+  } catch (eBbChinFixBoot) {}
+
 try {
     (function loadPayLater() {
       if (!global.document) return;

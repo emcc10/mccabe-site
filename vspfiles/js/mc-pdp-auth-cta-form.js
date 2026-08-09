@@ -243,14 +243,14 @@
         !global.__MC_ALT_VIEW_FLASH7_LOADING__ &&
         !(
           global.document &&
-          global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260803flash7.js"]')
+          global.document.querySelector('script[src*="mc-pdp-alt-view-row-20260809chin1.js"]')
         )
       ) {
         global.__MC_ALT_VIEW_FLASH7_LOADING__ = true;
         var altScript = global.document.createElement("script");
         altScript.id = "mc-pdp-alt-view-row-flash7-js";
         altScript.src =
-          "/v/vspfiles/js/mc-pdp-alt-view-row-20260803flash7.js?v=1&mcrd=" + Date.now();
+          "/v/vspfiles/js/mc-pdp-alt-view-row-20260809chin1.js?v=1&mcrd=" + Date.now();
         altScript.async = false;
         (global.document.head || global.document.documentElement).appendChild(altScript);
       }
@@ -277,18 +277,18 @@
 
   /* Always load the bbcol4 impl. A stale CF copy of form.js?mcrd= used to ship a
      fat bundle whose bbCoverAsset had no faux-leather map and overwrote impl. */
-  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl-20260807bbcol7.js?v=1";
+  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl-20260809chin1.js?v=1";
   try {
     global.document
-      .querySelectorAll('script[src*="mc-pdp-auth-cta-form-impl-20260807bbcol7.js"]')
+      .querySelectorAll('script[src*="mc-pdp-auth-cta-form-impl-20260809chin1.js"]')
       .forEach(function (old) {
         var src = String(old.getAttribute("src") || "");
-        if (/v=20260807bbcol7/i.test(src)) return;
+        if (/v=20260809chin1/i.test(src)) return;
         try {
           old.remove();
         } catch (eRmImpl) {}
       });
-    if (!global.document.querySelector('script[src*="mc-pdp-auth-cta-form-impl-20260807bbcol7.js"][src*="20260807bbcol4"]')) {
+    if (!global.document.querySelector('script[src*="mc-pdp-auth-cta-form-impl-20260809chin1.js"]')) {
       var s = global.document.createElement("script");
       s.id = "mc-pdp-auth-cta-form-impl-js";
       s.src = IMPL;
@@ -325,6 +325,17 @@
       (global.document.head || global.document.documentElement).appendChild(bbFix);
     }
   } catch (eBbLeatherFix) {}
+
+  try {
+    if (!global.document.querySelector('script[src*="mc-bb-chinchilla-photo-fix-20260809.js"]')) {
+      var chinFix = global.document.createElement("script");
+      chinFix.id = "mc-bb-chinchilla-photo-fix-js";
+      chinFix.src = "/v/vspfiles/js/mc-bb-chinchilla-photo-fix-20260809.js?v=1";
+      chinFix.async = true;
+      (global.document.head || global.document.documentElement).appendChild(chinFix);
+    }
+  } catch (eBbChinFix) {}
+
 
   fixAlexandriaHero();
   if (global.document && global.document.readyState === "loading") {
