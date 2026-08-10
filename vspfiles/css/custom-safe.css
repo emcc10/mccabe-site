@@ -24192,6 +24192,27 @@ html body .mc-cart-float svg.mc-cart-float__icon {
     max-height: 430px !important;
     margin-top: 0 !important;
   }
+
+  /* Dining landing: baked .mc-lp13 styles only set min-height 430px. The hero
+     image then sizes by aspect ratio (~800px+ tall). Cap to the intended 430. */
+  html body .mc-lp13:has(img[src*="mc-dining-hero"]) .mc-lp13-hero {
+    height: 430px !important;
+    min-height: 430px !important;
+    max-height: 430px !important;
+  }
+  html body .mc-lp13:has(img[src*="mc-dining-hero"]) .mc-lp13-media {
+    height: 430px !important;
+    min-height: 430px !important;
+    max-height: 430px !important;
+  }
+  html body .mc-lp13 .mc-lp13-media img[src*="mc-dining-hero"] {
+    height: 430px !important;
+    min-height: 430px !important;
+    max-height: 430px !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
 }
 
 @media (min-width: 992px) {
