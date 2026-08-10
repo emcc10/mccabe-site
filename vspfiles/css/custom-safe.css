@@ -20165,6 +20165,40 @@ body.mc-product-page section.vol-list-grid-toggle {
   height: 160px !important;
 }
 
+/* Landing categories (no product grid) mark the list/grid toggle with vol-hide.
+   Without this, the 160px height rule above still reserves a black gap under the
+   main menu and pushes the category banner down. */
+html.category .vol-list-grid.vol-hide,
+html[data-mc-category-plp="1"] .vol-list-grid.vol-hide,
+body.category .vol-list-grid.vol-hide,
+html.category aside.vol-list-grid.vol-hide,
+html[data-mc-category-plp="1"] aside.vol-list-grid.vol-hide,
+body.category aside.vol-list-grid.vol-hide {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  border: 0 !important;
+}
+
+/* Landing banners (.mc-lp13): header keeps a 128px min-height for the absolute
+   menu, but the in-flow desktop bar is only ~48px, so ~60px of empty black sat
+   under the menu. Tighten only when a landing banner is present. */
+@media (min-width: 992px) {
+  html.category:has(.mc-lp13) header.header,
+  html.category:has([id^="mc-lp13"]) header.header,
+  html[data-mc-category-plp="1"]:has(.mc-lp13) header.header,
+  html[data-mc-category-plp="1"]:has([id^="mc-lp13"]) header.header,
+  body.category:has(.mc-lp13) header.header,
+  body.category:has([id^="mc-lp13"]) header.header {
+    min-height: 72px !important;
+  }
+}
+
 /* Bean bag PDP spacing tweaks 20260702 */
 body.mc-bean-bag-pdp #v65-product-parent > tbody:nth-child(1) > tr:nth-child(1) {
   display: none !important;

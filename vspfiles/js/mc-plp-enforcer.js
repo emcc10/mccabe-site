@@ -942,6 +942,7 @@
     s.textContent =
       "#mc-cat-luxe-comforts details.mc-cat-editorial-toggle:not([open])>.mc-cat-editorial-body{display:none!important;height:0!important;overflow:hidden!important;padding:0!important;margin:0!important;visibility:hidden!important}" +
       "html.category form.search_results_section aside.vol-list-grid,html[data-mc-category-plp='1'] form.search_results_section aside.vol-list-grid{display:none!important;height:0!important;overflow:hidden!important;visibility:hidden!important}" +
+      "html.category .vol-list-grid.vol-hide,html[data-mc-category-plp='1'] .vol-list-grid.vol-hide,body.category .vol-list-grid.vol-hide{display:none!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;visibility:hidden!important;border:0!important}" +
       "html.category:has(#mc-cat-luxe-comforts) .mc-seo-footer,html[data-mc-category-plp='1']:has(#mc-cat-luxe-comforts) .mc-seo-footer{display:none!important;height:0!important;overflow:hidden!important}";
     (document.head || document.documentElement).appendChild(s);
   }
