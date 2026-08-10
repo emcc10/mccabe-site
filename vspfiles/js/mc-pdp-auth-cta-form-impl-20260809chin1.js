@@ -17042,3 +17042,19 @@ try {
     }
   } catch (e) {}
 })(window);
+
+/* BEGIN REMOVABLE: MC_BB_FAUXLEATHER_SWATCH_FIX_20260810 — ensure leather fix loads even if stub skipped.
+   Delete this trailing block to undo. */
+(function (global) {
+  "use strict";
+  try {
+    if (global.document && !global.document.querySelector('script[src*="mc-bb-fauxleather-swatch-fix-20260810.js"]')) {
+      var s = global.document.createElement("script");
+      s.id = "mc-bb-fauxleather-swatch-fix-js";
+      s.src = "/v/vspfiles/js/mc-bb-fauxleather-swatch-fix-20260810.js?v=2";
+      s.async = true;
+      (global.document.head || global.document.documentElement).appendChild(s);
+    }
+  } catch (e) {}
+})(window);
+/* END REMOVABLE: MC_BB_FAUXLEATHER_SWATCH_FIX_20260810 */

@@ -2768,6 +2768,44 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 </script>
 
+
+<!-- BEGIN REMOVABLE: MC_BB_FAUXLEATHER_SWATCH_FIX_20260810
+     Keep fat form.js?mcrd= from winning after chin1 stub, and load leather-only swatch/hero fix.
+     Delete this entire block to undo. -->
+<script id="mc-bb-fauxleather-swatch-fix-boot">
+(function (d, w) {
+  try {
+    d.documentElement.setAttribute("data-mc-pdp-auth-head-boot", "1");
+    d.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
+  } catch (eBoot) {}
+  try {
+    d.querySelectorAll('script[src*="mc-pdp-auth-cta-form.js"]').forEach(function (el) {
+      var src = String(el.getAttribute("src") || "");
+      if (/mc-pdp-auth-cta-form-\d/i.test(src)) return;
+      if (/mc-pdp-auth-cta-form\.js/i.test(src)) {
+        try { el.remove(); } catch (eRm) {}
+      }
+    });
+  } catch (eStrip) {}
+  try {
+    var path = String((w.location && w.location.pathname) || "");
+    var onLeather = /bb-faux-leather/i.test(path);
+    if (!onLeather) {
+      var pc = d.querySelector('input[name="ProductCode"],input[name="productcode"]');
+      onLeather = /FAUX-?LEATHER/i.test(String((pc && pc.value) || ""));
+    }
+    if (!onLeather) return;
+    if (d.querySelector('script[src*="mc-bb-fauxleather-swatch-fix-20260810.js"]')) return;
+    var s = d.createElement("script");
+    s.id = "mc-bb-fauxleather-swatch-fix-js";
+    s.src = "/v/vspfiles/js/mc-bb-fauxleather-swatch-fix-20260810.js?v=2&mcrd=" + Date.now();
+    s.async = true;
+    (d.head || d.documentElement).appendChild(s);
+  } catch (eLoad) {}
+})(document, window);
+</script>
+<!-- END REMOVABLE: MC_BB_FAUXLEATHER_SWATCH_FIX_20260810 -->
+
 <!-- ========= HOMEPAGE-ONLY HERO + MENU CONTROL (CLEAN) ========= -->
 
 <script>

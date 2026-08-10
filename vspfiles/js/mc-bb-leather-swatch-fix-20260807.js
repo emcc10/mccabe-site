@@ -59,3 +59,41 @@
     g.setTimeout(fix, ms);
   });
 })(window, document);
+
+/* BEGIN REMOVABLE: MC_BB_FAUXLEATHER_SWATCH_FIX_20260810
+   Black must use the corduroy color-swatch tile, not the full product photo.
+   Delete this trailing block to undo. */
+(function (g, d) {
+  "use strict";
+  if (!g || !d || g.__MC_BB_FAUXLEATHER_BLACK_THUMB_20260810__) return;
+  g.__MC_BB_FAUXLEATHER_BLACK_THUMB_20260810__ = true;
+  var WANT = "/v/vspfiles/swatches/corduroy/fauxLeather-black.jpg?v=20260810fl1";
+  function fixBlackThumb() {
+    try {
+      var code = String(
+        g.global_Current_ProductCode ||
+          ((d.querySelector('input[name="ProductCode"],input[name="productcode"]') || {}).value) ||
+          ""
+      );
+      var path = String((g.location && g.location.pathname) || "");
+      if (!(/FAUX-?LEATHER/i.test(code) || /bb-faux-leather/i.test(path))) return;
+      var wrap = d.getElementById("beanbag-swatch-wrapper");
+      if (!wrap) return;
+      wrap.querySelectorAll("img.beanbag-swatch").forEach(function (img) {
+        var label = String(img.getAttribute("data-option") || img.getAttribute("alt") || "");
+        if (!/faux\s*leather/i.test(label) || !/black/i.test(label)) return;
+        var cur = String(img.getAttribute("src") || img.src || "");
+        if (cur.indexOf("/swatches/corduroy/fauxLeather-black.jpg") >= 0) return;
+        img.removeAttribute("srcset");
+        img.setAttribute("src", WANT);
+        img.src = WANT;
+      });
+    } catch (e) {}
+  }
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", fixBlackThumb);
+  else fixBlackThumb();
+  [0, 250, 800, 1600, 3500, 7000].forEach(function (ms) {
+    g.setTimeout(fixBlackThumb, ms);
+  });
+})(window, document);
+/* END REMOVABLE: MC_BB_FAUXLEATHER_SWATCH_FIX_20260810 */

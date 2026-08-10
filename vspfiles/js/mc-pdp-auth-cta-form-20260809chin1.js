@@ -355,4 +355,27 @@
       (global.document.head || global.document.documentElement).appendChild(bbChenilleFix);
     }
   } catch (eBbChenilleFix) {}
+
+  /* BEGIN REMOVABLE: MC_BB_FAUXLEATHER_SWATCH_FIX_20260810
+     Stop template minimal-loader from injecting fat form.js?mcrd= after this stub,
+     and load the faux-leather-only swatch/hero repair. Delete this block to undo. */
+  try {
+    if (global.document && global.document.documentElement) {
+      global.document.documentElement.setAttribute("data-mc-pdp-auth-head-boot", "1");
+      global.document.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
+    }
+  } catch (eHeadBoot) {}
+  try {
+    if (
+      global.document &&
+      !global.document.querySelector('script[src*="mc-bb-fauxleather-swatch-fix-20260810.js"]')
+    ) {
+      var bbFlFix = global.document.createElement("script");
+      bbFlFix.id = "mc-bb-fauxleather-swatch-fix-js";
+      bbFlFix.src = "/v/vspfiles/js/mc-bb-fauxleather-swatch-fix-20260810.js?v=2";
+      bbFlFix.async = true;
+      (global.document.head || global.document.documentElement).appendChild(bbFlFix);
+    }
+  } catch (eBbFlFix) {}
+  /* END REMOVABLE: MC_BB_FAUXLEATHER_SWATCH_FIX_20260810 */
 })(window);
