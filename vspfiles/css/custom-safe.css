@@ -26397,3 +26397,96 @@ html body.productdetails #v65-product-parent input[name="btnaddtocart"]:hover {
   border-color: #222 !important;
   color: #fff !important;
 }
+
+/* =========================================================
+   BEGIN REMOVABLE: MC_LOGIN_MYACCOUNT_MOBILE_LAYOUT_20260810
+   PAGE ONLY: Login.asp / My Account guest login
+     (html.vol-login + #content_area form[name="loginform"])
+   WHAT: On mobile, Returning Customers | New Customers stay
+     side-by-side; email input size=30 crushes the "Email Address:"
+     label and New Customers copy into ~17–27px columns (one letter
+     per line). Stack those columns and make inputs full-width.
+   SAFE DELETE: Remove this entire block through END REMOVABLE to
+     revert. Does not edit product, category, cart, or other pages.
+   ========================================================= */
+@media (max-width: 991px) {
+  /* Stack Returning / New Customers columns */
+  html.vol-login #content_area form[name="loginform"] table table > tbody > tr[valign="top"],
+  html.mc-commerce-surface #content_area form[name="loginform"] table table > tbody > tr[valign="top"] {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  html.vol-login #content_area form[name="loginform"] table table > tbody > tr[valign="top"] > td,
+  html.mc-commerce-surface #content_area form[name="loginform"] table table > tbody > tr[valign="top"] > td {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 20px !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    white-space: normal !important;
+  }
+
+  /* Hide 1px divider + spacer cells between the two columns */
+  html.vol-login #content_area form[name="loginform"] table table > tbody > tr[valign="top"] > td[width="10"],
+  html.vol-login #content_area form[name="loginform"] table table > tbody > tr[valign="top"] > td[width="1"],
+  html.vol-login #content_area form[name="loginform"] table table > tbody > tr[valign="top"] > td.colors_lines_light,
+  html.mc-commerce-surface #content_area form[name="loginform"] table table > tbody > tr[valign="top"] > td[width="10"],
+  html.mc-commerce-surface #content_area form[name="loginform"] table table > tbody > tr[valign="top"] > td[width="1"],
+  html.mc-commerce-surface #content_area form[name="loginform"] table table > tbody > tr[valign="top"] > td.colors_lines_light {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Email label + field: stack full width, stop vertical letter wrap */
+  html.vol-login #content_area form[name="loginform"] table table table > tbody > tr,
+  html.mc-commerce-surface #content_area form[name="loginform"] table table table > tbody > tr {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  html.vol-login #content_area form[name="loginform"] table table table > tbody > tr > td,
+  html.mc-commerce-surface #content_area form[name="loginform"] table table table > tbody > tr > td {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    white-space: normal !important;
+  }
+
+  html.vol-login #content_area form[name="loginform"] input[type="text"],
+  html.vol-login #content_area form[name="loginform"] input[type="password"],
+  html.vol-login #content_area form[name="loginform"] input[type="email"],
+  html.vol-login #content_area form[name="loginform"] input[name="email"],
+  html.mc-commerce-surface #content_area form[name="loginform"] input[type="text"],
+  html.mc-commerce-surface #content_area form[name="loginform"] input[type="password"],
+  html.mc-commerce-surface #content_area form[name="loginform"] input[type="email"],
+  html.mc-commerce-surface #content_area form[name="loginform"] input[name="email"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html.vol-login #content_area form[name="loginform"] .btn_continue,
+  html.vol-login #content_area form[name="loginform"] input[type="submit"],
+  html.mc-commerce-surface #content_area form[name="loginform"] .btn_continue,
+  html.mc-commerce-surface #content_area form[name="loginform"] input[type="submit"] {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+/* END REMOVABLE: MC_LOGIN_MYACCOUNT_MOBILE_LAYOUT_20260810 */
