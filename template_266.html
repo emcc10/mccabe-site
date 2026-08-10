@@ -15603,5 +15603,44 @@ body.mc-product-page #v65-product-related img {
 })();
 </script>
 <script src="/v/vspfiles/js/mc-pdp-alt-view-row.js?v=20260716tmhaltviews2"></script>
+
+<!-- MC_BB_CHENILLE_MOBILE_LAYOUT_FIX_20260810: undo bean-bag -280px mobile pull + Larger Photo.
+     Delete this whole block (style + script) to undo. Does not edit the earlier -280 rule. -->
+<style id="mc-bb-chenille-mobile-layout-fix-20260810">
+@media (max-width: 991px) {
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-pdp-options-td,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-pdp-options-td,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td:has(.colors_pricebox),
+  html body.mc-bean-bag-pdp.productdetails #content_area td:has(.colors_pricebox),
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td:has(#priceWithOptions),
+  html body.mc-bean-bag-pdp.productdetails #content_area td:has(#priceWithOptions),
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp.mc-product-page #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp.productdetails #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp.mc-product-page #v65-product-parent td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp.productdetails #v65-product-parent td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp.mc-product-page #v65-product-parent td.vol-product__top--right,
+  html body.mc-bean-bag-pdp.productdetails #v65-product-parent td.vol-product__top--right {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  html body.mc-bean-bag-pdp a#product_photo_zoom_url2 {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+  html body.mc-bean-bag-pdp #mc-pdp-price-stack-host,
+  html body.mc-bean-bag-pdp #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #111 !important;
+    z-index: 3 !important;
+  }
+}
+</style>
+<script src="/v/vspfiles/js/mc-bb-chenille-mobile-layout-fix-20260810.js?v=1"></script>
 </body>
 </html>

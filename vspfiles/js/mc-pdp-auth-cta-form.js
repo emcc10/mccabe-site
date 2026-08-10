@@ -344,4 +344,15 @@
   [0, 300, 1000, 2500, 5000, 9000].forEach(function (ms) {
     global.setTimeout(fixAlexandriaHero, ms);
   });
+
+  /* MC_BB_CHENILLE_MOBILE_LAYOUT_FIX_20260810 — loader only; delete this block to undo. */
+  try {
+    if (!global.document.querySelector('script[src*="mc-bb-chenille-mobile-layout-fix-20260810.js"]')) {
+      var bbChenilleFix = global.document.createElement("script");
+      bbChenilleFix.id = "mc-bb-chenille-mobile-layout-fix-js";
+      bbChenilleFix.src = "/v/vspfiles/js/mc-bb-chenille-mobile-layout-fix-20260810.js?v=1";
+      bbChenilleFix.async = true;
+      (global.document.head || global.document.documentElement).appendChild(bbChenilleFix);
+    }
+  } catch (eBbChenilleFix) {}
 })(window);

@@ -26490,3 +26490,89 @@ html body.productdetails #v65-product-parent input[name="btnaddtocart"]:hover {
   }
 }
 /* END REMOVABLE: MC_LOGIN_MYACCOUNT_MOBILE_LAYOUT_20260810 */
+
+/* ==========================================================================
+   MC_BB_CHENILLE_MOBILE_LAYOUT_FIX_20260810
+   Cordaroys / bean-bag mobile PDP: undo template -280px info-column pull,
+   hide Larger Photo, keep altviews under hero, keep price visible.
+   Delete this entire block to undo.
+   ========================================================================== */
+@media (max-width: 991px) {
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.vol-product__top--right,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.vol-product__top--right,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td:has(.colors_pricebox),
+  html body.mc-bean-bag-pdp.productdetails #content_area td:has(.colors_pricebox),
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td:has(#priceWithOptions),
+  html body.mc-bean-bag-pdp.productdetails #content_area td:has(#priceWithOptions),
+  html body.mc-bean-bag-pdp.mc-product-page #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp.productdetails #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-bean-bag-pdp.mc-product-page #v65-product-parent td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp.productdetails #v65-product-parent td.mc-unified-pdp-info,
+  html body.mc-bean-bag-pdp.mc-product-page #v65-product-parent td.vol-product__top--right,
+  html body.mc-bean-bag-pdp.productdetails #v65-product-parent td.vol-product__top--right {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  html body.mc-bean-bag-pdp #mc-pdp-brand-logo,
+  html body.mc-bean-bag-pdp #mc-pdp-brand-logo.mc-pdp-brand-logo--cordaroys {
+    position: static !important;
+    display: flex !important;
+    justify-content: center !important;
+    margin: 12px auto 8px !important;
+    z-index: 1 !important;
+  }
+
+  html body.mc-bean-bag-pdp a#product_photo_zoom_url2 {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+  }
+
+  html body.mc-bean-bag-pdp #mc-pdp-price-stack-host,
+  html body.mc-bean-bag-pdp #mc-pdp-price-stack-host .mc-pdp-retail-row,
+  html body.mc-bean-bag-pdp #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+  html body.mc-bean-bag-pdp #mc-pdp-price-stack-host .product_productprice,
+  html body.mc-bean-bag-pdp #mc-pdp-price-stack-host [itemprop="price"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #111 !important;
+    position: relative !important;
+    z-index: 3 !important;
+  }
+
+  html body.mc-bean-bag-pdp #mc-pdp-price-stack-host .mc-pdp-retail-row {
+    display: flex !important;
+  }
+
+  html body.mc-bean-bag-pdp td.mc-pdp-media-td #altviews,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews,
+  html body.mc-bean-bag-pdp td.mc-pdp-media-td span#altviews,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-media span#altviews,
+  html body.mc-bean-bag-pdp td.mc-pdp-media-td #mc-pdp-alt-view-row,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-media #mc-pdp-alt-view-row,
+  html body.mc-bean-bag-pdp td.mc-pdp-media-td #mc-pdp-alt-view-row-host,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-media #mc-pdp-alt-view-row-host,
+  html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-pdp-alt-view-row,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-media .mc-pdp-alt-view-row {
+    display: flex !important;
+    visibility: visible !important;
+    position: static !important;
+    margin-top: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    order: 2 !important;
+  }
+}
+/* END REMOVABLE: MC_BB_CHENILLE_MOBILE_LAYOUT_FIX_20260810 */

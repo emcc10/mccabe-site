@@ -17027,3 +17027,18 @@ try {
     } catch (eMo) {}
   }
 })(window);
+
+/* MC_BB_CHENILLE_MOBILE_LAYOUT_FIX_20260810 — ensure fix script loads even if stub skipped.
+   Delete this trailing block to undo. */
+(function (global) {
+  "use strict";
+  try {
+    if (global.document && !global.document.querySelector('script[src*="mc-bb-chenille-mobile-layout-fix-20260810.js"]')) {
+      var s = global.document.createElement("script");
+      s.id = "mc-bb-chenille-mobile-layout-fix-js";
+      s.src = "/v/vspfiles/js/mc-bb-chenille-mobile-layout-fix-20260810.js?v=1";
+      s.async = true;
+      (global.document.head || global.document.documentElement).appendChild(s);
+    }
+  } catch (e) {}
+})(window);
