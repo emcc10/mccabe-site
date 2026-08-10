@@ -9,7 +9,7 @@
 
   /* forceLoveyStyleCta REMOVED 20260722manual4 â€” was unloading CTA and freezing lovey PDPs */
 
-  var VERSION = "20269999999bbcol5"; /* strip bedroom collection + BB leather swatch fix */
+  var VERSION = "20269999999homefeat17"; /* homepage featured title/price 17px + -35px gap */
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -1236,8 +1236,9 @@
       "body.is-home #content_area .mc-home-featured-grid .v-product{display:flex!important;flex-direction:column!important;align-items:center!important;min-width:0!important;margin:0!important;padding:0!important;box-sizing:border-box!important;text-align:center!important}" +
       "body.is-home #content_area .mc-home-featured-grid .v-product__img{display:flex!important;order:1!important;align-items:center!important;justify-content:center!important;width:100%!important;height:280px!important;margin:0!important;padding:0!important;overflow:hidden!important}" +
       "body.is-home #content_area .mc-home-featured-grid .v-product__img img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center center!important;margin:0!important}" +
-      "body.is-home #content_area .mc-home-featured-grid .v-product__title{display:block!important;order:2!important;width:100%!important;margin:12px 0 4px!important;text-align:center!important;text-decoration:none!important}" +
-      "body.is-home #content_area .mc-home-featured-grid .v-product__price{display:block!important;order:3!important;width:100%!important;text-align:center!important}" +
+      "body.is-home #content_area .mc-home-featured-grid .v-product__title{display:block!important;order:2!important;width:100%!important;margin:12px 0 4px!important;text-align:center!important;text-decoration:none!important;font-size:17px!important}" +
+      "body.is-home #content_area .mc-home-featured-grid .v-product__price{display:block!important;order:3!important;width:100%!important;text-align:center!important;margin-top:-35px!important;font-size:17px!important}" +
+      "body.is-home #content_area .mc-home-featured-grid .v-product__price,body.is-home #content_area .mc-home-featured-grid .v-product__price *{font-size:17px!important}" +
       "@media(max-width:575px){body.is-home #content_area .mc-home-featured-grid{grid-template-columns:1fr!important;gap:28px!important}body.is-home #content_area .mc-home-featured-grid .v-product__img{height:280px!important}}";
     (document.head || document.documentElement).appendChild(style);
   }

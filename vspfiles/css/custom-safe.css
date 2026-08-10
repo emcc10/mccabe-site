@@ -6533,6 +6533,16 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .mc-member-grid-price__amount,
 body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-price__amount,
+body.is-home:not(.productdetails) #content_area .mc-home-featured-grid .mc-member-grid-price__amount {
+  font-size: 17px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+  color: #1a1a1a !important;
+  margin-top: 2px !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
 :is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price__amount,
 :is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price__amount {
   font-size: 14px !important;
@@ -8744,6 +8754,7 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-produc
 
 /* Title band â€” left-aligned with member pricing below */
 body.is-home:not(.productdetails) #content_area_home .v-product__name,
+body.is-home:not(.productdetails) #content_area_home .v-product__title,
 body.is-home:not(.productdetails) #content_area_home .productnamecolor,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid h2,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid h3,
@@ -8751,9 +8762,12 @@ body.is-home:not(.productdetails) #content_area_home .v-product-grid h4,
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .v-product__name,
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .productnamecolor,
 body.is-home:not(.productdetails) #content_area .v-product-grid .v-product__name,
+body.is-home:not(.productdetails) #content_area .v-product-grid .v-product__title,
 body.is-home:not(.productdetails) #content_area .v-product-grid .productnamecolor,
 body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__name,
-body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .productnamecolor {
+body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .productnamecolor,
+body.is-home:not(.productdetails) #content_area .mc-home-featured-grid .v-product__title,
+body.is-home:not(.productdetails) #content_area .mc-home-featured-grid .productnamecolor {
   order: 2 !important;
   flex: 0 0 auto !important;
   display: flex !important;
@@ -8767,7 +8781,7 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .productn
   margin: 6px 0 0 0 !important;
   box-sizing: border-box !important;
   font-weight: 400 !important;
-  font-size: 14px !important;
+  font-size: 17px !important;
   letter-spacing: 0.02em !important;
   color: #1a1a1a !important;
 }
@@ -8816,11 +8830,23 @@ body.is-home:not(.productdetails) #content_area .product_price {
   order: 4 !important;
   flex: 0 0 auto !important;
   width: 100% !important;
-  margin-top: 4px !important;
+  margin-top: -35px !important;
   text-align: left !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
+  font-size: 17px !important;
+}
+
+body.is-home:not(.productdetails) #content_area_home .v-product__price,
+body.is-home:not(.productdetails) #content_area_home .v-product__price *,
+body.is-home:not(.productdetails) #content_area .v-product__price,
+body.is-home:not(.productdetails) #content_area .v-product__price *,
+body.is-home:not(.productdetails) #content_area_home .product_productprice,
+body.is-home:not(.productdetails) #content_area .product_productprice,
+body.is-home:not(.productdetails) #content_area_home .colors_productprice,
+body.is-home:not(.productdetails) #content_area .colors_productprice {
+  font-size: 17px !important;
 }
 
 :is(html.category, body.category) #content_area .v-product__price,
