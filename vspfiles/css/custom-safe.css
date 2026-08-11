@@ -26576,3 +26576,59 @@ html body.productdetails #v65-product-parent input[name="btnaddtocart"]:hover {
   }
 }
 /* END REMOVABLE: MC_BB_CHENILLE_MOBILE_LAYOUT_FIX_20260810 */
+
+/* BEGIN REMOVABLE: MC_PROMO_BANNER_ICON_CLEARANCE_20260811
+   Cause: user-chrome tweak (20260723) forces
+   .mc-promo-banner__line--offers { white-space:nowrap; width:max-content }
+   from 992px up, so SUMMER collides with fixed .mc-search-float /
+   .mc-account-float / .mc-cart-float / .mc-home-float as the viewport
+   narrows. Full-width (>=1900px) keeps the existing single-line look.
+   Delete this entire block to revert. */
+@media (min-width: 992px) and (max-width: 1899px) {
+  html body .mc-promo-banner,
+  html body #mcPromoBanner.mc-promo-banner {
+    padding-left: 24px !important;
+    padding-right: 260px !important; /* reserve search+account+cart+home cluster */
+    box-sizing: border-box !important;
+  }
+  html body .mc-promo-banner__line--offers {
+    white-space: normal !important;
+    width: auto !important;
+    max-width: 100% !important;
+    font-size: 14px !important;
+    letter-spacing: 0.02em !important;
+  }
+  html body .mc-promo-banner__line--offers .mc-promo-banner__num {
+    font-size: 16px !important;
+  }
+  html body .mc-promo-banner__line--offers .mc-promo-banner__pipe {
+    margin: 0 0.35em !important;
+  }
+  html body .mc-promo-banner__line--shipping {
+    white-space: normal !important;
+    max-width: 100% !important;
+    font-size: 14px !important;
+    letter-spacing: 0.1em !important;
+  }
+}
+@media (min-width: 992px) and (max-width: 1199px) {
+  html body .mc-promo-banner,
+  html body #mcPromoBanner.mc-promo-banner {
+    padding-right: 240px !important;
+  }
+  html body .mc-promo-banner__line--offers {
+    font-size: 13px !important;
+    letter-spacing: 0.01em !important;
+  }
+  html body .mc-promo-banner__line--offers .mc-promo-banner__num {
+    font-size: 15px !important;
+  }
+  html body .mc-promo-banner__line--offers .mc-promo-banner__pipe {
+    margin: 0 0.25em !important;
+  }
+  html body .mc-promo-banner__line--shipping {
+    font-size: 13px !important;
+    letter-spacing: 0.06em !important;
+  }
+}
+/* END REMOVABLE: MC_PROMO_BANNER_ICON_CLEARANCE_20260811 */
