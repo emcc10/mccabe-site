@@ -35,11 +35,37 @@
     } catch (eBanner) {}
   }
 
+  /* Homepage Game Room must stay on cat 194. Volusion keeps re-serving a stale
+     template copy with /category-s/200.htm after admin edits. */
+  function fixHomeGameRoomLink() {
+    try {
+      var path = String((g.location && g.location.pathname) || "").toLowerCase();
+      var isHome =
+        path === "/" ||
+        path === "/default.asp" ||
+        path.indexOf("/default.asp") !== -1 ||
+        !!(d.body && d.body.classList && d.body.classList.contains("is-home"));
+      if (!isHome) return;
+      d.querySelectorAll("a[href*='/category-s/200']").forEach(function (a) {
+        if (!/game\s*room/i.test(String(a.textContent || ""))) return;
+        a.setAttribute("href", "/category-s/194.htm");
+      });
+    } catch (eGameRoom) {}
+  }
+
   try {
-    if (d.body) ensureSitePromoBanner();
-    else d.addEventListener("DOMContentLoaded", ensureSitePromoBanner);
+    if (d.body) {
+      ensureSitePromoBanner();
+      fixHomeGameRoomLink();
+    } else {
+      d.addEventListener("DOMContentLoaded", function () {
+        ensureSitePromoBanner();
+        fixHomeGameRoomLink();
+      });
+    }
     [0, 200, 800, 2000].forEach(function (ms) {
       g.setTimeout(ensureSitePromoBanner, ms);
+      g.setTimeout(fixHomeGameRoomLink, ms);
     });
   } catch (eBoot) {}
 })(window, document);

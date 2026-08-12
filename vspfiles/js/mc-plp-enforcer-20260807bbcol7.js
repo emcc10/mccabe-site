@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
  * MC_PLP_ENFORCER_20260727012revert2 — bean bag free-ship img fallback (no icon font)
  *
@@ -1846,6 +1846,14 @@
       document.body.classList.add("is-home");
       document.body.setAttribute("data-mc-category-plp", "0");
     }
+    /* Keep homepage Game Room on cat 194. Stale template/HTML copies still
+       ship /category-s/200.htm and overwrite admin edits on each deploy. */
+    try {
+      document.querySelectorAll("a[href*='/category-s/200.htm'], a[href*='/category-s/200.']").forEach(function (a) {
+        if (!/game\s*room/i.test(String(a.textContent || ""))) return;
+        a.setAttribute("href", "/category-s/194.htm");
+      });
+    } catch (eGameRoomHref) {}
   }
 
   /* MC_PLP_FREESHIP_BADGE_ROBUST_20260716: the grid-conversion functions clone

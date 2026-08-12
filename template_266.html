@@ -2005,6 +2005,15 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
 <a href="/category-s/196.htm">Luxe Comforts</a> 
 <a href="/category-s/194.htm">Game Room</a>
 </nav>
+<script>
+(function () {
+  try {
+    document.querySelectorAll(".hero-nav a[href*='/category-s/200']").forEach(function (a) {
+      if (/game\s*room/i.test(String(a.textContent || ""))) a.setAttribute("href", "/category-s/194.htm");
+    });
+  } catch (e) {}
+})();
+</script>
       </div>
 
     <!-- Search: sibling between hero menu and video — z-index below .hero-menu, above video (see custom-safe.css) -->
