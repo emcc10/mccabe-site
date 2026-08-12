@@ -1,4 +1,4 @@
-/* 0812 C_CSS_DEPLOY_VERIFY_20260812opt1 - saranoni option arrows + color hero swap */
+/* 0812 C_CSS_DEPLOY_VERIFY_20260812opt2 - saranoni option arrows + color hero swap */
 /* MC_PDP_LAYOUT_20260616pdp32 â€” stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY â€” PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -16949,7 +16949,8 @@ html body.mc-saranoni-pdp #mc-configured-color-selected-name {
 html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper {
   display: block !important;
   clear: both !important;
-  position: static !important;
+  /* relative so rail arrows position against the color row, not the page */
+  position: relative !important;
   width: 100% !important;
   max-width: 100% !important;
   margin: 12px 0 16px 0 !important;

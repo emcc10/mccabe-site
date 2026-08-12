@@ -11,7 +11,7 @@
   var VERSION = "20260807bbcol7";
   /* Prefer numeric deploy rank so old labels like style1/restore15 cannot
      lexicographically beat a newer fix* VERSION and keep this IIFE from booting. */
-  var DEPLOY_RANK = 20260807008;
+  var DEPLOY_RANK = 20260812003;
   var ALT_VIEW_ROW_VER = "20260803flash7";
   var ALT_VIEW_ROW_RANK = 20260807;
   try {
@@ -19,6 +19,8 @@
     if (prevRank >= DEPLOY_RANK) return;
     global.__MC_PDP_AUTH_CTA_DEPLOY_RANK__ = DEPLOY_RANK;
     global.__MC_PDP_AUTH_CTA_MAX_VER__ = VERSION;
+    /* Latch for mcrd-busted alt-view bootstrap: skip re-inject once this rank is live. */
+    global.__MC_SARANONI_OPT2_HERO__ = true;
   } catch (eMax) {}
   /* Do NOT strip form.js script tags. Baked boots require tag presence and
      __MC_DEPLOY_FP__==="20260725fix3"; stripping caused endless reinject/loading loops. */
@@ -10248,9 +10250,11 @@ try {
           saranoniSizeActiveOptionId &&
           String(finalSrc).indexOf("--") !== -1 &&
           configuredColorImageBelongsToProduct(finalSrc, pc)
-        ) &&
-        !isConfiguredProductDefaultHero(finalSrc, pc)
+        )
       ) {
+        /* Never accept the category default (-1 / -1T) as a stand-in for a
+           color the shopper just picked — that locked the hero on -1 after
+           label-slug candidates 404'd. */
         return;
       }
       configuredColorActiveSrc = finalSrc;
@@ -11088,6 +11092,11 @@ try {
       }
       host.classList.add("mc-saranoni-scroll-host");
       rail.classList.add("mc-saranoni-scroll-rail");
+      try {
+        /* ID-level CSS used to force position:static on the swatch wrapper,
+           which parked absolute arrows against the page (near the hero / logo). */
+        host.style.setProperty("position", "relative", "important");
+      } catch (eHostPos) {}
       var id = rail.id || rail.getAttribute("data-mc-rail-id") || ("mc-saranoni-rail-" + Math.random().toString(36).slice(2));
       rail.setAttribute("data-mc-rail-id", id);
 
@@ -14988,6 +14997,44 @@ function revealBeanBagRelated() {
       true
     );
   }
+
+  /* Stale CF ?v=1 impl registers document-capture swatch clicks first and
+     stopImmediatePropagation's, so a later opt2/opt3 boot never sees the tap.
+     Window capture runs earlier — own color clicks here when our deploy rank
+     is newest, then stop the stale document handler. */
+  try {
+    var prevWinRank = Number(global.__MC_PDP_AUTH_CTA_WINDOW_SWATCH_RANK__ || 0) || 0;
+    if (prevWinRank < DEPLOY_RANK) {
+      global.__MC_PDP_AUTH_CTA_WINDOW_SWATCH_RANK__ = DEPLOY_RANK;
+      global.addEventListener(
+        "click",
+        function (e) {
+          if ((Number(global.__MC_PDP_AUTH_CTA_WINDOW_SWATCH_RANK__ || 0) || 0) !== DEPLOY_RANK) {
+            return;
+          }
+          if (!e || !e.target || !e.target.closest || !isSaranoniPdpPage()) return;
+          var configuredColorSwatch = e.target.closest(".mc-configured-color-swatch");
+          if (!configuredColorSwatch) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          handleConfiguredColorSwatchClick(configuredColorSwatch);
+        },
+        true
+      );
+      /* Restamp slug data-main-image left by the stale first paint. */
+      try {
+        var pcStamp = resolveConfiguredColorProductCode(null);
+        if (pcStamp) {
+          global.document.querySelectorAll(".mc-configured-color-swatch[data-option-id]").forEach(function (btn) {
+            var oid = btn.getAttribute("data-option-id") || "";
+            var idHero = saranoniOptionIdHeroFile(pcStamp, oid);
+            if (idHero) btn.setAttribute("data-main-image", idHero);
+          });
+        }
+      } catch (eStamp) {}
+    }
+  } catch (eWinSwatch) {}
 
   global.addEventListener("load", function () {
     if (

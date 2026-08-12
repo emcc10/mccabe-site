@@ -277,18 +277,18 @@
 
   /* Always load the bbcol4 impl. A stale CF copy of form.js?mcrd= used to ship a
      fat bundle whose bbCoverAsset had no faux-leather map and overwrote impl. */
-  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl-20260809chin1.js?v=20260812opt1";
+  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl-20260809chin1.js?v=20260812opt3";
   try {
     global.document
       .querySelectorAll('script[src*="mc-pdp-auth-cta-form-impl-20260809chin1.js"]')
       .forEach(function (old) {
         var src = String(old.getAttribute("src") || "");
-        if (/v=20260809chin1/i.test(src)) return;
+        if (/v=20260812opt3/i.test(src)) return;
         try {
           old.remove();
         } catch (eRmImpl) {}
       });
-    if (!global.document.querySelector('script[src*="mc-pdp-auth-cta-form-impl-20260809chin1.js"]')) {
+    if (!global.document.querySelector('script[src*="mc-pdp-auth-cta-form-impl-20260809chin1.js"][src*="20260812opt3"]')) {
       var s = global.document.createElement("script");
       s.id = "mc-pdp-auth-cta-form-impl-js";
       s.src = IMPL;

@@ -44,6 +44,42 @@
   window.__MC_ALT_VIEW_ROW_LOCK__ = true;
   window.__MC_ALT_VIEW_ROW_VER__ = ROW_VERSION;
   window.__MC_ALT_VIEW_ROW_OWNED__ = true;
+  /* CF still serves stale auth stub/impl at ?v=1. This file loads with mcrd=,
+     so it can force the opt2 stub (arrows beside color rail + optionId heroes). */
+  try {
+    if (
+      !window.__MC_SARANONI_OPT2_HERO__ &&
+      !window.__MC_AUTH_CTA_OPT2_UPGRADE__ &&
+      document.getElementById("v65-product-parent")
+    ) {
+      window.__MC_AUTH_CTA_OPT2_UPGRADE__ = true;
+      document
+        .querySelectorAll('script[src*="mc-pdp-auth-cta-form-20260809chin1.js"],script[src*="mc-pdp-auth-cta-form-impl-20260809chin1.js"]')
+        .forEach(function (old) {
+          var src = String(old.getAttribute("src") || "");
+          if (/20260812opt3/i.test(src)) return;
+          try {
+            old.remove();
+          } catch (eRmAuth) {}
+        });
+      try {
+        delete window.__MC_PDP_AUTH_CTA_DEPLOY_RANK__;
+      } catch (eClrRank) {}
+      if (
+        !document.querySelector(
+          'script[src*="mc-pdp-auth-cta-form-20260809chin1.js"][src*="20260812opt3"]'
+        )
+      ) {
+        var authUp = document.createElement("script");
+        authUp.id = "mc-pdp-auth-cta-form-js";
+        authUp.src =
+          "/v/vspfiles/js/mc-pdp-auth-cta-form-20260809chin1.js?v=20260812opt3&mcrd=" +
+          Date.now();
+        authUp.async = false;
+        (document.head || document.documentElement).appendChild(authUp);
+      }
+    }
+  } catch (eAuthOpt2) {}
   /* Exhaust the legacy FB double-pass so a stale cached copy (tmhnum4) that
      still allows one extra fbcheckout run cannot start a second owner and
      paint mojibake scroll arrows over the stable rail. */

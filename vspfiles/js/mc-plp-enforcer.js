@@ -1,13 +1,13 @@
-﻿/**
- * PLP fixes â€” DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260727012revert2 â€” bean bag free-ship img fallback (no icon font)
+/**
+ * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
+ * MC_PLP_ENFORCER_20260727012revert2 — bean bag free-ship img fallback (no icon font)
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  /* forceLoveyStyleCta REMOVED 20260722manual4 â€” was unloading CTA and freezing lovey PDPs */
+  /* forceLoveyStyleCta REMOVED 20260722manual4 — was unloading CTA and freezing lovey PDPs */
 
   var VERSION = "20269999999homefeat17"; /* homepage featured title/price 17px + -35px gap */
 
@@ -50,7 +50,7 @@
         });
       var s = global.document.createElement("script");
       s.id = "mc-pdp-auth-cta-form-js";
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form-20260809chin1.js?v=1";
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-form-20260809chin1.js?v=20260812opt3";
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eUp) {}
@@ -224,7 +224,7 @@
   }
 
   /* template.min.js matches [class*=mc-cart-float] and also styles the inner
-     svg (mc-cart-float__icon) as a second fixed 42px box â€” ripping the glyph
+     svg (mc-cart-float__icon) as a second fixed 42px box — ripping the glyph
      out / blanking it. Do not fight its position/size. Hide the hijacked svg
      and paint the cart glyph as an inline background-image on the anchor. */
   var MC_CART_GLYPH_BG =
@@ -571,7 +571,7 @@
     return tbl.rows.length <= 1;
   }
 
-  /** Only unwrap single-cell product-list tables â€” never hoist grid out of #content_area. */
+  /** Only unwrap single-cell product-list tables — never hoist grid out of #content_area. */
   function unwrapProductGridShell(grid) {
     var node = grid;
     var contentArea = document.getElementById("content_area");
@@ -685,7 +685,7 @@
       changed = true;
     }
 
-    /* Stray </section></div> in baked cat HTML pops #content_area out of .container â€” footer loses theme CSS. */
+    /* Stray </section></div> in baked cat HTML pops #content_area out of .container — footer loses theme CSS. */
     if (container && contentArea && !container.contains(contentArea)) {
       var row = container.querySelector(":scope > .row");
       if (!row) {
@@ -1090,7 +1090,7 @@
         /* MC_PLP_FREESHIP_CLONE_FIX_20260716: native Volusion markup is a plain
            <img alt="Free Shipping" src=".../Icon_FreeShipping_Small.gif">, never
            class="vol-free-shipping-icon" (that class is only added by the JS
-           fallback badge elsewhere in this file) â€” so this querySelector never
+           fallback badge elsewhere in this file) — so this querySelector never
            matched and the icon was silently dropped every time this card was
            rebuilt. Match the native markup directly. */
         var shipping =
@@ -1429,7 +1429,7 @@
     "TMH-TRV-TEAL-TRELLIS-MAT": "TMH-MAT-TEAL-TRELLIS-MAT",
   };
 
-  /** Duplicate/incomplete numeric SS imports â†’ existing slug photo stems on CDN. */
+  /** Duplicate/incomplete numeric SS imports → existing slug photo stems on CDN. */
   var PLP_PHOTO_ALIASES = {
     "SS-3105415": "SS-GATLIN-BROWN-RECL",
     "SS-2968622": "SS-OLSEN-DOVE-PWR-RECL",
@@ -1498,7 +1498,7 @@
     });
   }
 
-  /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP â€” probe and swap. */
+  /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP — probe and swap. */
   function fixNoPhotoThumbnails() {
     if (isCloseoutSalePlp()) return;
     var root = document.getElementById("content_area");
@@ -1851,12 +1851,12 @@
   /* MC_PLP_FREESHIP_BADGE_ROBUST_20260716: the grid-conversion functions clone
      the native <img alt="Free Shipping"> into each card's price block as-is
      (no class, no forced visibility), and this function's OWN "already has
-     one" check only recognized the CSS-only fallback badge's class names â€” so
+     one" check only recognized the CSS-only fallback badge's class names — so
      a native icon that clones in unstyled, or gets buried under nested markup
      from a wholesale td.innerHTML copy, was never detected OR force-shown.
      Now: if a native icon exists anywhere in the card, force its visibility
      directly (belt-and-suspenders alongside the CSS !important rules); only
-     build the synthetic fallback badge when no icon â€” native or synthetic â€”
+     build the synthetic fallback badge when no icon — native or synthetic —
      exists at all. */
   function plpCardQualifiesFreeShipping(card) {
     if (!card) return false;
@@ -1891,7 +1891,7 @@
     cards.forEach(function (card) {
       var qualifies = plpCardQualifiesFreeShipping(card);
       if (!qualifies) {
-        /* Strip synthetic AND native free-ship badges â€” Volusion often marks every card. */
+        /* Strip synthetic AND native free-ship badges — Volusion often marks every card. */
         card.querySelectorAll(
           ".mc-plp-free-ship, img.mc-plp-free-ship-img, .vol-free-shipping-icon, " +
           "img[alt='Free Shipping' i], img[src*='Icon_FreeShipping' i], " +
@@ -2161,12 +2161,12 @@
     }
   }
 
-  /* Must match VERSION in mc-pdp-auth-cta-fix.js â€” that is the string that script writes into
+  /* Must match VERSION in mc-pdp-auth-cta-fix.js — that is the string that script writes into
      global.__MC_PDP_AUTH_CTA_FIX_VER__. This constant had drifted out of sync (was
      "20260625sarrepair2", then briefly "20260708sarmob1" which was itself stale/incorrect),
      which permanently broke the version-match guard below and caused loadPdpAuthCtaFix() to
      re-inject the script on every call. Confirmed against the live deployed script on
-     20260713 â€” update this if mc-pdp-auth-cta-fix.js's VERSION is bumped again.
+     20260713 — update this if mc-pdp-auth-cta-fix.js's VERSION is bumped again.
      MC_PDP_AUTH_VERSION_GUARD_FIX_20260713 */
   var PDP_AUTH_WANT_RANK = 20260725034;
 
@@ -2214,7 +2214,7 @@
     global.setTimeout(loadPdpAuthCtaFix, ms);
   });
 
-  /* MC_CAT142_BEDROOM_LANDING â€” inject Steve Silver bedroom PLP hero (template rebake lags). */
+  /* MC_CAT142_BEDROOM_LANDING — inject Steve Silver bedroom PLP hero (template rebake lags). */
   (function cat142BedroomLanding(doc, win) {
     var FRAG_URL = "/v/vspfiles/category-landings/cat142-bedroom.html?v=20260620";
     var guard = "__MC_CAT142_BEDROOM__";

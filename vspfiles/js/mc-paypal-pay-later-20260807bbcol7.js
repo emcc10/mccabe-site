@@ -14,7 +14,7 @@
       !d.querySelector('script[src*="mc-pdp-auth-cta-form-20260809chin1.js"]')
     ) {
       var stBoot = d.createElement("script");
-      stBoot.src = "/v/vspfiles/js/mc-pdp-auth-cta-form-20260809chin1.js?v=1";
+      stBoot.src = "/v/vspfiles/js/mc-pdp-auth-cta-form-20260809chin1.js?v=20260812opt3";
       stBoot.async = false;
       (d.head || d.documentElement).appendChild(stBoot);
     }
