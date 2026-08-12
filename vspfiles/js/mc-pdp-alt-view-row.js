@@ -594,6 +594,11 @@
     var main = btn.getAttribute("data-main-image") || "";
     var optionId = btn.getAttribute("data-option-id") || "";
     var code = productCode();
+    /* Prefer numeric optionId heroes (CODE-1449-T.jpg). Label-slug files
+       (CODE-Charcoal-T.jpg) often 404 and holdHero would pin a broken image. */
+    if (code && optionId && /^\d+$/.test(String(optionId))) {
+      return absoluteUrl("/v/vspfiles/photos/" + code + "-" + optionId + "-T.jpg");
+    }
     if (main) {
       if (/^(?:https?:)?\/\//i.test(main) || main.charAt(0) === "/") return absoluteUrl(main);
       return absoluteUrl("/v/vspfiles/photos/" + main);

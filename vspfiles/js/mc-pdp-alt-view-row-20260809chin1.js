@@ -1,71 +1,6 @@
 (function (window, document) {
   "use strict";
 
-  /* Inline BB-CHINCHILLA photo restore — external fix file 404'd via CF after
-     a bad directory upload; keep this self-contained in flash7. */
-  try {
-    (function fixBbChinchillaPhotos() {
-      if (!window || !document || window.__MC_BB_CHINCHILLA_PHOTO_FIX_20260809__) return;
-      var path = String((window.location && window.location.pathname) || "");
-      var code = "";
-      try {
-        code = String(
-          window.global_Current_ProductCode ||
-            ((document.querySelector('input[name="ProductCode"],input[name="productcode"]') || {}).value) ||
-            ""
-        );
-      } catch (eCode) {}
-      if (!/bb-chinchilla/i.test(path) && !/BB-CHINCHILLA/i.test(code)) return;
-      window.__MC_BB_CHINCHILLA_PHOTO_FIX_20260809__ = true;
-      var VER = "20260809chin1";
-      var HERO = "/v/vspfiles/photos/BB-CHINCHILLA-1.jpg?v=" + VER;
-      var ALT1 = HERO;
-      var ALT2 = "/v/vspfiles/photos/BB-CHINCHILLA-2.jpg?v=" + VER;
-      function setSrc(el, url) {
-        if (!el || !url) return;
-        try {
-          if (el.removeAttribute) el.removeAttribute("srcset");
-          if (el.setAttribute) el.setAttribute("src", url);
-          if ("src" in el) el.src = url;
-        } catch (eSet) {}
-      }
-      function setHref(el, url) {
-        if (!el || !url) return;
-        try {
-          if (el.setAttribute) el.setAttribute("href", url);
-          if ("href" in el) el.href = url;
-        } catch (eHref) {}
-      }
-      function apply() {
-        var hero = document.getElementById("product_photo");
-        if (hero) setSrc(hero, HERO);
-        document.querySelectorAll("#product_photo_zoom_url, #product_photo_zoom_url2").forEach(function (a) {
-          setHref(a, HERO);
-        });
-        document
-          .querySelectorAll("#mc-pdp-alt-view-row a, #mc-pdp-alt-view-row-host a, .mc-pdp-alt-view-row a, #altviews a")
-          .forEach(function (a) {
-            var href = String(a.getAttribute("href") || a.href || "");
-            var img = a.querySelector("img");
-            var src = img ? String(img.getAttribute("src") || img.src || "") : href;
-            if (!/chinchilla/i.test(href + " " + src) && !img) return;
-            if (/[-_]2(?:T)?\.(?:jpg|jpeg|png|webp)/i.test(src) || /[-_]2(?:T)?\.(?:jpg|jpeg|png|webp)/i.test(href)) {
-              setHref(a, ALT2);
-              if (img) setSrc(img, ALT2);
-            } else {
-              setHref(a, ALT1);
-              if (img) setSrc(img, ALT1);
-            }
-          });
-      }
-      apply();
-      [0, 150, 400, 900, 1600, 3000, 6000].forEach(function (ms) {
-        window.setTimeout(apply, ms);
-      });
-    })();
-  } catch (eChinBoot) {}
-
-
   /* MC_ALT_VIEW_ROW_DUPLICATE_GUARD_20260727: clear the "pending" marker that
      either loader (mc-pdp-auth-cta-fix.js's ensureFreshSaranoniAltViewRowScript,
      or mc-plp-enforcer.js's upgradeAltViewRow) sets on the <script> tag the
@@ -97,7 +32,7 @@
   if (!window || !document) return;
   /* First script tag wins. Parallel loaders (plp + stub flash4 + baked tmhnum4)
      used to race the owned check and both boot — double probe/rebuild = flash. */
-  var ROW_VERSION = 202608091;
+  var ROW_VERSION = 20260807;
   /* Newer builds may replace an older owner (stale plp/impl inject that raced
      ahead of the flash7 stub). Equal/newer locks still short-circuit. */
   if (
@@ -659,6 +594,11 @@
     var main = btn.getAttribute("data-main-image") || "";
     var optionId = btn.getAttribute("data-option-id") || "";
     var code = productCode();
+    /* Prefer numeric optionId heroes (CODE-1449-T.jpg). Label-slug files
+       (CODE-Charcoal-T.jpg) often 404 and holdHero would pin a broken image. */
+    if (code && optionId && /^\d+$/.test(String(optionId))) {
+      return absoluteUrl("/v/vspfiles/photos/" + code + "-" + optionId + "-T.jpg");
+    }
     if (main) {
       if (/^(?:https?:)?\/\//i.test(main) || main.charAt(0) === "/") return absoluteUrl(main);
       return absoluteUrl("/v/vspfiles/photos/" + main);

@@ -8384,7 +8384,19 @@ try {
       .trim()
       .toUpperCase()
       .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return new RegExp(pc + "-\\dT\\.(jpg|jpeg|png|webp)", "i").test(String(src));
+    /* Only the primary lifestyle shot (-1 / -1T). -2T/-3T are secondary closeups
+       and must not count as an acceptable "default" when a color hero fails to load —
+       that locked the main image on -2T after swatch clicks. */
+    return new RegExp(pc + "-1T?\\.(jpg|jpeg|png|webp)$", "i").test(
+      saranoniPhotoFileName(src)
+    );
+  }
+
+  function saranoniOptionIdHeroFile(productCode, optionId) {
+    var pc = String(productCode || "").trim().toUpperCase();
+    var id = String(optionId || "").trim();
+    if (!pc || !id) return "";
+    return pc + "-" + id + "-T.jpg";
   }
 
   function resetConfiguredColorStateForProduct(productCode) {
@@ -10191,7 +10203,21 @@ try {
         });
       }
     }
-    preferFiles.push(fileName);
+    /* Always try optionId hero first (CODE-1449-T.jpg). Some renders still stamp
+       label-slug filenames (CODE-Charcoal-T.jpg) into data-main-image / entry.mainImage
+       even though only the numeric files exist on disk. */
+    if (configuredColorActiveEntry && configuredColorActiveEntry.optionId) {
+      var idHero = saranoniOptionIdHeroFile(pc, configuredColorActiveEntry.optionId);
+      if (idHero && preferFiles.indexOf(idHero) === -1) preferFiles.push(idHero);
+    }
+    if (fileName && preferFiles.indexOf(fileName) === -1) preferFiles.push(fileName);
+    if (
+      configuredColorActiveEntry &&
+      configuredColorActiveEntry.mainImage &&
+      preferFiles.indexOf(configuredColorActiveEntry.mainImage) === -1
+    ) {
+      preferFiles.push(configuredColorActiveEntry.mainImage);
+    }
     if (
       configuredColorActiveEntry &&
       configuredColorActiveEntry.mainImageAlt &&
@@ -11073,10 +11099,14 @@ try {
           btn.type = "button";
           btn.className = "mc-saranoni-scroll-arrow " + cls;
           btn.setAttribute("aria-label", dir < 0 ? "Scroll variants left" : "Scroll variants right");
-          btn.textContent = dir < 0 ? "‹" : "›";
+          /* ASCII only — same Volusion/CDN mojibake issue as alt-view arrows. */
+          btn.textContent = dir < 0 ? "<" : ">";
           if (dir < 0) host.insertBefore(btn, rail);
           else host.insertBefore(btn, rail.nextSibling);
         }
+        try {
+          btn.style.setProperty("display", "flex", "important");
+        } catch (eShow) {}
         btn.onclick = function (event) {
           event.preventDefault();
           event.stopPropagation();
@@ -11159,6 +11189,9 @@ try {
   function finishDataDrivenSaranoniSwatchProbe(wrap, select, ctx, probeState) {
     if (probeState.pending > 0) return;
     syncSaranoniSwatchReadyState(wrap, select, probeState.loaded);
+    try {
+      ensureSaranoniRailArrows();
+    } catch (eArrows) {}
   }
 
   function hideConfiguredColorLegacyRows(select) {
@@ -11224,7 +11257,10 @@ try {
         btn.setAttribute("aria-label", entry.label);
         btn.setAttribute("title", entry.label);
         btn.setAttribute("data-option-id", entry.optionId);
-        btn.setAttribute("data-main-image", entry.mainImage);
+        btn.setAttribute(
+          "data-main-image",
+          saranoniOptionIdHeroFile(ctx.productCode, entry.optionId) || entry.mainImage || ""
+        );
         btn.setAttribute("data-label", entry.label);
         btn.innerHTML = '<img alt="' + escapeHtmlText(entry.label) + '" />';
         var img = btn.querySelector("img");

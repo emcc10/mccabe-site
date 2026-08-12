@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260725nav1 - mobile category > toggles */
+/* 0812 C_CSS_DEPLOY_VERIFY_20260812opt1 - saranoni option arrows + color hero swap */
 /* MC_PDP_LAYOUT_20260616pdp32 â€” stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY â€” PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -25705,12 +25705,9 @@ html body.mc-closeout-pdp .vol-product__top--right {
 }
 /* END REMOVABLE: closeout chrome cleanup 20260723close2 */
 
-/* BEGIN REMOVABLE: related bounce + ATC width + saranoni mobile arrows 20260723rel1 */
-@media (max-width: 991px) {
-  html body.mc-saranoni-pdp .mc-saranoni-scroll-arrow {
-    display: none !important;
-  }
-}
+/* BEGIN REMOVABLE: related bounce + ATC width 20260723rel1
+   (20260812: removed mobile display:none on .mc-saranoni-scroll-arrow —
+    that hid the color-option rail arrows and left only alt-view < > above the brand logo.) */
 html body.mc-closeout-pdp #mc-pdp-purchase-stack,
 html body.mc-steve-silver-altview-pdp #mc-pdp-purchase-stack,
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,
@@ -25750,7 +25747,7 @@ html body.mc-closeout-pdp #mc-pdp-qty-row .mc-pdp-qty-row__label,
 html body.mc-steve-silver-altview-pdp #mc-pdp-qty-row .mc-pdp-qty-row__label {
   display: block !important;
 }
-/* END REMOVABLE: related bounce + ATC width + saranoni mobile arrows 20260723rel1 */
+/* END REMOVABLE: related bounce + ATC width 20260723rel1 */
 
 
 /* BEGIN REMOVABLE: accordion + ATC max-width 435px 20260723w435 */

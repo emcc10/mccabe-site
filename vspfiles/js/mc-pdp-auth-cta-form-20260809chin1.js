@@ -277,7 +277,7 @@
 
   /* Always load the bbcol4 impl. A stale CF copy of form.js?mcrd= used to ship a
      fat bundle whose bbCoverAsset had no faux-leather map and overwrote impl. */
-  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl-20260809chin1.js?v=1";
+  var IMPL = "/v/vspfiles/js/mc-pdp-auth-cta-form-impl-20260809chin1.js?v=20260812opt1";
   try {
     global.document
       .querySelectorAll('script[src*="mc-pdp-auth-cta-form-impl-20260809chin1.js"]')
