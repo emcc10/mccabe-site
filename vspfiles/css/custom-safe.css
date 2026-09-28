@@ -25458,7 +25458,7 @@ html body.productdetails.mc-saranoni-pdp .mc-pdp-main-row > td:nth-child(2) {
   html body.productdetails:has(#v65-product-parent) .content_area-wrapper,
   html body.mc-product-page:has(#v65-product-parent) .container--content,
   html body.mc-product-page:has(#v65-product-parent) .content_area-wrapper {
-    margin-top: -72px !important;
+    margin-top: -32px !important;
     padding-top: 0 !important;
   }
 
